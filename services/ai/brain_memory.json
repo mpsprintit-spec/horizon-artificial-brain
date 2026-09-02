@@ -1,0 +1,822 @@
+{
+  "nodes": [
+    {
+      "id": 12,
+      "token": "menunjuk",
+      "activation": 0.7309177887966445,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 5,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476477386Z"
+      ],
+      "last_activation": "2026-08-10T06:13:33.512699541Z",
+      "synapses": {
+        "15": {
+          "target_id": 15,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.3444387259456369,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:22.476520463Z"
+        },
+        "16": {
+          "target_id": 16,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.3444387259456369,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:22.476524155Z"
+        }
+      }
+    },
+    {
+      "id": 24,
+      "token": "perintah",
+      "activation": 0.5667294853896435,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362536093Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {
+        "27": {
+          "target_id": 27,
+          "kind": "location",
+          "weight": 0.85,
+          "activation": 0.09258007071941499,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362797939Z"
+        }
+      }
+    },
+    {
+      "id": 31,
+      "token": "melakukan",
+      "activation": 1.0640640905970034,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 5,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362672401Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {
+        "32": {
+          "target_id": 32,
+          "kind": "association",
+          "weight": 0.425,
+          "activation": 0.08866621775329495,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362851555Z"
+        },
+        "34": {
+          "target_id": 34,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.45599769130265977,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362973401Z"
+        },
+        "35": {
+          "target_id": 35,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.45599769130265977,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362968709Z"
+        },
+        "36": {
+          "target_id": 36,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.45599769130265977,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362971785Z"
+        }
+      }
+    },
+    {
+      "id": 32,
+      "token": "sesuata",
+      "activation": 0.6020753112424536,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362674247Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {}
+    },
+    {
+      "id": 26,
+      "token": "di",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 2,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362540401Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {}
+    },
+    {
+      "id": 10,
+      "token": "ai",
+      "activation": 0.6444256855809145,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 5,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:12:59.821646Z"
+      ],
+      "last_activation": "2026-08-10T06:13:33.512699541Z",
+      "synapses": {}
+    },
+    {
+      "id": 11,
+      "token": "itu",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476437002Z"
+      ],
+      "last_activation": "2026-08-10T06:13:58.820200388Z",
+      "synapses": {}
+    },
+    {
+      "id": 23,
+      "token": "kata",
+      "activation": 1.0431981261955277,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362533324Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {
+        "24": {
+          "target_id": 24,
+          "kind": "association",
+          "weight": 0.425,
+          "activation": 0.09542134197355977,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362785324Z"
+        },
+        "27": {
+          "target_id": 27,
+          "kind": "location",
+          "weight": 0.85,
+          "activation": 0.19084268394711953,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362791862Z"
+        }
+      }
+    },
+    {
+      "id": 34,
+      "token": "-kan",
+      "activation": 1.585595903219306,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362957709Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {}
+    },
+    {
+      "id": 8,
+      "token": "kamu",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 7,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:12:59.821627846Z"
+      ],
+      "last_activation": "2026-08-10T06:13:33.512699541Z",
+      "synapses": {
+        "10": {
+          "target_id": 10,
+          "kind": "is_a",
+          "weight": 0.85,
+          "activation": 0.07135302493106278,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:12:59.821654846Z"
+        },
+        "12": {
+          "target_id": 12,
+          "kind": "is_a",
+          "weight": 0.85,
+          "activation": 0.07135302493106278,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:22.476492463Z"
+        }
+      }
+    },
+    {
+      "id": 15,
+      "token": "tunjuk",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476509078Z"
+      ],
+      "last_activation": "2026-08-10T06:13:58.820200388Z",
+      "synapses": {}
+    },
+    {
+      "id": 18,
+      "token": "se-",
+      "activation": 1.3900860551505234,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476532155Z"
+      ],
+      "last_activation": "2026-08-10T06:13:22.476543848Z",
+      "synapses": {}
+    },
+    {
+      "id": 22,
+      "token": "coba",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362371247Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {
+        "23": {
+          "target_id": 23,
+          "kind": "is_a",
+          "weight": 0.85,
+          "activation": 0.12667237534468606,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362738862Z"
+        }
+      }
+    },
+    {
+      "id": 27,
+      "token": "gunakan",
+      "activation": 1.2282160423102368,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 5,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362542016Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {
+        "31": {
+          "target_id": 31,
+          "kind": "function",
+          "weight": 0.85,
+          "activation": 0.21145482222526416,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362805401Z"
+        },
+        "33": {
+          "target_id": 33,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.5437409714363935,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362952401Z"
+        },
+        "34": {
+          "target_id": 34,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.5437409714363935,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.36295917Z"
+        }
+      }
+    },
+    {
+      "id": 35,
+      "token": "laku",
+      "activation": 1.4160245351467027,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362966939Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {}
+    },
+    {
+      "id": 7,
+      "token": "node",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:10:11.955397606Z"
+      ],
+      "last_activation": "2026-08-10T06:10:11.955874298Z",
+      "synapses": {}
+    },
+    {
+      "id": 1,
+      "token": "saya",
+      "activation": 0.4556223167893053,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 17,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:08:29.166776446Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {
+        "19": {
+          "target_id": 19,
+          "kind": "is_a",
+          "weight": 0.85,
+          "activation": 0.08129348853535201,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:33.512679541Z"
+        }
+      }
+    },
+    {
+      "id": 33,
+      "token": "guna",
+      "activation": 1.450273924818556,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362948785Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {}
+    },
+    {
+      "id": 5,
+      "token": "tidak",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 20,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:08:29.166797369Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {
+        "1": {
+          "target_id": 1,
+          "kind": "association",
+          "weight": 0.425,
+          "activation": 0.03567651246553139,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:33.51267031Z"
+        },
+        "19": {
+          "target_id": 19,
+          "kind": "is_a",
+          "weight": 0.85,
+          "activation": 0.07135302493106278,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:33.512678848Z"
+        }
+      }
+    },
+    {
+      "id": 16,
+      "token": "men-",
+      "activation": 1.3591076111602134,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476522925Z"
+      ],
+      "last_activation": "2026-08-10T06:13:33.512699541Z",
+      "synapses": {}
+    },
+    {
+      "id": 17,
+      "token": "orang",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476529925Z"
+      ],
+      "last_activation": "2026-08-10T06:13:33.512699541Z",
+      "synapses": {}
+    },
+    {
+      "id": 21,
+      "token": "bahasa",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:58.820156388Z"
+      ],
+      "last_activation": "2026-08-10T06:13:58.820200388Z",
+      "synapses": {}
+    },
+    {
+      "id": 25,
+      "token": "yang",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 2,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362538247Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {}
+    },
+    {
+      "id": 30,
+      "token": "untuk",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 2,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362669093Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {}
+    },
+    {
+      "id": 36,
+      "token": "me-",
+      "activation": 1.4135923947852125,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362969939Z"
+      ],
+      "last_activation": "2026-08-10T06:17:45.486165402Z",
+      "synapses": {}
+    },
+    {
+      "id": 3,
+      "token": "sama",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 7,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:08:29.166793907Z"
+      ],
+      "last_activation": "2026-08-10T06:09:18.03827391Z",
+      "synapses": {}
+    },
+    {
+      "id": 6,
+      "token": "suka",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 8,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:09:01.178084063Z"
+      ],
+      "last_activation": "2026-08-10T06:09:26.94478868Z",
+      "synapses": {}
+    },
+    {
+      "id": 9,
+      "token": "adalah",
+      "activation": 0.7025586854013831,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 9,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:12:59.821635154Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {}
+    },
+    {
+      "id": 14,
+      "token": "seseorang",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476480078Z"
+      ],
+      "last_activation": "2026-08-10T06:13:22.476543848Z",
+      "synapses": {
+        "17": {
+          "target_id": 17,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.3257289651720499,
+          "frequency": 1,
+          "confidence": 0.9,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:22.476530848Z"
+        },
+        "18": {
+          "target_id": 18,
+          "kind": "affix",
+          "weight": 0.85,
+          "activation": 0.3583018616892549,
+          "frequency": 2,
+          "confidence": 0.99,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:22.476534309Z"
+        }
+      }
+    },
+    {
+      "id": 20,
+      "token": "bukan",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 6,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:58.820142542Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {
+        "19": {
+          "target_id": 19,
+          "kind": "association",
+          "weight": 0.425,
+          "activation": 0.03567651246553139,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:13:58.820175234Z"
+        }
+      }
+    },
+    {
+      "id": 28,
+      "token": "awal",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362573016Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {
+        "29": {
+          "target_id": 29,
+          "kind": "association",
+          "weight": 0.425,
+          "activation": 0.06333618767234303,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362845093Z"
+        },
+        "31": {
+          "target_id": 31,
+          "kind": "function",
+          "weight": 0.85,
+          "activation": 0.12667237534468606,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362848401Z"
+        }
+      }
+    },
+    {
+      "id": 29,
+      "token": "kalimat",
+      "activation": 1.0183562372015968,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 3,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:17:29.362576093Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {
+        "31": {
+          "target_id": 31,
+          "kind": "function",
+          "weight": 0.85,
+          "activation": 0.1989484414594384,
+          "frequency": 1,
+          "confidence": 0.35,
+          "inhibitory": false,
+          "last_activation": "2026-08-10T06:17:29.362850016Z"
+        }
+      }
+    },
+    {
+      "id": 4,
+      "token": "dengan",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 5,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:08:29.16679583Z"
+      ],
+      "last_activation": "2026-08-10T06:09:18.03827391Z",
+      "synapses": {}
+    },
+    {
+      "id": 13,
+      "token": "pada",
+      "activation": 0.6264534728032256,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 4,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:22.476478848Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {}
+    },
+    {
+      "id": 19,
+      "token": "manusia",
+      "activation": 1.161936778368164,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 7,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:13:33.512655156Z"
+      ],
+      "last_activation": "2026-08-10T06:17:29.363069093Z",
+      "synapses": {}
+    },
+    {
+      "id": 2,
+      "token": "bercanda",
+      "activation": 0.3747093054393549,
+      "resting_activation": 0.05,
+      "threshold": 0.12,
+      "frequency": 5,
+      "importance": 0.5,
+      "plasticity": 0.3,
+      "usage_history": [
+        "2026-08-10T06:08:29.166792138Z"
+      ],
+      "last_activation": "2026-08-10T06:09:01.178136986Z",
+      "synapses": {}
+    }
+  ],
+  "patterns": [
+    {
+      "id": 1,
+      "members": [
+        1,
+        2
+      ],
+      "result": 5,
+      "weight": 0.85,
+      "confidence": 0.35,
+      "frequency": 1
+    },
+    {
+      "id": 2,
+      "members": [
+        1,
+        5,
+        6
+      ],
+      "result": 5,
+      "weight": 0.85,
+      "confidence": 0.35,
+      "frequency": 1
+    }
+  ]
+}

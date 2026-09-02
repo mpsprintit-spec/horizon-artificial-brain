@@ -1,0 +1,18 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Build artifacts
+bin/
+build/
+dist/
+
+# Go
+*.test
+coverage.out
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/

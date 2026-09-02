@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package horizon.v1;
+
+option go_package = "github.com/project-horizon/horizon-core/internal/proto/horizon/v1;horizonv1";
+
+message RequestContext {
+  string request_id = 1;
+  string actor_id = 2;
+}
+
+message HealthCheckRequest { RequestContext context = 1; }
+message HealthCheckResponse {
+  string status = 1;
+  string service = 2;
+  string version = 3;
+}
+
+service HealthService {
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+}
