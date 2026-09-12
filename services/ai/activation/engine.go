@@ -15,8 +15,8 @@ type Engine struct {
 	Threshold  float64
 	Inhibition float64
 
-	mu              sync.RWMutex
-	internalState   map[knowledge.NodeID]float64
+	mu                 sync.RWMutex
+	internalState      map[knowledge.NodeID]float64
 	internalConfidence map[knowledge.NodeID]float64
 }
 
@@ -33,6 +33,17 @@ type Result struct {
 	Activations map[knowledge.NodeID]float64
 	Confidence  map[knowledge.NodeID]float64
 	RankedNodes []*knowledge.ConceptNode
+}
+
+type Prediction struct {
+	State      map[knowledge.NodeID]float64
+	Confidence map[knowledge.NodeID]float64
+}
+
+type ThoughtResult struct {
+	Result
+	Prediction      Prediction
+	PredictionError float64
 }
 
 func NewEngine(memory *knowledge.KnowledgeBase) *Engine {
@@ -56,25 +67,39 @@ func (e *Engine) Activate(tokens []string, cycles int) Result {
 // state for another recurrent activation cycle. It deliberately has no
 // answer lookup, semantic rule table, or required output.
 func (e *Engine) Think(cycles int) Result {
+	return e.ThinkWithPrediction(cycles).Result
+}
+
+// ThinkWithPrediction performs one internal prediction step, then advances
+// the actual internal state. Prediction is a state transition, not a lookup
+// from a pattern to an answer. The prediction is intentionally kept separate
+// from output generation so internal cognition can continue without output.
+func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 	if cycles < 1 {
 		cycles = 1
 	}
 
 	e.mu.RLock()
-	boosts := cloneState(e.internalState)
+	state := cloneState(e.internalState)
+	confidence := cloneState(e.internalConfidence)
 	e.mu.RUnlock()
 
-	// If the brain has no active internal state yet, there is nothing to
-	// continue. This is intentional: autonomous thought grows out of an
-	// existing learned/experienced state rather than inventing a stimulus.
-	if len(boosts) == 0 {
-		return Result{
+	if len(state) == 0 {
+		return ThoughtResult{Result: Result{
 			Activations: map[knowledge.NodeID]float64{},
-			Confidence: map[knowledge.NodeID]float64{},
-		}
+			Confidence:  map[knowledge.NodeID]float64{},
+		}}
 	}
 
-	return e.ActivateWith(Request{ContextBoosts: boosts, Cycles: cycles, Now: time.Now().UTC()})
+	predictionState, predictionConfidence := e.advance(state, confidence, time.Now().UTC(), cycles)
+	actual := e.ActivateWith(Request{ContextBoosts: state, Cycles: cycles, Now: time.Now().UTC()})
+	error := stateDifference(predictionState, actual.Activations)
+
+	return ThoughtResult{
+		Result:          actual,
+		Prediction:      Prediction{State: predictionState, Confidence: predictionConfidence},
+		PredictionError: error,
+	}
 }
 
 func (e *Engine) ActivateWith(req Request) Result {
@@ -98,17 +123,21 @@ func (e *Engine) ActivateWith(req Request) Result {
 	}
 	state = normalize(state)
 
-	for i := 0; i < req.Cycles; i++ {
+	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
+	result := e.converge(state, confidence, req.Now)
+	e.mu.Lock()
+	e.internalState = cloneState(state)
+	e.internalConfidence = cloneState(confidence)
+	e.mu.Unlock()
+	return result
+}
+
+func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+	state = cloneState(state)
+	confidence = cloneState(confidence)
+	for i := 0; i < cycles; i++ {
 		next := map[knowledge.NodeID]float64{}
 		nextConfidence := map[knowledge.NodeID]float64{}
-		// PENTING: cuma node yang MEMANG sedang aktif (ada di `state`) yang
-		// disuntik ulang resting activation-nya -- bukan SELURUH registry.
-		// Sebelumnya, semua node yang pernah ada (bahkan yang tidak
-		// berhubungan sama sekali dengan kalimat sekarang) ikut disuntik
-		// ulang tiap siklus, dan kalau hubungannya kebetulan sudah sangat
-		// sering diulang di masa lalu, sinyal kecil itu bisa menumpuk 8 kali
-		// berturut-turut dan "menyusup" jadi jawaban untuk topik yang sama
-		// sekali tidak relevan.
 		for id := range state {
 			n := e.Memory.Registry.GetByID(id)
 			if n == nil {
@@ -126,7 +155,7 @@ func (e *Engine) ActivateWith(req Request) Result {
 			next[id] += level * (1 - e.Decay)
 			nextConfidence[id] = max(nextConfidence[id], confidence[id])
 			for _, s := range n.OutboundAll() {
-				agePenalty := temporalPenalty(req.Now, s.LastActivation)
+				agePenalty := temporalPenalty(now, s.LastActivation)
 				pulse := level * s.Weight * s.Confidence * e.SpreadRate * agePenalty
 				if s.Inhibitory {
 					next[s.TargetID] -= pulse * e.Inhibition
@@ -140,12 +169,7 @@ func (e *Engine) ActivateWith(req Request) Result {
 		state = normalize(next)
 		confidence = normalize(nextConfidence)
 	}
-	result := e.converge(state, confidence, req.Now)
-	e.mu.Lock()
-	e.internalState = cloneState(state)
-	e.internalConfidence = cloneState(confidence)
-	e.mu.Unlock()
-	return result
+	return state, confidence
 }
 
 func (e *Engine) converge(state, confidence map[knowledge.NodeID]float64, now time.Time) Result {
@@ -225,3 +249,20 @@ func cloneState(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
 	}
 	return out
 }
+
+func stateDifference(a, b map[knowledge.NodeID]float64) float64 {
+	keys := make(map[knowledge.NodeID]struct{}, len(a)+len(b))
+	for id := range a { keys[id] = struct{}{} }
+	for id := range b { keys[id] = struct{}{} }
+	if len(keys) == 0 { return 0 }
+	var total float64
+	for id := range keys { total += abs(a[id] - b[id]) }
+	return clamp01(total / float64(len(keys)))
+}
+
+func abs(v float64) float64 {
+	if v < 0 { return -v }
+	return v
+}
+
+func clamp01(v float64) float64 { return clamp(v, 0, 1) }
