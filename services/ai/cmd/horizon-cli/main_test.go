@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -15,7 +16,7 @@ func runCLI(t *testing.T, input string) (string, string) {
 	if err := app.startup(); err != nil {
 		t.Fatalf("startup failed: %v", err)
 	}
-	app.run(t.Context())
+	app.run(context.Background())
 	return out.String(), memoryPath
 }
 
