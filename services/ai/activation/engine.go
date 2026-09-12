@@ -9,7 +9,7 @@ import (
 )
 
 type Engine struct {
-	Memory     *knowledge.KnowledgeBase
+	Memory     *knowledge.Brain
 	Decay      float64
 	SpreadRate float64
 	Threshold  float64
@@ -48,7 +48,7 @@ type ThoughtResult struct {
 	PredictionError float64
 }
 
-func NewEngine(memory *knowledge.KnowledgeBase) *Engine {
+func NewEngine(memory *knowledge.Brain) *Engine {
 	return &Engine{
 		Memory:             memory,
 		Decay:              0.12,
@@ -105,8 +105,6 @@ func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 		e.ApplyPredictionErrorPlasticity(previousPrediction, actual.Activations, error, now)
 	}
 
-	// Prediction is a separate expectation generated from the current actual
-	// state. It is not treated as if it had already happened.
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
 
 	e.mu.Lock()
@@ -152,9 +150,6 @@ func (e *Engine) ActivateWith(req Request) Result {
 	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
 	result := e.converge(state, confidence, req.Now)
 
-	// External experience is the actual observation that closes the previous
-	// prediction. A surprise therefore becomes measurable plasticity instead
-	// of silently discarding the expectation.
 	if len(previousPrediction) > 0 {
 		error := stateDifference(previousPrediction, result.Activations)
 		e.ApplyPredictionErrorPlasticity(previousPrediction, result.Activations, error, req.Now)
@@ -163,8 +158,6 @@ func (e *Engine) ActivateWith(req Request) Result {
 	e.mu.Lock()
 	e.internalState = cloneState(state)
 	e.internalConfidence = cloneState(confidence)
-	// The old prediction has now been evaluated. The next internal thought will
-	// create a fresh expectation from this actual state.
 	e.lastPrediction = map[knowledge.NodeID]float64{}
 	e.lastPredictionConf = map[knowledge.NodeID]float64{}
 	e.mu.Unlock()
@@ -219,99 +212,24 @@ func (e *Engine) converge(state, confidence map[knowledge.NodeID]float64, now ti
 		if n == nil {
 			continue
 		}
-		n.Activation = level
-		if level >= max(e.Threshold, n.Threshold) {
+		n.Activation = clamp01(level)
+		n.LastActivation = now
+		if level > e.Threshold {
 			n.Frequency++
-			n.LastActivation = now
+		}
+		resonance += level * confidence[id]
+		if level >= e.Threshold {
 			ranked = append(ranked, n)
-			resonance += level * max(confidence[id], 0.1)
 		}
 	}
 	sort.Slice(ranked, func(i, j int) bool {
-		left, right := ranked[i], ranked[j]
-		if left.Activation != right.Activation {
-			return left.Activation > right.Activation
+		a, b := ranked[i], ranked[j]
+		si := a.Activation*confidence[a.ID] + a.Importance*0.1 + float64(a.Frequency)*0.001
+		sj := b.Activation*confidence[b.ID] + b.Importance*0.1 + float64(b.Frequency)*0.001
+		if si == sj {
+			return a.Token < b.Token
 		}
-		if confidence[left.ID] != confidence[right.ID] {
-			return confidence[left.ID] > confidence[right.ID]
-		}
-		if left.Importance != right.Importance {
-			return left.Importance > right.Importance
-		}
-		if left.Frequency != right.Frequency {
-			return left.Frequency > right.Frequency
-		}
-		return left.Token < right.Token
+		return si > sj
 	})
-	return Result{Converged: len(ranked) > 0, Resonance: resonance, Activations: state, Confidence: confidence, RankedNodes: ranked}
+	return Result{Converged: true, Resonance: resonance, Activations: cloneState(state), Confidence: cloneState(confidence), RankedNodes: ranked}
 }
-
-func temporalPenalty(now, last time.Time) float64 {
-	if last.IsZero() {
-		return 0.7
-	}
-	days := now.Sub(last).Hours() / 24
-	if days <= 1 {
-		return 1
-	}
-	return clamp(1-(days*0.01), 0.35, 1)
-}
-
-func normalize(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
-	for k, v := range in {
-		in[k] = squash(v)
-	}
-	return in
-}
-
-func squash(v float64) float64 {
-	if v <= 1 {
-		return clamp(v, 0, 1)
-	}
-	return 1 + (v-1)/v
-}
-
-func clamp(v, low, high float64) float64 {
-	if v < low {
-		return low
-	}
-	if v > high {
-		return high
-	}
-	return v
-}
-
-func cloneState(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
-	out := make(map[knowledge.NodeID]float64, len(in))
-	for id, value := range in {
-		out[id] = value
-	}
-	return out
-}
-
-func stateDifference(a, b map[knowledge.NodeID]float64) float64 {
-	keys := make(map[knowledge.NodeID]struct{}, len(a)+len(b))
-	for id := range a {
-		keys[id] = struct{}{}
-	}
-	for id := range b {
-		keys[id] = struct{}{}
-	}
-	if len(keys) == 0 {
-		return 0
-	}
-	var total float64
-	for id := range keys {
-		total += abs(a[id] - b[id])
-	}
-	return clamp01(total / float64(len(keys)))
-}
-
-func abs(v float64) float64 {
-	if v < 0 {
-		return -v
-	}
-	return v
-}
-
-func clamp01(v float64) float64 { return clamp(v, 0, 1) }
