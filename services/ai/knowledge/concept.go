@@ -2,21 +2,24 @@ package knowledge
 
 import "time"
 
-// NodeID is the stable internal identifier of one unique neural token node.
+// NodeID is the stable internal identifier of one neural unit.
 type NodeID int64
 
-// ConceptNode represents exactly one token in Horizon's neural semantic memory.
+// ConceptNode is a neural unit in the shared substrate. Token remains an
+// optional language-facing anchor for compatibility; Representation is the
+// modality-neutral numeric representation used by non-language experience.
 type ConceptNode struct {
-	ID                NodeID              `json:"id"`
-	Token             string              `json:"token"`
-	Activation        float64             `json:"activation"`
-	RestingActivation float64             `json:"resting_activation"`
-	Threshold         float64             `json:"threshold"`
-	Frequency         int64               `json:"frequency"`
-	Importance        float64             `json:"importance"`
-	Plasticity        float64             `json:"plasticity"`
-	UsageHistory      []time.Time         `json:"usage_history,omitempty"`
-	LastActivation    time.Time           `json:"last_activation,omitempty"`
+	ID                NodeID                `json:"id"`
+	Token             string                `json:"token,omitempty"`
+	Representation    []float64             `json:"representation,omitempty"`
+	Activation        float64               `json:"activation"`
+	RestingActivation float64               `json:"resting_activation"`
+	Threshold         float64               `json:"threshold"`
+	Frequency         int64                 `json:"frequency"`
+	Importance        float64               `json:"importance"`
+	Plasticity        float64               `json:"plasticity"`
+	UsageHistory      []time.Time           `json:"usage_history,omitempty"`
+	LastActivation    time.Time             `json:"last_activation,omitempty"`
 	Synapses          map[NodeID]SynapseList `json:"synapses"`
 }
 
@@ -35,4 +38,11 @@ func newConceptNode(id NodeID, token string) *ConceptNode {
 		LastActivation:    now,
 		Synapses:          make(map[NodeID]SynapseList),
 	}
+}
+
+func newRepresentationNode(id NodeID, representation []float64) *ConceptNode {
+	n := newConceptNode(id, "")
+	n.UsageHistory = nil
+	n.Representation = append([]float64(nil), representation...)
+	return n
 }
