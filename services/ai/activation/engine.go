@@ -19,7 +19,7 @@ type Engine struct {
 	internalState      map[knowledge.NodeID]float64
 	internalConfidence map[knowledge.NodeID]float64
 	lastPrediction     map[knowledge.NodeID]float64
-	lastPredictionConf  map[knowledge.NodeID]float64
+	lastPredictionConf map[knowledge.NodeID]float64
 }
 
 type Request struct {
@@ -50,14 +50,14 @@ type ThoughtResult struct {
 
 func NewEngine(memory *knowledge.KnowledgeBase) *Engine {
 	return &Engine{
-		Memory:            memory,
-		Decay:             0.12,
-		SpreadRate:        0.65,
-		Threshold:         0.25,
-		Inhibition:        0.55,
-		internalState:     map[knowledge.NodeID]float64{},
+		Memory:             memory,
+		Decay:              0.12,
+		SpreadRate:         0.65,
+		Threshold:          0.25,
+		Inhibition:         0.55,
+		internalState:      map[knowledge.NodeID]float64{},
 		internalConfidence: map[knowledge.NodeID]float64{},
-		lastPrediction:    map[knowledge.NodeID]float64{},
+		lastPrediction:     map[knowledge.NodeID]float64{},
 		lastPredictionConf: map[knowledge.NodeID]float64{},
 	}
 }
@@ -66,17 +66,17 @@ func (e *Engine) Activate(tokens []string, cycles int) Result {
 	return e.ActivateWith(Request{StimulusTokens: tokens, Cycles: cycles, Now: time.Now().UTC()})
 }
 
-// Think continues the brain's own internal dynamics without requiring a new
-// external stimulus. A prediction generated during one internal step becomes
-// the expectation evaluated against the next actual state.
+// Think advances the brain's internal dynamics without requiring a new
+// external stimulus. Prediction is kept as an expectation about the next
+// state; it is evaluated when the next actual state arrives.
 func (e *Engine) Think(cycles int) Result {
 	return e.ThinkWithPrediction(cycles).Result
 }
 
-// ThinkWithPrediction advances internal state, evaluates the previous
-// prediction when one exists, then creates the next prediction. Prediction
-// error feeds substrate-level plasticity; no semantic rule or answer lookup is
-// involved.
+// ThinkWithPrediction performs one internal transition, then predicts the
+// following transition. Keeping prediction separate from the actual state is
+// essential: an external experience can later violate the prediction and feed
+// a measurable prediction error into plasticity.
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 	if cycles < 1 {
 		cycles = 1
@@ -105,6 +105,8 @@ func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 		e.ApplyPredictionErrorPlasticity(previousPrediction, actual.Activations, error, now)
 	}
 
+	// Prediction is a separate expectation generated from the current actual
+	// state. It is not treated as if it had already happened.
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
 
 	e.mu.Lock()
@@ -128,6 +130,11 @@ func (e *Engine) ActivateWith(req Request) Result {
 	if req.Now.IsZero() {
 		req.Now = time.Now().UTC()
 	}
+
+	e.mu.RLock()
+	previousPrediction := cloneState(e.lastPrediction)
+	e.mu.RUnlock()
+
 	state := map[knowledge.NodeID]float64{}
 	confidence := map[knowledge.NodeID]float64{}
 	for _, token := range req.StimulusTokens {
@@ -144,11 +151,20 @@ func (e *Engine) ActivateWith(req Request) Result {
 
 	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
 	result := e.converge(state, confidence, req.Now)
+
+	// External experience is the actual observation that closes the previous
+	// prediction. A surprise therefore becomes measurable plasticity instead
+	// of silently discarding the expectation.
+	if len(previousPrediction) > 0 {
+		error := stateDifference(previousPrediction, result.Activations)
+		e.ApplyPredictionErrorPlasticity(previousPrediction, result.Activations, error, req.Now)
+	}
+
 	e.mu.Lock()
 	e.internalState = cloneState(state)
 	e.internalConfidence = cloneState(confidence)
-	// A new external experience invalidates an old expectation. The resulting
-	// state will generate a fresh prediction on the next internal thought.
+	// The old prediction has now been evaluated. The next internal thought will
+	// create a fresh expectation from this actual state.
 	e.lastPrediction = map[knowledge.NodeID]float64{}
 	e.lastPredictionConf = map[knowledge.NodeID]float64{}
 	e.mu.Unlock()
@@ -275,16 +291,26 @@ func cloneState(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
 
 func stateDifference(a, b map[knowledge.NodeID]float64) float64 {
 	keys := make(map[knowledge.NodeID]struct{}, len(a)+len(b))
-	for id := range a { keys[id] = struct{}{} }
-	for id := range b { keys[id] = struct{}{} }
-	if len(keys) == 0 { return 0 }
+	for id := range a {
+		keys[id] = struct{}{}
+	}
+	for id := range b {
+		keys[id] = struct{}{}
+	}
+	if len(keys) == 0 {
+		return 0
+	}
 	var total float64
-	for id := range keys { total += abs(a[id] - b[id]) }
+	for id := range keys {
+		total += abs(a[id] - b[id])
+	}
 	return clamp01(total / float64(len(keys)))
 }
 
 func abs(v float64) float64 {
-	if v < 0 { return -v }
+	if v < 0 {
+		return -v
+	}
 	return v
 }
 
