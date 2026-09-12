@@ -74,7 +74,8 @@ func TestMatchTraceRanksTemporalAgreement(t *testing.T) {
 	if len(matches) != 2 {
 		t.Fatalf("expected two matching population traces, got %d", len(matches))
 	}
-	if sequenceKey(matches[0].Sequence) != sequenceKey(good) {
+	normalizedGood := normalizeSequence(good)
+	if sequenceKey(matches[0].Sequence) != sequenceKey(normalizedGood) {
 		t.Fatalf("expected temporally matching trace first, got %v", matches[0].Sequence)
 	}
 }
