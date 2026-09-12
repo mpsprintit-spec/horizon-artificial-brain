@@ -25,8 +25,8 @@ type PopulationUnit struct {
 }
 
 // ProjectVectorPopulation recruits a sparse population from the same Brain
-// substrate. Existing compatible units are reused; new units are grown only
-// when the substrate has insufficient compatible structure.
+// substrate. Existing compatible units are reused; new receptive prototypes
+// are grown only when the substrate has insufficient compatible structure.
 func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold float64, populationSize int) (ProjectionPopulation, error) {
 	if k == nil {
 		return ProjectionPopulation{}, ErrNilBrain
@@ -39,49 +39,79 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 		populationSize = defaultProjectionPopulation
 	}
 
-	nodes := k.Registry.Nodes()
-	type candidate struct {
-		node  *ConceptNode
-		score float64
+	candidates := k.matchRepresentationPopulation(vector, threshold)
+	for slot := 0; len(candidates) < populationSize && slot < populationSize*2; slot++ {
+		prototype := projectionPrototype(vector, slot, populationSize)
+		node, created, err := k.Registry.GetOrCreateRepresentation(prototype, threshold)
+		if err != nil {
+			return ProjectionPopulation{}, err
+		}
+		if !containsPopulationNode(candidates, node.ID) {
+			if created {
+				candidates = append(candidates, populationCandidate{node: node, score: NewNeuralVector(node.Representation).Similarity(vector)})
+			} else {
+				candidates = append(candidates, populationCandidate{node: node, score: NewNeuralVector(node.Representation).Similarity(vector)})
+			}
+		}
 	}
-	candidates := make([]candidate, 0, len(nodes))
+
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
+	if len(candidates) > populationSize {
+		candidates = candidates[:populationSize]
+	}
+	population := ProjectionPopulation{Units: make([]PopulationUnit, len(candidates))}
+	for i, item := range candidates {
+		item.node.Activation = clamp01(item.score)
+		population.Units[i] = PopulationUnit{NodeID: item.node.ID, Activation: clamp01(item.score)}
+	}
+	return population, nil
+}
+
+type populationCandidate struct {
+	node  *ConceptNode
+	score float64
+}
+
+func (k *KnowledgeBase) matchRepresentationPopulation(vector NeuralVector, threshold float64) []populationCandidate {
+	nodes := k.Registry.Nodes()
+	candidates := make([]populationCandidate, 0, len(nodes))
 	for _, node := range nodes {
 		if len(node.Representation) != len(vector.Values) {
 			continue
 		}
 		score := NewNeuralVector(node.Representation).Similarity(vector)
 		if score >= threshold {
-			candidates = append(candidates, candidate{node: node, score: score})
+			candidates = append(candidates, populationCandidate{node: node, score: score})
 		}
 	}
-	sort.Slice(candidates, func(i, j int) bool {
-		return candidates[i].score > candidates[j].score
-	})
+	sort.Slice(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
+	return candidates
+}
 
-	if len(candidates) < populationSize {
-		node, _, err := k.Registry.GetOrCreateRepresentation(vector, threshold)
-		if err != nil {
-			return ProjectionPopulation{}, err
-		}
-		found := false
-		for _, item := range candidates {
-			if item.node.ID == node.ID {
-				found = true
-				break
-			}
-		}
-		if !found {
-			candidates = append(candidates, candidate{node: node, score: 1})
+func containsPopulationNode(candidates []populationCandidate, id NodeID) bool {
+	for _, candidate := range candidates {
+		if candidate.node.ID == id {
+			return true
 		}
 	}
+	return false
+}
 
-	if len(candidates) > populationSize {
-		candidates = candidates[:populationSize]
+// projectionPrototype creates nearby receptive fields around the presented
+// vector. The variation is deterministic and coordinate-local, so repeating
+// the same experience can recruit the same distributed population.
+func projectionPrototype(vector NeuralVector, slot, populationSize int) NeuralVector {
+	if slot == 0 || len(vector.Values) == 0 {
+		return NewNeuralVector(vector.Values)
 	}
-	population := ProjectionPopulation{Units: make([]PopulationUnit, len(candidates))}
-	for i, item := range candidates {
-		item.node.Activation = item.score
-		population.Units[i] = PopulationUnit{NodeID: item.node.ID, Activation: item.score}
+	out := append([]float64(nil), vector.Values...)
+	spread := 0.08 + 0.04*float64(slot)/float64(maxInt(populationSize, 1))
+	for i := range out {
+		direction := -1.0
+		if (i+slot)%2 == 0 {
+			direction = 1
+		}
+		out[i] = clamp(out[i]+direction*spread, -1, 1)
 	}
-	return population, nil
+	return NewNeuralVector(out)
 }
