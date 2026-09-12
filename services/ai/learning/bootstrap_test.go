@@ -41,6 +41,74 @@ func TestLearnExperienceUsesOntologyFreeSubstrate(t *testing.T) {
 	}
 }
 
+func TestLearnExperienceReusesDistributedStructure(t *testing.T) {
+	brain := knowledge.NewKnowledgeBase()
+	unit := NewLearningUnit(brain)
+	now := time.Unix(100, 0).UTC()
+	experience := Experience{
+		Sequence:   []string{"air", "gelas", "meja"},
+		Weight:     0.8,
+		Confidence: 0.9,
+	}
+
+	unit.LearnExperience(experience, now)
+	unit.LearnExperience(experience, now.Add(time.Second))
+
+	air := brain.Fetch("air")
+	gelas := brain.Fetch("gelas")
+	meja := brain.Fetch("meja")
+	if air == nil || gelas == nil || meja == nil {
+		t.Fatal("expected all experienced units to exist")
+	}
+	if got := len(brain.Registry.Nodes()); got != 3 {
+		t.Fatalf("expected repeated experience to reuse 3 units, got %d", got)
+	}
+	if air.Frequency != 2 || gelas.Frequency != 2 || meja.Frequency != 2 {
+		t.Fatalf("expected one occurrence per experience: air=%d gelas=%d meja=%d", air.Frequency, gelas.Frequency, meja.Frequency)
+	}
+
+	edge := air.FindDynamicSynapse(gelas.ID, false)
+	if edge == nil {
+		t.Fatal("expected air->gelas dynamic connection")
+	}
+	if edge.Frequency != 2 {
+		t.Fatalf("expected repeated connection to be reinforced, got frequency %d", edge.Frequency)
+	}
+
+	patterns := brain.Patterns.All()
+	if len(patterns) != 1 {
+		t.Fatalf("expected one reused temporal pattern, got %d", len(patterns))
+	}
+	if patterns[0].Frequency != 2 {
+		t.Fatalf("expected temporal pattern frequency 2, got %d", patterns[0].Frequency)
+	}
+}
+
+func TestLearnExperiencePreservesTemporalDifference(t *testing.T) {
+	brain := knowledge.NewKnowledgeBase()
+	unit := NewLearningUnit(brain)
+	now := time.Unix(200, 0).UTC()
+
+	unit.LearnExperience(Experience{
+		Sequence:   []string{"api", "panas", "naik"},
+		Weight:     0.8,
+		Confidence: 0.9,
+	}, now)
+	unit.LearnExperience(Experience{
+		Sequence:   []string{"api", "naik", "panas"},
+		Weight:     0.8,
+		Confidence: 0.9,
+	}, now.Add(time.Second))
+
+	patterns := brain.Patterns.All()
+	if len(patterns) != 2 {
+		t.Fatalf("expected two distinct temporal patterns, got %d", len(patterns))
+	}
+	if patterns[0].Frequency != 1 || patterns[1].Frequency != 1 {
+		t.Fatalf("expected each distinct temporal pattern to have frequency 1: %+v", patterns)
+	}
+}
+
 func TestBootstrapBasicExperiencesLoadsDataCorpus(t *testing.T) {
 	kb := knowledge.NewKnowledgeBase()
 	unit := NewLearningUnit(kb)
