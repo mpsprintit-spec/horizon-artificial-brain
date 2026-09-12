@@ -1,6 +1,7 @@
 package learning
 
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +9,9 @@ import (
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
+
+//go:embed data/basic_experiences.json
+var foundationalExperienceCorpus []byte
 
 // Experience is a source-neutral observation. The brain receives only the
 // observed activation sequence; the source is deliberately not part of the
@@ -84,6 +88,10 @@ func (l *LearningUnit) LoadExperiences(path string, now time.Time) (int, error) 
 	if err != nil {
 		return 0, err
 	}
+	return l.loadExperienceData(data, now)
+}
+
+func (l *LearningUnit) loadExperienceData(data []byte, now time.Time) (int, error) {
 	var experiences []Experience
 	if err := json.Unmarshal(data, &experiences); err != nil {
 		return 0, err
@@ -94,9 +102,10 @@ func (l *LearningUnit) LoadExperiences(path string, now time.Time) (int, error) 
 	return len(experiences), nil
 }
 
-// BootstrapBasicExperiences teaches a compact set of foundational regularities
-// intended to give the substrate an initial structured experience. These are
-// data, not hard-coded semantic rules.
+// BootstrapBasicExperiences teaches the foundational corpus embedded with the
+// learning package. Embedding keeps bootstrap independent of the process's
+// working directory while the corpus remains training data rather than brain
+// memory.
 func (l *LearningUnit) BootstrapBasicExperiences(now time.Time) (int, error) {
-	return l.LoadExperiences("services/ai/learning/data/basic_experiences.json", now)
+	return l.loadExperienceData(foundationalExperienceCorpus, now)
 }
