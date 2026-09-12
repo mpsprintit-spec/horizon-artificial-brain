@@ -19,7 +19,7 @@ const (
 type Experience struct {
 	Activations map[knowledge.NodeID]float64
 	Confidence  map[knowledge.NodeID]float64
-	Now        time.Time
+	Now         time.Time
 }
 
 // LearnFromExperience incorporates an experienced internal state into the same
@@ -83,9 +83,9 @@ func (e *Engine) LearnFromExperience(exp Experience) {
 			synapse.Dynamic.Frequency++
 			synapse.Dynamic.LastActivation = exp.Now
 			synapse.Dynamic.LastModification = exp.Now
-			synapse.Weight = synapse.Dynamic.Weight
-			synapse.Confidence = synapse.Dynamic.Confidence
-			synapse.Frequency = synapse.Dynamic.Frequency
-			synapse.LastActivation = synapse.Dynamic.LastActivation
+		synapse.Weight = synapse.Dynamic.Weight
+		synapse.Confidence = synapse.Dynamic.Confidence
+		synapse.Frequency = synapse.Dynamic.Frequency
+		synapse.LastActivation = synapse.Dynamic.LastActivation
 	}
 }
