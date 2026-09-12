@@ -9,7 +9,8 @@ import (
 	"time"
 )
 
-// TokenRegistry is the only authority allowed to create token nodes.
+// TokenRegistry remains the canonical identity registry for linguistic anchors.
+// A token is an input anchor, not the definition of a concept.
 type TokenRegistry struct {
 	mu      sync.RWMutex
 	nextID  NodeID
@@ -23,7 +24,6 @@ func NewTokenRegistry() *TokenRegistry {
 
 func canonicalToken(token string) string { return strings.ToLower(strings.TrimSpace(token)) }
 
-// GetOrCreate returns the single canonical node for token, creating it only if absent.
 func (r *TokenRegistry) GetOrCreate(token string) (*ConceptNode, bool, error) {
 	canonical := canonicalToken(token)
 	if canonical == "" {
@@ -67,7 +67,8 @@ func (r *TokenRegistry) Nodes() []*ConceptNode {
 	return nodes
 }
 
-// KnowledgeBase is Horizon's neural semantic memory graph.
+// KnowledgeBase stores the persistent neural substrate. Semantic labels are
+// optional metadata and are not required to form or traverse connections.
 type KnowledgeBase struct {
 	Registry *TokenRegistry
 	Patterns *PatternIndex
@@ -82,10 +83,41 @@ func (k *KnowledgeBase) Store(token string) *ConceptNode {
 	return n
 }
 
+// Connect creates an ontology-free connection. This is the preferred API for
+// new learning code: no semantic relation is supplied or required.
 func (k *KnowledgeBase) Connect(source, target *ConceptNode, weight, confidence float64, inhibitory bool) {
-	k.ConnectKind(source, target, RelationAssociation, weight, confidence, inhibitory)
+	if source == nil || target == nil {
+		return
+	}
+	now := time.Now().UTC()
+	if source.Synapses == nil {
+		source.Synapses = make(map[NodeID]SynapseList)
+	}
+	list := source.Synapses[target.ID]
+	s := list.FindDynamic(inhibitory)
+	if s == nil {
+		s = &Synapse{
+			TargetID:   target.ID,
+			Weight:     clamp01(weight),
+			Confidence: clamp01(confidence),
+			Inhibitory: inhibitory,
+		}
+		source.Synapses[target.ID] = append(list, s)
+	}
+	s.Dynamic.Reinforce(weight, confidence, 1, now)
+	// Keep legacy scalar fields synchronized during migration. New code should
+	// consume Dynamic instead of treating these fields as the full state.
+	s.Weight = s.Dynamic.Weight
+	s.Confidence = s.Dynamic.Confidence
+	s.Frequency = s.Dynamic.Frequency
+	s.Activation = s.Dynamic.Activation
+	s.LastActivation = s.Dynamic.LastActivation
+	source.LastActivation = now
 }
 
+// ConnectKind is a compatibility API for existing language/reasoning code.
+// It creates an explicitly annotated legacy channel but does not define the
+// capabilities of the neural substrate. New code must prefer Connect.
 func (k *KnowledgeBase) ConnectKind(source, target *ConceptNode, kind RelationKind, weight, confidence float64, inhibitory bool) {
 	if source == nil || target == nil {
 		return
@@ -99,22 +131,18 @@ func (k *KnowledgeBase) ConnectKind(source, target *ConceptNode, kind RelationKi
 	if s == nil {
 		s = &Synapse{TargetID: target.ID, Kind: kind, Weight: weight, Confidence: confidence, Inhibitory: inhibitory}
 		source.Synapses[target.ID] = append(list, s)
-	} else {
-		s.Weight = clamp01((s.Weight*float64(s.Frequency) + weight) / float64(s.Frequency+1))
-		s.Confidence = clamp01(1 - (1-s.Confidence)*(1-confidence))
 	}
-	if s.Kind == "" {
-		s.Kind = kind
-	}
-	// Do not overwrite Kind/Inhibitory of a different channel — each channel is independent.
-	s.Frequency++
+	s.Dynamic.Reinforce(weight, confidence, 1, now)
+	s.Weight = s.Dynamic.Weight
+	s.Confidence = s.Dynamic.Confidence
+	s.Frequency = s.Dynamic.Frequency
+	s.Activation = s.Dynamic.Activation
 	s.LastActivation = now
 	source.LastActivation = now
 }
 
-
 type persistedGraph struct {
-	Nodes    []*ConceptNode  `json:"nodes"`
+	Nodes    []*ConceptNode    `json:"nodes"`
 	Patterns []*PatternSynapse `json:"patterns,omitempty"`
 }
 
@@ -175,6 +203,7 @@ func (k *KnowledgeBase) Save(path string) error {
 	}
 	return os.WriteFile(path, b, 0644)
 }
+
 func clamp01(v float64) float64 {
 	if v < 0 {
 		return 0
