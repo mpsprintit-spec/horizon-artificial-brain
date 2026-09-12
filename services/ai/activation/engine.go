@@ -18,6 +18,8 @@ type Engine struct {
 	mu                 sync.RWMutex
 	internalState      map[knowledge.NodeID]float64
 	internalConfidence map[knowledge.NodeID]float64
+	lastPrediction     map[knowledge.NodeID]float64
+	lastPredictionConf  map[knowledge.NodeID]float64
 }
 
 type Request struct {
@@ -48,13 +50,15 @@ type ThoughtResult struct {
 
 func NewEngine(memory *knowledge.KnowledgeBase) *Engine {
 	return &Engine{
-		Memory: memory,
-		Decay: 0.12,
-		SpreadRate: 0.65,
-		Threshold: 0.25,
-		Inhibition: 0.55,
-		internalState: map[knowledge.NodeID]float64{},
+		Memory:            memory,
+		Decay:             0.12,
+		SpreadRate:        0.65,
+		Threshold:         0.25,
+		Inhibition:        0.55,
+		internalState:     map[knowledge.NodeID]float64{},
 		internalConfidence: map[knowledge.NodeID]float64{},
+		lastPrediction:    map[knowledge.NodeID]float64{},
+		lastPredictionConf: map[knowledge.NodeID]float64{},
 	}
 }
 
@@ -63,25 +67,26 @@ func (e *Engine) Activate(tokens []string, cycles int) Result {
 }
 
 // Think continues the brain's own internal dynamics without requiring a new
-// external stimulus. The previous internal activation becomes the starting
-// state for another recurrent activation cycle. It deliberately has no
-// answer lookup, semantic rule table, or required output.
+// external stimulus. A prediction generated during one internal step becomes
+// the expectation evaluated against the next actual state.
 func (e *Engine) Think(cycles int) Result {
 	return e.ThinkWithPrediction(cycles).Result
 }
 
-// ThinkWithPrediction performs one internal prediction step, then advances
-// the actual internal state. Prediction is a state transition, not a lookup
-// from a pattern to an answer. The prediction is intentionally kept separate
-// from output generation so internal cognition can continue without output.
+// ThinkWithPrediction advances internal state, evaluates the previous
+// prediction when one exists, then creates the next prediction. Prediction
+// error feeds substrate-level plasticity; no semantic rule or answer lookup is
+// involved.
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 	if cycles < 1 {
 		cycles = 1
 	}
+	now := time.Now().UTC()
 
 	e.mu.RLock()
 	state := cloneState(e.internalState)
 	confidence := cloneState(e.internalConfidence)
+	previousPrediction := cloneState(e.lastPrediction)
 	e.mu.RUnlock()
 
 	if len(state) == 0 {
@@ -91,13 +96,27 @@ func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 		}}
 	}
 
-	predictionState, predictionConfidence := e.advance(state, confidence, time.Now().UTC(), cycles)
-	actual := e.ActivateWith(Request{ContextBoosts: state, Cycles: cycles, Now: time.Now().UTC()})
-	error := stateDifference(predictionState, actual.Activations)
+	actualState, actualConfidence := e.advance(state, confidence, now, cycles)
+	actual := e.converge(actualState, actualConfidence, now)
+
+	error := 0.0
+	if len(previousPrediction) > 0 {
+		error = stateDifference(previousPrediction, actual.Activations)
+		e.ApplyPredictionErrorPlasticity(previousPrediction, actual.Activations, error, now)
+	}
+
+	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
+
+	e.mu.Lock()
+	e.internalState = cloneState(actual.Activations)
+	e.internalConfidence = cloneState(actual.Confidence)
+	e.lastPrediction = cloneState(nextPrediction)
+	e.lastPredictionConf = cloneState(nextPredictionConfidence)
+	e.mu.Unlock()
 
 	return ThoughtResult{
 		Result:          actual,
-		Prediction:      Prediction{State: predictionState, Confidence: predictionConfidence},
+		Prediction:      Prediction{State: nextPrediction, Confidence: nextPredictionConfidence},
 		PredictionError: error,
 	}
 }
@@ -128,6 +147,10 @@ func (e *Engine) ActivateWith(req Request) Result {
 	e.mu.Lock()
 	e.internalState = cloneState(state)
 	e.internalConfidence = cloneState(confidence)
+	// A new external experience invalidates an old expectation. The resulting
+	// state will generate a fresh prediction on the next internal thought.
+	e.lastPrediction = map[knowledge.NodeID]float64{}
+	e.lastPredictionConf = map[knowledge.NodeID]float64{}
 	e.mu.Unlock()
 	return result
 }
