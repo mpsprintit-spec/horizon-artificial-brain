@@ -24,9 +24,9 @@ func TestConnectStrengthensExistingSynapse(t *testing.T) {
 	panas := kb.Store("panas")
 	kb.Connect(api, panas, 0.4, 0.7, false)
 	kb.Connect(api, panas, 0.8, 0.9, false)
-	s := api.FindSynapse(panas.ID, RelationAssociation, false)
+	s := api.FindDynamicSynapse(panas.ID, false)
 	if s == nil || s.Frequency != 2 {
-		t.Fatalf("expected reinforced synapse frequency 2, got %v", s)
+		t.Fatalf("expected reinforced dynamic synapse frequency 2, got %v", s)
 	}
 }
 
@@ -85,7 +85,8 @@ func TestLegacySingleSynapseJSONLoads(t *testing.T) {
 	    }
 	  }, {
 	    "id": 2, "token": "y", "activation": 0, "resting_activation": 0.05, "threshold": 0.25,
-	    "frequency": 1, "importance": 0.5, "plasticity": 0.3, "synapses": {}
+	    "frequency": 1, "importance": 0.5, "plasticity": 0.3,
+	    "synapses": {}
 	  }],
 	  "patterns": []
 	}`
