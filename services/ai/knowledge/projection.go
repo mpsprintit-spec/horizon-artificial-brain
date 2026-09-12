@@ -3,6 +3,7 @@ package knowledge
 import (
 	"errors"
 	"sort"
+	"time"
 )
 
 const defaultProjectionPopulation = 4
@@ -12,9 +13,6 @@ var (
 	ErrEmptyNeuralVector = errors.New("neural vector is empty")
 )
 
-// ProjectionPopulation is the distributed neural activity produced by a
-// numeric experience. It contains only neural-unit IDs and their activation
-// strengths; no semantic labels are attached to the population.
 type ProjectionPopulation struct {
 	Units []PopulationUnit
 }
@@ -40,18 +38,15 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	}
 
 	candidates := k.matchRepresentationPopulation(vector, threshold)
-	for slot := 0; len(candidates) < populationSize && slot < populationSize*2; slot++ {
+	for slot := 0; len(candidates) < populationSize; slot++ {
 		prototype := projectionPrototype(vector, slot, populationSize)
-		node, created, err := k.Registry.GetOrCreateRepresentation(prototype, threshold)
-		if err != nil {
-			return ProjectionPopulation{}, err
+		node := k.createRepresentationPrototype(prototype)
+		score := NewNeuralVector(node.Representation).Similarity(vector)
+		if score >= threshold && !containsPopulationNode(candidates, node.ID) {
+			candidates = append(candidates, populationCandidate{node: node, score: score})
 		}
-		if !containsPopulationNode(candidates, node.ID) {
-			if created {
-				candidates = append(candidates, populationCandidate{node: node, score: NewNeuralVector(node.Representation).Similarity(vector)})
-			} else {
-				candidates = append(candidates, populationCandidate{node: node, score: NewNeuralVector(node.Representation).Similarity(vector)})
-			}
+		if slot >= populationSize*2 {
+			break
 		}
 	}
 
@@ -60,8 +55,10 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 		candidates = candidates[:populationSize]
 	}
 	population := ProjectionPopulation{Units: make([]PopulationUnit, len(candidates))}
+	now := time.Now().UTC()
 	for i, item := range candidates {
 		item.node.Activation = clamp01(item.score)
+		item.node.LastActivation = now
 		population.Units[i] = PopulationUnit{NodeID: item.node.ID, Activation: clamp01(item.score)}
 	}
 	return population, nil
@@ -86,6 +83,17 @@ func (k *KnowledgeBase) matchRepresentationPopulation(vector NeuralVector, thres
 	}
 	sort.Slice(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
 	return candidates
+}
+
+func (k *KnowledgeBase) createRepresentationPrototype(vector NeuralVector) *ConceptNode {
+	k.Registry.mu.Lock()
+	defer k.Registry.mu.Unlock()
+	node := newRepresentationNode(k.Registry.nextID, vector.Values)
+	node.Frequency = 1
+	node.LastActivation = time.Now().UTC()
+	k.Registry.nextID++
+	k.Registry.byID[node.ID] = node
+	return node
 }
 
 func containsPopulationNode(candidates []populationCandidate, id NodeID) bool {
