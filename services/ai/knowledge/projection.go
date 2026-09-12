@@ -1,8 +1,16 @@
 package knowledge
 
-import "sort"
+import (
+	"errors"
+	"sort"
+)
 
 const defaultProjectionPopulation = 4
+
+var (
+	ErrNilBrain          = errors.New("brain is nil")
+	ErrEmptyNeuralVector = errors.New("neural vector is empty")
+)
 
 // ProjectionPopulation is the distributed neural activity produced by a
 // numeric experience. It contains only neural-unit IDs and their activation
@@ -51,9 +59,6 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	})
 
 	if len(candidates) < populationSize {
-		// The residual structure is represented by a new prototype. Its
-		// prototype is the current experience itself, so later repetitions
-		// naturally recruit it instead of creating another copy.
 		node, _, err := k.Registry.GetOrCreateRepresentation(vector, threshold)
 		if err != nil {
 			return ProjectionPopulation{}, err
