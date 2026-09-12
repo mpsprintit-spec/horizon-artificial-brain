@@ -1,6 +1,10 @@
 package activation
 
-import "github.com/project-horizon/horizon-core/services/ai/knowledge"
+import (
+	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+)
 
 func temporalPenalty(now, last time.Time) float64 {
 	if last.IsZero() {
