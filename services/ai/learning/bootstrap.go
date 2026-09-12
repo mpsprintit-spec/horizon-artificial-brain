@@ -66,7 +66,6 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 		}
 		previous = node
 		node.LastActivation = now
-		node.Frequency++
 	}
 	if len(steps) == 0 {
 		return
