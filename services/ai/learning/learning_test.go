@@ -22,9 +22,14 @@ func TestOptimizeWeakensStaleSynapse(t *testing.T) {
 	api := kb.Store("api")
 	panas := kb.Store("panas")
 	kb.Connect(api, panas, 1, 1, false)
-	api.FindSynapse(panas.ID, knowledge.RelationAssociation, false).LastActivation = time.Now().Add(-60 * 24 * time.Hour)
+	synapse := api.FindDynamicSynapse(panas.ID, false)
+	if synapse == nil {
+		t.Fatal("expected dynamic synapse")
+	}
+	synapse.LastActivation = time.Now().Add(-60 * 24 * time.Hour)
+	synapse.Dynamic.LastActivation = synapse.LastActivation
 	NewLearningUnit(kb).Optimize(time.Now())
-	if api.FindSynapse(panas.ID, knowledge.RelationAssociation, false).Weight >= 1 {
+	if synapse.Weight >= 1 {
 		t.Fatal("expected stale synapse weight to decay")
 	}
 }
