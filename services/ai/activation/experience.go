@@ -13,9 +13,6 @@ const (
 )
 
 // Experience is the modality-neutral internal form of an experience.
-// Perception systems may construct it from text, vision, audio, touch,
-// proprioception, external data, memory recall, imagination, or another
-// internal state. The learning substrate does not inspect the source modality.
 type Experience struct {
 	Activations map[knowledge.NodeID]float64
 	Confidence  map[knowledge.NodeID]float64
@@ -23,13 +20,7 @@ type Experience struct {
 }
 
 // LearnFromExperience incorporates an experienced internal state into the same
-// neural substrate used by every other experience. It does not assign semantic
-// meaning, source-specific storage, or a cognitive rule to any node.
-//
-// Co-active nodes strengthen an existing connection when one is present. A
-// missing connection is created only when repeated co-activation crosses the
-// structural-growth threshold; this prevents every single observation from
-// becoming a permanent edge.
+// neural substrate used by every other experience.
 func (e *Engine) LearnFromExperience(exp Experience) {
 	if e == nil || e.Memory == nil || len(exp.Activations) == 0 {
 		return
@@ -67,8 +58,6 @@ func (e *Engine) LearnFromExperience(exp Experience) {
 
 			synapse := source.FindDynamicSynapse(target.ID, false)
 			if synapse == nil {
-				// Structural growth is intentionally conservative. A new edge is
-				// introduced only for sufficiently strong co-activation.
 				if coactivation < 0.60 {
 					continue
 				}
@@ -83,9 +72,10 @@ func (e *Engine) LearnFromExperience(exp Experience) {
 			synapse.Dynamic.Frequency++
 			synapse.Dynamic.LastActivation = exp.Now
 			synapse.Dynamic.LastModification = exp.Now
-		synapse.Weight = synapse.Dynamic.Weight
-		synapse.Confidence = synapse.Dynamic.Confidence
-		synapse.Frequency = synapse.Dynamic.Frequency
-		synapse.LastActivation = synapse.Dynamic.LastActivation
+			synapse.Weight = synapse.Dynamic.Weight
+			synapse.Confidence = synapse.Dynamic.Confidence
+			synapse.Frequency = synapse.Dynamic.Frequency
+			synapse.LastActivation = synapse.Dynamic.LastActivation
+		}
 	}
 }
