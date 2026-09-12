@@ -6,10 +6,11 @@ import (
 	"time"
 )
 
-// SynapseList is multiple independent relations to the same target.
+// SynapseList stores multiple independent connections to the same target.
 type SynapseList []*Synapse
 
-// SynapseKey uniquely identifies one relation channel between two nodes.
+// SynapseKey is retained for legacy semantic-channel indexing only. The
+// ontology-free substrate must not use semantic kind as connection identity.
 func SynapseKey(target NodeID, kind RelationKind, inhibitory bool) string {
 	pol := "exc"
 	if inhibitory {
@@ -18,10 +19,22 @@ func SynapseKey(target NodeID, kind RelationKind, inhibitory bool) string {
 	return fmt.Sprintf("%d|%s|%s", target, kind, pol)
 }
 
-// Find matches kind+polarity on a target; nil if absent.
+// Find matches a legacy semantic channel. New substrate code should use
+// FindDynamic instead.
 func (list SynapseList) Find(kind RelationKind, inhibitory bool) *Synapse {
 	for _, s := range list {
 		if s != nil && s.Kind == kind && s.Inhibitory == inhibitory {
+			return s
+		}
+	}
+	return nil
+}
+
+// FindDynamic returns the ontology-free connection for a target/polarity.
+// Dynamic connections have no semantic Kind.
+func (list SynapseList) FindDynamic(inhibitory bool) *Synapse {
+	for _, s := range list {
+		if s != nil && s.Kind == "" && s.Inhibitory == inhibitory {
 			return s
 		}
 	}
@@ -39,7 +52,6 @@ func (list SynapseList) All() []*Synapse {
 	return out
 }
 
-// OutboundAll flattens all outbound synapses from a node.
 func (n *ConceptNode) OutboundAll() []*Synapse {
 	if n == nil {
 		return nil
@@ -51,7 +63,6 @@ func (n *ConceptNode) OutboundAll() []*Synapse {
 	return out
 }
 
-// SynapsesTo returns all relations toward target.
 func (n *ConceptNode) SynapsesTo(target NodeID) SynapseList {
 	if n == nil {
 		return nil
@@ -59,9 +70,13 @@ func (n *ConceptNode) SynapsesTo(target NodeID) SynapseList {
 	return n.Synapses[target]
 }
 
-// FindSynapse returns the exact relation channel.
 func (n *ConceptNode) FindSynapse(target NodeID, kind RelationKind, inhibitory bool) *Synapse {
 	return n.SynapsesTo(target).Find(kind, inhibitory)
+}
+
+// FindDynamicSynapse returns the semantic-free connection to target.
+func (n *ConceptNode) FindDynamicSynapse(target NodeID, inhibitory bool) *Synapse {
+	return n.SynapsesTo(target).FindDynamic(inhibitory)
 }
 
 // conceptNodeJSON supports backward-compatible load of map[NodeID]*Synapse.
@@ -79,7 +94,6 @@ type conceptNodeJSON struct {
 	Synapses          map[NodeID]json.RawMessage `json:"synapses"`
 }
 
-// NormalizeSynapses ensures map values are lists (call after naive unmarshal if needed).
 func NormalizeSynapses(n *ConceptNode) {
 	if n == nil {
 		return
@@ -89,10 +103,9 @@ func NormalizeSynapses(n *ConceptNode) {
 	}
 }
 
-// UnmarshalJSON accepts both legacy {"targetId": {synapse}} and new {"targetId": [synapse,...]}.
+// UnmarshalJSON accepts both legacy {"targetId": {synapse}} and modern
+// {"targetId": [synapse,...]} representations.
 func (n *ConceptNode) UnmarshalJSON(data []byte) error {
-	type alias ConceptNode
-	// Try modern shape first via raw map
 	var raw struct {
 		ID                NodeID                     `json:"id"`
 		Token             string                     `json:"token"`
@@ -124,18 +137,15 @@ func (n *ConceptNode) UnmarshalJSON(data []byte) error {
 		if len(blob) == 0 || string(blob) == "null" {
 			continue
 		}
-		// array form
 		var list []*Synapse
 		if err := json.Unmarshal(blob, &list); err == nil {
 			n.Synapses[tid] = list
 			continue
 		}
-		// legacy single object
 		var one Synapse
 		if err := json.Unmarshal(blob, &one); err == nil {
 			cp := one
 			n.Synapses[tid] = SynapseList{&cp}
-			continue
 		}
 	}
 	return nil
