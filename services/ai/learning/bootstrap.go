@@ -18,6 +18,16 @@ type Experience struct {
 	Confidence float64  `json:"confidence"`
 }
 
+func clamp01(v float64) float64 {
+	if v < 0 {
+		return 0
+	}
+	if v > 1 {
+		return 1
+	}
+	return v
+}
+
 // LearnExperience converts an experience into changes in the same persistent
 // neural substrate used by every other experience source. It does not assign
 // semantic relation types or execute cognitive rules.
@@ -45,8 +55,8 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 			continue
 		}
 		steps = append(steps, knowledge.PatternStep{
-			NodeID: node.ID,
-			Position: i,
+			NodeID:     node.ID,
+			Position:   i,
 			Activation: 1,
 		})
 		if previous != nil {
