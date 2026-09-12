@@ -6,11 +6,11 @@ import (
 )
 
 type LearningUnit struct {
-	Kb          *knowledge.KnowledgeBase
+	Kb          *knowledge.Brain
 	Memory      *memory.Engine
 	LastTouched []TouchedRelation
 }
 
-func NewLearningUnit(kb *knowledge.KnowledgeBase) *LearningUnit {
+func NewLearningUnit(kb *knowledge.Brain) *LearningUnit {
 	return &LearningUnit{Kb: kb, Memory: memory.NewEngine(kb)}
 }
