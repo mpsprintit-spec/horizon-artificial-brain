@@ -2,6 +2,7 @@ package activation
 
 import (
 	"sort"
+	"sync"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -13,6 +14,10 @@ type Engine struct {
 	SpreadRate float64
 	Threshold  float64
 	Inhibition float64
+
+	mu              sync.RWMutex
+	internalState   map[knowledge.NodeID]float64
+	internalConfidence map[knowledge.NodeID]float64
 }
 
 type Request struct {
@@ -31,11 +36,45 @@ type Result struct {
 }
 
 func NewEngine(memory *knowledge.KnowledgeBase) *Engine {
-	return &Engine{Memory: memory, Decay: 0.12, SpreadRate: 0.65, Threshold: 0.25, Inhibition: 0.55}
+	return &Engine{
+		Memory: memory,
+		Decay: 0.12,
+		SpreadRate: 0.65,
+		Threshold: 0.25,
+		Inhibition: 0.55,
+		internalState: map[knowledge.NodeID]float64{},
+		internalConfidence: map[knowledge.NodeID]float64{},
+	}
 }
 
 func (e *Engine) Activate(tokens []string, cycles int) Result {
 	return e.ActivateWith(Request{StimulusTokens: tokens, Cycles: cycles, Now: time.Now().UTC()})
+}
+
+// Think continues the brain's own internal dynamics without requiring a new
+// external stimulus. The previous internal activation becomes the starting
+// state for another recurrent activation cycle. It deliberately has no
+// answer lookup, semantic rule table, or required output.
+func (e *Engine) Think(cycles int) Result {
+	if cycles < 1 {
+		cycles = 1
+	}
+
+	e.mu.RLock()
+	boosts := cloneState(e.internalState)
+	e.mu.RUnlock()
+
+	// If the brain has no active internal state yet, there is nothing to
+	// continue. This is intentional: autonomous thought grows out of an
+	// existing learned/experienced state rather than inventing a stimulus.
+	if len(boosts) == 0 {
+		return Result{
+			Activations: map[knowledge.NodeID]float64{},
+			Confidence: map[knowledge.NodeID]float64{},
+		}
+	}
+
+	return e.ActivateWith(Request{ContextBoosts: boosts, Cycles: cycles, Now: time.Now().UTC()})
 }
 
 func (e *Engine) ActivateWith(req Request) Result {
@@ -101,7 +140,12 @@ func (e *Engine) ActivateWith(req Request) Result {
 		state = normalize(next)
 		confidence = normalize(nextConfidence)
 	}
-	return e.converge(state, confidence, req.Now)
+	result := e.converge(state, confidence, req.Now)
+	e.mu.Lock()
+	e.internalState = cloneState(state)
+	e.internalConfidence = cloneState(confidence)
+	e.mu.Unlock()
+	return result
 }
 
 func (e *Engine) converge(state, confidence map[knowledge.NodeID]float64, now time.Time) Result {
@@ -157,11 +201,6 @@ func normalize(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
 	return in
 }
 
-// squash mempertahankan nilai APA ADANYA selama masih di rentang wajar [0,1]
-// (persis seperti cara lama) -- supaya kalibrasi ambang batas yang sudah ada
-// tidak berubah. Cuma begitu nilai melebihi 1 yang diperhalus (tidak dipotong
-// rata ke 1) -- supaya node yang jauh lebih kuat tetap kelihatan lebih kuat
-// dari yang cuma sedikit melewati batas, bukan numpuk sama rata.
 func squash(v float64) float64 {
 	if v <= 1 {
 		return clamp(v, 0, 1)
@@ -177,4 +216,12 @@ func clamp(v, low, high float64) float64 {
 		return high
 	}
 	return v
+}
+
+func cloneState(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
+	out := make(map[knowledge.NodeID]float64, len(in))
+	for id, value := range in {
+		out[id] = value
+	}
+	return out
 }
