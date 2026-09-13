@@ -8,6 +8,7 @@ import (
 
 	"github.com/project-horizon/horizon-core/services/ai/perception"
 	"github.com/project-horizon/horizon-core/services/ai/thinking"
+	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
@@ -25,12 +26,11 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 		return PulseResult{Answer: "Baik, saya lemahkan/lupakan itu.", Confidence: 1, Success: true, Intent: string(intent), Path: "legacy_control"}
 
 	case IntentConfirmation:
-		// Phase 2: do not token-match for cognitive truth. Fall through to H2 + FSU.
-		// Legacy extractConfirmationParts is not used as understanding authority.
+		// Legacy confirmation token extraction remains disabled as a cognitive authority.
 	}
 
-	// Belajar HANYA untuk pernyataan (Teaching) -- semua bentuk pertanyaan/
-	// perintah lain tidak dianggap fakta baru.
+	// Teaching through the old semantic assimilator remains a compatibility path.
+	// It is deliberately not used by BrainRuntime as the neural transition mechanism.
 	learned := false
 	if intent == IntentTeaching {
 		signals, _ := h.Perception.Perceive(prompt)
@@ -40,11 +40,19 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 		}
 	}
 
-	// Horizon 2 P0: always retain stimulus tokens in the available subgraph.
-	// Whether a token becomes Focus/relevant is decided by Interpretation coherence,
-	// not by intent-trigger routing (Recall vs other).
+	// Official runtime boundary: the stimulus first enters the same persistent brain.
+	// Thinking below remains temporarily available for compatibility while its
+	// RelationKind/FSU path is migrated out of cognitive authority.
 	var thought thinking.Thought
 	var ok bool
+	if h.Runtime != nil {
+		_, _, _ = h.Runtime.Process(runtime.Event{
+			ID:       fmt.Sprintf("pulse-%d", time.Now().UnixNano()),
+			Stimulus: strings.Fields(strings.ToLower(prompt)),
+			Cycles:   8,
+			Timestamp: time.Now().UTC(),
+		})
+	}
 	thought, ok = h.Thinking.ThinkAbout(prompt, contextTokens)
 
 	if h.WebSearch != nil && h.WebSearch.ShouldSearch(thought.Confidence, len(h.Thinking.LastState.UnknownNodes), len(thought.Conflicts)) {
@@ -59,15 +67,10 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 		}
 	}
 
-	// Horizon 2 P0: Decision works only on coherent understanding state (I*).
-	// Focus is not overridden by string triggers (extractDefinitionTarget / extractTeachingFocus).
-	// Those helpers remain in classify.go for legacy routing of confirm/retraction only.
-	// Cognitive focus comes from Interpretation evaluation, not hard-coded token lists.
 	interp := h.Decision.Resolve(thought)
 
 	var answer string
 	if interp != nil && (len(interp.Relations) > 0 || len(interp.Nodes) > 0) {
-		// Language is pure realizer — no cognitive re-selection.
 		if interp.EvalStatus != "" {
 			answer = h.Language.RealizeEvaluation(interp, thought.Confidence, thought.NeedsWebSearch)
 		} else {
@@ -78,13 +81,11 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 		answer = h.Language.Generate(best, thought.Confidence, thought.NeedsWebSearch, thought.Inferences, false)
 	}
 
-	if ok && interp != nil && len(interp.Nodes) > 0 {
-		if node := h.Knowledge.Registry.GetByID(interp.FocusID); node != nil {
-			h.Execution.Dispatch(node.Token, task.Data)
-		}
-	}
+	// Execution is intentionally no longer dispatched directly from cognition.
+	// Authorization/Execution Gateway migration will be added in the safety gate.
 	h.Learning.Optimize(time.Now())
-var evidenceSummary []string
+
+	var evidenceSummary []string
 	for _, ps := range thought.PatternEvidence {
 		var words []string
 		for _, id := range ps.Members {
@@ -137,26 +138,14 @@ var evidenceSummary []string
 		}
 	}
 	return PulseResult{
-		Answer:             answer,
-		Concepts:           thought.Concepts,
-		Confidence:         thought.Confidence,
-		NeedsWebSearch:     thought.NeedsWebSearch,
-		Learned:            learned,
-		Success:            ok,
-		Hypotheses:         thought.Hypotheses,
-		PatternEvidence:    evidenceSummary,
-		Intent:             string(intent),
-		Path:               "h2",
-		FocusToken:         focusTok,
-		FunctionalSignals:  fsigs,
-		InterpretationNotes: fnotes,
-		Propositions: props,
-		Constraints: constr,
-		EvidencePaths: paths,
-		EvalStatus: evalSt,
+		Answer: answer, Concepts: thought.Concepts, Confidence: thought.Confidence,
+		NeedsWebSearch: thought.NeedsWebSearch, Learned: learned, Success: ok,
+		Hypotheses: thought.Hypotheses, PatternEvidence: evidenceSummary,
+		Intent: string(intent), Path: "h2", FocusToken: focusTok,
+		FunctionalSignals: fsigs, InterpretationNotes: fnotes, Propositions: props,
+		Constraints: constr, EvidencePaths: paths, EvalStatus: evalSt,
 	}
 }
-
 
 func formatFunctionalSignal(s thinking.FunctionalSignal) string {
 	return s.Kind + " src=" + s.Source + " strength=" + formatFloat(s.Strength) + " note=" + s.Note
@@ -165,4 +154,3 @@ func formatFunctionalSignal(s thinking.FunctionalSignal) string {
 func formatFloat(v float64) string {
 	return fmt.Sprintf("%.3f", v)
 }
-
