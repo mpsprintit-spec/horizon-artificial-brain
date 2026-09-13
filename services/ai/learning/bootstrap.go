@@ -13,99 +13,79 @@ import (
 //go:embed data/basic_experiences.json
 var foundationalExperienceCorpus []byte
 
-// Experience is a source-neutral observation. The brain receives only the
-// observed activation sequence; the source is deliberately not part of the
-// neural representation.
+// Experience is a source-neutral observation plus provenance metadata. The
+// metadata is evidence about the experience, not a semantic rule for cognition.
 type Experience struct {
-	Sequence   []string `json:"sequence"`
-	Weight     float64  `json:"weight"`
-	Confidence float64  `json:"confidence"`
+	Sequence           []string `json:"sequence"`
+	Weight             float64  `json:"weight"`
+	Confidence         float64  `json:"confidence"`
+	ExperienceID       string   `json:"experience_id,omitempty"`
+	Source             string   `json:"source,omitempty"`
+	Modality           string   `json:"modality,omitempty"`
+	Timestamp          time.Time `json:"timestamp,omitempty"`
+	Reliability        float64  `json:"reliability,omitempty"`
+	IndependenceGroup  string   `json:"independence_group,omitempty"`
+	CausalLink         string   `json:"causal_link,omitempty"`
+	ContradictionSet   string   `json:"contradiction_set,omitempty"`
 }
 
 func clamp01(v float64) float64 {
-	if v < 0 {
-		return 0
-	}
-	if v > 1 {
-		return 1
-	}
+	if v < 0 { return 0 }
+	if v > 1 { return 1 }
 	return v
+}
+
+func (e Experience) evidence(now time.Time) knowledge.ExperienceEvidence {
+	stamp := e.Timestamp
+	if stamp.IsZero() { stamp = now }
+	return knowledge.ExperienceEvidence{
+		ExperienceID: e.ExperienceID, Source: e.Source, Modality: e.Modality,
+		Timestamp: stamp, Reliability: clamp01(e.Reliability),
+		IndependenceGroup: e.IndependenceGroup, CausalLink: e.CausalLink,
+		ContradictionSet: e.ContradictionSet,
+	}
 }
 
 // LearnExperience converts an experience into changes in the same persistent
 // neural substrate used by every other experience source. It does not assign
 // semantic relation types or execute cognitive rules.
 func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
-	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 {
-		return
-	}
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
+	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 { return }
+	if now.IsZero() { now = time.Now().UTC() }
 	weight := clamp01(experience.Weight)
 	confidence := clamp01(experience.Confidence)
-	if weight == 0 {
-		weight = 0.5
-	}
-	if confidence == 0 {
-		confidence = 0.5
-	}
+	if weight == 0 { weight = 0.5 }
+	if confidence == 0 { confidence = 0.5 }
 
 	steps := make([]knowledge.PatternStep, 0, len(experience.Sequence))
 	var previous *knowledge.ConceptNode
 	for i, token := range experience.Sequence {
 		node := l.Kb.Store(token)
-		if node == nil {
-			continue
-		}
-		steps = append(steps, knowledge.PatternStep{
-			NodeID:     node.ID,
-			Position:   i,
-			Activation: 1,
-		})
-		if previous != nil {
-			// Direction records observed temporal succession, not semantic
-			// meaning. Repeated experiences reinforce the same substrate edge.
-			l.Kb.Connect(previous, node, weight, confidence, false)
-		}
+		if node == nil { continue }
+		steps = append(steps, knowledge.PatternStep{NodeID: node.ID, Position: i, Activation: 1})
+		if previous != nil { l.Kb.Connect(previous, node, weight, confidence, false) }
 		previous = node
 		node.LastActivation = now
 	}
-	if len(steps) == 0 {
-		return
-	}
+	if len(steps) == 0 { return }
 	result := steps[len(steps)-1].NodeID
-	l.Kb.Patterns.LearnTrace(steps, nil, result, weight, confidence)
+	l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, experience.evidence(now))
 }
 
-// LoadExperiences reads a source-neutral experience corpus and teaches it to
-// the brain. The file is training experience, not persisted brain memory.
 func (l *LearningUnit) LoadExperiences(path string, now time.Time) (int, error) {
-	if l == nil || l.Kb == nil {
-		return 0, fmt.Errorf("learning unit or knowledge base is nil")
-	}
+	if l == nil || l.Kb == nil { return 0, fmt.Errorf("learning unit or knowledge base is nil") }
 	data, err := os.ReadFile(path)
-	if err != nil {
-		return 0, err
-	}
+	if err != nil { return 0, err }
 	return l.loadExperienceData(data, now)
 }
 
 func (l *LearningUnit) loadExperienceData(data []byte, now time.Time) (int, error) {
 	var experiences []Experience
-	if err := json.Unmarshal(data, &experiences); err != nil {
-		return 0, err
-	}
-	for _, experience := range experiences {
-		l.LearnExperience(experience, now)
-	}
+	if err := json.Unmarshal(data, &experiences); err != nil { return 0, err }
+	for _, experience := range experiences { l.LearnExperience(experience, now) }
 	return len(experiences), nil
 }
 
-// BootstrapBasicExperiences teaches the foundational corpus embedded with the
-// learning package. Embedding keeps bootstrap independent of the process's
-// working directory while the corpus remains training data rather than brain
-// memory.
 func (l *LearningUnit) BootstrapBasicExperiences(now time.Time) (int, error) {
 	return l.loadExperienceData(foundationalExperienceCorpus, now)
 }
