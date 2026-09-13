@@ -87,13 +87,16 @@ func populationConfidence(output runtime.CognitiveOutput) float64 {
 }
 
 // pulseLegacy is retained solely for controlled compatibility experiments.
-// It is not part of the default Horizon cognitive path.
+// It is not part of the default Horizon cognitive path. Web search is never
+// invoked here while WebSearchEnabled is false.
 func (h *HorizonEngine) pulseLegacy(ctx context.Context, prompt string, contextTokens []string, intent Intent, learned bool) PulseResult {
 	var thought thinking.Thought
 	var ok bool
 	thought, ok = h.Thinking.ThinkAbout(prompt, contextTokens)
 
-	if h.WebSearch != nil && h.WebSearch.ShouldSearch(thought.Confidence, len(h.Thinking.LastState.UnknownNodes), len(thought.Conflicts)) {
+	// Web search is deliberately dormant during the neural migration. The
+	// capability remains installed but cannot fetch or inject external data.
+	if h.WebSearchEnabled && h.WebSearch != nil && h.WebSearch.ShouldSearch(thought.Confidence, len(h.Thinking.LastState.UnknownNodes), len(thought.Conflicts)) {
 		thought.NeedsWebSearch = true
 		results, err := h.WebSearch.Perceive(ctx, prompt)
 		if err == nil {
