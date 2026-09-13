@@ -13,21 +13,21 @@ import (
 const BrainIdentity = "horizon-primary-brain"
 
 type Event struct {
-	ID        string
-	Stimulus  []string
-	Context   map[knowledge.NodeID]float64
-	Cycles    int
+	ID string
+	Stimulus []string
+	Context map[knowledge.NodeID]float64
+	Cycles int
 	Timestamp time.Time
 }
 
 type BrainRuntime struct {
-	brain      *knowledge.Brain
+	brain *knowledge.Brain
 	activation *activation.Engine
-	learning   *learning.LearningUnit
-	eventLog   *EventLog
-	clock      Clock
-	mu         sync.Mutex
-	seq        uint64
+	learning *learning.LearningUnit
+	eventLog *EventLog
+	clock Clock
+	mu sync.Mutex
+	seq uint64
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
@@ -118,12 +118,7 @@ func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
 
 func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	thought, sequence, err := r.Think(cycles); if err != nil { return CognitiveOutput{}, err }
-	return CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: thoughtTime(thought), RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}, nil
-}
-
-func thoughtTime(thought activation.ThoughtResult) time.Time {
-	for id := range thought.Activations { _ = id; break }
-	return time.Time{}
+	return CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: r.now(), RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}, nil
 }
 
 func (r *BrainRuntime) LastSequence() uint64 {
