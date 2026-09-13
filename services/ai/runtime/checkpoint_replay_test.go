@@ -17,7 +17,7 @@ func TestCheckpointRestoresOngoingRecurrentState(t *testing.T) {
 	if _, err := r.LearnExperience(testExperience(), clock.Now()); err != nil {
 		t.Fatalf("learn experience: %v", err)
 	}
-	if _, err := r.Process(Event{ID: "p1", Stimulus: []string{"saya"}, Cycles: 2, Timestamp: clock.Now()}); err != nil {
+	if _, _, err := r.Process(Event{ID: "p1", Stimulus: []string{"saya"}, Cycles: 2, Timestamp: clock.Now()); err != nil {
 		t.Fatalf("process: %v", err)
 	}
 	clock.Set(clock.Now().Add(time.Second))
