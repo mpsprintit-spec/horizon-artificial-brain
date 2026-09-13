@@ -13,20 +13,18 @@ import (
 //go:embed data/basic_experiences.json
 var foundationalExperienceCorpus []byte
 
-// Experience is a source-neutral observation plus provenance metadata. The
-// metadata is evidence about the experience, not a semantic rule for cognition.
 type Experience struct {
-	Sequence           []string `json:"sequence"`
-	Weight             float64  `json:"weight"`
-	Confidence         float64  `json:"confidence"`
-	ExperienceID       string   `json:"experience_id,omitempty"`
-	Source             string   `json:"source,omitempty"`
-	Modality           string   `json:"modality,omitempty"`
-	Timestamp          time.Time `json:"timestamp,omitempty"`
-	Reliability        float64  `json:"reliability,omitempty"`
-	IndependenceGroup  string   `json:"independence_group,omitempty"`
-	CausalLink         string   `json:"causal_link,omitempty"`
-	ContradictionSet   string   `json:"contradiction_set,omitempty"`
+	Sequence          []string  `json:"sequence"`
+	Weight            float64   `json:"weight"`
+	Confidence        float64   `json:"confidence"`
+	ExperienceID      string    `json:"experience_id,omitempty"`
+	Source            string    `json:"source,omitempty"`
+	Modality          string    `json:"modality,omitempty"`
+	Timestamp         time.Time `json:"timestamp,omitempty"`
+	Reliability       float64   `json:"reliability,omitempty"`
+	IndependenceGroup string    `json:"independence_group,omitempty"`
+	CausalLink        string    `json:"causal_link,omitempty"`
+	ContradictionSet  string    `json:"contradiction_set,omitempty"`
 }
 
 func clamp01(v float64) float64 {
@@ -46,9 +44,6 @@ func (e Experience) evidence(now time.Time) knowledge.ExperienceEvidence {
 	}
 }
 
-// LearnExperience converts an experience into changes in the same persistent
-// neural substrate used by every other experience source. It does not assign
-// semantic relation types or execute cognitive rules.
 func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 { return }
 	if now.IsZero() { now = time.Now().UTC() }
@@ -69,7 +64,10 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	}
 	if len(steps) == 0 { return }
 	result := steps[len(steps)-1].NodeID
-	l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, experience.evidence(now))
+	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, experience.evidence(now))
+	if pattern != nil {
+		pattern.Confidence = knowledge.CalibratedConfidence(pattern.Confidence, pattern.Evidence)
+	}
 }
 
 func (l *LearningUnit) LoadExperiences(path string, now time.Time) (int, error) {
