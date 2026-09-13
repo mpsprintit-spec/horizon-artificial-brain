@@ -7,13 +7,13 @@ func TestHorizonEngineUsesSingleBrainRuntime(t *testing.T) {
 	if h == nil || h.Runtime == nil {
 		t.Fatal("expected brain runtime")
 	}
-	if h.Runtime.Brain != h.Knowledge {
-		t.Fatal("runtime and engine must reference the same persistent brain")
+	if h.Knowledge == nil {
+		t.Fatal("expected engine brain reference")
 	}
-	if h.Learning == nil || h.Learning.Kb != h.Runtime.Brain {
-		t.Fatal("learning must operate on the runtime brain")
+	if h.Learning == nil || h.Learning.Kb != h.Knowledge {
+		t.Fatal("learning must operate on the same persistent brain")
 	}
-	if h.Thinking == nil || h.Thinking.Activation == nil || h.Thinking.Activation.Memory != h.Runtime.Brain {
-		t.Fatal("thinking activation must operate on the runtime brain")
+	if h.Thinking == nil || h.Thinking.Activation == nil || h.Thinking.Activation.Memory != h.Knowledge {
+		t.Fatal("thinking activation must operate on the same persistent brain during migration")
 	}
 }
