@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 	"github.com/project-horizon/horizon-core/services/ai/perception"
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
 	"github.com/project-horizon/horizon-core/services/ai/thinking"
@@ -26,12 +27,14 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 	}
 
 	learned := false
-	if intent == IntentTeaching {
-		signals, _ := h.Perception.Perceive(prompt)
-		if len(signals) > 0 {
-			h.Learning.Assimilate(signals[0].RawText, 0.85, 0.35)
-			learned = true
+	if intent == IntentTeaching && h.Runtime != nil {
+		experience := learning.Experience{
+			Sequence:   strings.Fields(strings.ToLower(prompt)),
+			Weight:     0.85,
+			Confidence: 0.35,
 		}
+		_, err := h.Runtime.LearnExperience(experience, time.Now().UTC())
+		learned = err == nil && len(experience.Sequence) > 0
 	}
 
 	// Legacy cognition is isolated behind an explicit opt-in switch. The neural
