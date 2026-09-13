@@ -9,22 +9,25 @@ import (
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/activation"
 )
 
-const BrainSnapshotSchemaVersion = 1
+const BrainSnapshotSchemaVersion = 2
 
 type BrainSnapshot struct {
-	SchemaVersion int             `json:"schema_version"`
-	BrainIdentity string          `json:"brain_identity"`
-	Sequence      uint64          `json:"sequence"`
-	Timestamp     time.Time       `json:"timestamp"`
-	Checksum      string          `json:"checksum"`
-	Brain         json.RawMessage `json:"brain"`
+	SchemaVersion int                    `json:"schema_version"`
+	BrainIdentity string                 `json:"brain_identity"`
+	Sequence      uint64                 `json:"sequence"`
+	Timestamp     time.Time              `json:"timestamp"`
+	Checksum      string                 `json:"checksum"`
+	Brain         json.RawMessage        `json:"brain"`
+	Activation    activation.StateSnapshot `json:"activation"`
 }
 
-// Checkpoint persists the current neural substrate together with the runtime
-// sequence. The temporary file + fsync + rename sequence makes replacement
-// atomic from the perspective of readers and avoids exposing partial snapshots.
+// Checkpoint persists the neural substrate and the runtime's recurrent
+// activation state. The latter is process state, not a second memory store;
+// without it a restart would restore the graph but lose the ongoing thought.
 func (r *BrainRuntime) Checkpoint(path string) error {
 	if r == nil || r.brain == nil {
 		return errors.New("brain runtime is not initialized")
@@ -52,9 +55,10 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		SchemaVersion: BrainSnapshotSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence:      r.seq,
-		Timestamp:     time.Now().UTC(),
+		Timestamp:     r.now(),
 		Checksum:      hex.EncodeToString(checksum[:]),
 		Brain:         json.RawMessage(brainBytes),
+		Activation:    r.activation.SnapshotState(),
 	}
 	data, err := json.MarshalIndent(snapshot, "", "  ")
 	if err != nil {
@@ -89,7 +93,8 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 }
 
 // RestoreCheckpoint loads a versioned checkpoint into the runtime's single
-// existing Brain. It never creates a second neural substrate.
+// existing Brain and restores its recurrent activation state. It never
+// creates a second neural substrate.
 func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if r == nil || r.brain == nil {
 		return errors.New("brain runtime is not initialized")
@@ -123,6 +128,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := r.brain.Load(brainPath); err != nil {
 		return fmt.Errorf("restore brain: %w", err)
 	}
+	r.activation.RestoreState(snapshot.Activation)
 	r.seq = snapshot.Sequence
 	return nil
 }
