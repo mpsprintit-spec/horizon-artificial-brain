@@ -1,6 +1,7 @@
 package activation
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -12,7 +13,7 @@ import (
 // answer or rule is selected by this method.
 func (e *Engine) CompleteFromCue(cue []knowledge.PatternStep, context []knowledge.ContextFrame, cycles int, now time.Time) ([]knowledge.PatternSynapse, Result, error) {
 	if e == nil || e.Memory == nil {
-		return nil, Result{}, knowledge.ErrNilBrain
+		return nil, Result{}, fmt.Errorf("activation engine has no brain")
 	}
 	matches := e.Memory.Patterns.CompleteTrace(cue, context)
 	if len(matches) == 0 {
