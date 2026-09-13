@@ -52,9 +52,13 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 			}
 			synapse.Dynamic.LastModification = now
 
-			// Keep legacy fields synchronized while consumers migrate to Dynamic.
 			synapse.Weight = synapse.Dynamic.Weight
 			synapse.Confidence = synapse.Dynamic.Confidence
 		}
 	}
+
+	// Prediction error also informs structural competition. This is a bounded
+	// reconsolidation signal, not a semantic contradiction detector: competing
+	// traces remain in the same Brain and retain their evidence history.
+	e.Memory.Patterns.ReconsolidateFromState(predicted, actual, errorSignal)
 }
