@@ -9,6 +9,9 @@ import (
 
 func TestCognitiveProcessUsesSingleBrainIdentityAndSubstrate(t *testing.T) {
 	brain := knowledge.NewBrain()
+	brain.Store("saya")
+	brain.Store("ingin")
+	brain.Store("belajar")
 	rt := NewBrainRuntime(brain)
 
 	out, err := rt.CognitiveProcess(Event{
@@ -36,6 +39,9 @@ func TestCognitiveProcessUsesSingleBrainIdentityAndSubstrate(t *testing.T) {
 
 func TestCognitiveThinkContinuesWithoutExternalStimulus(t *testing.T) {
 	brain := knowledge.NewBrain()
+	brain.Store("saya")
+	brain.Store("ingin")
+	brain.Store("belajar")
 	rt := NewBrainRuntime(brain)
 
 	if _, err := rt.CognitiveProcess(Event{Stimulus: []string{"saya", "ingin", "belajar"}, Cycles: 4}); err != nil {
