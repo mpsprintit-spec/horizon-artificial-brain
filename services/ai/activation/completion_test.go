@@ -45,12 +45,14 @@ func TestCompleteFromCueRejectsUnlearnedContinuation(t *testing.T) {
 	engine := NewEngine(brain)
 	now := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
 	learner.LearnExperience(learning.Experience{Sequence: []string{"saya", "ingin", "belajar", "tentang", "air"}, Weight: 1, Confidence: 1}, now)
+	// The unit exists in the same brain, but has never occurred in this learned continuation.
+	listrik := brain.Store("listrik")
 
 	cue := []knowledge.PatternStep{
 		{NodeID: brain.Fetch("saya").ID, Position: 0, Activation: 1},
 		{NodeID: brain.Fetch("ingin").ID, Position: 1, Activation: 1},
 		{NodeID: brain.Fetch("belajar").ID, Position: 2, Activation: 1},
-		{NodeID: brain.Fetch("listrik").ID, Position: 3, Activation: 1},
+		{NodeID: listrik.ID, Position: 3, Activation: 1},
 	}
 	matches, _, err := engine.CompleteFromCue(cue, nil, 1, now)
 	if err != nil { t.Fatal(err) }
