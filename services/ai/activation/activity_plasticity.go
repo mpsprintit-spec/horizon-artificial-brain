@@ -70,5 +70,6 @@ func (e *Engine) ApplyActivityPlasticity(preState, postState map[knowledge.NodeI
 
 			synapse.Weight = synapse.Dynamic.Weight
 			synapse.Confidence = synapse.Dynamic.Confidence
+		}
 	}
 }
