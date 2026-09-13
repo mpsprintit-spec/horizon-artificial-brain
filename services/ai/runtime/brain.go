@@ -10,6 +10,8 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
+const canonicalBrainIdentity = "horizon-primary-brain"
+
 // Event is the runtime boundary for an experience entering Horizon.
 // Runtime deliberately carries substrate-neutral stimulus and context; it does
 // not classify semantic intent or select an answer.
@@ -42,6 +44,15 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 		Activation: activation.NewEngine(brain),
 		Learning:   learning.NewLearningUnit(brain),
 	}
+}
+
+// BrainIdentity is the canonical identity of this single Horizon brain.
+// Identity is runtime metadata; it is not a semantic node or a second store.
+func (r *BrainRuntime) BrainIdentity() string {
+	if r == nil || r.Brain == nil {
+		return ""
+	}
+	return canonicalBrainIdentity
 }
 
 // Process serializes the complete neural transition, not merely sequence
