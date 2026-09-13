@@ -21,14 +21,14 @@ type Event struct {
 }
 
 type CognitiveOutput struct {
-	BrainIdentity  string
-	Sequence       uint64
-	Activations    map[knowledge.NodeID]float64
-	Confidence     map[knowledge.NodeID]float64
-	RankedNodes    []knowledge.NodeID
-	Resonance      float64
-	Prediction     map[knowledge.NodeID]float64
-	PredictionConf map[knowledge.NodeID]float64
+	BrainIdentity   string
+	Sequence        uint64
+	Activations     map[knowledge.NodeID]float64
+	Confidence      map[knowledge.NodeID]float64
+	RankedNodes     []knowledge.NodeID
+	Resonance       float64
+	Prediction      map[knowledge.NodeID]float64
+	PredictionConf  map[knowledge.NodeID]float64
 	PredictionError float64
 }
 
@@ -70,6 +70,25 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 		Now:            event.Timestamp,
 	})
 	return result, sequence, nil
+}
+
+// LearnExperience is the only runtime-owned entry point for new experience
+// mutation. It serializes structural learning with cognition so the single
+// persistent Brain cannot be concurrently mutated by an external adapter.
+// LearningUnit's neural LearnExperience performs no semantic RelationKind
+// assignment.
+func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) {
+	if r == nil || r.Brain == nil || r.Learning == nil {
+		return 0, errors.New("brain runtime is not initialized")
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	r.Learning.LearnExperience(experience, now)
+	r.seq++
+	return r.seq, nil
 }
 
 func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
