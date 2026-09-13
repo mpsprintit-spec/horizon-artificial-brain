@@ -29,9 +29,8 @@ type BrainRuntime struct {
 	Activation *activation.Engine
 	Learning   *learning.LearningUnit
 
-	mu      sync.Mutex
-	seq     uint64
-	lastSeq uint64
+	mu  sync.Mutex
+	seq uint64
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
@@ -45,22 +44,22 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	}
 }
 
-// Process advances the same persistent neural substrate for one ordered event.
-// No semantic relation vocabulary, interpretation engine, or execution path is
-// involved here.
+// Process serializes the complete neural transition, not merely sequence
+// allocation. This makes sequence order equal to mutation order on the single
+// persistent brain substrate.
 func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.Brain == nil || r.Activation == nil {
 		return activation.Result{}, 0, errors.New("brain runtime is not initialized")
 	}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if event.Timestamp.IsZero() {
 		event.Timestamp = time.Now().UTC()
 	}
 	r.seq++
 	sequence := r.seq
-	r.lastSeq = sequence
-	r.mu.Unlock()
 
 	result := r.Activation.ActivateWith(activation.Request{
 		StimulusTokens: append([]string(nil), event.Stimulus...),
@@ -71,18 +70,18 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	return result, sequence, nil
 }
 
-// Think advances the existing internal state without a new external event.
+// Think serializes an internal transition with external events. Thinking is
+// still recurrent and does not require a new external stimulus.
 func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) {
 	if r == nil || r.Brain == nil || r.Activation == nil {
 		return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized")
 	}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	r.seq++
 	sequence := r.seq
-	r.lastSeq = sequence
-	r.mu.Unlock()
-
 	return r.Activation.ThinkWithPrediction(cycles), sequence, nil
 }
 
@@ -92,7 +91,7 @@ func (r *BrainRuntime) LastSequence() uint64 {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	return r.lastSeq
+	return r.seq
 }
 
 func cloneContext(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
