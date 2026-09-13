@@ -31,25 +31,29 @@ func (e *Engine) RecurrentCompletion(cue []knowledge.PatternStep, cycles int, no
 }
 
 // RecurrentNext returns the strongest learned dynamic targets reached from
-// the supplied cue. It exposes a measurable continuation without assigning a
-// semantic meaning to any node.
+// the terminal state of the supplied cue. Position is used only to determine
+// which cue state is the current temporal frontier; no semantic relation type
+// is assigned to the nodes or synapses.
 func (e *Engine) RecurrentNext(cue []knowledge.PatternStep, now time.Time) []knowledge.NodeID {
 	if e == nil || e.Memory == nil || len(cue) == 0 { return nil }
 	if now.IsZero() { now = time.Now().UTC() }
-	state := make(map[knowledge.NodeID]float64, len(cue))
-	for _, step := range cue { state[step.NodeID] = max(state[step.NodeID], clamp01(step.Activation)) }
+
+	frontier := cue[0]
+	for _, step := range cue {
+		if step.Position > frontier.Position { frontier = step }
+	}
+
+	level := clamp01(frontier.Activation)
+	n := e.Memory.Registry.GetByID(frontier.NodeID)
+	if n == nil { return nil }
 
 	type candidate struct { id knowledge.NodeID; score float64 }
 	byID := map[knowledge.NodeID]float64{}
-	for id, level := range state {
-		n := e.Memory.Registry.GetByID(id)
-		if n == nil { continue }
-		for _, syn := range n.OutboundAll() {
-			if syn == nil || syn.Inhibitory { continue }
-			age := temporalPenalty(now, syn.LastActivation)
-			score := level * syn.Weight * syn.Confidence * age
-			if score > byID[syn.TargetID] { byID[syn.TargetID] = score }
-		}
+	for _, syn := range n.OutboundAll() {
+		if syn == nil || syn.Inhibitory { continue }
+		age := temporalPenalty(now, syn.LastActivation)
+		score := level * syn.Weight * syn.Confidence * age
+		if score > byID[syn.TargetID] { byID[syn.TargetID] = score }
 	}
 	candidates := make([]candidate, 0, len(byID))
 	for id, score := range byID { candidates = append(candidates, candidate{id, score}) }
