@@ -12,17 +12,12 @@ func TestThinkContinuouslyMaintainsInternalProcess(t *testing.T) {
 	brain := knowledge.NewBrain()
 	engine := NewEngine(brain)
 	now := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
-
-	a, err := brain.ProjectVectorPopulation(knowledge.NewNeuralVector([]float64{-1, -1, 1, 1}), 0.90, 4)
-	if err != nil { t.Fatal(err) }
-	b, err := brain.ProjectVectorPopulation(knowledge.NewNeuralVector([]float64{-1, 1, -1, 1}), 0.90, 4)
-	if err != nil { t.Fatal(err) }
-	c, err := brain.ProjectVectorPopulation(knowledge.NewNeuralVector([]float64{1, -1, -1, 1}), 0.90, 4)
-	if err != nil { t.Fatal(err) }
+	a, err := brain.ProjectVectorPopulation(knowledge.NewNeuralVector([]float64{-1, -1, 1, 1}), 0.90, 4); if err != nil { t.Fatal(err) }
+	b, err := brain.ProjectVectorPopulation(knowledge.NewNeuralVector([]float64{-1, 1, -1, 1}), 0.90, 4); if err != nil { t.Fatal(err) }
+	c, err := brain.ProjectVectorPopulation(knowledge.NewNeuralVector([]float64{1, -1, -1, 1}), 0.90, 4); if err != nil { t.Fatal(err) }
 	if err := engine.LearnPopulationTransition(a, b, 0.8, 1, now); err != nil { t.Fatal(err) }
 	if err := engine.LearnPopulationTransition(b, c, 0.8, 1, now); err != nil { t.Fatal(err) }
 	if _, err := engine.ActivatePopulation(a, 1, now); err != nil { t.Fatal(err) }
-
 	thoughts := engine.ThinkContinuously(4, 1)
 	if len(thoughts) != 4 { t.Fatalf("expected four thought steps, got %d", len(thoughts)) }
 	first := thoughts[0].Activations
@@ -54,18 +49,43 @@ func TestThinkContinuouslyFromLearnedExperience(t *testing.T) {
 	for _, experience := range experiences { unit.LearnExperience(experience, now) }
 	if len(brain.Registry.Nodes()) < 12 { t.Fatalf("too little learned structure: %d nodes", len(brain.Registry.Nodes())) }
 	if len(brain.Patterns.All()) < len(experiences) { t.Fatal("learned experiences did not form temporal patterns") }
-
 	seed := brain.Fetch("saya")
 	if seed == nil { t.Fatal("learned seed missing") }
 	population := knowledge.ProjectionPopulation{Units: []knowledge.PopulationUnit{{NodeID: seed.ID, Activation: 1}}}
 	if _, err := engine.ActivatePopulation(population, 1, now); err != nil { t.Fatal(err) }
 	thoughts := engine.ThinkContinuously(12, 1)
 	if len(thoughts) != 12 { t.Fatalf("expected 12 internal steps, got %d", len(thoughts)) }
-
 	seen := map[knowledge.NodeID]bool{}
 	for i, thought := range thoughts {
 		if len(thought.Activations) == 0 || len(thought.Prediction.State) == 0 { t.Fatalf("thought step %d lost continuity", i) }
 		for id, level := range thought.Activations { if level > engine.Threshold { seen[id] = true } }
 	}
 	if len(seen) < 3 { t.Fatalf("internal process explored too little learned structure: %d units", len(seen)) }
+}
+
+func TestLearnedExperienceFormsSharedBranchingPath(t *testing.T) {
+	brain := knowledge.NewBrain()
+	unit := learning.NewLearningUnit(brain)
+	now := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
+	experiences := []learning.Experience{
+		{Sequence: []string{"saya", "ingin", "belajar", "tentang", "air"}, Weight: 1, Confidence: 1},
+		{Sequence: []string{"saya", "ingin", "belajar", "tentang", "listrik"}, Weight: 1, Confidence: 1},
+		{Sequence: []string{"saya", "ingin", "belajar", "tentang", "air"}, Weight: 1, Confidence: 1},
+		{Sequence: []string{"saya", "ingin", "belajar", "tentang", "listrik"}, Weight: 1, Confidence: 1},
+	}
+	for _, experience := range experiences { unit.LearnExperience(experience, now) }
+	if got := len(brain.Registry.Nodes()); got != 6 { t.Fatalf("shared prefix should reuse neural units, got %d nodes", got) }
+	prefix, air, listrik := brain.Fetch("tentang"), brain.Fetch("air"), brain.Fetch("listrik")
+	if prefix == nil || air == nil || listrik == nil { t.Fatal("expected shared prefix and both branch units") }
+	airEdge, listrikEdge := prefix.FindDynamicSynapse(air.ID, false), prefix.FindDynamicSynapse(listrik.ID, false)
+	if airEdge == nil || listrikEdge == nil { t.Fatal("learned branching path did not preserve both continuations") }
+	if airEdge.Frequency != 2 || listrikEdge.Frequency != 2 { t.Fatalf("repeated branches were not reinforced: air=%d listrik=%d", airEdge.Frequency, listrikEdge.Frequency) }
+	result := brain.Patterns.MatchTrace([]knowledge.PatternStep{
+		{NodeID: brain.Fetch("saya").ID, Position: 0, Activation: 1},
+		{NodeID: brain.Fetch("ingin").ID, Position: 1, Activation: 1},
+		{NodeID: brain.Fetch("belajar").ID, Position: 2, Activation: 1},
+		{NodeID: prefix.ID, Position: 3, Activation: 1},
+		{NodeID: air.ID, Position: 4, Activation: 1},
+	}, nil)
+	if len(result) == 0 || result[0].Frequency != 2 { t.Fatal("temporal pattern for learned air branch was not reconstructed") }
 }
