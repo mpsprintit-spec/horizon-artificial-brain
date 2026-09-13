@@ -12,7 +12,7 @@ func TestPulseUsesNeuralRuntimeByDefault(t *testing.T) {
 
 	h := NewHorizonEngine()
 	h.Knowledge.Store("air")
-	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "air"})
+	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "bagaimana air?"})
 	if result.Path != "neural_runtime" {
 		t.Fatalf("expected neural runtime path, got %q", result.Path)
 	}
