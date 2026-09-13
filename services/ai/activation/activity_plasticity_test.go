@@ -26,23 +26,11 @@ func TestActivityPlasticityStrengthensCoActivePath(t *testing.T) {
 	synapse := dynamicSynapseForTest(t, brain, "a", "b")
 	initial := synapse.Dynamic.Weight
 	now := time.Date(2026, 9, 13, 9, 0, 0, 0, time.UTC)
-
+	a := brain.Store("a")
+	b := brain.Store("b")
+	engine := NewEngine(brain)
 	for i := 0; i < 5; i++ {
-		Apply := map[knowledge.NodeID]float64{}
-		Apply[brain.Registry.GetOrCreate("a").ID] = 0.9
-		post := map[knowledge.NodeID]float64{}
-		post[brain.Registry.GetOrCreate("b").ID] = 0.9
-		// Use a fresh timestamp so the transition is a genuine repeated event.
-		_ = i
-		_ = Apply
-		_ = post
-	}
-
-	a := brain.Registry.GetOrCreate("a")
-	b := brain.Registry.GetOrCreate("b")
-	for i := 0; i < 5; i++ {
-		e := NewEngine(brain)
-		e.ApplyActivityPlasticity(
+		engine.ApplyActivityPlasticity(
 			map[knowledge.NodeID]float64{a.ID: 0.9},
 			map[knowledge.NodeID]float64{b.ID: 0.9},
 			now.Add(time.Duration(i)*time.Millisecond),
@@ -61,7 +49,7 @@ func TestActivityPlasticityDecaysUnusedPathWithoutDeletingIt(t *testing.T) {
 	brain := knowledge.NewBrain()
 	synapse := dynamicSynapseForTest(t, brain, "a", "b")
 	initial := synapse.Dynamic.Weight
-	a := brain.Registry.GetOrCreate("a")
+	a := brain.Store("a")
 	now := time.Date(2026, 9, 13, 9, 0, 0, 0, time.UTC)
 
 	engine := NewEngine(brain)
