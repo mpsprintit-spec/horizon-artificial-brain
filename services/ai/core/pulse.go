@@ -56,8 +56,8 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 		return PulseResult{Intent: string(intent), Path: "neural_runtime_error", Learned: learned}
 	}
 
-	concepts := make([]string, 0, len(output.RankedNodes))
-	for _, id := range output.RankedNodes {
+	concepts := make([]string, 0, len(output.RankedNodeIDs))
+	for _, id := range output.RankedNodeIDs {
 		if n := h.Knowledge.Registry.GetByID(id); n != nil && n.Token != "" {
 			concepts = append(concepts, n.Token)
 		}
@@ -81,7 +81,7 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 
 func populationConfidence(output runtime.CognitiveOutput) float64 {
 	best := 0.0
-	for _, id := range output.RankedNodes {
+	for _, id := range output.RankedNodeIDs {
 		if value := output.Confidence[id]; value > best {
 			best = value
 		}
