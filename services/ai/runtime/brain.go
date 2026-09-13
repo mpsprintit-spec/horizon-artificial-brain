@@ -25,26 +25,40 @@ type BrainRuntime struct {
 	activation *activation.Engine
 	learning   *learning.LearningUnit
 	eventLog   *EventLog
+	clock      Clock
 	mu         sync.Mutex
 	seq        uint64
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBrain() }
-	return &BrainRuntime{brain: brain, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain)}
+	return &BrainRuntime{brain: brain, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), clock: WallClock{}}
 }
 
-// SetEventLog attaches the durable append-only transition log.
-func (r *BrainRuntime) SetEventLog(log *EventLog) {
+// SetClock injects the runtime temporal source. It is primarily used by replay
+// and deterministic tests; cognition still runs on the same neural substrate.
+func (r *BrainRuntime) SetClock(clock Clock) {
 	if r == nil { return }
 	r.mu.Lock(); defer r.mu.Unlock()
-	r.eventLog = log
+	if clock == nil { r.clock = WallClock{} } else { r.clock = clock }
+}
+
+func (r *BrainRuntime) now() time.Time {
+	if r.clock == nil { r.clock = WallClock{} }
+	now := r.clock.Now()
+	if now.IsZero() { now = time.Now().UTC() }
+	return now.UTC()
+}
+
+func (r *BrainRuntime) SetEventLog(log *EventLog) {
+	if r == nil { return }
+	r.mu.Lock(); defer r.mu.Unlock(); r.eventLog = log
 }
 
 func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil { return activation.Result{}, 0, errors.New("brain runtime is not initialized") }
 	r.mu.Lock(); defer r.mu.Unlock()
-	if event.Timestamp.IsZero() { event.Timestamp = time.Now().UTC() }
+	if event.Timestamp.IsZero() { event.Timestamp = r.now() }
 	r.seq++
 	result := r.activation.ActivateWith(activation.Request{StimulusTokens: append([]string(nil), event.Stimulus...), ContextBoosts: cloneContext(event.Context), Cycles: event.Cycles, Now: event.Timestamp})
 	if r.eventLog != nil {
@@ -56,7 +70,7 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) {
 	if r == nil || r.brain == nil || r.learning == nil { return 0, errors.New("brain runtime is not initialized") }
 	r.mu.Lock(); defer r.mu.Unlock()
-	if now.IsZero() { now = time.Now().UTC() }
+	if now.IsZero() { now = r.now() }
 	r.learning.LearnExperience(experience, now)
 	r.seq++
 	if r.eventLog != nil {
@@ -70,10 +84,11 @@ func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, erro
 	if r == nil || r.brain == nil || r.activation == nil { return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized") }
 	r.mu.Lock(); defer r.mu.Unlock()
 	r.seq++
+	now := r.now()
 	thought := r.activation.ThinkWithPrediction(cycles)
 	if r.eventLog != nil {
-		event := Event{Cycles: cycles, Timestamp: time.Now().UTC()}
-		if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: r.seq, Type: EventTypeThink, Timestamp: event.Timestamp, Event: &event}); err != nil { return thought, r.seq, err }
+		event := Event{Cycles: cycles, Timestamp: now}
+		if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: r.seq, Type: EventTypeThink, Timestamp: now, Event: &event}); err != nil { return thought, r.seq, err }
 	}
 	return thought, r.seq, nil
 }
@@ -93,13 +108,13 @@ type CognitiveOutput struct {
 
 func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
 	result, sequence, err := r.Process(event); if err != nil { return CognitiveOutput{}, err }
-	now := event.Timestamp; if now.IsZero() { now = time.Now().UTC() }
+	now := event.Timestamp; if now.IsZero() { now = r.clock.Now() }
 	return cognitiveOutputFromResult(BrainIdentity, sequence, now, result), nil
 }
 
 func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	thought, sequence, err := r.Think(cycles); if err != nil { return CognitiveOutput{}, err }
-	return CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: time.Now().UTC(), RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}, nil
+	return CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: r.clock.Now(), RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}, nil
 }
 
 func (r *BrainRuntime) LastSequence() uint64 {
