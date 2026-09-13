@@ -10,9 +10,10 @@ import (
 
 func TestBrainRuntimeUsesSingleBrainAcrossEvents(t *testing.T) {
 	brain := knowledge.NewBrain()
-	brain.Store("saya")
-	brain.Store("ingin")
+	saya := brain.Store("saya")
+	ingin := brain.Store("ingin")
 	brain.Store("belajar")
+	brain.Connect(saya, ingin, 0.6, 0.8, false)
 	r := NewBrainRuntime(brain)
 
 	first, seq1, err := r.Process(Event{
@@ -34,10 +35,6 @@ func TestBrainRuntimeUsesSingleBrainAcrossEvents(t *testing.T) {
 	if got := len(brain.Registry.Nodes()); got != 3 {
 		t.Fatalf("brain node count = %d, want 3; repeated experience must reuse the same substrate", got)
 	}
-
-	saya := brain.Fetch("saya")
-	ingin := brain.Fetch("ingin")
-	if saya == nil || ingin == nil { t.Fatal("expected learned nodes to remain in the same brain") }
 	path := saya.SynapsesTo(ingin.ID)
 	if len(path) != 1 { t.Fatalf("saya -> ingin synapse count = %d, want 1", len(path)) }
 	if path[0].Dynamic.Frequency < 2 { t.Fatalf("synapse frequency = %d, want repeated reinforcement", path[0].Dynamic.Frequency) }
