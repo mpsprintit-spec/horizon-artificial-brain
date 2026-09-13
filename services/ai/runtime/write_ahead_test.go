@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 func TestWriteAheadLogFailureDoesNotMutateProcessState(t *testing.T) {
