@@ -10,11 +10,8 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
-const canonicalBrainIdentity = "horizon-primary-brain"
+const BrainIdentity = "horizon-primary-brain"
 
-// Event is the runtime boundary for an experience entering Horizon.
-// Runtime deliberately carries substrate-neutral stimulus and context; it does
-// not classify semantic intent or select an answer.
 type Event struct {
 	ID        string
 	Stimulus  []string
@@ -23,9 +20,18 @@ type Event struct {
 	Timestamp time.Time
 }
 
-// BrainRuntime is the single runtime facade for the persistent Horizon brain.
-// It owns ordering and access to the existing neural substrate. It does not
-// create a second memory or a second intelligence.
+type CognitiveOutput struct {
+	BrainIdentity  string
+	Sequence       uint64
+	Activations    map[knowledge.NodeID]float64
+	Confidence     map[knowledge.NodeID]float64
+	RankedNodes    []knowledge.NodeID
+	Resonance      float64
+	Prediction     map[knowledge.NodeID]float64
+	PredictionConf map[knowledge.NodeID]float64
+	PredictionError float64
+}
+
 type BrainRuntime struct {
 	Brain      *knowledge.Brain
 	Activation *activation.Engine
@@ -46,32 +52,17 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	}
 }
 
-// BrainIdentity is the canonical identity of this single Horizon brain.
-// Identity is runtime metadata; it is not a semantic node or a second store.
-func (r *BrainRuntime) BrainIdentity() string {
-	if r == nil || r.Brain == nil {
-		return ""
-	}
-	return canonicalBrainIdentity
-}
-
-// Process serializes the complete neural transition, not merely sequence
-// allocation. This makes sequence order equal to mutation order on the single
-// persistent brain substrate.
 func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.Brain == nil || r.Activation == nil {
 		return activation.Result{}, 0, errors.New("brain runtime is not initialized")
 	}
-
 	r.mu.Lock()
 	defer r.mu.Unlock()
-
 	if event.Timestamp.IsZero() {
 		event.Timestamp = time.Now().UTC()
 	}
 	r.seq++
 	sequence := r.seq
-
 	result := r.Activation.ActivateWith(activation.Request{
 		StimulusTokens: append([]string(nil), event.Stimulus...),
 		ContextBoosts:  cloneContext(event.Context),
@@ -81,28 +72,76 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	return result, sequence, nil
 }
 
-// Think serializes an internal transition with external events. Thinking is
-// still recurrent and does not require a new external stimulus.
+func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
+	result, sequence, err := r.Process(event)
+	if err != nil {
+		return CognitiveOutput{}, err
+	}
+	return cognitiveOutputFromResult(result, sequence), nil
+}
+
 func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) {
 	if r == nil || r.Brain == nil || r.Activation == nil {
 		return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized")
 	}
-
 	r.mu.Lock()
 	defer r.mu.Unlock()
-
 	r.seq++
 	sequence := r.seq
 	return r.Activation.ThinkWithPrediction(cycles), sequence, nil
 }
 
-func (r *BrainRuntime) LastSequence() uint64 {
-	if r == nil {
-		return 0
+func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
+	thought, sequence, err := r.Think(cycles)
+	if err != nil {
+		return CognitiveOutput{}, err
 	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	return r.seq
+	return CognitiveOutput{
+		BrainIdentity:   BrainIdentity,
+		Sequence:        sequence,
+		Activations:     cloneFloatMap(thought.Activations),
+		Confidence:      cloneFloatMap(thought.Confidence),
+		RankedNodes:     rankedNodeIDs(thought.RankedNodes),
+		Resonance:       thought.Resonance,
+		Prediction:      cloneFloatMap(thought.Prediction.State),
+		PredictionConf:  cloneFloatMap(thought.Prediction.Confidence),
+		PredictionError: thought.PredictionError,
+	}, nil
+}
+
+func cognitiveOutputFromResult(result activation.Result, sequence uint64) CognitiveOutput {
+	return CognitiveOutput{
+		BrainIdentity: BrainIdentity,
+		Sequence:      sequence,
+		Activations:   cloneFloatMap(result.Activations),
+		Confidence:    cloneFloatMap(result.Confidence),
+		RankedNodes:   rankedNodeIDs(result.RankedNodes),
+		Resonance:     result.Resonance,
+	}
+}
+
+func rankedNodeIDs(nodes []*knowledge.ConceptNode) []knowledge.NodeID {
+	if len(nodes) == 0 {
+		return nil
+	}
+	out := make([]knowledge.NodeID, 0, len(nodes))
+	for _, node := range nodes {
+		if node != nil {
+			out = append(out, node.ID)
+		}
+	}
+	return out
+}
+
+func cloneFloatMap(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
+	if len(in) == 0 {
+		return nil
+	}
+	out := make(map[knowledge.NodeID]float64, len(in))
+	for id, value := range in {
+		out[id] = value
+	}
+	return out
 }
 
 func cloneContext(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
