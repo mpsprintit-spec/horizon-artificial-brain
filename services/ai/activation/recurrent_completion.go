@@ -53,7 +53,12 @@ func (e *Engine) RecurrentNext(cue []knowledge.PatternStep, now time.Time) []kno
 		if syn == nil || syn.Inhibitory { continue }
 		age := temporalPenalty(now, syn.LastActivation)
 		score := level * syn.Weight * syn.Confidence * age
-		if score > byID[syn.TargetID] { byID[syn.TargetID] = score }
+		// A learned target remains a candidate even when temporal attenuation
+		// currently drives its score to zero. Temporal decay ranks candidates;
+		// it must not erase the existence of a learned pathway.
+		if _, exists := byID[syn.TargetID]; !exists || score > byID[syn.TargetID] {
+			byID[syn.TargetID] = score
+		}
 	}
 	candidates := make([]candidate, 0, len(byID))
 	for id, score := range byID { candidates = append(candidates, candidate{id, score}) }
