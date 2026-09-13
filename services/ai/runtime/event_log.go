@@ -98,7 +98,7 @@ func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
 			if _, err := brainRuntime.Process(*logged.Event); err != nil { return err }
 		case EventTypeThink:
 			if logged.Event == nil { return errors.New("think event has no event payload") }
-			if _, _, err := brainRuntime.Think(logged.Event.Cycles); err != nil { return err }
+			if _, _, err := brainRuntime.ThinkAt(logged.Event.Cycles, logged.Timestamp); err != nil { return err }
 		default:
 			return fmt.Errorf("unknown event type %q", logged.Type)
 		}
