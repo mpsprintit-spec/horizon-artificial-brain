@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log/slog"
 	"os"
@@ -34,11 +33,8 @@ func main() {
 		}
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.DecisionTimeout)
-	defer cancel()
-
 	stimulus := signalStimulus(signals)
-	output, err := horizon.Runtime.CognitiveProcess(ctx, runtime.Event{
+	output, err := horizon.Runtime.CognitiveProcess(runtime.Event{
 		ID:        "bootstrap",
 		Stimulus:  stimulus,
 		Cycles:    8,
