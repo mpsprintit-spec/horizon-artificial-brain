@@ -10,6 +10,9 @@ import (
 
 func TestBrainRuntimeUsesSingleBrainAcrossEvents(t *testing.T) {
 	brain := knowledge.NewBrain()
+	brain.Store("saya")
+	brain.Store("ingin")
+	brain.Store("belajar")
 	r := NewBrainRuntime(brain)
 
 	first, seq1, err := r.Process(Event{
@@ -42,6 +45,8 @@ func TestBrainRuntimeUsesSingleBrainAcrossEvents(t *testing.T) {
 
 func TestBrainRuntimeContinuesWithoutExternalInput(t *testing.T) {
 	brain := knowledge.NewBrain()
+	brain.Store("air")
+	brain.Store("dingin")
 	r := NewBrainRuntime(brain)
 	if _, _, err := r.Process(Event{ID: "seed", Stimulus: []string{"air", "dingin", "air"}, Cycles: 1, Timestamp: time.Unix(200, 0).UTC()}); err != nil { t.Fatal(err) }
 
@@ -53,6 +58,8 @@ func TestBrainRuntimeContinuesWithoutExternalInput(t *testing.T) {
 
 func TestBrainRuntimeSerializesConcurrentTransitions(t *testing.T) {
 	brain := knowledge.NewBrain()
+	brain.Store("shared")
+	brain.Store("path")
 	r := NewBrainRuntime(brain)
 
 	const workers = 16
