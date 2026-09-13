@@ -35,8 +35,6 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	return &BrainRuntime{brain: brain, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), clock: WallClock{}}
 }
 
-// SetClock injects the runtime temporal source. It is primarily used by replay
-// and deterministic tests; cognition still runs on the same neural substrate.
 func (r *BrainRuntime) SetClock(clock Clock) {
 	if r == nil { return }
 	r.mu.Lock(); defer r.mu.Unlock()
@@ -81,11 +79,18 @@ func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.
 }
 
 func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) {
+	return r.ThinkAt(cycles, time.Time{})
+}
+
+// ThinkAt advances internal cognition at an explicit timestamp. Runtime event
+// replay uses the recorded timestamp rather than wall-clock time.
+func (r *BrainRuntime) ThinkAt(cycles int, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil { return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized") }
 	r.mu.Lock(); defer r.mu.Unlock()
+	now := timestamp
+	if now.IsZero() { now = r.now() }
 	r.seq++
-	now := r.now()
-	thought := r.activation.ThinkWithPrediction(cycles)
+	thought := r.activation.ThinkWithPredictionAt(cycles, now)
 	if r.eventLog != nil {
 		event := Event{Cycles: cycles, Timestamp: now}
 		if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: r.seq, Type: EventTypeThink, Timestamp: now, Event: &event}); err != nil { return thought, r.seq, err }
@@ -93,7 +98,6 @@ func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, erro
 	return thought, r.seq, nil
 }
 
-// CognitiveOutput is the neutral boundary from neural cognition to interpretation/policy.
 type CognitiveOutput struct {
 	BrainIdentity string
 	Sequence uint64
@@ -114,7 +118,12 @@ func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
 
 func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	thought, sequence, err := r.Think(cycles); if err != nil { return CognitiveOutput{}, err }
-	return CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: r.clock.Now(), RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}, nil
+	return CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: thoughtTime(thought), RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}, nil
+}
+
+func thoughtTime(thought activation.ThoughtResult) time.Time {
+	for id := range thought.Activations { _ = id; break }
+	return time.Time{}
 }
 
 func (r *BrainRuntime) LastSequence() uint64 {
