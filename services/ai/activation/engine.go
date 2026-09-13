@@ -99,6 +99,10 @@ func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult {
 	actualState, actualConfidence := e.advance(state, confidence, now, cycles)
 	actual := e.converge(actualState, actualConfidence, now)
 
+	// Plasticity observes the actual transition that just occurred. This is
+	// intentionally independent from language tokens or symbolic relations.
+	e.ApplyActivityPlasticity(state, actual.Activations, now)
+
 	error := 0.0
 	if len(previousPrediction) > 0 {
 		error = stateDifference(previousPrediction, actual.Activations)
@@ -147,8 +151,11 @@ func (e *Engine) ActivateWith(req Request) Result {
 	}
 	state = normalize(state)
 
+	preState := cloneState(state)
 	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
 	result := e.converge(state, confidence, req.Now)
+
+	e.ApplyActivityPlasticity(preState, result.Activations, req.Now)
 
 	if len(previousPrediction) > 0 {
 		error := stateDifference(previousPrediction, result.Activations)
@@ -156,8 +163,8 @@ func (e *Engine) ActivateWith(req Request) Result {
 	}
 
 	e.mu.Lock()
-	e.internalState = cloneState(state)
-	e.internalConfidence = cloneState(confidence)
+	e.internalState = cloneState(result.Activations)
+	e.internalConfidence = cloneState(result.Confidence)
 	e.lastPrediction = map[knowledge.NodeID]float64{}
 	e.lastPredictionConf = map[knowledge.NodeID]float64{}
 	e.mu.Unlock()
