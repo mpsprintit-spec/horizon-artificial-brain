@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 func TestThinkContinuouslyMaintainsInternalProcess(t *testing.T) {
@@ -78,5 +79,68 @@ func TestThinkContinuouslyMaintainsInternalProcess(t *testing.T) {
 	}
 	if !reachedC {
 		t.Fatal("continuous internal process did not propagate through the learned transition chain")
+	}
+}
+
+func TestThinkContinuouslyFromFoundationalLanguageExperience(t *testing.T) {
+	brain := knowledge.NewBrain()
+	unit := learning.NewLearningUnit(brain)
+	engine := NewEngine(brain)
+	now := time.Date(2026, 9, 13, 0, 0, 0, 0, time.UTC)
+
+	experiences := []learning.Experience{
+		{Sequence: []string{"saya", "ingin", "belajar"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"saya", "ingin", "belajar", "tentang", "air"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"air", "itu", "dingin"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"air", "menjadi", "panas"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"es", "mencair", "ketika", "hangat"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"setelah", "makan", "saya", "minum"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"sebelum", "tidur", "saya", "membaca"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"kemudian", "dia", "pulang"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"kemarin", "saya", "pergi", "ke", "pasar"}, Weight: 0.9, Confidence: 0.9},
+		{Sequence: []string{"besok", "saya", "akan", "bekerja"}, Weight: 0.9, Confidence: 0.9},
+	}
+	for _, experience := range experiences {
+		unit.LearnExperience(experience, now)
+	}
+
+	before := len(brain.Registry.Nodes())
+	if before < 12 {
+		t.Fatalf("foundational experience produced too little learned structure: %d nodes", before)
+	}
+	if len(brain.Patterns.All()) < len(experiences) {
+		t.Fatalf("expected temporal patterns for learned experiences: got %d", len(brain.Patterns.All()))
+	}
+
+	seed := brain.Fetch("saya")
+	if seed == nil {
+		t.Fatal("learned language seed was not stored")
+	}
+	state := map[knowledge.NodeID]float64{seed.ID: 1}
+	confidence := map[knowledge.NodeID]float64{seed.ID: 1}
+	state, confidence = engine.advance(state, confidence, now, 1)
+	if len(state) == 0 {
+		t.Fatal("language experience produced no recurrent state")
+	}
+
+	thoughts := engine.ThinkContinuously(8, 1)
+	if len(thoughts) != 8 {
+		t.Fatalf("expected eight internal thought steps from learned experience, got %d", len(thoughts))
+	}
+
+	seen := map[knowledge.NodeID]bool{}
+	for _, thought := range thoughts {
+		for id, level := range thought.Activations {
+			if level > engine.Threshold {
+				seen[id] = true
+			}
+		}
+	}
+	if len(seen) < 3 {
+		t.Fatalf("internal process explored too little learned structure: %d active units", len(seen))
+	}
+
+	if brain.Fetch("air") == nil || brain.Fetch("belajar") == nil || brain.Fetch("pasar") == nil {
+		t.Fatal("expected learned vocabulary to remain in the shared brain substrate")
 	}
 }
