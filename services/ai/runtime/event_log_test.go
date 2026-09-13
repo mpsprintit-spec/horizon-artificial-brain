@@ -22,7 +22,7 @@ func TestEventLogAppendsAndReplaysLearning(t *testing.T) {
 	now := time.Date(2026, 9, 13, 12, 0, 0, 0, time.UTC)
 	experience := learning.Experience{Sequence: []string{"saya", "ingin", "belajar"}, Weight: 0.8, Confidence: 0.6, ExperienceID: "replay-1", Source: "test", Modality: "language", Reliability: 0.9, IndependenceGroup: "g1"}
 	if _, err := r.LearnExperience(experience, now); err != nil { t.Fatalf("learn: %v", err) }
-	if _, err := r.Process(Event{ID: "p1", Stimulus: []string{"saya"}, Cycles: 2, Timestamp: now.Add(time.Second)}); err != nil { t.Fatalf("process: %v", err) }
+	if _, _, err := r.Process(Event{ID: "p1", Stimulus: []string{"saya"}, Cycles: 2, Timestamp: now.Add(time.Second)}); err != nil { t.Fatalf("process: %v", err) }
 
 	events, err := ReadEventLog(path)
 	if err != nil { t.Fatalf("read log: %v", err) }
