@@ -11,7 +11,8 @@ func TestPulseUsesNeuralRuntimeByDefault(t *testing.T) {
 	defer func() { LegacyCognitionEnabled = previous }()
 
 	h := NewHorizonEngine()
-	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "saya ingin belajar"})
+	h.Knowledge.Store("air")
+	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "air"})
 	if result.Path != "neural_runtime" {
 		t.Fatalf("expected neural runtime path, got %q", result.Path)
 	}
