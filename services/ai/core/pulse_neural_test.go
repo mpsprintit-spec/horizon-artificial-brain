@@ -24,6 +24,26 @@ func TestPulseUsesNeuralRuntimeByDefault(t *testing.T) {
 	}
 }
 
+func TestNeuralPulseDoesNotRequireLegacyThinkingEngine(t *testing.T) {
+	previous := LegacyCognitionEnabled
+	LegacyCognitionEnabled = false
+	defer func() { LegacyCognitionEnabled = previous }()
+
+	h := NewHorizonEngine()
+	h.Knowledge.Store("air")
+	// Deliberately remove the legacy ThinkingEngine. The neural runtime must
+	// remain independently usable when legacy cognition is disabled.
+	h.Thinking = nil
+
+	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "bagaimana air?"})
+	if result.Path != "neural_runtime" {
+		t.Fatalf("expected neural runtime path without legacy thinking, got %q", result.Path)
+	}
+	if !result.Success {
+		t.Fatal("expected neural runtime to remain operational without legacy thinking")
+	}
+}
+
 func TestPulseLegacyPathRequiresExplicitOptIn(t *testing.T) {
 	previous := LegacyCognitionEnabled
 	LegacyCognitionEnabled = true
