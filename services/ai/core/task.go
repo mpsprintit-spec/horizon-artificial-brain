@@ -23,12 +23,13 @@ type PulseResult struct {
 
 	// FSU Phase 1 observability (not answers).
 	Intent              string
-	Path                string // h2 | legacy_confirm | legacy_control
+	Path                string
+	InterpretationSource string // neural | legacy-compatibility
 	FocusToken          string
 	FunctionalSignals   []string
 	InterpretationNotes []string
-	Propositions         []string
-	Constraints          []string
-	EvidencePaths        []string
+	Propositions        []string
+	Constraints         []string
+	EvidencePaths       []string
 	EvalStatus           string
 }
