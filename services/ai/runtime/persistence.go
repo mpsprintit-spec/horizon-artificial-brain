@@ -30,6 +30,10 @@ type checkpointPayload struct {
 	Activation activation.StateSnapshot `json:"activation"`
 }
 
+// checkpointChecksum covers the complete logical neural/runtime state rather
+// than only the serialized Brain graph. Envelope metadata is intentionally
+// excluded so a checkpoint can be verified independently of its timestamp or
+// sequence metadata.
 func checkpointChecksum(brain json.RawMessage, state activation.StateSnapshot) (string, error) {
 	payload, err := json.Marshal(checkpointPayload{Brain: brain, Activation: state})
 	if err != nil {
