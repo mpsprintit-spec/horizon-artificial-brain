@@ -48,9 +48,12 @@ func stateDifference(a, b map[knowledge.NodeID]float64) float64 {
 	for id := range a { keys[id] = struct{}{} }
 	for id := range b { keys[id] = struct{}{} }
 	if len(keys) == 0 { return 0 }
+	ids := make([]knowledge.NodeID, 0, len(keys))
+	for id := range keys { ids = append(ids, id) }
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 	var total float64
-	for id := range keys { total += abs(a[id] - b[id]) }
-	return clamp01(total / float64(len(keys)))
+	for _, id := range ids { total += abs(a[id] - b[id]) }
+	return clamp01(total / float64(len(ids)))
 }
 
 func abs(v float64) float64 {
