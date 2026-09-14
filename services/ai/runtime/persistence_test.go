@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"testing"
@@ -61,6 +62,46 @@ func TestBrainRuntimeRejectsCorruptCheckpoint(t *testing.T) {
 	}
 	if err := r.RestoreCheckpoint(path); err == nil {
 		t.Fatal("expected checksum failure")
+	}
+}
+
+func TestBrainRuntimeRejectsActivationStateTampering(t *testing.T) {
+	brain := knowledge.NewBrain()
+	brain.Store("saya")
+	r := NewBrainRuntime(brain)
+	if _, _, err := r.Process(Event{ID: "activation-check", Stimulus: []string{"saya"}, Cycles: 1, Timestamp: time.Now().UTC()}); err != nil {
+		t.Fatalf("process: %v", err)
+	}
+
+	path := filepath.Join(t.TempDir(), "brain.json")
+	if err := r.Checkpoint(path); err != nil {
+		t.Fatalf("checkpoint: %v", err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read checkpoint: %v", err)
+	}
+	var snapshot BrainSnapshot
+	if err := json.Unmarshal(data, &snapshot); err != nil {
+		t.Fatalf("decode checkpoint: %v", err)
+	}
+	if len(snapshot.Activation.InternalState) == 0 {
+		t.Fatal("checkpoint did not contain recurrent activation state")
+	}
+	for nodeID, value := range snapshot.Activation.InternalState {
+		snapshot.Activation.InternalState[nodeID] = value + 0.001
+		break
+	}
+	tampered, err := json.MarshalIndent(snapshot, "", "  ")
+	if err != nil {
+		t.Fatalf("encode tampered checkpoint: %v", err)
+	}
+	if err := os.WriteFile(path, tampered, 0600); err != nil {
+		t.Fatalf("write tampered checkpoint: %v", err)
+	}
+
+	if err := r.RestoreCheckpoint(path); err == nil {
+		t.Fatal("expected checksum failure after activation state tampering")
 	}
 }
 
