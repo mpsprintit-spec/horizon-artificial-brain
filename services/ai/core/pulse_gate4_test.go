@@ -26,6 +26,25 @@ func TestPulseDefaultUsesNeuralRuntime(t *testing.T) {
 	}
 }
 
+func TestPulseDefaultUsesNeuralInterpreter(t *testing.T) {
+	old := LegacyCognitionEnabled
+	LegacyCognitionEnabled = false
+	defer func() { LegacyCognitionEnabled = old }()
+
+	h := NewHorizonEngine()
+	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "uji jalur neural"})
+
+	if !result.Success {
+		t.Fatalf("neural pulse failed: path=%q", result.Path)
+	}
+	if result.Path != "neural_runtime" {
+		t.Fatalf("pulse path = %q, want neural_runtime", result.Path)
+	}
+	if result.InterpretationSource != "neural" {
+		t.Fatalf("interpretation source = %q, want neural", result.InterpretationSource)
+	}
+}
+
 func TestPulseDoesNotUseLegacyIntentControlWhenDisabled(t *testing.T) {
 	old := LegacyCognitionEnabled
 	LegacyCognitionEnabled = false
