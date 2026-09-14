@@ -13,6 +13,13 @@ import (
 )
 
 func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
+	// Gate 4: the default path must enter the neural runtime before any legacy
+	// intent classification or semantic control logic. Legacy behavior is an
+	// explicit compatibility path only.
+	if !LegacyCognitionEnabled {
+		return h.pulseNeural(task)
+	}
+
 	prompt := strings.TrimSpace(task.Stimulus)
 	contextTokens := strings.Fields(strings.ToLower(task.Context))
 	intent := classifyIntent(prompt)
@@ -37,25 +44,34 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 		learned = err == nil && len(experience.Sequence) > 0
 	}
 
-	// Legacy cognition is isolated behind an explicit opt-in switch. The neural
-	// runtime is the only default cognitive authority.
-	if LegacyCognitionEnabled {
-		return h.pulseLegacy(ctx, prompt, contextTokens, intent, learned)
+	return h.pulseLegacy(ctx, prompt, contextTokens, intent, learned)
+}
+
+// pulseNeural is the sole default cognitive path. It does not classify intent,
+// invoke the legacy thinking/decision pipeline, or use semantic relation rules.
+func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
+	if h == nil || h.Runtime == nil || h.Knowledge == nil {
+		return PulseResult{Path: "neural_runtime_unavailable", Success: false}
 	}
 
-	if h.Runtime == nil {
-		return PulseResult{Intent: string(intent), Path: "neural_runtime_unavailable", Learned: learned}
+	prompt := strings.TrimSpace(task.Stimulus)
+	if prompt == "" {
+		return PulseResult{Path: "neural_empty_input", Success: false}
 	}
+
+	timestamp := time.Now().UTC()
 	output, err := h.Runtime.CognitiveProcess(runtime.Event{
-		ID:        fmt.Sprintf("pulse-%d", time.Now().UnixNano()),
+		ID:        fmt.Sprintf("pulse-%d", timestamp.UnixNano()),
 		Stimulus:  strings.Fields(strings.ToLower(prompt)),
 		Cycles:    8,
-		Timestamp: time.Now().UTC(),
+		Timestamp: timestamp,
 	})
 	if err != nil {
-		return PulseResult{Intent: string(intent), Path: "neural_runtime_error", Learned: learned}
+		return PulseResult{Path: "neural_runtime_error", Success: false}
 	}
 
+	// Token strings are presentation anchors only. They are not used to infer
+	// semantic relations; the ranked result originates in neural activation.
 	concepts := make([]string, 0, len(output.RankedNodeIDs))
 	for _, id := range output.RankedNodeIDs {
 		if n := h.Knowledge.Registry.GetByID(id); n != nil && n.Token != "" {
@@ -69,13 +85,11 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 	}
 
 	return PulseResult{
-		Answer:         answer,
-		Concepts:       concepts,
-		Confidence:     populationConfidence(output),
-		Learned:        learned,
-		Success:        true,
-		Intent:         string(intent),
-		Path:           "neural_runtime",
+		Answer:     answer,
+		Concepts:   concepts,
+		Confidence: populationConfidence(output),
+		Success:    true,
+		Path:       "neural_runtime",
 	}
 }
 
