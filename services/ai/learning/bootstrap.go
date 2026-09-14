@@ -47,6 +47,7 @@ func (e Experience) evidence(now time.Time) knowledge.ExperienceEvidence {
 func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 { return }
 	if now.IsZero() { now = time.Now().UTC() }
+	now = now.UTC()
 	weight := clamp01(experience.Weight)
 	confidence := clamp01(experience.Confidence)
 	if weight == 0 { weight = 0.5 }
@@ -58,7 +59,7 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 		node := l.Kb.Store(token)
 		if node == nil { continue }
 		steps = append(steps, knowledge.PatternStep{NodeID: node.ID, Position: i, Activation: 1})
-		if previous != nil { l.Kb.Connect(previous, node, weight, confidence, false) }
+		if previous != nil { l.Kb.ConnectAt(previous, node, weight, confidence, false, now) }
 		previous = node
 		node.LastActivation = now
 	}
