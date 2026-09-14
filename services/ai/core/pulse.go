@@ -27,10 +27,10 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 	switch intent {
 	case IntentConfirm:
 		h.Learning.Confirm()
-		return PulseResult{Answer: "Baik, saya perkuat keyakinan saya soal itu.", Confidence: 1, Success: true, Intent: string(intent), Path: "legacy_control"}
+		return PulseResult{Answer: "Baik, saya perkuat keyakinan saya soal itu.", Confidence: 1, Success: true, Intent: string(intent), Path: "legacy_control", InterpretationSource: "legacy-compatibility"}
 	case IntentRetraction:
 		h.Learning.Retract()
-		return PulseResult{Answer: "Baik, saya lemahkan/lupakan itu.", Confidence: 1, Success: true, Intent: string(intent), Path: "legacy_control"}
+		return PulseResult{Answer: "Baik, saya lemahkan/lupakan itu.", Confidence: 1, Success: true, Intent: string(intent), Path: "legacy_control", InterpretationSource: "legacy-compatibility"}
 	}
 
 	learned := false
@@ -70,33 +70,41 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 		return PulseResult{Path: "neural_runtime_error", Success: false}
 	}
 
+	// Gate 4: interpretation is an explicit boundary. The interpreter only
+	// translates neural output; it does not mutate or supplement cognition.
+	interpretation, err := h.Runtime.Interpret(output, runtime.NeuralInterpreter{})
+	if err != nil {
+		return PulseResult{Path: "neural_interpretation_error", Success: false}
+	}
+
 	// Token strings are presentation anchors only. They are not used to infer
 	// semantic relations; the ranked result originates in neural activation.
-	concepts := make([]string, 0, len(output.RankedNodeIDs))
-	for _, id := range output.RankedNodeIDs {
+	concepts := make([]string, 0, len(interpretation.RankedNodeIDs))
+	for _, id := range interpretation.RankedNodeIDs {
 		if n := h.Knowledge.Registry.GetByID(id); n != nil && n.Token != "" {
 			concepts = append(concepts, n.Token)
 		}
 	}
 
 	answer := "Saya belum cukup tahu untuk memberikan jawaban yang dapat dipastikan."
-	if len(concepts) > 0 && output.Resonance >= 0.2 {
+	if len(concepts) > 0 && interpretation.Resonance >= 0.2 {
 		answer = strings.Join(concepts, " ")
 	}
 
 	return PulseResult{
-		Answer:     answer,
-		Concepts:   concepts,
-		Confidence: populationConfidence(output),
-		Success:    true,
-		Path:       "neural_runtime",
+		Answer:                answer,
+		Concepts:              concepts,
+		Confidence:            interpretationConfidence(interpretation),
+		Success:               true,
+		Path:                  "neural_runtime",
+		InterpretationSource:  interpretation.Source,
 	}
 }
 
-func populationConfidence(output runtime.CognitiveOutput) float64 {
+func interpretationConfidence(interpretation runtime.Interpretation) float64 {
 	best := 0.0
-	for _, id := range output.RankedNodeIDs {
-		if value := output.Confidence[id]; value > best {
+	for _, id := range interpretation.RankedNodeIDs {
+		if value := interpretation.Confidence[id]; value > best {
 			best = value
 		}
 	}
@@ -142,5 +150,6 @@ func (h *HorizonEngine) pulseLegacy(ctx context.Context, prompt string, contextT
 		Answer: answer, Concepts: thought.Concepts, Confidence: thought.Confidence,
 		NeedsWebSearch: thought.NeedsWebSearch, Learned: learned, Success: ok,
 		Hypotheses: thought.Hypotheses, Intent: string(intent), Path: "legacy_compatibility",
+		InterpretationSource: "legacy-compatibility",
 	}
 }
