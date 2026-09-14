@@ -1,7 +1,6 @@
 package knowledge
 
 import (
-	"errors"
 	"sort"
 	"time"
 )
@@ -25,6 +24,10 @@ type PopulationUnit struct {
 // ProjectVectorPopulation recruits a sparse population from the same Brain
 // substrate. Existing compatible units are reused; new receptive prototypes
 // are grown only when the substrate has insufficient compatible structure.
+// Once any sufficiently similar unit already represents the presented vector,
+// the projection never grows another prototype for that presentation. This is
+// the critical reuse invariant: repeated experience reinforces/re-activates
+// existing substrate instead of allocating duplicate knowledge.
 func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold float64, populationSize int) (ProjectionPopulation, error) {
 	if k == nil {
 		return ProjectionPopulation{}, ErrNilBrain
@@ -38,19 +41,28 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	}
 
 	candidates := k.matchRepresentationPopulation(vector, threshold)
-	for slot := 0; len(candidates) < populationSize; slot++ {
-		prototype := projectionPrototype(vector, slot, populationSize)
-		node := k.createRepresentationPrototype(prototype)
-		score := NewNeuralVector(node.Representation).Similarity(vector)
-		if score >= threshold && !containsPopulationNode(candidates, node.ID) {
-			candidates = append(candidates, populationCandidate{node: node, score: score})
-		}
-		if slot >= populationSize*2 {
-			break
+	if len(candidates) == 0 {
+		// No compatible substrate exists. Grow one deterministic receptive
+		// population. Future presentations of the same vector must reuse it.
+		for slot := 0; len(candidates) < populationSize; slot++ {
+			prototype := projectionPrototype(vector, slot, populationSize)
+			node := k.createRepresentationPrototype(prototype)
+			score := NewNeuralVector(node.Representation).Similarity(vector)
+			if score >= threshold && !containsPopulationNode(candidates, node.ID) {
+				candidates = append(candidates, populationCandidate{node: node, score: score})
+			}
+			if slot >= populationSize*2 {
+				break
+			}
 		}
 	}
 
-	sort.Slice(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].score == candidates[j].score {
+			return candidates[i].node.ID < candidates[j].node.ID
+		}
+		return candidates[i].score > candidates[j].score
+	})
 	if len(candidates) > populationSize {
 		candidates = candidates[:populationSize]
 	}
@@ -81,7 +93,12 @@ func (k *KnowledgeBase) matchRepresentationPopulation(vector NeuralVector, thres
 			candidates = append(candidates, populationCandidate{node: node, score: score})
 		}
 	}
-	sort.Slice(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
+	sort.Slice(candidates, func(i, j int) bool {
+		if candidates[i].score == candidates[j].score {
+			return candidates[i].node.ID < candidates[j].node.ID
+		}
+		return candidates[i].score > candidates[j].score
+	})
 	return candidates
 }
 
