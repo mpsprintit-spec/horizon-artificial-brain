@@ -1,6 +1,10 @@
 package activation
 
-import "time"
+import (
+	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+)
 
 // ThinkWithPredictionAt is the deterministic form of the recurrent thought
 // transition. The explicit timestamp makes replay and checkpoint continuation
@@ -22,8 +26,8 @@ func (e *Engine) ThinkWithPredictionAt(cycles int, now time.Time) ThoughtResult 
 
 	if len(state) == 0 {
 		return ThoughtResult{Result: Result{
-			Activations: map[NodeID]float64{},
-			Confidence:  map[NodeID]float64{},
+			Activations: map[knowledge.NodeID]float64{},
+			Confidence:  map[knowledge.NodeID]float64{},
 		}}
 	}
 
