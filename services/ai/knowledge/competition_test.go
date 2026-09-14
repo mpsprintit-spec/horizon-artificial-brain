@@ -31,6 +31,36 @@ func TestCompetingPatternsCompareDifferentContinuations(t *testing.T) {
 	}
 }
 
+func TestCompetingPatternsRankingIsIndependentOfInsertionOrder(t *testing.T) {
+	cue := []PatternStep{{NodeID: 10, Position: 0, Activation: 1}}
+	a := append(append([]PatternStep{}, cue...), PatternStep{NodeID: 20, Position: 1, Activation: 1})
+	b := append(append([]PatternStep{}, cue...), PatternStep{NodeID: 30, Position: 1, Activation: 1})
+
+	first := NewPatternIndex()
+	pa1 := first.LearnTrace(a, nil, 20, 0.9, 0.9)
+	pb1 := first.LearnTrace(b, nil, 30, 0.4, 0.4)
+	firstResult := first.CompetingPatterns(cue, nil)
+
+	second := NewPatternIndex()
+	pb2 := second.LearnTrace(b, nil, 30, 0.4, 0.4)
+	pa2 := second.LearnTrace(a, nil, 20, 0.9, 0.9)
+	secondResult := second.CompetingPatterns(cue, nil)
+
+	if len(firstResult) != 2 || len(secondResult) != 2 {
+		t.Fatalf("expected two competitors in both indexes: %d and %d", len(firstResult), len(secondResult))
+	}
+	if firstResult[0].PatternID != pa1.ID || firstResult[1].PatternID != pb1.ID {
+		t.Fatalf("unexpected first ranking: %#v", firstResult)
+	}
+	if secondResult[0].PatternID != pa2.ID || secondResult[1].PatternID != pb2.ID {
+		t.Fatalf("unexpected reversed-insertion ranking: %#v", secondResult)
+	}
+	if firstResult[0].CompetitiveScore != secondResult[0].CompetitiveScore ||
+		firstResult[1].CompetitiveScore != secondResult[1].CompetitiveScore {
+		t.Fatalf("ranking score changed with insertion order: %#v vs %#v", firstResult, secondResult)
+	}
+}
+
 func TestCompetingPatternsDoNotTreatSameContinuationAsContradiction(t *testing.T) {
 	p := NewPatternIndex()
 	cue := []PatternStep{{NodeID: 1, Position: 0, Activation: 1}}
