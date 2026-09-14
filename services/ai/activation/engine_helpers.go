@@ -1,7 +1,7 @@
 package activation
 
 import (
-	"time"
+	"sort"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
@@ -47,6 +47,15 @@ func cloneState(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 {
 		out[id] = value
 	}
 	return out
+}
+
+func sortedNodeIDs(in map[knowledge.NodeID]float64) []knowledge.NodeID {
+	ids := make([]knowledge.NodeID, 0, len(in))
+	for id := range in {
+		ids = append(ids, id)
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return ids
 }
 
 func stateDifference(a, b map[knowledge.NodeID]float64) float64 {
