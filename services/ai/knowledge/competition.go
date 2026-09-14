@@ -1,22 +1,25 @@
 package knowledge
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 // PatternCompetition is a structural competition signal between learned
 // temporal traces. It records a trace's continuation, its relative support,
 // and the other learned continuations it competes with. It does not assign
 // semantic relation kinds and it never deletes a competing trace.
 type PatternCompetition struct {
-	PatternID       PatternID
-	SharedSteps     int
-	DivergenceAt    int
-	Continuation    NodeID
-	Strength        float64
-	EvidenceSupport float64
-	Contradiction   float64
-	ContextFit      float64
+	PatternID        PatternID
+	SharedSteps      int
+	DivergenceAt     int
+	Continuation     NodeID
+	Strength         float64
+	EvidenceSupport  float64
+	Contradiction    float64
+	ContextFit       float64
 	CompetitiveScore float64
-	OpponentIDs     []PatternID
+	OpponentIDs      []PatternID
 }
 
 // CompetingPatterns finds learned traces that share the complete cue and
@@ -35,13 +38,13 @@ func (p *PatternIndex) CompetingPatterns(cue []PatternStep, context []ContextFra
 	defer p.mu.RUnlock()
 
 	type candidate struct {
-		pattern      *PatternSynapse
-		continuation NodeID
-		strength     float64
-		support      float64
+		pattern       *PatternSynapse
+		continuation  NodeID
+		strength      float64
+		support       float64
 		contradiction float64
-		contextFit   float64
-		score        float64
+		contextFit    float64
+		score         float64
 	}
 
 	candidates := make([]candidate, 0)
@@ -64,7 +67,7 @@ func (p *PatternIndex) CompetingPatterns(cue []PatternStep, context []ContextFra
 
 		// Contradiction reduces support; it does not remove the trace. Context
 		// is a contextual prior, while learned strength remains the dominant
-		// signal. The constants are deliberately bounded and continuous.
+		// signal. The constants are bounded and continuous.
 		score := clamp01(strength*.55 + support*.20 + contextFit*.15 - contradiction*.10)
 		candidates = append(candidates, candidate{
 			pattern: pattern, continuation: continuation, strength: strength,
@@ -82,11 +85,11 @@ func (p *PatternIndex) CompetingPatterns(cue []PatternStep, context []ContextFra
 			}
 			opponents = append(opponents, other.pattern.ID)
 		}
+		sort.Slice(opponents, func(i, j int) bool { return opponents[i] < opponents[j] })
 		if len(opponents) == 0 {
 			continue
 		}
-		// Pairwise margin is normalized to [0,1]. A candidate can therefore
-		// remain represented even when another continuation currently wins.
+
 		bestOpponent := 0.0
 		for _, other := range candidates {
 			if other.pattern.ID == current.pattern.ID || other.continuation == current.continuation {
@@ -112,6 +115,16 @@ func (p *PatternIndex) CompetingPatterns(cue []PatternStep, context []ContextFra
 			OpponentIDs: opponents,
 		})
 	}
+
+	// This API is a ranking surface: callers must receive the same order for
+	// the same neural state regardless of Go map iteration order. PatternID is
+	// the stable tie-breaker.
+	sort.Slice(out, func(i, j int) bool {
+		if out[i].CompetitiveScore == out[j].CompetitiveScore {
+			return out[i].PatternID < out[j].PatternID
+		}
+		return out[i].CompetitiveScore > out[j].CompetitiveScore
+	})
 	return out
 }
 
