@@ -56,7 +56,7 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	steps := make([]knowledge.PatternStep, 0, len(experience.Sequence))
 	var previous *knowledge.ConceptNode
 	for i, token := range experience.Sequence {
-		node := l.Kb.Store(token)
+		node := l.Kb.StoreAt(token, now)
 		if node == nil { continue }
 		steps = append(steps, knowledge.PatternStep{NodeID: node.ID, Position: i, Activation: 1})
 		if previous != nil { l.Kb.ConnectAt(previous, node, weight, confidence, false, now) }
