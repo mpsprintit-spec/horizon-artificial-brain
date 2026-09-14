@@ -16,13 +16,27 @@ import (
 const BrainSnapshotSchemaVersion = 2
 
 type BrainSnapshot struct {
-	SchemaVersion int                    `json:"schema_version"`
-	BrainIdentity string                 `json:"brain_identity"`
-	Sequence      uint64                 `json:"sequence"`
-	Timestamp     time.Time              `json:"timestamp"`
-	Checksum      string                 `json:"checksum"`
-	Brain         json.RawMessage        `json:"brain"`
+	SchemaVersion int                      `json:"schema_version"`
+	BrainIdentity string                   `json:"brain_identity"`
+	Sequence      uint64                   `json:"sequence"`
+	Timestamp     time.Time                `json:"timestamp"`
+	Checksum      string                   `json:"checksum"`
+	Brain         json.RawMessage          `json:"brain"`
 	Activation    activation.StateSnapshot `json:"activation"`
+}
+
+type checkpointPayload struct {
+	Brain      json.RawMessage          `json:"brain"`
+	Activation activation.StateSnapshot `json:"activation"`
+}
+
+func checkpointChecksum(brain json.RawMessage, state activation.StateSnapshot) (string, error) {
+	payload, err := json.Marshal(checkpointPayload{Brain: brain, Activation: state})
+	if err != nil {
+		return "", err
+	}
+	hash := sha256.Sum256(payload)
+	return hex.EncodeToString(hash[:]), nil
 }
 
 // Checkpoint persists the neural substrate and the runtime's recurrent
@@ -50,15 +64,19 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	}
 	_ = os.Remove(brainPath)
 
-	checksum := sha256.Sum256(brainBytes)
+	activationState := r.activation.SnapshotState()
+	checksum, err := checkpointChecksum(brainBytes, activationState)
+	if err != nil {
+		return fmt.Errorf("checksum checkpoint: %w", err)
+	}
 	snapshot := BrainSnapshot{
 		SchemaVersion: BrainSnapshotSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence:      r.seq,
 		Timestamp:     r.now(),
-		Checksum:      hex.EncodeToString(checksum[:]),
+		Checksum:      checksum,
 		Brain:         json.RawMessage(brainBytes),
-		Activation:    r.activation.SnapshotState(),
+		Activation:    activationState,
 	}
 	data, err := json.MarshalIndent(snapshot, "", "  ")
 	if err != nil {
@@ -113,8 +131,11 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}
-	checksum := sha256.Sum256(snapshot.Brain)
-	if hex.EncodeToString(checksum[:]) != snapshot.Checksum {
+	checksum, err := checkpointChecksum(snapshot.Brain, snapshot.Activation)
+	if err != nil {
+		return fmt.Errorf("checksum checkpoint: %w", err)
+	}
+	if checksum != snapshot.Checksum {
 		return errors.New("checkpoint checksum mismatch")
 	}
 
