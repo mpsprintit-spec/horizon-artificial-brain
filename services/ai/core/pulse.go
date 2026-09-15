@@ -88,10 +88,14 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	}
 
 	// Convert the neural result into the typed cognitive boundary before any
-	// presentation logic. Observation preserves the perception provenance and
+	// presentation logic. Observation preserves all perception input channels;
 	// the answer remains distinct from any future action recommendation.
 	cognitive, err := h.Runtime.InterpretCognitive(output, runtime.Observation{
-		Source: perceptionEvent.Source, Modality: perceptionEvent.Modality, Tokens: append([]string(nil), stimulusTokens...),
+		Source: perceptionEvent.Source,
+		Modality: perceptionEvent.Modality,
+		Tokens: append([]string(nil), stimulusTokens...),
+		ContextTokens: append([]string(nil), perceptionEvent.Context...),
+		DataTokens: append([]string(nil), perceptionEvent.Data...),
 	})
 	if err != nil { return PulseResult{Path: "neural_interpretation_error", Success: false, Learned: learned} }
 
