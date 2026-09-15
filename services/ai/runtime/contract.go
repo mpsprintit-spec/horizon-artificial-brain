@@ -48,6 +48,9 @@ type OutcomeEvent struct {
 	Reliability   float64
 }
 
+// ObserveOutcome appends the outcome before changing the neural substrate.
+// The outcome is then learned into the same Brain as an experience with a
+// causal link to the originating request.
 func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 	if r == nil || r.brain == nil || r.learning == nil {
 		return 0, errors.New("brain runtime is not initialized")
@@ -74,6 +77,22 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 		outcome.Modality = "execution-outcome"
 	}
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	nextSeq := r.seq + 1
+	if r.eventLog != nil {
+		if err := r.eventLog.Append(LoggedEvent{
+			SchemaVersion: EventLogSchemaVersion,
+			BrainIdentity: BrainIdentity,
+			Sequence: nextSeq,
+			Type: EventTypeOutcome,
+			Timestamp: outcome.ObservedAt,
+			Outcome: cloneOutcome(outcome),
+		}); err != nil {
+			return r.seq, err
+		}
+	}
+
 	weight := 0.45
 	confidence := 0.30
 	if outcome.Success {
@@ -81,7 +100,9 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 		confidence = 0.50
 	}
 	experience := learningExperienceFromOutcome(outcome, weight, confidence)
-	return r.LearnExperience(experience, outcome.ObservedAt)
+	r.learning.LearnExperience(experience, outcome.ObservedAt)
+	r.seq = nextSeq
+	return r.seq, nil
 }
 
 func learningExperienceFromOutcome(outcome OutcomeEvent, weight, confidence float64) learning.Experience {
@@ -97,4 +118,10 @@ func learningExperienceFromOutcome(outcome OutcomeEvent, weight, confidence floa
 		IndependenceGroup: outcome.RequestID,
 		CausalLink: outcome.RequestID,
 	}
+}
+
+func cloneOutcome(in OutcomeEvent) *OutcomeEvent {
+	out := in
+	out.Observation = append([]string(nil), in.Observation...)
+	return &out
 }
