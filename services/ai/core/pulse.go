@@ -44,9 +44,20 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 
 	timestamp := time.Now().UTC()
 	eventID := fmt.Sprintf("pulse-%d", timestamp.UnixNano())
-	stimulusTokens := strings.Fields(strings.ToLower(prompt))
+
+	// Normalize the external input through the perception boundary before it
+	// reaches BrainRuntime. This keeps sensing/perception separate from neural
+	// representation while allowing future sensor adapters to use the same
+	// PerceptionEvent contract.
+	perceptionEvent, err := perception.NewUserInputEvent(eventID, prompt, "pulse", timestamp)
+	if err != nil || len(perceptionEvent.Signals) == 0 {
+		return PulseResult{Path: "neural_perception_error", Success: false}
+	}
+	stimulusTokens := append([]string(nil), perceptionEvent.Signals[0].Tokens...)
 	contextTokens := strings.Fields(strings.ToLower(task.Context))
 	dataTokens := strings.Fields(strings.ToLower(task.Data))
+	perceptionEvent.Context = append([]string(nil), contextTokens...)
+	perceptionEvent.Data = append([]string(nil), dataTokens...)
 
 	// Context and Data remain modality/provenance-bearing input. Existing neural
 	// units are boosted when they are already represented in the same Brain;
@@ -64,8 +75,9 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 
 	output, err := h.Runtime.CognitiveProcess(runtime.Event{
 		ID: eventID, Stimulus: stimulusTokens, Context: contextBoosts,
-		ContextTokens: contextTokens, DataTokens: dataTokens,
-		Source: "pulse", Modality: "user-input", Cycles: 8, Timestamp: timestamp,
+		ContextTokens: perceptionEvent.Context, DataTokens: perceptionEvent.Data,
+		Source: perceptionEvent.Source, Modality: perceptionEvent.Modality,
+		Cycles: 8, Timestamp: perceptionEvent.ObservedAt,
 	})
 	if err != nil { return PulseResult{Path: "neural_runtime_error", Success: false} }
 
@@ -78,9 +90,9 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	if len(experienceSequence) > 0 {
 		_, learnErr := h.Runtime.LearnExperience(learning.Experience{
 			ExperienceID: eventID, Sequence: experienceSequence, Weight: 0.50, Confidence: 0.20,
-			Source: "pulse", Modality: "user-input", Timestamp: timestamp, Reliability: 0.50,
+			Source: perceptionEvent.Source, Modality: perceptionEvent.Modality, Timestamp: perceptionEvent.ObservedAt, Reliability: 0.50,
 			IndependenceGroup: eventID,
-		}, timestamp)
+		}, perceptionEvent.ObservedAt)
 		learned = learnErr == nil
 	}
 
