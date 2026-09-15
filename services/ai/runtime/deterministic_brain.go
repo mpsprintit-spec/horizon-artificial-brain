@@ -38,14 +38,15 @@ func saveDeterministicBrain(brain *knowledge.Brain, path string) error {
 		return patterns[i].ID < patterns[j].ID
 	})
 
+	// Projection populations are appended in deterministic learning order and
+	// their unit order is part of the stored activation pattern. Preserve that
+	// order so checkpoint bytes remain stable without introducing a second
+	// population identity representation.
 	populations := append([]knowledge.ProjectionPopulation(nil), brain.ProjectionPopulations...)
-	sort.Slice(populations, func(i, j int) bool {
-		return populationKey(populations[i]) < populationKey(populations[j])
-	})
 
 	payload := struct {
-		Nodes                 []*knowledge.ConceptNode       `json:"nodes"`
-		Patterns              []*knowledge.PatternSynapse    `json:"patterns,omitempty"`
+		Nodes                 []*knowledge.ConceptNode        `json:"nodes"`
+		Patterns              []*knowledge.PatternSynapse     `json:"patterns,omitempty"`
 		ProjectionPopulations []knowledge.ProjectionPopulation `json:"projection_populations,omitempty"`
 	}{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations}
 
@@ -54,13 +55,4 @@ func saveDeterministicBrain(brain *knowledge.Brain, path string) error {
 		return err
 	}
 	return os.WriteFile(path, data, 0644)
-}
-
-func populationKey(population knowledge.ProjectionPopulation) string {
-	ids := make([]int64, 0, len(population.Units))
-	for _, unit := range population.Units {
-		ids = append(ids, int64(unit.NodeID))
-	}
-	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
-	return fmt.Sprint(ids)
 }
