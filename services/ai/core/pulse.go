@@ -45,10 +45,6 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	timestamp := time.Now().UTC()
 	eventID := fmt.Sprintf("pulse-%d", timestamp.UnixNano())
 
-	// Normalize the external input through the perception boundary before it
-	// reaches BrainRuntime. This keeps sensing/perception separate from neural
-	// representation while allowing future sensor adapters to use the same
-	// PerceptionEvent contract.
 	perceptionEvent, err := perception.NewUserInputEvent(eventID, prompt, "pulse", timestamp)
 	if err != nil || len(perceptionEvent.Signals) == 0 {
 		return PulseResult{Path: "neural_perception_error", Success: false}
@@ -59,9 +55,6 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	perceptionEvent.Context = append([]string(nil), contextTokens...)
 	perceptionEvent.Data = append([]string(nil), dataTokens...)
 
-	// Context and Data remain modality/provenance-bearing input. Existing neural
-	// units are boosted when they are already represented in the same Brain;
-	// unknown tokens are not created merely to manufacture context semantics.
 	contextBoosts := make(map[knowledge.NodeID]float64)
 	addContextBoosts := func(tokens []string, boost float64) {
 		for _, token := range tokens {
@@ -81,8 +74,6 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	})
 	if err != nil { return PulseResult{Path: "neural_runtime_error", Success: false} }
 
-	// The default neural path records the interaction on the same persistent
-	// Brain. Provenance is attached to the experience rather than a second store.
 	experienceSequence := append([]string(nil), stimulusTokens...)
 	experienceSequence = append(experienceSequence, contextTokens...)
 	experienceSequence = append(experienceSequence, dataTokens...)
@@ -96,15 +87,21 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 		learned = learnErr == nil
 	}
 
-	interpretation, err := h.Runtime.Interpret(output, runtime.NeuralInterpreter{})
+	// Convert the neural result into the typed cognitive boundary before any
+	// presentation logic. Observation preserves the perception provenance and
+	// the answer remains distinct from any future action recommendation.
+	cognitive, err := h.Runtime.InterpretCognitive(output, runtime.Observation{
+		Source: perceptionEvent.Source, Modality: perceptionEvent.Modality, Tokens: append([]string(nil), stimulusTokens...),
+	})
 	if err != nil { return PulseResult{Path: "neural_interpretation_error", Success: false, Learned: learned} }
-	concepts := make([]string, 0, len(interpretation.RankedNodeIDs))
-	for _, id := range interpretation.RankedNodeIDs {
+
+	concepts := make([]string, 0, len(cognitive.Answer.NodeIDs))
+	for _, id := range cognitive.Answer.NodeIDs {
 		if n := h.Knowledge.Registry.GetByID(id); n != nil && n.Token != "" { concepts = append(concepts, n.Token) }
 	}
 	answer := "Saya belum cukup tahu untuk memberikan jawaban yang dapat dipastikan."
-	if len(concepts) > 0 && interpretation.Resonance >= 0.2 { answer = strings.Join(concepts, " ") }
-	return PulseResult{Answer: answer, Concepts: concepts, Confidence: interpretationConfidence(interpretation), Success: true, Learned: learned, Path: "neural_runtime", InterpretationSource: interpretation.Source}
+	if len(concepts) > 0 && cognitive.Interpretation.Resonance >= 0.2 { answer = strings.Join(concepts, " ") }
+	return PulseResult{Answer: answer, Concepts: concepts, Confidence: cognitive.Answer.Confidence, Success: true, Learned: learned, Path: "neural_runtime", InterpretationSource: cognitive.Interpretation.Source}
 }
 
 func interpretationConfidence(interpretation runtime.Interpretation) float64 {
