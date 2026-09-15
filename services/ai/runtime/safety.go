@@ -19,14 +19,14 @@ const (
 )
 
 type Recommendation struct {
-	RequestID      string
-	BrainIdentity  string
-	Intent         string
-	Confidence     float64
-	EvidenceRefs   []string
-	Reversibility  bool
-	RiskLevel      RiskLevel
-	CreatedAt      time.Time
+	RequestID     string
+	BrainIdentity string
+	Intent        string
+	Confidence    float64
+	EvidenceRefs  []string
+	Reversibility bool
+	RiskLevel     RiskLevel
+	CreatedAt     time.Time
 }
 
 type RiskAssessment struct {
@@ -37,26 +37,35 @@ type RiskAssessment struct {
 }
 
 type AuthorizationDecision struct {
-	RequestID       string
-	Authorized      bool
-	Approver        string
-	DecisionAt      time.Time
-	Reason          string
+	RequestID        string
+	Authorized       bool
+	Approver         string
+	DecisionAt       time.Time
+	Reason           string
 	RequiredApproval bool
 }
 
 type ExecutionRequest struct {
-	RequestID      string
-	BrainIdentity  string
-	Intent         string
-	RiskLevel      RiskLevel
-	Confidence     float64
-	EvidenceRefs   []string
-	Reversibility  bool
+	RequestID        string
+	BrainIdentity    string
+	Intent           string
+	RiskLevel        RiskLevel
+	Confidence       float64
+	EvidenceRefs     []string
+	Reversibility    bool
 	RequiredApproval bool
-	Expiry         time.Time
-	IdempotencyKey string
+	Expiry           time.Time
+	IdempotencyKey   string
+
+	// authorized is an opaque capability marker. Only BuildExecutionRequest
+	// can set it; callers cannot fabricate an authorized request by constructing
+	// the exported fields directly.
+	authorized bool
 }
+
+// Authorized reports whether this request was produced by the safety boundary
+// after a successful authorization decision.
+func (r ExecutionRequest) Authorized() bool { return r.authorized }
 
 // SafetyBoundary keeps recommendation, risk, authorization and execution as
 // separate stages. Cognition can produce a recommendation, but it cannot
@@ -96,8 +105,8 @@ func (s SafetyBoundary) Authorize(recommendation Recommendation, assessment Risk
 		return AuthorizationDecision{}, errors.New("recommendation and risk assessment request IDs do not match")
 	}
 	decision := AuthorizationDecision{
-		RequestID: recommendation.RequestID,
-		DecisionAt: s.now(),
+		RequestID:        recommendation.RequestID,
+		DecisionAt:       s.now(),
 		RequiredApproval: assessment.RequiresHuman,
 	}
 	if assessment.RequiresHuman {
@@ -129,16 +138,17 @@ func (s SafetyBoundary) BuildExecutionRequest(recommendation Recommendation, ass
 		return ExecutionRequest{}, errors.New("execution request is expired")
 	}
 	return ExecutionRequest{
-		RequestID: recommendation.RequestID,
-		BrainIdentity: recommendation.BrainIdentity,
-		Intent: recommendation.Intent,
-		RiskLevel: assessment.RiskLevel,
-		Confidence: recommendation.Confidence,
-		EvidenceRefs: append([]string(nil), recommendation.EvidenceRefs...),
-		Reversibility: recommendation.Reversibility,
+		RequestID:        recommendation.RequestID,
+		BrainIdentity:    recommendation.BrainIdentity,
+		Intent:           recommendation.Intent,
+		RiskLevel:        assessment.RiskLevel,
+		Confidence:       recommendation.Confidence,
+		EvidenceRefs:     append([]string(nil), recommendation.EvidenceRefs...),
+		Reversibility:    recommendation.Reversibility,
 		RequiredApproval: authorization.RequiredApproval,
-		Expiry: expiry,
-		IdempotencyKey: recommendation.RequestID,
+		Expiry:           expiry,
+		IdempotencyKey:   recommendation.RequestID,
+		authorized:       true,
 	}, nil
 }
 
