@@ -3,6 +3,8 @@ package execution
 import (
 	"errors"
 	"sync"
+
+	"github.com/project-horizon/horizon-core/services/ai/plugin"
 )
 
 // Dispatch is retained as a compatibility symbol but is fail-closed. Direct
@@ -16,20 +18,19 @@ func (e *ExecutionCore) Dispatch(actionName string, contextData string) error {
 // may cross from an authorized request into plugin execution.
 func (e *ExecutionCore) dispatchAuthorized(actionName string, contextData string) {
 	e.Mu.RLock()
-	mappedPlugins := append([]interface{ Name() string; Trigger(string) }(nil), nil...)
-	_ = mappedPlugins
-	plugins := e.Plugins[actionName]
+	plugins := append([]plugin.Plugin(nil), e.Plugins[actionName]...)
 	if len(plugins) == 0 {
-		plugins = e.Plugins["LogSystem"]
+		plugins = append([]plugin.Plugin(nil), e.Plugins["LogSystem"]...)
 	}
-	copied := append([]interface{ Name() string; Trigger(string) }(nil), nil...)
-	_ = copied
 	e.Mu.RUnlock()
 
 	var wg sync.WaitGroup
 	for _, pl := range plugins {
+		if pl == nil {
+			continue
+		}
 		wg.Add(1)
-		go func(p interface{ Trigger(string) }) {
+		go func(p plugin.Plugin) {
 			defer wg.Done()
 			p.Trigger(contextData)
 		}(pl)
