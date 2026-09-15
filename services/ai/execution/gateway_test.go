@@ -27,6 +27,22 @@ func (p *gate8TestPlugin) Count() int {
 	return len(p.triggers)
 }
 
+func buildLowRiskRequest(t *testing.T, now time.Time, id string) runtime.ExecutionRequest {
+	t.Helper()
+	boundary := runtime.SafetyBoundary{Now: func() time.Time { return now }}
+	recommendation := runtime.Recommendation{
+		RequestID: id, BrainIdentity: runtime.BrainIdentity, Intent: "action",
+		RiskLevel: runtime.RiskLow, Confidence: 0.1, CreatedAt: now,
+	}
+	assessment, err := boundary.Assess(recommendation)
+	if err != nil { t.Fatalf("assess: %v", err) }
+	authorization, err := boundary.Authorize(recommendation, assessment, "")
+	if err != nil { t.Fatalf("authorize: %v", err) }
+	request, err := boundary.BuildExecutionRequest(recommendation, assessment, authorization, now.Add(time.Minute))
+	if err != nil { t.Fatalf("build request: %v", err) }
+	return request
+}
+
 func TestGate8BDirectDispatchFailsClosed(t *testing.T) {
 	core := NewExecutionCore()
 	p := &gate8TestPlugin{}
@@ -48,16 +64,32 @@ func TestGate8BGatewayExecutesAuthorizedRequest(t *testing.T) {
 	gateway := NewExecutionGateway(core)
 	gateway.Now = func() time.Time { return now }
 
-	request := runtime.ExecutionRequest{
-		RequestID: "gate8b-1", BrainIdentity: runtime.BrainIdentity, Intent: "action",
-		RiskLevel: runtime.RiskLow, Confidence: 0.1, Expiry: now.Add(time.Minute),
-		IdempotencyKey: "gate8b-1",
-	}
+	request := buildLowRiskRequest(t, now, "gate8b-1")
 	if err := gateway.Execute(request); err != nil {
 		t.Fatalf("execute: %v", err)
 	}
 	if got := p.Count(); got != 1 {
 		t.Fatalf("plugin trigger count: got %d want 1", got)
+	}
+}
+
+func TestGate8BGatewayRejectsFabricatedRequest(t *testing.T) {
+	now := time.Date(2026, 9, 15, 20, 0, 0, 0, time.UTC)
+	core := NewExecutionCore()
+	p := &gate8TestPlugin{}
+	core.RegisterPlugin("action", p)
+	gateway := NewExecutionGateway(core)
+	gateway.Now = func() time.Time { return now }
+
+	err := gateway.Execute(runtime.ExecutionRequest{
+		RequestID: "gate8b-2", BrainIdentity: runtime.BrainIdentity, Intent: "action",
+		RiskLevel: runtime.RiskLow, Expiry: now.Add(time.Minute), IdempotencyKey: "gate8b-2",
+	})
+	if err == nil {
+		t.Fatal("fabricated request was accepted")
+	}
+	if p.Count() != 0 {
+		t.Fatal("fabricated request reached plugin")
 	}
 }
 
@@ -70,15 +102,11 @@ func TestGate8BGatewayRejectsUnknownBrain(t *testing.T) {
 	gateway.Now = func() time.Time { return now }
 
 	err := gateway.Execute(runtime.ExecutionRequest{
-		RequestID: "gate8b-2", BrainIdentity: "foreign-brain", Intent: "action",
-		RiskLevel: runtime.RiskLow, Expiry: now.Add(time.Minute), IdempotencyKey: "gate8b-2",
+		RequestID: "gate8b-3", BrainIdentity: "foreign-brain", Intent: "action",
+		RiskLevel: runtime.RiskLow, Expiry: now.Add(time.Minute), IdempotencyKey: "gate8b-3",
 	})
-	if err == nil {
-		t.Fatal("unknown brain was accepted")
-	}
-	if p.Count() != 0 {
-		t.Fatal("unknown brain reached plugin")
-	}
+	if err == nil { t.Fatal("unknown brain was accepted") }
+	if p.Count() != 0 { t.Fatal("unknown brain reached plugin") }
 }
 
 func TestGate8BGatewayRejectsExpiredRequest(t *testing.T) {
@@ -89,16 +117,16 @@ func TestGate8BGatewayRejectsExpiredRequest(t *testing.T) {
 	gateway := NewExecutionGateway(core)
 	gateway.Now = func() time.Time { return now }
 
-	err := gateway.Execute(runtime.ExecutionRequest{
-		RequestID: "gate8b-3", BrainIdentity: runtime.BrainIdentity, Intent: "action",
-		RiskLevel: runtime.RiskLow, Expiry: now, IdempotencyKey: "gate8b-3",
-	})
-	if err == nil {
-		t.Fatal("expired request was accepted")
+	request := buildLowRiskRequest(t, now, "gate8b-4")
+	requestExpiry := now.Add(-time.Second)
+	request = runtime.ExecutionRequest{
+		RequestID: request.RequestID, BrainIdentity: request.BrainIdentity, Intent: request.Intent,
+		RiskLevel: request.RiskLevel, Confidence: request.Confidence, EvidenceRefs: request.EvidenceRefs,
+		Reversibility: request.Reversibility, RequiredApproval: request.RequiredApproval,
+		Expiry: requestExpiry, IdempotencyKey: request.IdempotencyKey,
 	}
-	if p.Count() != 0 {
-		t.Fatal("expired request reached plugin")
-	}
+	if err := gateway.Execute(request); err == nil { t.Fatal("expired request was accepted") }
+	if p.Count() != 0 { t.Fatal("expired request reached plugin") }
 }
 
 func TestGate8BGatewayIdempotencyPreventsDuplicateExecution(t *testing.T) {
@@ -109,19 +137,10 @@ func TestGate8BGatewayIdempotencyPreventsDuplicateExecution(t *testing.T) {
 	gateway := NewExecutionGateway(core)
 	gateway.Now = func() time.Time { return now }
 
-	request := runtime.ExecutionRequest{
-		RequestID: "gate8b-4", BrainIdentity: runtime.BrainIdentity, Intent: "action",
-		RiskLevel: runtime.RiskLow, Expiry: now.Add(time.Minute), IdempotencyKey: "gate8b-4",
-	}
-	if err := gateway.Execute(request); err != nil {
-		t.Fatalf("first execute: %v", err)
-	}
-	if err := gateway.Execute(request); err == nil {
-		t.Fatal("duplicate execution was accepted")
-	}
-	if got := p.Count(); got != 1 {
-		t.Fatalf("plugin trigger count: got %d want 1", got)
-	}
+	request := buildLowRiskRequest(t, now, "gate8b-5")
+	if err := gateway.Execute(request); err != nil { t.Fatalf("first execute: %v", err) }
+	if err := gateway.Execute(request); err == nil { t.Fatal("duplicate execution was accepted") }
+	if got := p.Count(); got != 1 { t.Fatalf("plugin trigger count: got %d want 1", got) }
 }
 
 func TestGate8BGatewayRejectsApprovalFlagOnLowRisk(t *testing.T) {
@@ -132,15 +151,14 @@ func TestGate8BGatewayRejectsApprovalFlagOnLowRisk(t *testing.T) {
 	gateway := NewExecutionGateway(core)
 	gateway.Now = func() time.Time { return now }
 
-	err := gateway.Execute(runtime.ExecutionRequest{
-		RequestID: "gate8b-5", BrainIdentity: runtime.BrainIdentity, Intent: "action",
-		RiskLevel: runtime.RiskLow, RequiredApproval: true,
-		Expiry: now.Add(time.Minute), IdempotencyKey: "gate8b-5",
-	})
-	if err == nil {
-		t.Fatal("inconsistent approval policy was accepted")
+	request := buildLowRiskRequest(t, now, "gate8b-6")
+	// Rebuilding the exported representation cannot preserve the opaque
+	// authorization marker, so this also verifies fail-closed behavior.
+	request = runtime.ExecutionRequest{
+		RequestID: request.RequestID, BrainIdentity: request.BrainIdentity, Intent: request.Intent,
+		RiskLevel: runtime.RiskLow, RequiredApproval: true, Expiry: now.Add(time.Minute),
+		IdempotencyKey: request.IdempotencyKey,
 	}
-	if p.Count() != 0 {
-		t.Fatal("invalid approval request reached plugin")
-	}
+	if err := gateway.Execute(request); err == nil { t.Fatal("invalid approval request was accepted") }
+	if p.Count() != 0 { t.Fatal("invalid approval request reached plugin") }
 }
