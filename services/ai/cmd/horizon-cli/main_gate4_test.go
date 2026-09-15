@@ -9,7 +9,9 @@ import (
 )
 
 // Gate 4 integration boundary: the CLI must reach the same neural runtime
-// path as the core entrypoint when legacy cognition is disabled.
+// path as the core entrypoint when legacy cognition is disabled. A Pulse now
+// records both the process and the learning transition, so one interaction
+// advances the runtime sequence twice.
 func TestCLIProcessUsesNeuralRuntimeByDefault(t *testing.T) {
 	old := core.LegacyCognitionEnabled
 	core.LegacyCognitionEnabled = false
@@ -21,8 +23,8 @@ func TestCLIProcessUsesNeuralRuntimeByDefault(t *testing.T) {
 	if result.Path != "neural_runtime" {
 		t.Fatalf("CLI process path = %q, want neural_runtime", result.Path)
 	}
-	if app.horizon.Runtime.LastSequence() != 1 {
-		t.Fatalf("CLI process did not enter BrainRuntime exactly once: sequence=%d", app.horizon.Runtime.LastSequence())
+	if app.horizon.Runtime.LastSequence() != 2 {
+		t.Fatalf("CLI process expected process+learning transitions: sequence=%d", app.horizon.Runtime.LastSequence())
 	}
 }
 
