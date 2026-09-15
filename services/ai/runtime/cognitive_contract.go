@@ -5,17 +5,19 @@ import "github.com/project-horizon/horizon-core/services/ai/knowledge"
 // Observation is the substrate-neutral record of what the runtime received or
 // detected. It deliberately carries no semantic rule or action permission.
 type Observation struct {
-	Source   string
-	Modality string
-	Tokens   []string
+	Source        string
+	Modality      string
+	Tokens        []string
+	ContextTokens []string
+	DataTokens    []string
 }
 
 // Uncertainty describes limitations of the current neural state. It is not an
 // authorization signal and must not be converted into permission to act.
 type Uncertainty struct {
-	Level          float64
+	Level           float64
 	PredictionError float64
-	Reason         string
+	Reason          string
 }
 
 // Answer is a presentation candidate derived from the current cognitive
@@ -45,20 +47,20 @@ func ToCognitiveInterpretation(observation Observation, interpretation Interpret
 	return CognitiveInterpretation{
 		Observation: observation,
 		State: CognitiveState{
-			BrainIdentity: interpretation.BrainIdentity,
-			Sequence: interpretation.Sequence,
-			ActiveNodeIDs: append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
-			Activations: cloneNodeValues(interpretation.Activations),
-			Confidence: cloneNodeValues(interpretation.Confidence),
-			Resonance: interpretation.Resonance,
+			BrainIdentity:  interpretation.BrainIdentity,
+			Sequence:       interpretation.Sequence,
+			ActiveNodeIDs:  append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
+			Activations:    cloneNodeValues(interpretation.Activations),
+			Confidence:     cloneNodeValues(interpretation.Confidence),
+			Resonance:      interpretation.Resonance,
 			PredictionError: interpretation.PredictionError,
 		},
 		Interpretation: interpretation,
 		Answer: Answer{
-			NodeIDs: append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
+			NodeIDs:    append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
 			Confidence: bestInterpretationConfidence(interpretation),
 			Uncertainty: Uncertainty{
-				Level: 1 - interpretation.Resonance,
+				Level:           1 - interpretation.Resonance,
 				PredictionError: interpretation.PredictionError,
 			},
 		},
