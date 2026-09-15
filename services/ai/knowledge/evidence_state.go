@@ -15,10 +15,8 @@ type EvidenceState struct {
 	UpdatedAt           time.Time `json:"updated_at,omitempty"`
 }
 
-// EvidenceIndependenceBounded counts effective evidence groups. Explicit
-// independence groups take precedence; source is the conservative fallback.
-// This prevents repeated observations from one source from masquerading as
-// independent confirmation.
+// evidenceGroup identifies the conservative unit of independent support.
+// Explicit independence groups take precedence over source identity.
 func evidenceGroup(e ExperienceEvidence) string {
 	if e.IndependenceGroup != "" {
 		return "group:" + e.IndependenceGroup
@@ -60,56 +58,26 @@ func BuildEvidenceState(activationStrength, structuralStability float64, evidenc
 	}
 
 	contradiction := 0.0
-	sets := make(map[string]struct{})
 	for _, e := range evidence {
-		if e.ContradictionSet != "" {
-			sets[e.ContradictionSet] = struct{}{}
+		if e.ContradictionSet == "" {
+			continue
 		}
-	}
-	for set := range sets {
-		contradiction = maxFloat(contradiction, ContradictionLoad(evidence, set))
+		load := ContradictionLoad(evidence, e.ContradictionSet)
+		if load > contradiction {
+			contradiction = load
+		}
 	}
 
 	return EvidenceState{
-		ActivationStrength:   clamp01(activationStrength),
-		EvidenceConfidence:   calibratedConfidenceState(evidence),
-		StructuralStability:  clamp01(structuralStability),
-		SourceReliability:    EvidenceReliability(evidence),
-		Recency:              recency,
-		ContradictionLoad:    contradiction,
-		Calibration:          clamp01(1 - contradiction),
-		UpdatedAt:             now,
+		ActivationStrength:  clamp01(activationStrength),
+		EvidenceConfidence:  CalibratedConfidence(0.5, evidence),
+		StructuralStability: clamp01(structuralStability),
+		SourceReliability:   EvidenceReliability(evidence),
+		Recency:             recency,
+		ContradictionLoad:   contradiction,
+		Calibration:         clamp01(1 - contradiction),
+		UpdatedAt:           now,
 	}
-}
-
-// calibratedConfidenceState provides the evidence-aware confidence used by
-// EvidenceState without introducing a second public calibration function.
-func calibratedConfidenceState(evidence []ExperienceEvidence) float64 {
-	if len(evidence) == 0 {
-		return 0
-	}
-	independent := EvidenceIndependenceBounded(evidence)
-	reliability := EvidenceReliability(evidence)
-	contradiction := 0.0
-	sets := make(map[string]struct{})
-	for _, e := range evidence {
-		if e.ContradictionSet != "" {
-			sets[e.ContradictionSet] = struct{}{}
-		}
-	}
-	for set := range sets {
-		contradiction = maxFloat(contradiction, ContradictionLoad(evidence, set))
-	}
-	base := 0.5
-	gain := (1 - base) * (1 - expDecay(float64(independent)*reliability))
-	return clamp01((base + gain) * (1 - 0.5*contradiction))
-}
-
-func expDecay(x float64) float64 {
-	if x <= 0 {
-		return 1
-	}
-	return 1 / (1 + x)
 }
 
 func maxFloat(a, b float64) float64 {
