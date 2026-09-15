@@ -38,14 +38,29 @@ func saveDeterministicBrain(brain *knowledge.Brain, path string) error {
 		return patterns[i].ID < patterns[j].ID
 	})
 
+	populations := append([]knowledge.ProjectionPopulation(nil), brain.ProjectionPopulations...)
+	sort.Slice(populations, func(i, j int) bool {
+		return populationKey(populations[i]) < populationKey(populations[j])
+	})
+
 	payload := struct {
-		Nodes    []*knowledge.ConceptNode   `json:"nodes"`
-		Patterns []*knowledge.PatternSynapse `json:"patterns,omitempty"`
-	}{Nodes: nodes, Patterns: patterns}
+		Nodes                 []*knowledge.ConceptNode       `json:"nodes"`
+		Patterns              []*knowledge.PatternSynapse    `json:"patterns,omitempty"`
+		ProjectionPopulations []knowledge.ProjectionPopulation `json:"projection_populations,omitempty"`
+	}{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations}
 
 	data, err := json.MarshalIndent(payload, "", "  ")
 	if err != nil {
 		return err
 	}
 	return os.WriteFile(path, data, 0644)
+}
+
+func populationKey(population knowledge.ProjectionPopulation) string {
+	ids := make([]int64, 0, len(population.Units))
+	for _, unit := range population.Units {
+		ids = append(ids, int64(unit.NodeID))
+	}
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	return fmt.Sprint(ids)
 }
