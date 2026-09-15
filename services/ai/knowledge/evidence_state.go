@@ -71,19 +71,19 @@ func BuildEvidenceState(activationStrength, structuralStability float64, evidenc
 	}
 
 	return EvidenceState{
-		ActivationStrength:  clamp01(activationStrength),
-		EvidenceConfidence: calibratedConfidenceState(evidence),
-		StructuralStability: clamp01(structuralStability),
-		SourceReliability:   EvidenceReliability(evidence),
-		Recency:             recency,
-		ContradictionLoad:   contradiction,
-		Calibration:         clamp01(1 - contradiction),
-		UpdatedAt:           now,
+		ActivationStrength:   clamp01(activationStrength),
+		EvidenceConfidence:   calibratedConfidenceState(evidence),
+		StructuralStability:  clamp01(structuralStability),
+		SourceReliability:    EvidenceReliability(evidence),
+		Recency:              recency,
+		ContradictionLoad:    contradiction,
+		Calibration:          clamp01(1 - contradiction),
+		UpdatedAt:             now,
 	}
 }
 
 // calibratedConfidenceState provides the evidence-aware confidence used by
-// EvidenceState without introducing a second CalibratedConfidence definition.
+// EvidenceState without introducing a second public calibration function.
 func calibratedConfidenceState(evidence []ExperienceEvidence) float64 {
 	if len(evidence) == 0 {
 		return 0
