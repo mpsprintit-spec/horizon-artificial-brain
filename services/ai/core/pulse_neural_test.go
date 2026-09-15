@@ -3,7 +3,42 @@ package core
 import (
 	"context"
 	"testing"
+	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/perception"
 )
+
+type fixedPerception struct{}
+
+func (fixedPerception) Perceive(string) ([]perception.PerceptionSignal, error) {
+	return []perception.PerceptionSignal{{
+		Kind: perception.PerceptionUserInput,
+		Source: "synthetic-sensor",
+		RawText: "air",
+		Tokens: []string{"air"},
+		Confidence: 0.9,
+		ObservedAt: time.Unix(100, 0).UTC(),
+	}}, nil
+}
+
+func TestPulseUsesConfiguredPerceptionLayer(t *testing.T) {
+	previous := LegacyCognitionEnabled
+	LegacyCognitionEnabled = false
+	defer func() { LegacyCognitionEnabled = previous }()
+
+	h := NewHorizonEngine()
+	h.Perception = fixedPerception{}
+	h.Knowledge.Store("air")
+
+	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "input-yang-harus-diabaikan"})
+	if result.Path != "neural_runtime" { t.Fatalf("expected neural runtime path, got %q", result.Path) }
+	if !result.Success { t.Fatal("expected neural pulse to succeed") }
+	found := false
+	for _, concept := range result.Concepts {
+		if concept == "air" { found = true; break }
+	}
+	if !found { t.Fatalf("expected perception-produced token to reach neural interpretation, concepts=%v", result.Concepts) }
+}
 
 func TestPulseUsesNeuralRuntimeByDefault(t *testing.T) {
 	previous := LegacyCognitionEnabled
