@@ -76,3 +76,37 @@ func TestPulseLegacyPathRequiresExplicitOptIn(t *testing.T) {
 	result := h.Pulse(context.Background(), TaskPulse{Stimulus: "saya ingin belajar"})
 	if result.Path != "legacy_compatibility" { t.Fatalf("expected explicit legacy path, got %q", result.Path) }
 }
+
+func TestNeuralPulseCarriesContextAndDataIntoCognitiveBoundary(t *testing.T) {
+	previous := LegacyCognitionEnabled
+	LegacyCognitionEnabled = false
+	defer func() { LegacyCognitionEnabled = previous }()
+
+	h := NewHorizonEngine()
+	h.Perception = fixedPerception{}
+	h.Knowledge.Store("air")
+	contextNode := h.Knowledge.Store("air-ruang")
+	dataNode := h.Knowledge.Store("sensor-42")
+
+	result := h.Pulse(context.Background(), TaskPulse{
+		Stimulus: "input-diabaikan",
+		Context:  "air-ruang",
+		Data:     "sensor-42",
+	})
+	if !result.Success || result.Cognitive == nil {
+		t.Fatalf("expected typed cognitive result, success=%v cognitive=%v", result.Success, result.Cognitive != nil)
+	}
+	observation := result.Cognitive.Observation
+	if len(observation.ContextTokens) != 1 || observation.ContextTokens[0] != "air-ruang" {
+		t.Fatalf("context was not preserved at cognitive boundary: %#v", observation.ContextTokens)
+	}
+	if len(observation.DataTokens) != 1 || observation.DataTokens[0] != "sensor-42" {
+		t.Fatalf("data was not preserved at cognitive boundary: %#v", observation.DataTokens)
+	}
+	if activation := result.Cognitive.State.Activations[contextNode.ID]; activation <= 0 {
+		t.Fatalf("context node did not influence neural activation: %v", activation)
+	}
+	if activation := result.Cognitive.State.Activations[dataNode.ID]; activation <= 0 {
+		t.Fatalf("data node did not influence neural activation: %v", activation)
+	}
+}
