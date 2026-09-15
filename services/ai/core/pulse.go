@@ -45,7 +45,7 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	timestamp := time.Now().UTC()
 	eventID := fmt.Sprintf("pulse-%d", timestamp.UnixNano())
 
-	perceptionEvent, err := perception.NewUserInputEvent(eventID, prompt, "pulse", timestamp)
+	perceptionEvent, err := perception.NewEvent(eventID, prompt, "pulse", timestamp, h.Perception)
 	if err != nil || len(perceptionEvent.Signals) == 0 {
 		return PulseResult{Path: "neural_perception_error", Success: false}
 	}
