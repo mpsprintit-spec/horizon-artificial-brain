@@ -21,8 +21,10 @@ func TestPulseDefaultUsesNeuralRuntime(t *testing.T) {
 	if result.Path == "legacy_compatibility" || result.Path == "legacy_control" {
 		t.Fatalf("default pulse entered legacy path: %q", result.Path)
 	}
-	if h.Runtime.LastSequence() != 1 {
-		t.Fatalf("expected one runtime event, got sequence %d", h.Runtime.LastSequence())
+	// A neural interaction now records both the accepted process event and the
+	// resulting learning transition on the same runtime sequence.
+	if h.Runtime.LastSequence() != 2 {
+		t.Fatalf("expected process+learning runtime sequence 2, got %d", h.Runtime.LastSequence())
 	}
 }
 
