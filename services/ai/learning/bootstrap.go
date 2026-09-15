@@ -67,7 +67,10 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	result := steps[len(steps)-1].NodeID
 	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, experience.evidence(now))
 	if pattern != nil {
-		pattern.Confidence = knowledge.CalibratedConfidence(pattern.Confidence, pattern.Evidence)
+		// Recompute confidence from the retained evidence rather than repeatedly
+		// compounding the prior confidence. This makes repeated same-source
+		// observations saturate instead of becoming pseudo-independent evidence.
+		pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
 	}
 }
 
