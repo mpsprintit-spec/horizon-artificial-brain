@@ -13,7 +13,7 @@ type TokenRegistry struct {
 	mu       sync.RWMutex
 	nextID   NodeID
 	byID     map[NodeID]*ConceptNode
-	byToken map[string]NodeID
+	byToken  map[string]NodeID
 }
 
 func NewTokenRegistry() *TokenRegistry { return &TokenRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode), byToken: make(map[string]NodeID)} }
@@ -65,8 +65,16 @@ func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold
 
 // KnowledgeBase stores the persistent neural substrate. Semantic labels are
 // optional compatibility metadata and are not required to form or traverse
-// dynamic connections.
-type KnowledgeBase struct { Registry *TokenRegistry; Patterns *PatternIndex }
+// dynamic connections. ProjectionPopulations records distributed receptive
+// fields so repeated experiences can recover the same population without
+// turning similar experiences into one identical representation.
+type KnowledgeBase struct {
+	Registry             *TokenRegistry
+	Patterns             *PatternIndex
+	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+	projectionMu         sync.RWMutex
+}
+
 func NewKnowledgeBase() *KnowledgeBase { return &KnowledgeBase{Registry: NewTokenRegistry(), Patterns: NewPatternIndex()} }
 func (k *KnowledgeBase) Fetch(token string) *ConceptNode { return k.Registry.Get(token) }
 func (k *KnowledgeBase) Store(token string) *ConceptNode { n, _, _ := k.Registry.GetOrCreate(token); return n }
@@ -108,13 +116,23 @@ func hydrateSynapseDynamicState(s *Synapse) {
 	if s == nil { return }; if s.Dynamic.Frequency == 0 && s.Frequency > 0 { s.Dynamic.Weight = clamp01(s.Weight); s.Dynamic.Confidence = clamp01(s.Confidence); s.Dynamic.Activation = clamp01(s.Activation); s.Dynamic.Frequency = s.Frequency; s.Dynamic.LastActivation = s.LastActivation; s.Dynamic.LastModification = s.LastActivation }; syncSynapseLegacyState(s)
 }
 
-type persistedGraph struct { Nodes []*ConceptNode `json:"nodes"`; Patterns []*PatternSynapse `json:"patterns,omitempty"` }
+type persistedGraph struct {
+	Nodes                 []*ConceptNode      `json:"nodes"`
+	Patterns              []*PatternSynapse   `json:"patterns,omitempty"`
+	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+}
+
 func (k *KnowledgeBase) Load(path string) error {
 	b, err := os.ReadFile(path); if err != nil { return err }; var graph persistedGraph; if err := json.Unmarshal(b, &graph); err != nil { return err }
 	registry := NewTokenRegistry(); var maxID NodeID
 	for _, node := range graph.Nodes { if node == nil { continue }; node.Token = canonicalToken(node.Token); if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.Token != "" { registry.byToken[node.Token] = node.ID }; if node.ID > maxID { maxID = node.ID } }
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
-	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex; return nil
+	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
+	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
+	return nil
 }
-func (k *KnowledgeBase) Save(path string) error { b, e := json.MarshalIndent(persistedGraph{Nodes: k.Registry.Nodes(), Patterns: k.Patterns.All()}, "", "  "); if e != nil { return e }; return os.WriteFile(path, b, 0644) }
+func (k *KnowledgeBase) Save(path string) error {
+	k.projectionMu.RLock(); populations := append([]ProjectionPopulation(nil), k.ProjectionPopulations...); k.projectionMu.RUnlock()
+	b, e := json.MarshalIndent(persistedGraph{Nodes: k.Registry.Nodes(), Patterns: k.Patterns.All(), ProjectionPopulations: populations}, "", "  "); if e != nil { return e }; return os.WriteFile(path, b, 0644)
+}
 func clamp01(v float64) float64 { if v < 0 { return 0 }; if v > 1 { return 1 }; return v }
