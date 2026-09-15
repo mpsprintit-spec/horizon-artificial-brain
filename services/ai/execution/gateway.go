@@ -30,10 +30,14 @@ func NewExecutionGateway(core *ExecutionCore) *ExecutionGateway {
 }
 
 // Execute validates the complete execution contract before touching a plugin.
-// It fails closed on identity, expiry, approval and idempotency violations.
+// It fails closed on authorization, identity, expiry, policy and idempotency
+// violations.
 func (g *ExecutionGateway) Execute(request runtime.ExecutionRequest) error {
 	if g == nil || g.Core == nil {
 		return errors.New("execution gateway is not initialized")
+	}
+	if !request.Authorized() {
+		return errors.New("execution request has no valid safety authorization")
 	}
 	if request.RequestID == "" || request.IdempotencyKey == "" {
 		return errors.New("execution request identity is required")
@@ -49,6 +53,9 @@ func (g *ExecutionGateway) Execute(request runtime.ExecutionRequest) error {
 	}
 	if request.RequiredApproval && request.RiskLevel == runtime.RiskLow {
 		return errors.New("low-risk execution cannot require approval")
+	}
+	if !request.RequiredApproval && request.RiskLevel != runtime.RiskLow {
+		return errors.New("non-low-risk execution requires explicit approval")
 	}
 
 	g.mu.Lock()
