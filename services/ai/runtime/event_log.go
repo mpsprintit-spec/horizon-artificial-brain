@@ -22,12 +22,14 @@ type LoggedEvent struct {
 	Timestamp     time.Time            `json:"timestamp"`
 	Event         *Event               `json:"event,omitempty"`
 	Experience    *learning.Experience `json:"experience,omitempty"`
+	Outcome       *OutcomeEvent        `json:"outcome,omitempty"`
 }
 
 const (
-	EventTypeProcess = "process"
-	EventTypeLearn   = "learn"
-	EventTypeThink   = "think"
+	EventTypeProcess  = "process"
+	EventTypeLearn    = "learn"
+	EventTypeThink    = "think"
+	EventTypeOutcome  = "outcome"
 )
 
 type EventLog struct {
@@ -149,6 +151,13 @@ func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
 				return errors.New("think event has no event payload")
 			}
 			if _, _, err := brainRuntime.ThinkAt(logged.Event.Cycles, logged.Timestamp); err != nil {
+				return err
+			}
+		case EventTypeOutcome:
+			if logged.Outcome == nil {
+				return errors.New("outcome event has no outcome payload")
+			}
+			if _, err := brainRuntime.ObserveOutcome(*logged.Outcome); err != nil {
 				return err
 			}
 		default:
