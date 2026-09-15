@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 // CognitiveState is the explicit runtime state passed from neural processing
@@ -73,8 +74,6 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 		outcome.Modality = "execution-outcome"
 	}
 
-	// Outcomes are learned into the same neural substrate. Success/failure is
-	// provenance on the experience, not a semantic relation encoded in nodes.
 	weight := 0.45
 	confidence := 0.30
 	if outcome.Success {
@@ -83,4 +82,19 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 	}
 	experience := learningExperienceFromOutcome(outcome, weight, confidence)
 	return r.LearnExperience(experience, outcome.ObservedAt)
+}
+
+func learningExperienceFromOutcome(outcome OutcomeEvent, weight, confidence float64) learning.Experience {
+	return learning.Experience{
+		ExperienceID: outcome.RequestID + ":outcome",
+		Sequence: append([]string(nil), outcome.Observation...),
+		Weight: weight,
+		Confidence: confidence,
+		Source: outcome.Source,
+		Modality: outcome.Modality,
+		Timestamp: outcome.ObservedAt,
+		Reliability: outcome.Reliability,
+		IndependenceGroup: outcome.RequestID,
+		CausalLink: outcome.RequestID,
+	}
 }
