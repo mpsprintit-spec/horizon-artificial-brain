@@ -69,8 +69,16 @@ func TestGate7CheckpointRejectsTampering(t *testing.T) {
 	if len(snapshot.Brain) == 0 {
 		t.Fatal("checkpoint contains no brain state")
 	}
-	snapshot.Brain = append([]byte(nil), snapshot.Brain...)
-	snapshot.Brain[len(snapshot.Brain)-1] ^= 1
+
+	// Change the serialized brain while keeping the envelope valid JSON. The
+	// checkpoint checksum must detect the modification during restore.
+	brain := string(snapshot.Brain)
+	mutated := strings.Replace(brain, "\"nodes\"", "\"nodes_tampered\"", 1)
+	if mutated == brain {
+		t.Fatal("failed to mutate serialized brain payload")
+	}
+	snapshot.Brain = json.RawMessage(mutated)
+
 	tampered, err := json.Marshal(snapshot)
 	if err != nil {
 		t.Fatalf("encode tampered checkpoint: %v", err)
