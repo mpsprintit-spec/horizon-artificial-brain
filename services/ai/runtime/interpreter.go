@@ -46,6 +46,20 @@ func (NeuralInterpreter) Interpret(output CognitiveOutput) (Interpretation, erro
 	}, nil
 }
 
+// InterpretCognitive is the typed P0 boundary. It packages the neural result
+// into Observation/State/Interpretation/Answer. Recommendation remains nil
+// unless a separate explicit action-producing stage creates one. Neural
+// activation alone is never treated as an action instruction.
+func (r *BrainRuntime) InterpretCognitive(output CognitiveOutput, observation Observation) (CognitiveInterpretation, error) {
+	interpretation, err := r.Interpret(output, NeuralInterpreter{})
+	if err != nil {
+		return CognitiveInterpretation{}, err
+	}
+	result := ToCognitiveInterpretation(observation, interpretation)
+	result.State.Timestamp = output.Timestamp
+	return result, nil
+}
+
 // LegacyCompatibilityInterpreter is intentionally opt-in. It is a boundary
 // adapter only; it has no access to BrainRuntime mutation and cannot become
 // the default source of cognition.
