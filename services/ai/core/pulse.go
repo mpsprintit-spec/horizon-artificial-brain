@@ -105,7 +105,7 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	}
 	answer := "Saya belum cukup tahu untuk memberikan jawaban yang dapat dipastikan."
 	if len(concepts) > 0 && cognitive.Interpretation.Resonance >= 0.2 { answer = strings.Join(concepts, " ") }
-	return PulseResult{Answer: answer, Concepts: concepts, Confidence: cognitive.Answer.Confidence, Success: true, Learned: learned, Path: "neural_runtime", InterpretationSource: cognitive.Interpretation.Source}
+	return PulseResult{Answer: answer, Concepts: concepts, Confidence: cognitive.Answer.Confidence, Success: true, Learned: learned, Path: "neural_runtime", InterpretationSource: cognitive.Interpretation.Source, Cognitive: &cognitive}
 }
 
 func interpretationConfidence(interpretation runtime.Interpretation) float64 {
