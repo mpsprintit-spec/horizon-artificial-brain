@@ -35,11 +35,7 @@ func (h *HorizonEngine) Pulse(ctx context.Context, task TaskPulse) PulseResult {
 
 	learned := false
 	if intent == IntentTeaching && h.Runtime != nil {
-		experience := learning.Experience{
-			Sequence:   strings.Fields(strings.ToLower(prompt)),
-			Weight:     0.85,
-			Confidence: 0.35,
-		}
+		experience := learning.Experience{Sequence: strings.Fields(strings.ToLower(prompt)), Weight: 0.85, Confidence: 0.35}
 		_, err := h.Runtime.LearnExperience(experience, time.Now().UTC())
 		learned = err == nil && len(experience.Sequence) > 0
 	}
@@ -60,21 +56,69 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	}
 
 	timestamp := time.Now().UTC()
+	eventID := fmt.Sprintf("pulse-%d", timestamp.UnixNano())
+	stimulusTokens := strings.Fields(strings.ToLower(prompt))
+	contextTokens := strings.Fields(strings.ToLower(task.Context))
+	dataTokens := strings.Fields(strings.ToLower(task.Data))
+
+	// Context and Data remain modality/provenance-bearing input. Existing neural
+	// units are boosted when they are already represented in the same Brain;
+	// unknown tokens are not created merely to manufacture context semantics.
+	contextBoosts := make(map[knowledge.NodeID]float64)
+	addContextBoosts := func(tokens []string, boost float64) {
+		for _, token := range tokens {
+			if node := h.Knowledge.Registry.Get(token); node != nil {
+				if current := contextBoosts[node.ID]; boost > current {
+					contextBoosts[node.ID] = boost
+				}
+			}
+		}
+	}
+	addContextBoosts(contextTokens, 0.35)
+	addContextBoosts(dataTokens, 0.20)
+
 	output, err := h.Runtime.CognitiveProcess(runtime.Event{
-		ID:        fmt.Sprintf("pulse-%d", timestamp.UnixNano()),
-		Stimulus:  strings.Fields(strings.ToLower(prompt)),
-		Cycles:    8,
-		Timestamp: timestamp,
+		ID:            eventID,
+		Stimulus:      stimulusTokens,
+		Context:       contextBoosts,
+		ContextTokens: contextTokens,
+		DataTokens:    dataTokens,
+		Source:        "pulse",
+		Modality:      "user-input",
+		Cycles:        8,
+		Timestamp:     timestamp,
 	})
 	if err != nil {
 		return PulseResult{Path: "neural_runtime_error", Success: false}
+	}
+
+	// The default neural path now records the interaction on the same persistent
+	// Brain. Provenance is attached to the experience rather than represented as
+	// a second memory store. This is learning, not an intent-specific control rule.
+	experienceSequence := append([]string(nil), stimulusTokens...)
+	experienceSequence = append(experienceSequence, contextTokens...)
+	experienceSequence = append(experienceSequence, dataTokens...)
+	learned := false
+	if len(experienceSequence) > 0 {
+		_, learnErr := h.Runtime.LearnExperience(learning.Experience{
+			ExperienceID:      eventID,
+			Sequence:          experienceSequence,
+			Weight:            0.50,
+			Confidence:        0.20,
+			Source:            "pulse",
+			Modality:          "user-input",
+			Timestamp:         timestamp,
+			Reliability:       0.50,
+			IndependenceGroup: eventID,
+		}, timestamp)
+		learned = learnErr == nil
 	}
 
 	// Gate 4: interpretation is an explicit boundary. The interpreter only
 	// translates neural output; it does not mutate or supplement cognition.
 	interpretation, err := h.Runtime.Interpret(output, runtime.NeuralInterpreter{})
 	if err != nil {
-		return PulseResult{Path: "neural_interpretation_error", Success: false}
+		return PulseResult{Path: "neural_interpretation_error", Success: false, Learned: learned}
 	}
 
 	// Token strings are presentation anchors only. They are not used to infer
@@ -92,12 +136,13 @@ func (h *HorizonEngine) pulseNeural(task TaskPulse) PulseResult {
 	}
 
 	return PulseResult{
-		Answer:                answer,
-		Concepts:              concepts,
-		Confidence:            interpretationConfidence(interpretation),
-		Success:               true,
-		Path:                  "neural_runtime",
-		InterpretationSource:  interpretation.Source,
+		Answer:               answer,
+		Concepts:             concepts,
+		Confidence:           interpretationConfidence(interpretation),
+		Success:              true,
+		Learned:              learned,
+		Path:                 "neural_runtime",
+		InterpretationSource: interpretation.Source,
 	}
 }
 
@@ -119,8 +164,6 @@ func (h *HorizonEngine) pulseLegacy(ctx context.Context, prompt string, contextT
 	var ok bool
 	thought, ok = h.Thinking.ThinkAbout(prompt, contextTokens)
 
-	// Web search is deliberately dormant during the neural migration. The
-	// capability remains installed but cannot fetch or inject external data.
 	if h.WebSearchEnabled && h.WebSearch != nil && h.WebSearch.ShouldSearch(thought.Confidence, len(h.Thinking.LastState.UnknownNodes), len(thought.Conflicts)) {
 		thought.NeedsWebSearch = true
 		results, err := h.WebSearch.Perceive(ctx, prompt)
