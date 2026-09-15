@@ -7,6 +7,7 @@ import (
 )
 
 const defaultProjectionPopulation = 4
+const projectionReuseThreshold = 0.98
 
 var (
 	ErrNilBrain          = errors.New("brain is nil")
@@ -21,8 +22,7 @@ type PopulationUnit struct {
 
 // ProjectVectorPopulation recruits a sparse population from the same Brain
 // substrate. Existing compatible units are reused; new receptive prototypes
-// are grown only when the substrate has no compatible structure. Once any
-// compatible structure exists, repeated experience cannot allocate duplicates.
+// are grown only when the substrate has no compatible structure.
 func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold float64, populationSize int) (ProjectionPopulation, error) {
 	if k == nil {
 		return ProjectionPopulation{}, ErrNilBrain
@@ -36,10 +36,17 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	}
 
 	candidates := k.matchRepresentationPopulation(vector, threshold)
-	if len(candidates) == 0 {
+	if len(candidates) > 0 {
+		// A population is a distributed receptive field. Once its strongest
+		// member establishes a match, recover the remaining members from the
+		// same local representation basin instead of treating them as new
+		// concepts merely because their receptive fields are slightly offset.
+		reuse := k.matchRepresentationPopulation(vector, projectionReuseThreshold)
+		if len(reuse) > len(candidates) {
+			candidates = reuse
+		}
+	} else {
 		// The first presentation establishes the distributed receptive field.
-		// Prototype perturbations are intentionally small so every member remains
-		// inside the same compatibility basin on subsequent presentations.
 		for slot := 0; len(candidates) < populationSize; slot++ {
 			node := k.createRepresentationPrototype(projectionPrototype(vector, slot, populationSize))
 			score := NewNeuralVector(node.Representation).Similarity(vector)
@@ -109,8 +116,7 @@ func (k *KnowledgeBase) createRepresentationPrototype(vector NeuralVector) *Conc
 
 // projectionPrototype creates nearby receptive fields only for the first
 // presentation of a previously unseen vector. The perturbation is deliberately
-// narrow: the members form one distributed representation while remaining
-// mutually retrievable under the caller's compatibility threshold.
+// narrow so the members remain in one reusable representation basin.
 func projectionPrototype(vector NeuralVector, slot, populationSize int) NeuralVector {
 	if slot == 0 || len(vector.Values) == 0 {
 		return NewNeuralVector(vector.Values)
