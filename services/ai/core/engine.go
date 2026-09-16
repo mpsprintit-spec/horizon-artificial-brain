@@ -26,6 +26,10 @@ type HorizonEngine struct {
 	Decision  *decision.Engine
 	Language  *language.Engine
 
+	// Orchestrator is the canonical integration boundary for the neural
+	// perception -> cognition -> interpretation cycle.
+	Orchestrator *runtime.CognitiveOrchestrator
+
 	// Gateway is the only execution surface exposed by HorizonEngine. The
 	// underlying ExecutionCore is intentionally private to this facade.
 	Gateway *execution.ExecutionGateway
@@ -44,7 +48,8 @@ func NewHorizonEngine() *HorizonEngine {
 	return &HorizonEngine{
 		Runtime: rt, Knowledge: brain, Learning: learning.NewLearningUnit(brain),
 		Thinking: thinking.NewThinkingEngine(brain), Decision: decision.NewEngine(),
-		Language: language.NewEngine(brain), Gateway: execution.NewExecutionGateway(core),
+		Language: language.NewEngine(brain), Orchestrator: runtime.NewCognitiveOrchestrator(rt),
+		Gateway: execution.NewExecutionGateway(core),
 		WebSearch: websearch.NewEngine(nil), WebSearchEnabled: false,
 		Perception: perception.UserInputPerception{}, Safety: runtime.SafetyBoundary{},
 	}
