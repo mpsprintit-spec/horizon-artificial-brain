@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"github.com/project-horizon/horizon-core/services/ai/plugin"
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
@@ -44,7 +45,7 @@ func TestP15RecommendationAuthorizationActionOutcomePromotionLoop(t *testing.T) 
 		RequestID:     requestID,
 		BrainIdentity: runtime.BrainIdentity,
 		Intent:        "complete-task",
-		TargetNodeIDs: []runtimeNodeID{runtimeNodeID(completed.ID)},
+		TargetNodeIDs: []knowledge.NodeID{completed.ID},
 	}); err != nil {
 		t.Fatalf("register action binding: %v", err)
 	}
@@ -114,7 +115,3 @@ func TestP15RecommendationAuthorizationActionOutcomePromotionLoop(t *testing.T) 
 		t.Fatalf("promoted target was not active in next cognitive process: got %v", activation)
 	}
 }
-
-// runtimeNodeID keeps the binding construction explicit while avoiding any
-// dependency on runtime-private state. It is an alias of knowledge.NodeID.
-type runtimeNodeID = uint64
