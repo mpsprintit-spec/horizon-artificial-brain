@@ -60,11 +60,19 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 	weight, confidence, contradictions := 0.45, 0.30, 1
 	if outcome.Success { weight, confidence, contradictions = 0.60, 0.50, 0 }
 	evidence := learning.Evidence{Weight: weight, Confidence: confidence, Reliability: clamp01(outcome.Reliability), IndependentSources: 1, Contradictions: contradictions}
+
 	for _, nodeID := range binding.TargetNodeIDs {
 		combined, added, err := r.evidence.Record(learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence})
 		if err != nil { return r.seq, err }
 		if !added { continue }
-		if _, err := r.promotion.Apply(nodeID, combined, outcome.ObservedAt); err != nil { return r.seq, err }
+		decision, err := r.promotion.Apply(nodeID, combined, outcome.ObservedAt)
+		if err != nil { return r.seq, err }
+		if decision == learning.PromotionAccepted {
+			for _, synapse := range binding.Synapses {
+				if synapse.TargetNodeID != nodeID { continue }
+				if err := learning.PromoteSynapse(r.brain, learning.SynapsePromotion{SourceNodeID: synapse.SourceNodeID, TargetNodeID: synapse.TargetNodeID, Inhibitory: synapse.Inhibitory}, combined, outcome.ObservedAt); err != nil { return r.seq, err }
+			}
+		}
 	}
 	r.seq = nextSeq
 	return r.seq, nil
