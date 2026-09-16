@@ -42,7 +42,8 @@ func TestObserveOutcomeDoesNotDoubleCountSameSource(t *testing.T) {
 	if _, err := rt.ObserveOutcome(outcome); err != nil { t.Fatal(err) }
 	if _, err := rt.ObserveOutcome(outcome); err != nil { t.Fatal(err) }
 
-	combined, err := rt.evidence.Record(learning.OutcomeEvidence{RequestID: "req-1", NodeID: node.ID, Source: "sensor-a", Evidence: learning.Evidence{Weight: 0.6, Confidence: 0.5, Reliability: 0.9, IndependentSources: 1}})
+	combined, added, err := rt.evidence.Record(learning.OutcomeEvidence{RequestID: "req-1", NodeID: node.ID, Source: "sensor-a", Evidence: learning.Evidence{Weight: 0.6, Confidence: 0.5, Reliability: 0.9, IndependentSources: 1}})
 	if err != nil { t.Fatal(err) }
+	if added { t.Fatal("duplicate source was accepted as new evidence") }
 	if combined.IndependentSources != 1 { t.Fatalf("same source was double-counted: got %d", combined.IndependentSources) }
 }
