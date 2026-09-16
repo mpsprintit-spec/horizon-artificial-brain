@@ -14,7 +14,7 @@ func TestGroundVectorReusesExistingRepresentation(t *testing.T) {
 	if err != nil {
 		t.Fatalf("second grounding failed: %v", err)
 	}
-	if first.NodeID == "" || second.NodeID == "" {
+	if first.NodeID == 0 || second.NodeID == 0 {
 		t.Fatal("expected node ids")
 	}
 	if first.NodeID != second.NodeID {
