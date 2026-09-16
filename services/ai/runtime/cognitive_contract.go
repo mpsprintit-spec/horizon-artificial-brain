@@ -20,8 +20,6 @@ type Uncertainty struct {
 	Reason          string
 }
 
-// Answer is a presentation candidate derived from the current cognitive
-// interpretation. It is distinct from an action recommendation.
 type Answer struct {
 	NodeIDs     []knowledge.NodeID
 	Confidence  float64
@@ -29,30 +27,27 @@ type Answer struct {
 }
 
 // CognitiveInterpretation is the typed boundary between neural state and
-// externally usable cognition. An empty Recommendation means no action has
-// been proposed; ordinary answers therefore never require safety execution.
+// externally usable cognition. Grounding records how raw context/data entered
+// the shared substrate; they do not assert semantic truth or authorization.
 type CognitiveInterpretation struct {
-	Observation    Observation
-	State          CognitiveState
-	Interpretation Interpretation
-	Answer         Answer
-	Recommendation *Recommendation
+	Observation             Observation
+	GroundedRepresentations []knowledge.GroundedRepresentation
+	State                   CognitiveState
+	Interpretation          Interpretation
+	Answer                  Answer
+	Recommendation          *Recommendation
 }
 
-// ToCognitiveInterpretation packages an already validated neural
-// Interpretation without introducing semantic rules. Recommendation remains
-// nil because neural activation alone is not sufficient authorization or an
-// action instruction.
 func ToCognitiveInterpretation(observation Observation, interpretation Interpretation) CognitiveInterpretation {
 	return CognitiveInterpretation{
 		Observation: observation,
 		State: CognitiveState{
-			BrainIdentity:  interpretation.BrainIdentity,
-			Sequence:       interpretation.Sequence,
-			ActiveNodeIDs:  append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
-			Activations:    cloneNodeValues(interpretation.Activations),
-			Confidence:     cloneNodeValues(interpretation.Confidence),
-			Resonance:      interpretation.Resonance,
+			BrainIdentity:   interpretation.BrainIdentity,
+			Sequence:        interpretation.Sequence,
+			ActiveNodeIDs:   append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
+			Activations:     cloneNodeValues(interpretation.Activations),
+			Confidence:      cloneNodeValues(interpretation.Confidence),
+			Resonance:       interpretation.Resonance,
 			PredictionError: interpretation.PredictionError,
 		},
 		Interpretation: interpretation,
@@ -70,9 +65,7 @@ func ToCognitiveInterpretation(observation Observation, interpretation Interpret
 func bestInterpretationConfidence(interpretation Interpretation) float64 {
 	best := 0.0
 	for _, id := range interpretation.RankedNodeIDs {
-		if value := interpretation.Confidence[id]; value > best {
-			best = value
-		}
+		if value := interpretation.Confidence[id]; value > best { best = value }
 	}
 	return best
 }
