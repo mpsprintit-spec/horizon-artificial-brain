@@ -15,7 +15,7 @@ func TestGroundingIntegrationUsesSharedBrain(t *testing.T) {
 	if err != nil {
 		t.Fatalf("first grounding failed: %v", err)
 	}
-	if first.NodeID == "" {
+	if first.NodeID == 0 {
 		t.Fatal("expected grounding to produce a node id")
 	}
 
