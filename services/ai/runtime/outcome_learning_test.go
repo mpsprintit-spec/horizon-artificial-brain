@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 func TestObserveOutcomeRequiresExplicitBinding(t *testing.T) {
@@ -41,17 +42,7 @@ func TestObserveOutcomeDoesNotDoubleCountSameSource(t *testing.T) {
 	if _, err := rt.ObserveOutcome(outcome); err != nil { t.Fatal(err) }
 	if _, err := rt.ObserveOutcome(outcome); err != nil { t.Fatal(err) }
 
-	combined, err := rt.evidence.Record(learningOutcomeProbe("probe", node.ID, "sensor-a"))
+	combined, err := rt.evidence.Record(learning.OutcomeEvidence{RequestID: "req-1", NodeID: node.ID, Source: "sensor-a", Evidence: learning.Evidence{Weight: 0.6, Confidence: 0.5, Reliability: 0.9, IndependentSources: 1}})
 	if err != nil { t.Fatal(err) }
 	if combined.IndependentSources != 1 { t.Fatalf("same source was double-counted: got %d", combined.IndependentSources) }
-}
-
-func learningOutcomeProbe(requestID string, nodeID knowledge.NodeID, source string) interfaceOutcomeEvidence {
-	return interfaceOutcomeEvidence{RequestID: requestID, NodeID: nodeID, Source: source}
-}
-
-type interfaceOutcomeEvidence struct {
-	RequestID string
-	NodeID knowledge.NodeID
-	Source string
 }
