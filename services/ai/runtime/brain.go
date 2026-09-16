@@ -29,10 +29,23 @@ type Event struct {
 	Timestamp time.Time
 }
 
+// ActionBinding records which neural representations an authorized action is
+// allowed to teach. Outcomes must reference the same RequestID; they never
+// infer a target from the outcome text itself.
+type ActionBinding struct {
+	RequestID     string
+	BrainIdentity string
+	Intent        string
+	TargetNodeIDs []knowledge.NodeID
+}
+
 type BrainRuntime struct {
 	brain      *knowledge.Brain
 	activation *activation.Engine
 	learning   *learning.LearningUnit
+	promotion  *learning.PromotionEngine
+	evidence   *learning.EvidenceLedger
+	actions    map[string]ActionBinding
 	eventLog   *EventLog
 	clock      Clock
 	mu         sync.Mutex
@@ -41,7 +54,15 @@ type BrainRuntime struct {
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBrain() }
-	return &BrainRuntime{brain: brain, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), clock: WallClock{}}
+	return &BrainRuntime{
+		brain: brain,
+		activation: activation.NewEngine(brain),
+		learning: learning.NewLearningUnit(brain),
+		promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()),
+		evidence: learning.NewEvidenceLedger(),
+		actions: make(map[string]ActionBinding),
+		clock: WallClock{},
+	}
 }
 
 // GroundObservation projects raw context/data evidence into the canonical
@@ -50,6 +71,22 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) {
 	if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }
 	return r.brain.GroundObservation(token, source, modality, GroundingThreshold)
+}
+
+// RegisterActionBinding explicitly connects an authorized action request to
+// neural representations. This prevents an outcome from guessing what part
+// of the brain it should modify.
+func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	if binding.RequestID == "" { return errors.New("action binding request ID is required") }
+	if binding.BrainIdentity == "" { binding.BrainIdentity = BrainIdentity }
+	if binding.BrainIdentity != BrainIdentity { return errors.New("action binding belongs to a different brain") }
+	if len(binding.TargetNodeIDs) == 0 { return errors.New("action binding requires at least one target node") }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...)
+	r.actions[binding.RequestID] = binding
+	return nil
 }
 
 func (r *BrainRuntime) SetClock(clock Clock) {
