@@ -9,13 +9,13 @@ import (
 )
 
 type CognitiveState struct {
-	BrainIdentity   string
-	Sequence        uint64
-	Timestamp       time.Time
-	ActiveNodeIDs   []knowledge.NodeID
-	Activations     map[knowledge.NodeID]float64
-	Confidence      map[knowledge.NodeID]float64
-	Resonance       float64
+	BrainIdentity string
+	Sequence uint64
+	Timestamp time.Time
+	ActiveNodeIDs []knowledge.NodeID
+	Activations map[knowledge.NodeID]float64
+	Confidence map[knowledge.NodeID]float64
+	Resonance float64
 	PredictionError float64
 }
 
@@ -23,8 +23,6 @@ func (o CognitiveOutput) State() CognitiveState {
 	return CognitiveState{BrainIdentity: o.BrainIdentity, Sequence: o.Sequence, Timestamp: o.Timestamp, ActiveNodeIDs: append([]knowledge.NodeID(nil), o.RankedNodeIDs...), Activations: cloneNodeValues(o.Activations), Confidence: cloneNodeValues(o.Confidence), Resonance: o.Resonance, PredictionError: o.PredictionError}
 }
 
-// OutcomeEvent records an externally observed consequence of a previously
-// issued action/recommendation. It is an event, not a second memory store.
 type OutcomeEvent struct {
 	RequestID string
 	BrainIdentity string
@@ -63,8 +61,9 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 	if outcome.Success { weight, confidence, contradictions = 0.60, 0.50, 0 }
 	evidence := learning.Evidence{Weight: weight, Confidence: confidence, Reliability: clamp01(outcome.Reliability), IndependentSources: 1, Contradictions: contradictions}
 	for _, nodeID := range binding.TargetNodeIDs {
-		combined, err := r.evidence.Record(learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence})
+		combined, added, err := r.evidence.Record(learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence})
 		if err != nil { return r.seq, err }
+		if !added { continue }
 		if _, err := r.promotion.Apply(nodeID, combined, outcome.ObservedAt); err != nil { return r.seq, err }
 	}
 	r.seq = nextSeq
