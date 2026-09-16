@@ -4,9 +4,16 @@ import (
 	"errors"
 	"strings"
 	"time"
-
-	"github.com/project-horizon/horizon-core/services/ai/websearch"
 )
+
+// InquirySource is the minimal external provenance contract required by the
+// learning layer. The websearch package adapts to this shape at the boundary,
+// avoiding a dependency cycle between perception and learning.
+type InquirySource struct {
+	Source     string
+	Reputation float64
+	Confidence float64
+}
 
 // InquiryCandidate is an untrusted experience assembled from an external
 // inquiry. Creating a candidate does not mutate the neural substrate.
@@ -19,7 +26,7 @@ type InquiryCandidate struct {
 // BuildInquiryCandidate converts independent external observations into a
 // candidate experience. Each distinct non-empty source contributes at most one
 // independent support unit.
-func BuildInquiryCandidate(sequence []string, results []websearch.SourceResult, modality string, now time.Time) (InquiryCandidate, error) {
+func BuildInquiryCandidate(sequence []string, results []InquirySource, modality string, now time.Time) (InquiryCandidate, error) {
 	if len(sequence) == 0 {
 		return InquiryCandidate{}, errors.New("inquiry candidate sequence is empty")
 	}
