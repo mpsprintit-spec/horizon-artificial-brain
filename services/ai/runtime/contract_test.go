@@ -32,7 +32,7 @@ func TestCognitiveOutputExposesCognitiveState(t *testing.T) {
 	}
 }
 
-func TestObserveOutcomeWritesEventAndLearnsSameBrain(t *testing.T) {
+func TestObserveOutcomeWritesEventForBoundTarget(t *testing.T) {
 	brain := knowledge.NewBrain()
 	rt := NewBrainRuntime(brain)
 	path := filepath.Join(t.TempDir(), "events.jsonl")
@@ -42,6 +42,23 @@ func TestObserveOutcomeWritesEventAndLearnsSameBrain(t *testing.T) {
 	}
 	defer log.Close()
 	rt.SetEventLog(log)
+
+	motor, _, err := brain.Registry.GetOrCreate("motor")
+	if err != nil {
+		t.Fatal(err)
+	}
+	completed, _, err := brain.Registry.GetOrCreate("completed")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := rt.RegisterActionBinding(ActionBinding{
+		RequestID: "req-1",
+		BrainIdentity: BrainIdentity,
+		Intent: "execute motor",
+		TargetNodeIDs: []knowledge.NodeID{motor.ID, completed.ID},
+	}); err != nil {
+		t.Fatal(err)
+	}
 
 	now := time.Unix(100, 0).UTC()
 	seq, err := rt.ObserveOutcome(OutcomeEvent{
@@ -71,6 +88,6 @@ func TestObserveOutcomeWritesEventAndLearnsSameBrain(t *testing.T) {
 		t.Fatalf("wrong outcome request ID: %+v", events[0].Outcome)
 	}
 	if brain.Registry.Get("motor") == nil || brain.Registry.Get("completed") == nil {
-		t.Fatal("outcome was not learned into the canonical Brain")
+		t.Fatal("bound outcome targets disappeared from the canonical Brain")
 	}
 }
