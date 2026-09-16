@@ -26,9 +26,7 @@ type Answer struct {
 	Uncertainty Uncertainty
 }
 
-// CognitiveInterpretation is the typed boundary between neural state and
-// externally usable cognition. Grounding records how raw context/data entered
-// the shared substrate; they do not assert semantic truth or authorization.
+// CognitiveInterpretation is the typed boundary between neural state and externally usable cognition. Grounding records how raw context/data entered the shared substrate; they do not assert semantic truth or authorization.
 type CognitiveInterpretation struct {
 	Observation             Observation
 	GroundedRepresentations []knowledge.GroundedRepresentation
@@ -39,24 +37,27 @@ type CognitiveInterpretation struct {
 }
 
 func ToCognitiveInterpretation(observation Observation, interpretation Interpretation) CognitiveInterpretation {
+	resonance := clamp01(interpretation.Resonance)
+	predictionError := clamp01(interpretation.PredictionError)
 	return CognitiveInterpretation{
 		Observation: observation,
 		State: CognitiveState{
-			BrainIdentity:   interpretation.BrainIdentity,
-			Sequence:        interpretation.Sequence,
-			ActiveNodeIDs:   append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
-			Activations:     cloneNodeValues(interpretation.Activations),
-			Confidence:      cloneNodeValues(interpretation.Confidence),
-			Resonance:       interpretation.Resonance,
-			PredictionError: interpretation.PredictionError,
+			BrainIdentity: interpretation.BrainIdentity,
+			Sequence: interpretation.Sequence,
+			ActiveNodeIDs: append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
+			Activations: cloneNodeValues(interpretation.Activations),
+			Confidence: cloneNodeValues(interpretation.Confidence),
+			Resonance: resonance,
+			PredictionError: predictionError,
 		},
 		Interpretation: interpretation,
 		Answer: Answer{
-			NodeIDs:    append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
+			NodeIDs: append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
 			Confidence: bestInterpretationConfidence(interpretation),
 			Uncertainty: Uncertainty{
-				Level:           1 - interpretation.Resonance,
-				PredictionError: interpretation.PredictionError,
+				Level: 1 - resonance,
+				PredictionError: predictionError,
+				Reason: uncertaintyReason(resonance, predictionError),
 			},
 		},
 	}
@@ -67,5 +68,24 @@ func bestInterpretationConfidence(interpretation Interpretation) float64 {
 	for _, id := range interpretation.RankedNodeIDs {
 		if value := interpretation.Confidence[id]; value > best { best = value }
 	}
-	return best
+	return clamp01(best)
+}
+
+func uncertaintyReason(resonance, predictionError float64) string {
+	switch {
+	case predictionError >= 0.5 && resonance < 0.5:
+		return "high-prediction-error-and-low-resonance"
+	case predictionError >= 0.5:
+		return "high-prediction-error"
+	case resonance < 0.5:
+		return "low-resonance"
+	default:
+		return "within-neural-range"
+	}
+}
+
+func clamp01(v float64) float64 {
+	if v < 0 { return 0 }
+	if v > 1 { return 1 }
+	return v
 }
