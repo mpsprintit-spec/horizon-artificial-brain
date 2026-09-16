@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
+	"github.com/project-horizon/horizon-core/services/ai/dnf"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
@@ -43,6 +44,7 @@ type SynapseBinding struct {
 
 type BrainRuntime struct {
 	brain *knowledge.Brain
+	dnf *dnf.Fabric
 	activation *activation.Engine
 	learning *learning.LearningUnit
 	promotion *learning.PromotionEngine
@@ -56,7 +58,16 @@ type BrainRuntime struct {
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBrain() }
-	return &BrainRuntime{brain: brain, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), clock: WallClock{}}
+	fabric, err := dnf.NewFabric(brain)
+	if err != nil { return nil }
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), clock: WallClock{}}
+}
+
+// DNF returns the structural facade bound to the exact same canonical Brain.
+// It is a view/operation boundary, never a second memory store.
+func (r *BrainRuntime) DNF() *dnf.Fabric {
+	if r == nil { return nil }
+	return r.dnf
 }
 
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) {
@@ -89,7 +100,7 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
 	result := r.activation.ActivateWith(activation.Request{StimulusTokens: append([]string(nil), event.Stimulus...), ContextBoosts: cloneContext(event.Context), Cycles: event.Cycles, Now: event.Timestamp}); r.seq = nextSeq; return result, r.seq, nil
 }
-func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.now() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
+func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.now() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
 func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) { return r.ThinkAt(cycles, time.Time{}) }
 func (r *BrainRuntime) ThinkAt(cycles int, timestamp time.Time) (activation.ThoughtResult, uint64, error) { if r == nil || r.brain == nil || r.activation == nil { return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); now := timestamp; if now.IsZero() { now = r.now() }; nextSeq := r.seq + 1; if r.eventLog != nil { event := Event{Cycles: cycles, Timestamp: now}; if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeThink, Timestamp: now, Event: &event}); err != nil { return activation.ThoughtResult{}, r.seq, err } }; thought := r.activation.ThinkWithPredictionAt(cycles, now); r.seq = nextSeq; return thought, r.seq, nil }
 type CognitiveOutput struct { BrainIdentity string; Sequence uint64; Timestamp time.Time; RankedNodeIDs []knowledge.NodeID; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; Resonance float64; PredictionError float64; Prediction activation.Prediction }
