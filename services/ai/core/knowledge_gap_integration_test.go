@@ -32,12 +32,16 @@ func TestP16KnowledgeGapInquiryGroundingValidationLearningLoop(t *testing.T) {
 	if responseGrounding.NodeID == 0 { t.Fatal("expected grounded response node") }
 	if responseGrounding.Source != "source-a" || responseGrounding.Modality != "inquiry" { t.Fatalf("grounding provenance lost: %+v", responseGrounding) }
 
-	candidate, err := learning.BuildInquiryCandidate([]string{"burung-unta", "tidak", "terbang"}, results, "inquiry", now)
+	inquirySources := make([]learning.InquirySource, 0, len(results))
+	for _, result := range results {
+		inquirySources = append(inquirySources, learning.InquirySource{Source: result.Source, Reputation: result.Reputation, Confidence: result.Confidence})
+	}
+	candidate, err := learning.BuildInquiryCandidate([]string{"burung-unta", "tidak", "terbang"}, inquirySources, "inquiry", now)
 	if err != nil { t.Fatalf("build inquiry candidate: %v", err) }
 	if got := learning.ValidateInquiry(candidate, learning.DefaultLearningPolicy()); got != learning.PromotionAccepted { t.Fatalf("expected independent evidence to validate candidate, got %q", got) }
 
 	beforePatterns := len(h.Knowledge.Patterns.All())
-	weakCandidate, err := learning.BuildInquiryCandidate([]string{"candidate-only"}, []websearch.SourceResult{{Source: "single-source", Reputation: 0.90, Confidence: 0.80}}, "inquiry", now)
+	weakCandidate, err := learning.BuildInquiryCandidate([]string{"candidate-only"}, []learning.InquirySource{{Source: "single-source", Reputation: 0.90, Confidence: 0.80}}, "inquiry", now)
 	if err != nil { t.Fatalf("build weak candidate: %v", err) }
 	if got := learning.ValidateInquiry(weakCandidate, learning.DefaultLearningPolicy()); got != learning.PromotionCandidate { t.Fatalf("single-source candidate must remain candidate, got %q", got) }
 	if got := len(h.Knowledge.Patterns.All()); got != beforePatterns { t.Fatalf("unvalidated candidate mutated patterns: before=%d after=%d", beforePatterns, got) }
