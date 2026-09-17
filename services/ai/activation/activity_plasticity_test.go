@@ -91,3 +91,82 @@ func TestActivityPlasticityDoesNotDependOnSemanticRelationKind(t *testing.T) {
 		t.Fatalf("expected activity-driven update without semantic relation: before=%v after=%v", before, synapse.Dynamic.Weight)
 	}
 }
+
+func TestDecayEligibilityUsesElapsedTime(t *testing.T) {
+	base := time.Date(2026, 9, 13, 9, 0, 0, 0, time.UTC)
+	oneHalfLife := decayEligibility(1, base, base.Add(activityPlasticityEligibilityHalfLife))
+	twoHalfLives := decayEligibility(1, base, base.Add(2*activityPlasticityEligibilityHalfLife))
+
+	if oneHalfLife < 0.49 || oneHalfLife > 0.51 {
+		t.Fatalf("expected one half-life to retain about half the eligibility, got %v", oneHalfLife)
+	}
+	if twoHalfLives < 0.24 || twoHalfLives > 0.26 {
+		t.Fatalf("expected two half-lives to retain about quarter eligibility, got %v", twoHalfLives)
+	}
+	if twoHalfLives >= oneHalfLife {
+		t.Fatalf("expected longer elapsed time to produce stronger decay: one=%v two=%v", oneHalfLife, twoHalfLives)
+	}
+}
+
+func TestActivityPlasticityRecentTraceRetainsMoreEligibilityThanLongIdleTrace(t *testing.T) {
+	base := time.Date(2026, 9, 13, 9, 0, 0, 0, time.UTC)
+
+	recent := knowledge.NewBrain()
+	recentSynapse := dynamicSynapseForTest(t, recent, "recent-a", "recent-b")
+	recentSynapse.Dynamic.Eligibility = 1
+	recentSynapse.Dynamic.LastEligibilityUpdate = base
+
+	idle := knowledge.NewBrain()
+	idleSynapse := dynamicSynapseForTest(t, idle, "idle-a", "idle-b")
+	idleSynapse.Dynamic.Eligibility = 1
+	idleSynapse.Dynamic.LastEligibilityUpdate = base
+
+	recentEngine := NewEngine(recent)
+	idleEngine := NewEngine(idle)
+	recentA := recent.Store("recent-a")
+	recentB := recent.Store("recent-b")
+	idleA := idle.Store("idle-a")
+	idleB := idle.Store("idle-b")
+
+	recentEngine.ApplyActivityPlasticity(
+		map[knowledge.NodeID]float64{recentA.ID: 1},
+		map[knowledge.NodeID]float64{recentB.ID: 1},
+		base.Add(100*time.Millisecond),
+	)
+	idleEngine.ApplyActivityPlasticity(
+		map[knowledge.NodeID]float64{idleA.ID: 1},
+		map[knowledge.NodeID]float64{idleB.ID: 1},
+		base.Add(5*activityPlasticityEligibilityHalfLife),
+	)
+
+	if recentSynapse.Dynamic.Eligibility <= idleSynapse.Dynamic.Eligibility {
+		t.Fatalf("expected recent activity to retain a stronger eligibility trace: recent=%v idle=%v", recentSynapse.Dynamic.Eligibility, idleSynapse.Dynamic.Eligibility)
+	}
+}
+
+func TestEligibilityDecayNeverDeletesSynapse(t *testing.T) {
+	brain := knowledge.NewBrain()
+	synapse := dynamicSynapseForTest(t, brain, "a", "b")
+	source := brain.Store("a")
+	target := brain.Store("b")
+	base := time.Date(2026, 9, 13, 9, 0, 0, 0, time.UTC)
+	synapse.Dynamic.Eligibility = 1
+	synapse.Dynamic.LastEligibilityUpdate = base
+
+	NewEngine(brain).ApplyActivityPlasticity(
+		map[knowledge.NodeID]float64{source.ID: 0},
+		map[knowledge.NodeID]float64{target.ID: 0},
+		base.Add(30*activityPlasticityEligibilityHalfLife),
+	)
+
+	found := false
+	for _, candidate := range source.OutboundAll() {
+		if candidate != nil && candidate.TargetID == target.ID && candidate.IsDynamic() {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatal("expected time decay to preserve the dynamic synapse")
+	}
+}
