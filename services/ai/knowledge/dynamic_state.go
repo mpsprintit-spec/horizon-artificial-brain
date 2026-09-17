@@ -6,13 +6,14 @@ import "time"
 // distributed neural substrate. It intentionally contains no semantic
 // ontology such as cause, has, is-a, or can-do.
 type DynamicState struct {
-	Weight           float64   `json:"weight"`
-	Activation       float64   `json:"activation"`
-	Eligibility      float64   `json:"eligibility"`
-	Confidence       float64   `json:"confidence"`
-	Frequency        int64     `json:"frequency"`
-	LastActivation   time.Time `json:"last_activation,omitempty"`
-	LastModification time.Time `json:"last_modification,omitempty"`
+	Weight                 float64   `json:"weight"`
+	Activation             float64   `json:"activation"`
+	Eligibility            float64   `json:"eligibility"`
+	Confidence             float64   `json:"confidence"`
+	Frequency              int64     `json:"frequency"`
+	LastActivation         time.Time `json:"last_activation,omitempty"`
+	LastModification       time.Time `json:"last_modification,omitempty"`
+	LastEligibilityUpdate  time.Time `json:"last_eligibility_update,omitempty"`
 }
 
 // Reinforce updates adaptive state from an experience without assigning a
@@ -33,4 +34,5 @@ func (s *DynamicState) Reinforce(weight, confidence, eligibility float64, now ti
 	s.Frequency++
 	s.LastActivation = now
 	s.LastModification = now
+	s.LastEligibilityUpdate = now
 }
