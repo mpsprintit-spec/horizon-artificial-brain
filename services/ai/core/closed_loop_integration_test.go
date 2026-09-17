@@ -32,6 +32,10 @@ var _ plugin.Plugin = (*closedLoopTestPlugin)(nil)
 func TestP15RecommendationAuthorizationActionOutcomePromotionLoop(t *testing.T) {
 	now := time.Date(2026, 9, 16, 12, 0, 0, 0, time.UTC)
 	h := NewHorizonEngine()
+	// Keep the safety clock deterministic so the test validates the closed
+	// loop rather than depending on wall-clock time. Production safety still
+	// uses the real UTC clock when Safety.Now is nil.
+	h.Safety.Now = func() time.Time { return now }
 
 	p := &closedLoopTestPlugin{}
 	h.Gateway.RegisterPlugin("complete-task", p)
