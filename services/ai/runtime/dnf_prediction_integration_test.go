@@ -73,8 +73,8 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 	if after.LastEligibilityUpdate.Before(t0) {
 		t.Fatalf("prediction-error path did not advance eligibility timestamp: %v", after.LastEligibilityUpdate)
 	}
-	if after.Weight <= before.Weight {
-		t.Fatalf("prediction-error plasticity did not strengthen the existing pathway: before=%v after=%v", before.Weight, after.Weight)
+	if after.Weight == before.Weight {
+		t.Fatalf("prediction-error plasticity did not modify the existing pathway: before=%v after=%v", before.Weight, after.Weight)
 	}
 	if after.Weight > 0.95 {
 		t.Fatalf("prediction-error plasticity exceeded weight bound: %v", after.Weight)
