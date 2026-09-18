@@ -73,6 +73,14 @@ type KnowledgeBase struct {
 	Patterns             *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
 	projectionMu         sync.RWMutex
+	mu                   sync.RWMutex
+}
+
+// Lock serializes mutations to the canonical neural substrate.
+func (k *KnowledgeBase) Lock() { if k != nil { k.mu.Lock() } }
+func (k *KnowledgeBase) Unlock() { if k != nil { k.mu.Unlock() } }
+func (k *KnowledgeBase) RLock() { if k != nil { k.mu.RLock() } }
+func (k *KnowledgeBase) RUnlock() { if k != nil { k.mu.RUnlock() } }
 }
 
 func NewKnowledgeBase() *KnowledgeBase { return &KnowledgeBase{Registry: NewTokenRegistry(), Patterns: NewPatternIndex()} }
@@ -84,6 +92,8 @@ func (k *KnowledgeBase) Store(token string) *ConceptNode { n, _, _ := k.Registry
 // not a separate vector memory database.
 func (k *KnowledgeBase) ProjectVector(vector NeuralVector, threshold float64) (NodeID, float64, bool, error) {
 	if k == nil { return 0, 0, false, errors.New("brain is nil") }
+	k.mu.Lock()
+	defer k.mu.Unlock()
 	node, created, err := k.Registry.GetOrCreateRepresentation(vector, threshold)
 	if err != nil { return 0, 0, false, err }
 	score := 1.0
@@ -95,6 +105,8 @@ func (k *KnowledgeBase) ProjectVector(vector NeuralVector, threshold float64) (N
 
 func (k *KnowledgeBase) Connect(source, target *ConceptNode, weight, confidence float64, inhibitory bool) {
 	if source == nil || target == nil { return }
+	k.mu.Lock()
+	defer k.mu.Unlock()
 	now := time.Now().UTC(); if source.Synapses == nil { source.Synapses = make(map[NodeID]SynapseList) }
 	list := source.Synapses[target.ID]; s := list.FindDynamic(inhibitory)
 	if s == nil { s = &Synapse{TargetID: target.ID, Weight: clamp01(weight), Confidence: clamp01(confidence), Inhibitory: inhibitory}; source.Synapses[target.ID] = append(list, s) }
@@ -103,6 +115,8 @@ func (k *KnowledgeBase) Connect(source, target *ConceptNode, weight, confidence 
 
 func (k *KnowledgeBase) ConnectKind(source, target *ConceptNode, kind RelationKind, weight, confidence float64, inhibitory bool) {
 	if source == nil || target == nil { return }
+	k.mu.Lock()
+	defer k.mu.Unlock()
 	now := time.Now().UTC(); if source.Synapses == nil { source.Synapses = make(map[NodeID]SynapseList) }
 	list := source.Synapses[target.ID]; s := list.Find(kind, inhibitory)
 	if s == nil { s = &Synapse{TargetID: target.ID, Kind: kind, Weight: weight, Confidence: confidence, Inhibitory: inhibitory}; source.Synapses[target.ID] = append(list, s) }
@@ -123,6 +137,9 @@ type persistedGraph struct {
 }
 
 func (k *KnowledgeBase) Load(path string) error {
+	if k == nil { return ErrNilBrain }
+	k.mu.Lock()
+	defer k.mu.Unlock()
 	b, err := os.ReadFile(path); if err != nil { return err }; var graph persistedGraph; if err := json.Unmarshal(b, &graph); err != nil { return err }
 	registry := NewTokenRegistry(); var maxID NodeID
 	for _, node := range graph.Nodes { if node == nil { continue }; node.Token = canonicalToken(node.Token); if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.Token != "" { registry.byToken[node.Token] = node.ID }; if node.ID > maxID { maxID = node.ID } }
@@ -132,6 +149,9 @@ func (k *KnowledgeBase) Load(path string) error {
 	return nil
 }
 func (k *KnowledgeBase) Save(path string) error {
+	if k == nil { return ErrNilBrain }
+	k.mu.RLock()
+	defer k.mu.RUnlock()
 	k.projectionMu.RLock(); populations := append([]ProjectionPopulation(nil), k.ProjectionPopulations...); k.projectionMu.RUnlock()
 	b, e := json.MarshalIndent(persistedGraph{Nodes: k.Registry.Nodes(), Patterns: k.Patterns.All(), ProjectionPopulations: populations}, "", "  "); if e != nil { return e }; return os.WriteFile(path, b, 0644)
 }
