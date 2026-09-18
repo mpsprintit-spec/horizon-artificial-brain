@@ -35,7 +35,7 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 
 	// The first recurrent thought establishes a prediction trace in the same
 	// canonical activation engine. No second memory or predictor is created.
-	prediction, err := runtime.ThinkAt(1, t0.Add(250*time.Millisecond))
+	prediction, _, err := runtime.ThinkAt(1, t0.Add(250*time.Millisecond))
 
 	if err != nil {
 		t.Fatal(err)
