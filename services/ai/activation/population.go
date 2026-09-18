@@ -23,7 +23,7 @@ func (e *Engine) ActivateVector(vector knowledge.NeuralVector, cycles int, now t
 		cycles = 1
 	}
 
-	population, err := e.Memory.ProjectVectorPopulation(vector, e.Threshold, 4)
+	population, err := e.Memory.ProjectVectorPopulationAt(vector, e.Threshold, 4, now)
 	if err != nil {
 		return Result{}, err
 	}
