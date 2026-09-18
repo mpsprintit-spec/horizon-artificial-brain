@@ -1,6 +1,9 @@
 package knowledge
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestProjectVectorPopulationReusesDistributedUnits(t *testing.T) {
 	brain := NewBrain()
@@ -88,4 +91,24 @@ func containsPopulationUnit(units []PopulationUnit, id NodeID) bool {
 		}
 	}
 	return false
+}
+
+func TestProjectVectorPopulationAtUsesEventTime(t *testing.T) {
+	brain := NewBrain()
+	at := time.Unix(400, 0).UTC()
+	vector := NewNeuralVector([]float64{0.1, -0.2, 0.3, 0.4})
+
+	population, err := brain.ProjectVectorPopulationAt(vector, 0.80, 4, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, unit := range population.Units {
+		node := brain.Registry.GetByID(unit.NodeID)
+		if node == nil {
+			t.Fatalf("population references missing node %d", unit.NodeID)
+		}
+		if !node.LastActivation.Equal(at) {
+			t.Fatalf("node %d used wall-clock time: got %v want %v", node.ID, node.LastActivation, at)
+		}
+	}
 }
