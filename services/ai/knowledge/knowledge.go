@@ -151,7 +151,15 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.RLock()
 	defer k.mu.RUnlock()
-	k.projectionMu.RLock(); populations := append([]ProjectionPopulation(nil), k.ProjectionPopulations...); k.projectionMu.RUnlock()
-	b, e := json.MarshalIndent(persistedGraph{Nodes: k.Registry.Nodes(), Patterns: k.Patterns.All(), ProjectionPopulations: populations}, "", "  "); if e != nil { return e }; return os.WriteFile(path, b, 0644)
+	k.projectionMu.RLock()
+	populations := append([]ProjectionPopulation(nil), k.ProjectionPopulations...)
+	k.projectionMu.RUnlock()
+	var nodes []*ConceptNode
+	if k.Registry != nil { nodes = k.Registry.Nodes() }
+	var patterns []*PatternSynapse
+	if k.Patterns != nil { patterns = k.Patterns.All() }
+	b, e := json.MarshalIndent(persistedGraph{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations}, "", "  ")
+	if e != nil { return e }
+	return os.WriteFile(path, b, 0644)
 }
 func clamp01(v float64) float64 { if v < 0 { return 0 }; if v > 1 { return 1 }; return v }
