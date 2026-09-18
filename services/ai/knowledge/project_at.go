@@ -8,6 +8,8 @@ func (k *KnowledgeBase) ProjectVectorAt(vector NeuralVector, threshold float64, 
 	if k == nil {
 		return 0, 0, false, ErrNilBrain
 	}
+	k.mu.Lock()
+	defer k.mu.Unlock()
 	node, created, score, err := k.Registry.GetOrCreateRepresentationAt(vector, threshold, now)
 	if err != nil {
 		return 0, 0, false, err
