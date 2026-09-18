@@ -21,7 +21,7 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 	if o == nil || o.Runtime == nil { return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized") }
 	observationContext := Observation{Source: observation.Source, Modality: observation.Modality, Tokens: append([]string(nil), observation.Tokens...), ContextTokens: append([]string(nil), observation.ContextTokens...), DataTokens: append([]string(nil), observation.DataTokens...)}
 	grounded := make([]knowledge.GroundedRepresentation, 0, len(observation.ContextTokens)+len(observation.DataTokens))
-	for _, token := range observation.ContextTokens { representation, err := o.Runtime.GroundObservation(token, observation.Source, observation.Modality); if err != nil { return CognitiveInterpretation{}, false, err }; grounded = append(grounded, representation) }
+	for _, token := range observation.ContextTokens { representation, err := o.Runtime.GroundObservationAt(token, observation.Source, observation.Modality, event.Timestamp); if err != nil { return CognitiveInterpretation{}, false, err }; grounded = append(grounded, representation) }
 	for _, token := range observation.DataTokens { representation, err := o.Runtime.GroundObservation(token, observation.Source, observation.Modality); if err != nil { return CognitiveInterpretation{}, false, err }; grounded = append(grounded, representation) }
 	event.Source = observation.Source; event.Modality = observation.Modality; event.ContextTokens = append([]string(nil), observation.ContextTokens...); event.DataTokens = append([]string(nil), observation.DataTokens...)
 	output, err := o.Runtime.CognitiveProcess(event); if err != nil { return CognitiveInterpretation{}, false, err }
