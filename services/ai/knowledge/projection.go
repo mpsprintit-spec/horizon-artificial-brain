@@ -26,6 +26,13 @@ type PopulationUnit struct {
 // compatible unit and grows new members, preserving both shared structure and
 // population separation.
 func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold float64, populationSize int) (ProjectionPopulation, error) {
+	return k.ProjectVectorPopulationAt(vector, threshold, populationSize, time.Time{})
+}
+
+// ProjectVectorPopulationAt is the event-time-aware population projection path.
+// All node activation timestamps created by the projection use the supplied
+// timestamp, making replay independent of wall-clock time.
+func (k *KnowledgeBase) ProjectVectorPopulationAt(vector NeuralVector, threshold float64, populationSize int, now time.Time) (ProjectionPopulation, error) {
 	if k == nil {
 		return ProjectionPopulation{}, ErrNilBrain
 	}
@@ -38,13 +45,18 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	if populationSize <= 0 {
 		populationSize = defaultProjectionPopulation
 	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	} else {
+		now = now.UTC()
+	}
 
 	// Population identity is structural state, so recover an exact learned
 	// projection before considering generic unit similarity. This prevents a
 	// later similar experience from accidentally stealing members from an
 	// earlier population merely because it ranks highly against them.
 	if population, ok := k.findExactProjectionPopulation(vector); ok {
-		return k.activateProjectionPopulation(population, vector), nil
+		return k.activateProjectionPopulationAt(population, vector, now), nil
 	}
 
 	candidates := k.matchRepresentationPopulation(vector, threshold)
@@ -71,7 +83,7 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	}
 
 	k.registerProjectionPopulation(population)
-	return k.activateProjectionPopulation(population, vector), nil
+	return k.activateProjectionPopulationAt(population, vector, now), nil
 }
 
 type populationCandidate struct {
@@ -133,7 +145,11 @@ func (k *KnowledgeBase) registerProjectionPopulation(population ProjectionPopula
 }
 
 func (k *KnowledgeBase) activateProjectionPopulation(population ProjectionPopulation, vector NeuralVector) ProjectionPopulation {
-	now := time.Now().UTC()
+	return k.activateProjectionPopulationAt(population, vector, time.Now().UTC())
+}
+
+func (k *KnowledgeBase) activateProjectionPopulationAt(population ProjectionPopulation, vector NeuralVector, now time.Time) ProjectionPopulation {
+	if now.IsZero() { now = time.Now().UTC() } else { now = now.UTC() }
 	out := ProjectionPopulation{Units: make([]PopulationUnit, len(population.Units))}
 	for i, unit := range population.Units {
 		node := k.Registry.GetByID(unit.NodeID)
