@@ -81,7 +81,6 @@ func (k *KnowledgeBase) Lock() { if k != nil { k.mu.Lock() } }
 func (k *KnowledgeBase) Unlock() { if k != nil { k.mu.Unlock() } }
 func (k *KnowledgeBase) RLock() { if k != nil { k.mu.RLock() } }
 func (k *KnowledgeBase) RUnlock() { if k != nil { k.mu.RUnlock() } }
-}
 
 func NewKnowledgeBase() *KnowledgeBase { return &KnowledgeBase{Registry: NewTokenRegistry(), Patterns: NewPatternIndex()} }
 func (k *KnowledgeBase) Fetch(token string) *ConceptNode { return k.Registry.Get(token) }
