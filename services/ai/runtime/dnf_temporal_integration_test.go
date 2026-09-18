@@ -41,7 +41,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 
 	if _, err := runtime.CognitiveProcess(Event{
 		ID:        "temporal-idle-1",
-		Stimulus:  []string{"idle"},
+		Stimulus:  []string{"source"},
 		Cycles:    1,
 		Timestamp: t0.Add(time.Second),
 	}); err != nil {
