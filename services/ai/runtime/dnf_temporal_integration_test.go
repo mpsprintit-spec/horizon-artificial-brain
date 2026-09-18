@@ -11,6 +11,8 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 	brain := knowledge.NewBrain()
 	source := brain.Store("source")
 	target := brain.Store("target")
+	idle := brain.Store("idle")
+	_ = idle
 	brain.Connect(source, target, 0.20, 0.50, false)
 
 	runtime := NewBrainRuntime(brain)
@@ -41,7 +43,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 
 	if _, err := runtime.CognitiveProcess(Event{
 		ID:        "temporal-idle-1",
-		Stimulus:  []string{"source"},
+		Stimulus:  []string{"idle"},
 		Cycles:    1,
 		Timestamp: t0.Add(time.Second),
 	}); err != nil {
