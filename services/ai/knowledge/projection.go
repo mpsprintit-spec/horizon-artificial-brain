@@ -29,6 +29,8 @@ func (k *KnowledgeBase) ProjectVectorPopulation(vector NeuralVector, threshold f
 	if k == nil {
 		return ProjectionPopulation{}, ErrNilBrain
 	}
+	k.mu.Lock()
+	defer k.mu.Unlock()
 	if vector.Empty() {
 		return ProjectionPopulation{}, ErrEmptyNeuralVector
 	}
