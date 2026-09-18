@@ -41,6 +41,8 @@ func (e *Engine) ApplyActivityPlasticity(preState, postState map[knowledge.NodeI
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
+	e.Memory.Lock()
+	defer e.Memory.Unlock()
 
 	for _, source := range e.Memory.Registry.Nodes() {
 		pre := clamp01(preState[source.ID])
