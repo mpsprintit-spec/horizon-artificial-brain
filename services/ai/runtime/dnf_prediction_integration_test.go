@@ -19,6 +19,7 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 	}
 
 	t0 := time.Unix(400, 0).UTC()
+	runtime.SetClock(NewFixedClock(t0.Add(250 * time.Millisecond)))
 	first, err := runtime.CognitiveProcess(Event{
 		ID:        "prediction-seed",
 		Stimulus:  []string{"source"},
@@ -34,7 +35,8 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 
 	// The first recurrent thought establishes a prediction trace in the same
 	// canonical activation engine. No second memory or predictor is created.
-	prediction, err := runtime.CognitiveThink(1)
+	prediction, err := runtime.ThinkAt(1, t0.Add(250*time.Millisecond))
+
 	if err != nil {
 		t.Fatal(err)
 	}
