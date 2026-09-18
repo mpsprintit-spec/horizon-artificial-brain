@@ -40,6 +40,9 @@ func (e *Engine) ActivateWith(req Request) Result {
 }
 
 func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
+	if e == nil || e.Memory == nil { return cloneState(state), cloneState(confidence) }
+	e.Memory.Lock()
+	defer e.Memory.Unlock()
 	state=cloneState(state); confidence=cloneState(confidence)
 	for i:=0;i<cycles;i++ { next:=map[knowledge.NodeID]float64{}; nextConfidence:=map[knowledge.NodeID]float64{}
 		for _,id:=range sortedNodeIDs(state) { n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; adaptive:=n.Threshold-(n.Importance*.05)-(float64(n.Frequency)*.001); n.Threshold=clamp(adaptive,.12,.8); next[id]=n.RestingActivation }
@@ -49,4 +52,8 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 	return state,confidence
 }
 
-func (e *Engine) converge(state,confidence map[knowledge.NodeID]float64,now time.Time) Result { var ranked []*knowledge.ConceptNode; var resonance float64; for _,id:=range sortedNodeIDs(state){level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; n.Activation=clamp01(level); n.LastActivation=now; if level>e.Threshold{n.Frequency++}; resonance+=level*confidence[id]; if level>=e.Threshold{ranked=append(ranked,n)} }; sort.Slice(ranked,func(i,j int)bool{a,b:=ranked[i],ranked[j]; si:=a.Activation*confidence[a.ID]+a.Importance*.1+float64(a.Frequency)*.001; sj:=b.Activation*confidence[b.ID]+b.Importance*.1+float64(b.Frequency)*.001; if si==sj{return a.ID<b.ID}; return si>sj}); return Result{Converged:true,Resonance:resonance,Activations:cloneState(state),Confidence:cloneState(confidence),RankedNodes:ranked} }
+func (e *Engine) converge(state,confidence map[knowledge.NodeID]float64,now time.Time) Result {
+	if e == nil || e.Memory == nil { return Result{} }
+	e.Memory.Lock()
+	defer e.Memory.Unlock()
+	var ranked []*knowledge.ConceptNode; var resonance float64; for _,id:=range sortedNodeIDs(state){level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; n.Activation=clamp01(level); n.LastActivation=now; if level>e.Threshold{n.Frequency++}; resonance+=level*confidence[id]; if level>=e.Threshold{ranked=append(ranked,n)} }; sort.Slice(ranked,func(i,j int)bool{a,b:=ranked[i],ranked[j]; si:=a.Activation*confidence[a.ID]+a.Importance*.1+float64(a.Frequency)*.001; sj:=b.Activation*confidence[b.ID]+b.Importance*.1+float64(b.Frequency)*.001; if si==sj{return a.ID<b.ID}; return si>sj}); return Result{Converged:true,Resonance:resonance,Activations:cloneState(state),Confidence:cloneState(confidence),RankedNodes:ranked} }
