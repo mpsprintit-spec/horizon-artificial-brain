@@ -19,7 +19,7 @@ func decayPredictionEligibility(eligibility float64, lastUpdate, now time.Time) 
 		return eligibility
 	}
 	const halfLife = time.Second
-	factor := math.Exp(-math.Ln2 * now.Sub(lastUpdate).Seconds() / halfLife)
+	factor := math.Exp(-math.Ln2 * now.Sub(lastUpdate).Seconds() / halfLife.Seconds())
 	return clamp01(eligibility * factor)
 }
 
