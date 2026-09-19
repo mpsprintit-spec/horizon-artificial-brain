@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 func TestP1CognitiveIntegrationGroundLearnThinkInterpret(t *testing.T) {
@@ -78,6 +79,44 @@ func TestP1CognitiveIntegrationGroundLearnThinkInterpret(t *testing.T) {
 	if repeated.GroundedRepresentations[0].Status != "existing" {
 		t.Fatalf("repeated grounding status = %q, want existing", repeated.GroundedRepresentations[0].Status)
 	}
+}
+
+func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T) {
+	brain := knowledge.NewBrain()
+	runtime := NewBrainRuntime(brain)
+	at := time.Date(2026, 9, 19, 13, 2, 0, 0, time.UTC)
+
+	candidate, err := learning.BuildInquiryCandidate(
+		[]string{"matahari", "terbit"},
+		[]learning.InquirySource{
+			{Source: "source-a", Reputation: 0.95, Confidence: 0.90},
+			{Source: "source-b", Reputation: 0.90, Confidence: 0.95},
+		},
+		"web-inquiry",
+		at,
+	)
+	if err != nil { t.Fatalf("BuildInquiryCandidate: %v", err) }
+	decision := learning.ValidateInquiry(candidate, learning.DefaultLearningPolicy())
+	if decision != learning.PromotionAccepted { t.Fatalf("inquiry decision = %v, want %v", decision, learning.PromotionAccepted) }
+	if !candidate.Experience.Timestamp.Equal(at) { t.Fatalf("candidate timestamp = %v, want %v", candidate.Experience.Timestamp, at) }
+
+	if _, err := runtime.LearnExperience(candidate.Experience, at); err != nil { t.Fatalf("LearnExperience: %v", err) }
+
+	first := brain.Registry.Get("matahari")
+	second := brain.Registry.Get("terbit")
+	if first == nil || second == nil { t.Fatal("accepted inquiry did not create canonical Brain nodes") }
+	if !first.LastActivation.Equal(at) || !second.LastActivation.Equal(at) { t.Fatalf("learned node timestamps = %v, %v; want %v", first.LastActivation, second.LastActivation, at) }
+
+	patterns := brain.Patterns.MatchTrace([]knowledge.PatternStep{
+		{NodeID: first.ID, Position: 0, Activation: 1},
+		{NodeID: second.ID, Position: 1, Activation: 1},
+	}, nil)
+	if len(patterns) == 0 { t.Fatal("accepted inquiry did not form a recoverable canonical pattern") }
+	pattern := patterns[0]
+	if pattern.Result != second.ID { t.Fatalf("pattern result = %d, want %d", pattern.Result, second.ID) }
+	if len(pattern.Evidence) != 1 { t.Fatalf("pattern evidence count = %d, want 1", len(pattern.Evidence)) }
+	if !pattern.Evidence[0].Timestamp.Equal(at) { t.Fatalf("pattern evidence timestamp = %v, want %v", pattern.Evidence[0].Timestamp, at) }
+	if pattern.Evidence[0].Source != "source-a" { t.Fatalf("pattern provenance source = %q, want source-a", pattern.Evidence[0].Source) }
 }
 
 func TestP1ActionOutcomeLearningRequiresSafetyAndIndependentEvidence(t *testing.T) {
