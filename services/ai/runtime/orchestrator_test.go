@@ -57,3 +57,15 @@ func TestNewExperienceFromObservationCopiesSequence(t *testing.T) {
 	if experience.Sequence[0] != "shape" { t.Fatal("experience must own a copy of the sequence") }
 	if experience.ExperienceID != event.ID || experience.Source != "sensor" || experience.Modality != "vision" { t.Fatal("experience metadata was not propagated") }
 }
+
+func TestCognitiveOrchestratorDataGroundingUsesEventTime(t *testing.T) {
+	orchestrator := NewCognitiveOrchestrator(NewBrainRuntime(nil))
+	at := time.Date(2026, 9, 16, 1, 2, 3, 0, time.UTC)
+	observation := ObservationInput{Source: "sensor", Modality: "vision", DataTokens: []string{"jarak:0.8"}}
+	cognitive, _, err := orchestrator.ProcessObservation(Event{ID: "grounding-time", Cycles: 1, Timestamp: at}, observation, nil)
+	if err != nil { t.Fatalf("ProcessObservation failed: %v", err) }
+	if len(cognitive.GroundedRepresentations) != 1 { t.Fatalf("expected one grounding, got %d", len(cognitive.GroundedRepresentations)) }
+	node := orchestrator.Runtime.brain.FetchByID(cognitive.GroundedRepresentations[0].NodeID)
+	if node == nil { t.Fatal("grounded node is missing") }
+	if !node.LastActivation.Equal(at) { t.Fatalf("data grounding timestamp = %v, want %v", node.LastActivation, at) }
+}
