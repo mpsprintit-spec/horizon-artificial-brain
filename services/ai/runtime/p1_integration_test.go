@@ -117,6 +117,49 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 	if len(pattern.Evidence) != 1 { t.Fatalf("pattern evidence count = %d, want 1", len(pattern.Evidence)) }
 	if !pattern.Evidence[0].Timestamp.Equal(at) { t.Fatalf("pattern evidence timestamp = %v, want %v", pattern.Evidence[0].Timestamp, at) }
 	if pattern.Evidence[0].Source != "source-a" { t.Fatalf("pattern provenance source = %q, want source-a", pattern.Evidence[0].Source) }
+
+	// Recover the learned inquiry through the same observation boundary used by
+	// ordinary perception. Context/data grounding must resolve to the canonical
+	// nodes created by the accepted inquiry, while the stimulus is processed by
+	// the cognitive runtime.
+	recoveryAt := at.Add(time.Second)
+	observation := ObservationInput{
+		Source: "follow-up-observation",
+		Modality: "text",
+		Tokens: []string{"matahari", "terbit"},
+		ContextTokens: []string{"matahari", "terbit"},
+	}
+	interpreted, learned, err := NewCognitiveOrchestrator(runtime).ProcessObservation(Event{
+		ID: "p1-inquiry-recovery",
+		Stimulus: observation.Tokens,
+		Timestamp: recoveryAt,
+		Cycles: 1,
+	}, observation, nil)
+	if err != nil { t.Fatalf("ProcessObservation recovery: %v", err) }
+	if learned { t.Fatal("recovery observation without an experience should not learn") }
+	if len(interpreted.GroundedRepresentations) != 2 {
+		t.Fatalf("recovery grounding count = %d, want 2", len(interpreted.GroundedRepresentations))
+	}
+	if interpreted.GroundedRepresentations[0].NodeID != first.ID ||
+		interpreted.GroundedRepresentations[1].NodeID != second.ID {
+		t.Fatalf("recovery grounding IDs = %d,%d; want %d,%d",
+			interpreted.GroundedRepresentations[0].NodeID,
+			interpreted.GroundedRepresentations[1].NodeID, first.ID, second.ID)
+	}
+	for i, representation := range interpreted.GroundedRepresentations {
+		if representation.Status != "existing" {
+			t.Fatalf("recovery grounding[%d] status = %q, want existing", i, representation.Status)
+		}
+		if !representation.Timestamp.Equal(recoveryAt) {
+			t.Fatalf("recovery grounding[%d] timestamp = %v, want %v", i, representation.Timestamp, recoveryAt)
+		}
+	}
+	if interpreted.State.BrainIdentity != BrainIdentity {
+		t.Fatalf("recovery brain identity = %q, want %q", interpreted.State.BrainIdentity, BrainIdentity)
+	}
+	if len(interpreted.State.RankedNodeIDs) == 0 {
+		t.Fatal("recovery interpretation produced no ranked neural nodes")
+	}
 }
 
 func TestP1ActionOutcomeLearningRequiresSafetyAndIndependentEvidence(t *testing.T) {
