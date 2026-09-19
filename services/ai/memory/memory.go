@@ -24,6 +24,11 @@ func (m *Engine) Optimize(now time.Time, staleAfter time.Duration, decay float64
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
+	m.Kb.Lock()
+	defer m.Kb.Unlock()
+	if m.Kb.Registry == nil {
+		return
+	}
 	for _, node := range m.Kb.Registry.Nodes() {
 		for _, synapse := range node.OutboundAll() {
 			if synapse == nil || synapse.Dynamic.LastActivation.IsZero() || now.Sub(synapse.Dynamic.LastActivation) <= staleAfter {
@@ -32,7 +37,7 @@ func (m *Engine) Optimize(now time.Time, staleAfter time.Duration, decay float64
 			synapse.Dynamic.Weight = clamp01(synapse.Dynamic.Weight * (1 - decay))
 			synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence * (1 - decay))
 			synapse.Dynamic.LastModification = now
-		synapse.Weight = synapse.Dynamic.Weight
+			synapse.Weight = synapse.Dynamic.Weight
 		synapse.Confidence = synapse.Dynamic.Confidence
 		synapse.LastActivation = synapse.Dynamic.LastActivation
 		}
