@@ -74,7 +74,7 @@ func (k *KnowledgeBase) ProjectVectorPopulationAt(vector NeuralVector, threshold
 	}
 
 	for slot := len(population.Units); slot < populationSize; slot++ {
-		node := k.createRepresentationPrototype(projectionPrototype(vector, slot, populationSize))
+		node := k.createRepresentationPrototypeAt(projectionPrototype(vector, slot, populationSize), now)
 		score := NewNeuralVector(node.Representation).Similarity(vector)
 		population.Units = append(population.Units, PopulationUnit{
 			NodeID: node.ID,
@@ -165,11 +165,14 @@ func (k *KnowledgeBase) activateProjectionPopulationAt(population ProjectionPopu
 }
 
 func (k *KnowledgeBase) createRepresentationPrototype(vector NeuralVector) *ConceptNode {
+	return k.createRepresentationPrototypeAt(vector, time.Time{})
+}
+
+func (k *KnowledgeBase) createRepresentationPrototypeAt(vector NeuralVector, now time.Time) *ConceptNode {
 	k.Registry.mu.Lock()
 	defer k.Registry.mu.Unlock()
-	node := newRepresentationNode(k.Registry.nextID, vector.Values)
+	node := newRepresentationNodeAt(k.Registry.nextID, vector.Values, now)
 	node.Frequency = 1
-	node.LastActivation = time.Now().UTC()
 	k.Registry.nextID++
 	k.Registry.byID[node.ID] = node
 	return node
