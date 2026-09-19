@@ -24,7 +24,11 @@ type ConceptNode struct {
 }
 
 func newConceptNode(id NodeID, token string) *ConceptNode {
-	now := time.Now().UTC()
+	return newConceptNodeAt(id, token, time.Now().UTC())
+}
+
+func newConceptNodeAt(id NodeID, token string, now time.Time) *ConceptNode {
+	if now.IsZero() { now = time.Now().UTC() } else { now = now.UTC() }
 	return &ConceptNode{
 		ID:                id,
 		Token:             token,
@@ -41,7 +45,11 @@ func newConceptNode(id NodeID, token string) *ConceptNode {
 }
 
 func newRepresentationNode(id NodeID, representation []float64) *ConceptNode {
-	n := newConceptNode(id, "")
+	return newRepresentationNodeAt(id, representation, time.Now().UTC())
+}
+
+func newRepresentationNodeAt(id NodeID, representation []float64, now time.Time) *ConceptNode {
+	n := newConceptNodeAt(id, "", now)
 	n.UsageHistory = nil
 	n.Representation = append([]float64(nil), representation...)
 	return n
