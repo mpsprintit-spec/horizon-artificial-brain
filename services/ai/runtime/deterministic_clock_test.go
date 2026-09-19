@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/project-horizon/horizon-core/services/ai/activation"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
@@ -57,4 +58,25 @@ func TestRuntimeClockAccessIsSerialized(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
+}
+
+func TestCanonicalBrainSerializesStoreAndActivation(t *testing.T) {
+	brain := knowledge.NewBrain()
+	brain.Store("seed")
+	r := NewBrainRuntime(brain)
+	const workers = 8
+	var wg sync.WaitGroup
+	wg.Add(workers * 2)
+	for i := 0; i < workers; i++ {
+		go func(i int) {
+			defer wg.Done()
+			brain.Store("token-" + string(rune('a'+i)))
+		}(i)
+		go func(i int) {
+			defer wg.Done()
+			r.activation.ActivateWith(activation.Request{StimulusTokens: []string{"seed"}, Cycles: 1, Now: time.Unix(int64(100+i), 0).UTC()})
+		}(i)
+	}
+	wg.Wait()
+	if got := len(brain.Registry.Nodes()); got != workers+1 { t.Fatalf("node count = %d, want %d", got, workers+1) }
 }
