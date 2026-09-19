@@ -3,7 +3,11 @@ package knowledge
 import (
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
+	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/activation"
 )
 
 func TestTokenRegistryPreventsDuplicateNodes(t *testing.T) {
@@ -106,5 +110,28 @@ func TestLegacySingleSynapseJSONLoads(t *testing.T) {
 	}
 	if x.FindSynapse(y.ID, RelationHas, false) == nil {
 		t.Fatal("legacy single synapse not migrated")
+	}
+}
+
+func TestStoreSerializesWithActivationOnCanonicalBrain(t *testing.T) {
+	kb := NewKnowledgeBase()
+	kb.Store("seed")
+	engine := activation.NewEngine(kb)
+	const workers = 8
+	var wg sync.WaitGroup
+	wg.Add(workers * 2)
+	for i := 0; i < workers; i++ {
+		go func(i int) {
+			defer wg.Done()
+			kb.Store("token-" + string(rune('a'+i)))
+		}(i)
+		go func(i int) {
+			defer wg.Done()
+			engine.ActivateWith(activation.Request{StimulusTokens: []string{"seed"}, Cycles: 1, Now: time.Unix(int64(100+i), 0).UTC()})
+		}(i)
+	}
+	wg.Wait()
+	if got := len(kb.Registry.Nodes()); got != workers+1 {
+		t.Fatalf("node count = %d, want %d", got, workers+1)
 	}
 }
