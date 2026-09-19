@@ -53,7 +53,7 @@ func TestRuntimeClockAccessIsSerialized(t *testing.T) {
 		}(i)
 		go func(i int) {
 			defer wg.Done()
-			_, _, err := r.CognitiveProcess(Event{ID: string(rune('a' + i)), Stimulus: []string{"air"}, Cycles: 1})
+			_, err := r.CognitiveProcess(Event{ID: string(rune('a' + i)), Stimulus: []string{"air"}, Cycles: 1})
 			if err != nil { t.Errorf("CognitiveProcess: %v", err) }
 		}(i)
 	}
