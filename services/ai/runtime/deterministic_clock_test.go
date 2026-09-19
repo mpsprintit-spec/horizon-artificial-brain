@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -35,4 +36,25 @@ func TestRuntimeUsesInjectedClockForMissingEventTimestamp(t *testing.T) {
 	if err != nil { t.Fatalf("read event log: %v", err) }
 	if len(events) != 1 { t.Fatalf("events: got %d want 1", len(events)) }
 	if !events[0].Timestamp.Equal(initial) { t.Fatalf("event timestamp: got %v want %v", events[0].Timestamp, initial) }
+}
+
+func TestRuntimeClockAccessIsSerialized(t *testing.T) {
+	brain := knowledge.NewBrain()
+	brain.Store("air")
+	r := NewBrainRuntime(brain)
+	var wg sync.WaitGroup
+	const workers = 8
+	wg.Add(workers * 2)
+	for i := 0; i < workers; i++ {
+		go func(i int) {
+			defer wg.Done()
+			r.SetClock(NewFixedClock(time.Date(2026, 9, 13, 12, 0, i, 0, time.UTC)))
+		}(i)
+		go func(i int) {
+			defer wg.Done()
+			_, _, err := r.CognitiveProcess(Event{ID: string(rune('a' + i)), Stimulus: []string{"air"}, Cycles: 1})
+			if err != nil { t.Errorf("CognitiveProcess: %v", err) }
+		}(i)
+	}
+	wg.Wait()
 }
