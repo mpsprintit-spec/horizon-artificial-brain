@@ -65,7 +65,7 @@ func TestCognitiveOrchestratorDataGroundingUsesEventTime(t *testing.T) {
 	cognitive, _, err := orchestrator.ProcessObservation(Event{ID: "grounding-time", Cycles: 1, Timestamp: at}, observation, nil)
 	if err != nil { t.Fatalf("ProcessObservation failed: %v", err) }
 	if len(cognitive.GroundedRepresentations) != 1 { t.Fatalf("expected one grounding, got %d", len(cognitive.GroundedRepresentations)) }
-	node := orchestrator.Runtime.brain.FetchByID(cognitive.GroundedRepresentations[0].NodeID)
+	node := orchestrator.Runtime.brain.Registry.GetByID(cognitive.GroundedRepresentations[0].NodeID)
 	if node == nil { t.Fatal("grounded node is missing") }
 	if !node.LastActivation.Equal(at) { t.Fatalf("data grounding timestamp = %v, want %v", node.LastActivation, at) }
 }
