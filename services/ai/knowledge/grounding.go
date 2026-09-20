@@ -3,7 +3,7 @@ package knowledge
 import (
 	"errors"
 	"hash/fnv"
-	"strings"
+	"strings"\n\t"time"
 )
 
 // GroundingStatus describes how an observation entered the shared brain.
@@ -52,7 +52,7 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	}
 	return GroundedRepresentation{
 		NodeID: nodeID, Similarity: similarity, Status: status,
-		Source: source, Modality: modality, Token: canonical,
+		Source: source, Modality: modality, Token: canonical, Timestamp: time.Now().UTC(),
 	}, nil
 }
 
