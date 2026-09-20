@@ -125,6 +125,17 @@ func BuildInquiryAgenda(brainIdentity string, sequence uint64, at time.Time, can
 
 // DefaultInquiryCandidates derives candidate actions from uncertainty and
 // avoids making language the only mechanism for acquiring information.
+// BuildInquiryAgendaFromCognition derives inquiry candidates from Horizon's
+// current cognitive boundary. It does not create a second uncertainty model:
+// the Answer.Uncertainty value is the uncertainty already produced by the
+// neural interpretation layer. Candidate evaluation remains separate from
+// authorization and execution.
+func BuildInquiryAgendaFromCognition(interpretation CognitiveInterpretation, at time.Time) (InquiryAgenda, error) {
+	uncertainty := clamp01(interpretation.Answer.Uncertainty.Level)
+	candidates := DefaultInquiryCandidates(uncertainty)
+	return BuildInquiryAgenda(interpretation.State.BrainIdentity, interpretation.State.Sequence, at, candidates, DefaultInquiryPolicy())
+}
+
 func DefaultInquiryCandidates(uncertainty float64) []InquiryCandidate {
 	u := clamp01(uncertainty)
 	return []InquiryCandidate{
