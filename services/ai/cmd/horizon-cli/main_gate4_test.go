@@ -23,8 +23,8 @@ func TestCLIProcessUsesNeuralRuntimeByDefault(t *testing.T) {
 	if result.Path != "neural_runtime" {
 		t.Fatalf("CLI process path = %q, want neural_runtime", result.Path)
 	}
-	if app.horizon.Runtime.LastSequence() != 2 {
-		t.Fatalf("CLI process expected process+learning transitions: sequence=%d", app.horizon.Runtime.LastSequence())
+	if app.horizon.Runtime.LastSequence() != 1 {
+		t.Fatalf("CLI process expected one canonical process transition: sequence=%d", app.horizon.Runtime.LastSequence())
 	}
 }
 
