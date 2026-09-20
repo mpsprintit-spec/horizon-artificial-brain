@@ -50,3 +50,47 @@ func TestInquiryAgendaDoesNotAuthorizeExecution(t *testing.T) {
 		t.Fatal("authorization requirement was lost")
 	}
 }
+
+
+func TestBuildInquiryAgendaFromCognitionUsesCurrentNeuralUncertainty(t *testing.T) {
+	at := time.Date(2026, 9, 20, 5, 0, 0, 0, time.UTC)
+	interpretation := CognitiveInterpretation{
+		State: CognitiveState{
+			BrainIdentity: BrainIdentity,
+			Sequence: 42,
+			Resonance: .9,
+			PredictionError: .2,
+		},
+		Answer: Answer{
+			Uncertainty: Uncertainty{
+				Level: .1,
+				PredictionError: .2,
+				Reason: "low-uncertainty",
+			},
+		},
+	}
+	agenda, err := BuildInquiryAgendaFromCognition(interpretation, at)
+	if err != nil {
+		t.Fatalf("BuildInquiryAgendaFromCognition() error = %v", err)
+	}
+	if agenda.BrainIdentity != BrainIdentity || agenda.Sequence != 42 {
+		t.Fatalf("agenda identity/sequence = %q/%d, want %q/42", agenda.BrainIdentity, agenda.Sequence, BrainIdentity)
+	}
+	if !agenda.CreatedAt.Equal(at) {
+		t.Fatalf("agenda timestamp = %v, want %v", agenda.CreatedAt, at)
+	}
+	for _, evaluation := range agenda.Evaluations {
+		if evaluation.InformationValue > .1+.000001 {
+			t.Fatalf("candidate %q used uncertainty outside cognitive answer: %v", evaluation.Action, evaluation.InformationValue)
+		}
+	}
+}
+
+func TestBuildInquiryAgendaFromCognitionRejectsMissingBrainIdentity(t *testing.T) {
+	_, err := BuildInquiryAgendaFromCognition(CognitiveInterpretation{
+		Answer: Answer{Uncertainty: Uncertainty{Level: .8}},
+	}, time.Date(2026, 9, 20, 5, 0, 0, 0, time.UTC))
+	if err == nil {
+		t.Fatal("expected missing brain identity error")
+	}
+}
