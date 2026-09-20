@@ -77,7 +77,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		SchemaVersion: BrainSnapshotSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence:      r.seq,
-		Timestamp:     r.now(),
+		Timestamp:     r.nowLocked(),
 		Checksum:      checksum,
 		Brain:         json.RawMessage(brainBytes),
 		Activation:    activationState,
