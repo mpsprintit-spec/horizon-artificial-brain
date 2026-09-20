@@ -13,7 +13,7 @@ func TestCognitiveStateContinuityTracksActualTransitions(t *testing.T) {
 	orchestrator := NewCognitiveOrchestrator(runtime)
 	at := time.Date(2026, 9, 20, 5, 0, 0, 0, time.UTC)
 
-	observation := ObservationInput{Source: "sensor", Modality: "text", Tokens: []string{"gelas"}}
+	observation := ObservationInput{Source: "sensor", Modality: "text", Tokens: []string{"gelas", "air"}}
 	first, _, err := orchestrator.ProcessObservation(Event{
 		ID: "state-transition-1", Stimulus: []string{"gelas"}, Cycles: 1, Timestamp: at,
 	}, observation, nil)
@@ -32,7 +32,7 @@ func TestCognitiveStateContinuityTracksActualTransitions(t *testing.T) {
 	}
 
 	second, _, err := orchestrator.ProcessObservation(Event{
-		ID: "state-transition-2", Stimulus: []string{"gelas"}, Cycles: 1, Timestamp: at.Add(time.Second),
+		ID: "state-transition-2", Stimulus: []string{"gelas", "air"}, Context: map[knowledge.NodeID]float64{first.State.ActiveNodeIDs[0]: 0.15}, Cycles: 1, Timestamp: at.Add(time.Second),
 	}, observation, nil)
 	if err != nil {
 		t.Fatalf("second ProcessObservation: %v", err)
