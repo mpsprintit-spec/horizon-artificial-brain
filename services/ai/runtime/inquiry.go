@@ -139,8 +139,8 @@ func BuildInquiryAgendaFromCognition(interpretation CognitiveInterpretation, at 
 func DefaultInquiryCandidates(uncertainty float64) []InquiryCandidate {
 	u := clamp01(uncertainty)
 	return []InquiryCandidate{
-		{ID:"reobserve", Action:InquiryReobserve, ExpectedInformationGain:u*.85, Cost:.10, Reversibility:1, SocialFit:.95, PriorExperience:.50},
-		{ID:"change-view", Action:InquiryChangeView, ExpectedInformationGain:u*.80, Cost:.20, Reversibility:1, SocialFit:.90, PriorExperience:.50},
+		{ID:"reobserve", Action:InquiryReobserve, ExpectedInformationGain:u*.65, Cost:.10, Reversibility:1, SocialFit:.95, PriorExperience:.50},
+		{ID:"change-view", Action:InquiryChangeView, ExpectedInformationGain:u*.65, Cost:.20, Reversibility:1, SocialFit:.90, PriorExperience:.50},
 		{ID:"focus", Action:InquiryFocus, ExpectedInformationGain:u*.75, Cost:.10, Reversibility:1, SocialFit:1, PriorExperience:.50},
 		{ID:"point", Action:InquiryPoint, ExpectedInformationGain:u*.45, Cost:.15, Reversibility:1, SocialFit:.85, PriorExperience:.30},
 		{ID:"vocalize", Action:InquiryVocalize, ExpectedInformationGain:u*.35, Cost:.25, Reversibility:1, SocialFit:.70, PriorExperience:.30},
