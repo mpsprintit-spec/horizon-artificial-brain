@@ -21,6 +21,22 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	if err != nil {
 		return GroundedRepresentation{}, err
 	}
+	if created {
+		// A newly grounded numeric unit can also carry the observed token as a
+		// compatibility anchor. The numeric representation remains canonical;
+		// the token only lets later textual learning/recovery resolve the same
+		// neural unit instead of creating a duplicate.
+		k.mu.Lock()
+		k.Registry.mu.Lock()
+		if node := k.Registry.byID[nodeID]; node != nil && node.Token == "" {
+			node.Token = canonical
+			if _, exists := k.Registry.byToken[canonical]; !exists {
+				k.Registry.byToken[canonical] = nodeID
+			}
+		}
+		k.Registry.mu.Unlock()
+		k.mu.Unlock()
+	}
 	status := GroundingExisting
 	if created {
 		status = GroundingCandidate
