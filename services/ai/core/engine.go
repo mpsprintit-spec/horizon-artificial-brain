@@ -60,11 +60,13 @@ func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, er
 	if len(signals) > 1 {
 		return runtime.CognitiveInterpretation{}, errors.New("pulse requires exactly one perception signal")
 	}
+
 	signal := signals[0]
 	observedAt := signal.ObservedAt
 	if observedAt.IsZero() {
 		observedAt = time.Now().UTC()
 	}
+
 	event := runtime.Event{
 		ID:        "pulse-" + observedAt.Format("20060102T150405.000000000Z0700"),
 		Stimulus:  append([]string(nil), signal.Tokens...),
@@ -77,6 +79,11 @@ func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, er
 		Source:   signal.Source,
 		Modality: "text",
 		Tokens:   append([]string(nil), signal.Tokens...),
+	}
+
+	interpretation, _, err := h.Orchestrator.ProcessObservation(event, observation, nil)
+	if err != nil {
+		return runtime.CognitiveInterpretation{}, err
 	}
 	return interpretation, nil
 }
@@ -98,13 +105,23 @@ func NewHorizonEngine() *HorizonEngine {
 // RequestAction is the facade-level action boundary. Callers cannot bypass the
 // safety assessment/authorization stages or reach ExecutionCore directly.
 func (h *HorizonEngine) RequestAction(recommendation runtime.Recommendation, approver string, expiry time.Time) error {
-	if h == nil || h.Gateway == nil { return errors.New("horizon execution gateway is unavailable") }
-	if recommendation.BrainIdentity == "" { recommendation.BrainIdentity = runtime.BrainIdentity }
+	if h == nil || h.Gateway == nil {
+		return errors.New("horizon execution gateway is unavailable")
+	}
+	if recommendation.BrainIdentity == "" {
+		recommendation.BrainIdentity = runtime.BrainIdentity
+	}
 	assessment, err := h.Safety.Assess(recommendation)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	authorization, err := h.Safety.Authorize(recommendation, assessment, strings.TrimSpace(approver))
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	request, err := h.Safety.BuildExecutionRequest(recommendation, assessment, authorization, expiry)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	return h.Gateway.Execute(request)
 }
