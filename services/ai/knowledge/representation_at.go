@@ -33,7 +33,7 @@ func (r *TokenRegistry) GetOrCreateRepresentationAt(vector NeuralVector, thresho
 		best.LastActivation = now
 		return best, false, bestScore, nil
 	}
-	n := newRepresentationNode(r.nextID, vector.Values)
+	n := newRepresentationNodeAt(r.nextID, vector.Values, now)
 	n.UsageHistory = []time.Time{now}
 	n.LastActivation = now
 	n.Frequency = 1
