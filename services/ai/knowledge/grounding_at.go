@@ -16,7 +16,36 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	if canonical == "" {
 		return GroundedRepresentation{}, errors.New("observation token is empty")
 	}
+
 	vector := observationVector(canonical, modality)
+
+	// If learning created a canonical token node before this observation was
+	// grounded, promote that same node with its first numeric representation.
+	// This preserves one neural unit across symbolic ingestion and later
+	// perception instead of creating token-node/numeric-node duplicates.
+	k.mu.Lock()
+	k.Registry.mu.Lock()
+	if id, exists := k.Registry.byToken[canonical]; exists {
+		if node := k.Registry.byID[id]; node != nil && len(node.Representation) == 0 {
+			node.Representation = append([]float64(nil), vector.Values...)
+			node.Activation = 1
+			if now.IsZero() {
+				node.LastActivation = time.Now().UTC()
+			} else {
+				node.LastActivation = now.UTC()
+			}
+			k.Registry.mu.Unlock()
+			k.mu.Unlock()
+			return GroundedRepresentation{
+				NodeID: node.ID, Similarity: 1, Status: GroundingExisting,
+				Source: source, Modality: modality, Token: canonical,
+				Timestamp: now.UTC(),
+			}, nil
+		}
+	}
+	k.Registry.mu.Unlock()
+	k.mu.Unlock()
+
 	nodeID, similarity, created, err := k.ProjectVectorAt(vector, threshold, now)
 	if err != nil {
 		return GroundedRepresentation{}, err
@@ -41,5 +70,9 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	if created {
 		status = GroundingCandidate
 	}
-	return GroundedRepresentation{NodeID: nodeID, Similarity: similarity, Status: status, Source: source, Modality: modality, Token: canonical, Timestamp: now.UTC()}, nil
+	return GroundedRepresentation{
+		NodeID: nodeID, Similarity: similarity, Status: status,
+		Source: source, Modality: modality, Token: canonical,
+		Timestamp: now.UTC(),
+	}, nil
 }
