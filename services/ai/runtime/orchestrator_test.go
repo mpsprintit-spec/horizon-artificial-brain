@@ -24,7 +24,7 @@ func TestCognitiveOrchestratorGroundsContextAndDataIntoSharedSubstrate(t *testin
 	observation := ObservationInput{Source: "vision-sensor", Modality: "vision", Tokens: []string{"gelas"}, ContextTokens: []string{"meja"}, DataTokens: []string{"jarak:0.8"}}
 	cognitive, _, err := orchestrator.ProcessObservation(Event{ID: "grounding-1", Stimulus: []string{"gelas"}, Cycles: 1, Timestamp: time.Date(2026, 9, 16, 0, 0, 0, 0, time.UTC)}, observation, nil)
 	if err != nil { t.Fatalf("ProcessObservation grounding failed: %v", err) }
-	if len(cognitive.GroundedRepresentations) != 2 { t.Fatalf("expected 2 grounded representations, got %d", len(cognitive.GroundedRepresentations)) }
+	if len(cognitive.GroundedRepresentations) != 3 { t.Fatalf("expected 3 grounded representations, got %d", len(cognitive.GroundedRepresentations)) }
 	if cognitive.GroundedRepresentations[0].Status != "candidate" { t.Fatalf("first unseen representation should be candidate, got %q", cognitive.GroundedRepresentations[0].Status) }
 	if cognitive.GroundedRepresentations[0].Source != "vision-sensor" || cognitive.GroundedRepresentations[0].Modality != "vision" { t.Fatal("grounding provenance was not preserved") }
 	if cognitive.GroundedRepresentations[0].NodeID == 0 || cognitive.GroundedRepresentations[1].NodeID == 0 { t.Fatal("grounding must produce valid substrate node IDs") }
