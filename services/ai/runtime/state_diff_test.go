@@ -14,19 +14,19 @@ func TestCognitiveStateDiffTracksNeuralStateChanges(t *testing.T) {
 		retained  knowledge.NodeID = 2
 	)
 	previous := CognitiveState{
-		Sequence:       10,
-		ActiveNodeIDs:  []knowledge.NodeID{removedID, retained},
-		Activations:    map[knowledge.NodeID]float64{removedID: 0.4, retained: 0.2},
-		Confidence:     map[knowledge.NodeID]float64{removedID: 0.5, retained: 0.6},
-		Resonance:      0.3,
+		Sequence:        10,
+		ActiveNodeIDs:   []knowledge.NodeID{removedID, retained},
+		Activations:     map[knowledge.NodeID]float64{removedID: 0.4, retained: 0.2},
+		Confidence:      map[knowledge.NodeID]float64{removedID: 0.5, retained: 0.6},
+		Resonance:       0.3,
 		PredictionError: 0.7,
 	}
 	current := CognitiveState{
-		Sequence:       11,
-		ActiveNodeIDs:  []knowledge.NodeID{retained, addedID},
-		Activations:    map[knowledge.NodeID]float64{retained: 0.7, addedID: 0.8},
-		Confidence:     map[knowledge.NodeID]float64{retained: 0.9, addedID: 0.4},
-		Resonance:      0.8,
+		Sequence:        11,
+		ActiveNodeIDs:   []knowledge.NodeID{retained, addedID},
+		Activations:     map[knowledge.NodeID]float64{retained: 0.7, addedID: 0.8},
+		Confidence:      map[knowledge.NodeID]float64{retained: 0.9, addedID: 0.4},
+		Resonance:       0.8,
 		PredictionError: 0.2,
 	}
 
@@ -53,5 +53,4 @@ func TestCognitiveStateDiffTracksNeuralStateChanges(t *testing.T) {
 
 func almostEqual(a, b float64) bool {
 	return math.Abs(a-b) < 1e-12
-}
 }
