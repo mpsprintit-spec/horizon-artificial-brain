@@ -39,8 +39,8 @@ func TestP1CognitiveIntegrationGroundLearnThinkInterpret(t *testing.T) {
 	if interpreted.State.BrainIdentity != BrainIdentity {
 		t.Fatalf("brain identity = %q, want %q", interpreted.State.BrainIdentity, BrainIdentity)
 	}
-	if len(interpreted.GroundedRepresentations) != 2 {
-		t.Fatalf("grounded representations = %d, want 2", len(interpreted.GroundedRepresentations))
+	if len(interpreted.GroundedRepresentations) != 4 {
+		t.Fatalf("grounded representations = %d, want 4", len(interpreted.GroundedRepresentations))
 	}
 	if interpreted.GroundedRepresentations[0].NodeID == 0 || interpreted.GroundedRepresentations[1].NodeID == 0 {
 		t.Fatal("grounding returned invalid canonical node IDs")
