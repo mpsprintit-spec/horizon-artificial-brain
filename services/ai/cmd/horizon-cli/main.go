@@ -173,6 +173,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 		Input: input,
 		Tokens: result.Observation.Tokens,
 		Answer: answer,
+		Path: "neural_runtime",
 		Confidence: result.Answer.Confidence,
 		Activation: rankedTokens(c.horizon),
 		Understanding: strings.Join(concepts, ", "),
