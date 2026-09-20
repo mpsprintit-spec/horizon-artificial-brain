@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"math"
 	"testing"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -39,13 +40,18 @@ func TestCognitiveStateDiffTracksNeuralStateChanges(t *testing.T) {
 	if len(delta.RemovedNodeIDs) != 1 || delta.RemovedNodeIDs[0] != removedID {
 		t.Fatalf("removed nodes = %v, want [%d]", delta.RemovedNodeIDs, removedID)
 	}
-	if delta.ActivationDelta[retained] != 0.5 || delta.ActivationDelta[addedID] != 0.8 || delta.ActivationDelta[removedID] != -0.4 {
+	if !almostEqual(delta.ActivationDelta[retained], 0.5) || !almostEqual(delta.ActivationDelta[addedID], 0.8) || !almostEqual(delta.ActivationDelta[removedID], -0.4) {
 		t.Fatalf("activation deltas = %v", delta.ActivationDelta)
 	}
-	if delta.ConfidenceDelta[retained] != 0.3 || delta.ConfidenceDelta[addedID] != 0.4 || delta.ConfidenceDelta[removedID] != -0.5 {
+	if !almostEqual(delta.ConfidenceDelta[retained], 0.3) || !almostEqual(delta.ConfidenceDelta[addedID], 0.4) || !almostEqual(delta.ConfidenceDelta[removedID], -0.5) {
 		t.Fatalf("confidence deltas = %v", delta.ConfidenceDelta)
 	}
-	if delta.ResonanceDelta != 0.5 || delta.PredictionErrorDelta != -0.5 {
+	if !almostEqual(delta.ResonanceDelta, 0.5) || !almostEqual(delta.PredictionErrorDelta, -0.5) {
 		t.Fatalf("scalar deltas = resonance %v, prediction error %v", delta.ResonanceDelta, delta.PredictionErrorDelta)
 	}
+}
+
+func almostEqual(a, b float64) bool {
+	return math.Abs(a-b) < 1e-12
+}
 }
