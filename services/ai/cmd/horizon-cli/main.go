@@ -152,40 +152,38 @@ func (c *cli) run(ctx context.Context) {
 // (kapan belajar, kapan cari web, mode ingat atau tidak) ke horizon.Pulse --
 // satu-satunya jalur resmi otak Horizon.
 func (c *cli) process(ctx context.Context, input string) pipelineResult {
-	signals, err := c.perceiver.Perceive(input)
-	if err != nil || len(signals) == 0 {
-		return pipelineResult{Input: input, Answer: "Input tidak dapat dipersepsi."}
+	_ = ctx // canonical Pulse owns the cognitive pipeline and does not accept a legacy context argument.
+	result, err := c.horizon.Pulse(input)
+	if err != nil {
+		return pipelineResult{Input: input, Answer: "Input tidak dapat diproses: " + err.Error()}
 	}
-	tokens := signals[0].Tokens
 
-	result := c.horizon.Pulse(ctx, core.TaskPulse{
-		Stimulus: input,
-		Context:  strings.Join(c.context, " "),
-	})
-
-	c.context = deriveContext(tokens, result.Concepts)
+	concepts := make([]string, 0, len(result.Interpretation.RankedNodeIDs))
+	for _, id := range result.Interpretation.RankedNodeIDs {
+		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil && node.Token != "" {
+			concepts = append(concepts, node.Token)
+		}
+	}
+	c.context = deriveContext(nil, concepts)
+	answer := strings.Join(concepts, ", ")
+	if answer == "" {
+		answer = "Tidak ada node neural yang teraktivasi."
+	}
 	return pipelineResult{
-		Input:         input,
-		Tokens:        tokens,
-		Answer:        result.Answer,
-		Confidence:    result.Confidence,
-		Activation:    rankedTokens(c.horizon),
-		Understanding: strings.Join(result.Concepts, ", "),
-		Reasoning:     result.Answer,
-		Context:       c.context,
-		Hypothesis:    hypothesisSummary(result.Hypotheses),
-		NeedsWeb:      result.NeedsWebSearch,
-		Learned:       result.Learned,
-		PatternEvidence: result.PatternEvidence,
-		Intent:        result.Intent,
-		Path:          result.Path,
-		FocusToken:    result.FocusToken,
-		FunctionalSignals: result.FunctionalSignals,
-		InterpretationNotes: result.InterpretationNotes,
-		Propositions: result.Propositions,
-		Constraints: result.Constraints,
-		EvidencePaths: result.EvidencePaths,
-		EvalStatus: result.EvalStatus,
+		Input: input,
+		Tokens: result.Observation.Tokens,
+		Answer: answer,
+		Confidence: result.Answer.Confidence,
+		Activation: rankedTokens(c.horizon),
+		Understanding: strings.Join(concepts, ", "),
+		Reasoning: answer,
+		Context: c.context,
+		FunctionalSignals: nil,
+		InterpretationNotes: []string{"source=" + result.Interpretation.Source},
+		Propositions: nil,
+		Constraints: nil,
+		EvidencePaths: nil,
+		EvalStatus: "cognitive_interpretation",
 	}
 }
 
