@@ -23,6 +23,61 @@ func (o CognitiveOutput) State() CognitiveState {
 	return CognitiveState{BrainIdentity: o.BrainIdentity, Sequence: o.Sequence, Timestamp: o.Timestamp, ActiveNodeIDs: append([]knowledge.NodeID(nil), o.RankedNodeIDs...), Activations: cloneNodeValues(o.Activations), Confidence: cloneNodeValues(o.Confidence), Resonance: o.Resonance, PredictionError: o.PredictionError}
 }
 
+type CognitiveStateDelta struct {
+	FromSequence uint64
+	ToSequence uint64
+	AddedNodeIDs []knowledge.NodeID
+	RemovedNodeIDs []knowledge.NodeID
+	ActivationDelta map[knowledge.NodeID]float64
+	ConfidenceDelta map[knowledge.NodeID]float64
+	ResonanceDelta float64
+	PredictionErrorDelta float64
+}
+
+func (s CognitiveState) Diff(previous CognitiveState) CognitiveStateDelta {
+	added := make([]knowledge.NodeID, 0)
+	removed := make([]knowledge.NodeID, 0)
+	previousActive := make(map[knowledge.NodeID]struct{}, len(previous.ActiveNodeIDs))
+	currentActive := make(map[knowledge.NodeID]struct{}, len(s.ActiveNodeIDs))
+	for _, id := range previous.ActiveNodeIDs { previousActive[id] = struct{}{} }
+	for _, id := range s.ActiveNodeIDs {
+		currentActive[id] = struct{}{}
+		if _, ok := previousActive[id]; !ok { added = append(added, id) }
+	}
+	for _, id := range previous.ActiveNodeIDs {
+		if _, ok := currentActive[id]; !ok { removed = append(removed, id) }
+	}
+	activationDelta := make(map[knowledge.NodeID]float64)
+	for id, value := range s.Activations {
+		if previousValue, ok := previous.Activations[id]; ok {
+			if delta := value - previousValue; delta != 0 { activationDelta[id] = delta }
+		} else if value != 0 {
+			activationDelta[id] = value
+		}
+	}
+	for id, value := range previous.Activations {
+		if _, ok := s.Activations[id]; !ok && value != 0 { activationDelta[id] = -value }
+	}
+	confidenceDelta := make(map[knowledge.NodeID]float64)
+	for id, value := range s.Confidence {
+		if previousValue, ok := previous.Confidence[id]; ok {
+			if delta := value - previousValue; delta != 0 { confidenceDelta[id] = delta }
+		} else if value != 0 {
+			confidenceDelta[id] = value
+		}
+	}
+	for id, value := range previous.Confidence {
+		if _, ok := s.Confidence[id]; !ok && value != 0 { confidenceDelta[id] = -value }
+	}
+	return CognitiveStateDelta{
+		FromSequence: previous.Sequence, ToSequence: s.Sequence,
+		AddedNodeIDs: added, RemovedNodeIDs: removed,
+		ActivationDelta: activationDelta, ConfidenceDelta: confidenceDelta,
+		ResonanceDelta: s.Resonance - previous.Resonance,
+		PredictionErrorDelta: s.PredictionError - previous.PredictionError,
+	}
+}
+
 type OutcomeEvent struct {
 	RequestID string
 	BrainIdentity string
