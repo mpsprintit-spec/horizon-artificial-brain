@@ -41,6 +41,47 @@ type HorizonEngine struct {
 	Safety runtime.SafetyBoundary
 }
 
+// Pulse is the canonical external perception-to-cognition entry point.
+// Perception only normalizes input; the CognitiveOrchestrator owns grounding,
+// runtime processing, and interpretation. Pulse deliberately does not create
+// an Experience, so an observation cannot become trusted learning merely by
+// entering through the facade.
+func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, error) {
+	if h == nil || h.Perception == nil || h.Orchestrator == nil || h.Runtime == nil {
+		return runtime.CognitiveInterpretation{}, errors.New("horizon cognitive pipeline is unavailable")
+	}
+	signals, err := h.Perception.Perceive(input)
+	if err != nil {
+		return runtime.CognitiveInterpretation{}, err
+	}
+	if len(signals) == 0 {
+		return runtime.CognitiveInterpretation{}, errors.New("perception produced no signals")
+	}
+	if len(signals) > 1 {
+		return runtime.CognitiveInterpretation{}, errors.New("pulse requires exactly one perception signal")
+	}
+	signal := signals[0]
+	observedAt := signal.ObservedAt
+	if observedAt.IsZero() {
+		observedAt = time.Now().UTC()
+	}
+	event := runtime.Event{
+		ID:        "pulse-" + observedAt.Format("20060102T150405.000000000Z0700"),
+		Stimulus:  append([]string(nil), signal.Tokens...),
+		Source:    signal.Source,
+		Modality:  "text",
+		Cycles:    1,
+		Timestamp: observedAt,
+	}
+	observation := runtime.ObservationInput{
+		Source:   signal.Source,
+		Modality: "text",
+		Tokens:   append([]string(nil), signal.Tokens...),
+	}
+	interpretation, _, err := h.Orchestrator.ProcessObservation(event, observation, nil)
+	return interpretation, err
+}
+
 func NewHorizonEngine() *HorizonEngine {
 	brain := knowledge.NewBrain()
 	rt := runtime.NewBrainRuntime(brain)
