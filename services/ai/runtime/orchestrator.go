@@ -30,9 +30,56 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 		if experience.ExperienceID == "" { experience.ExperienceID = event.ID }; if experience.Source == "" { experience.Source = observation.Source }; if experience.Modality == "" { experience.Modality = observation.Modality }; if experience.Timestamp.IsZero() { experience.Timestamp = event.Timestamp }
 		_, err = o.Runtime.LearnExperience(*experience, experience.Timestamp); if err != nil { return CognitiveInterpretation{}, false, err }; learned = true
 	}
-	cognitive, err := o.Runtime.InterpretCognitive(output, observationContext); if err != nil { return CognitiveInterpretation{}, learned, err }; cognitive.GroundedRepresentations = grounded
+	cognitive, err := o.Runtime.InterpretCognitive(output, observationContext)
+	if err != nil { return CognitiveInterpretation{}, learned, err }
+	cognitive.GroundedRepresentations = grounded
+	cognitive.ChangeAwareness = InternalChangeAwareness{
+		BrainIdentity: BrainIdentity,
+		Sequence: output.Sequence,
+		Timestamp: output.Timestamp,
+		StateDelta: output.State().Diff(CognitiveState{}),
+		KnowledgeChanges: []KnowledgeInjectionEvent{{
+			BrainIdentity: BrainIdentity,
+			Sequence: output.Sequence,
+			Timestamp: event.Timestamp,
+			Claims: knowledgeClaimsFromGrounding(grounded, event.Timestamp),
+			ExperienceID: experienceID(experience),
+			ChangedNodeIDs: groundedNodeIDs(grounded),
+		}},
+	}
 	return cognitive, learned, nil
 }
 
 func (o *CognitiveOrchestrator) LearnFromOutcome(outcome OutcomeEvent) (uint64, error) { if o == nil || o.Runtime == nil { return 0, errors.New("cognitive orchestrator is not initialized") }; return o.Runtime.ObserveOutcome(outcome) }
 func NewExperienceFromObservation(event Event, observation ObservationInput, sequence []string) learning.Experience { timestamp := event.Timestamp; if timestamp.IsZero() { timestamp = time.Now().UTC() }; return learning.Experience{ExperienceID: event.ID, Sequence: append([]string(nil), sequence...), Weight: 0.50, Confidence: 0.20, Source: observation.Source, Modality: observation.Modality, Timestamp: timestamp, Reliability: 0.50, IndependenceGroup: event.ID} }
+
+
+func knowledgeClaimsFromGrounding(grounded []knowledge.GroundedRepresentation, at time.Time) []KnowledgeClaim {
+	claims := make([]KnowledgeClaim, 0, len(grounded))
+	for _, representation := range grounded {
+		claims = append(claims, KnowledgeClaim{
+			NodeID: representation.NodeID,
+			Origin: KnowledgeOrigin{
+				Source: representation.Source,
+				Modality: representation.Modality,
+				ObservedAt: at,
+			},
+			Verified: false,
+			Status: representation.Status,
+		})
+	}
+	return claims
+}
+
+func groundedNodeIDs(grounded []knowledge.GroundedRepresentation) []knowledge.NodeID {
+	ids := make([]knowledge.NodeID, 0, len(grounded))
+	for _, representation := range grounded {
+		ids = append(ids, representation.NodeID)
+	}
+	return ids
+}
+
+func experienceID(experience *learning.Experience) string {
+	if experience == nil { return "" }
+	return experience.ExperienceID
+}
