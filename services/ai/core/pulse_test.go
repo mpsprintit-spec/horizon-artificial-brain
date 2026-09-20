@@ -1,27 +1,23 @@
 package core
 
-import (
-	"context"
-	"testing"
-)
+import "testing"
 
-type recordingPlugin struct{ triggered []string }
-func (p *recordingPlugin) Name() string { return "recording" }
-func (p *recordingPlugin) Trigger(data string) { p.triggered = append(p.triggered, data) }
-
-func TestPulseNeuralPathDoesNotDispatchExecutionDirectly(t *testing.T) {
-	previous := LegacyCognitionEnabled
-	LegacyCognitionEnabled = false
-	defer func() { LegacyCognitionEnabled = previous }()
-
+func TestPulseUsesCanonicalCognitivePipeline(t *testing.T) {
 	horizon := NewHorizonEngine()
-	drone := &recordingPlugin{}
-	horizon.Gateway.RegisterPlugin("terbang", drone)
-	horizon.Knowledge.Store("burung")
-	horizon.Knowledge.Store("elang")
-	horizon.Knowledge.Store("terbang")
-
-	result := horizon.Pulse(context.Background(), TaskPulse{Stimulus: "burung elang", Context: "terbang", Data: "Koordinat Ketinggian 50m"})
-	if result.Path != "neural_runtime" { t.Fatalf("expected neural runtime path, got %q", result.Path) }
-	if len(drone.triggered) != 0 { t.Fatalf("neural cognition must not dispatch execution directly, got %#v", drone.triggered) }
+	result, err := horizon.Pulse("burung elang")
+	if err != nil {
+		t.Fatalf("Pulse() error = %v", err)
+	}
+	if result.State.BrainIdentity != "horizon-primary-brain" {
+		t.Fatalf("brain identity = %q, want horizon-primary-brain", result.State.BrainIdentity)
+	}
+	if result.Interpretation.BrainIdentity != "horizon-primary-brain" {
+		t.Fatalf("interpretation brain identity = %q, want horizon-primary-brain", result.Interpretation.BrainIdentity)
+	}
+	if len(result.Answer.NodeIDs) == 0 {
+		t.Fatal("canonical Pulse produced no cognitive answer nodes")
+	}
+	if result.Recommendation != nil {
+		t.Fatal("canonical Pulse must not bypass the action-safety boundary")
+	}
 }
