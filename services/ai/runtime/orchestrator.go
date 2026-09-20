@@ -48,7 +48,7 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 		BrainIdentity: BrainIdentity,
 		Sequence: output.Sequence,
 		Timestamp: output.Timestamp,
-		StateDelta: output.State().Diff(CognitiveState{}),
+		StateDelta: output.StateDelta,
 		KnowledgeChanges: []KnowledgeInjectionEvent{{
 			BrainIdentity: BrainIdentity,
 			Sequence: output.Sequence,
