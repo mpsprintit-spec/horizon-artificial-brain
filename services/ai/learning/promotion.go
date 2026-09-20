@@ -22,6 +22,8 @@ func (p *PromotionEngine) Apply(nodeID knowledge.NodeID, evidence Evidence, now 
 		return PromotionCandidate, errors.New("promotion engine is not initialized")
 	}
 	decision := p.Policy.Evaluate(evidence)
+	p.Brain.Lock()
+	defer p.Brain.Unlock()
 	node := p.Brain.Registry.GetByID(nodeID)
 	if node == nil {
 		return decision, errors.New("promotion target node not found")
