@@ -20,9 +20,20 @@ type ObservationInput struct { Source string; Modality string; Tokens []string; 
 func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation ObservationInput, experience *learning.Experience) (CognitiveInterpretation, bool, error) {
 	if o == nil || o.Runtime == nil { return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized") }
 	observationContext := Observation{Source: observation.Source, Modality: observation.Modality, Tokens: append([]string(nil), observation.Tokens...), ContextTokens: append([]string(nil), observation.ContextTokens...), DataTokens: append([]string(nil), observation.DataTokens...)}
-	grounded := make([]knowledge.GroundedRepresentation, 0, len(observation.ContextTokens)+len(observation.DataTokens))
-	for _, token := range observation.ContextTokens { representation, err := o.Runtime.GroundObservationAt(token, observation.Source, observation.Modality, event.Timestamp); if err != nil { return CognitiveInterpretation{}, false, err }; grounded = append(grounded, representation) }
-	for _, token := range observation.DataTokens { representation, err := o.Runtime.GroundObservationAt(token, observation.Source, observation.Modality, event.Timestamp); if err != nil { return CognitiveInterpretation{}, false, err }; grounded = append(grounded, representation) }
+	grounded := make([]knowledge.GroundedRepresentation, 0, len(observation.Tokens)+len(observation.ContextTokens)+len(observation.DataTokens))
+	seen := make(map[string]struct{}, len(observation.Tokens)+len(observation.ContextTokens)+len(observation.DataTokens))
+	groundToken := func(token string) error {
+		key := token
+		if _, exists := seen[key]; exists { return nil }
+		seen[key] = struct{}{}
+		representation, err := o.Runtime.GroundObservationAt(token, observation.Source, observation.Modality, event.Timestamp)
+		if err != nil { return err }
+		grounded = append(grounded, representation)
+		return nil
+	}
+	for _, token := range observation.Tokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
+	for _, token := range observation.ContextTokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
+	for _, token := range observation.DataTokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
 	event.Source = observation.Source; event.Modality = observation.Modality; event.ContextTokens = append([]string(nil), observation.ContextTokens...); event.DataTokens = append([]string(nil), observation.DataTokens...)
 	output, err := o.Runtime.CognitiveProcess(event); if err != nil { return CognitiveInterpretation{}, false, err }
 	learned := false
