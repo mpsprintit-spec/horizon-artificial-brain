@@ -3,7 +3,8 @@ package knowledge
 import (
 	"errors"
 	"hash/fnv"
-	"strings"\n\t"time"
+	"strings"
+	"time"
 )
 
 // GroundingStatus describes how an observation entered the shared brain.
@@ -26,6 +27,7 @@ type GroundedRepresentation struct {
 	Source     string
 	Modality   string
 	Token      string
+	Timestamp  time.Time
 }
 
 // GroundObservation converts an unknown textual observation into a numeric
