@@ -157,7 +157,7 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 	if interpreted.State.BrainIdentity != BrainIdentity {
 		t.Fatalf("recovery brain identity = %q, want %q", interpreted.State.BrainIdentity, BrainIdentity)
 	}
-	if len(interpreted.State.RankedNodeIDs) == 0 {
+	if len(interpreted.State.ActiveNodeIDs) == 0 {
 		t.Fatal("recovery interpretation produced no ranked neural nodes")
 	}
 }
