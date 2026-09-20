@@ -25,5 +25,5 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	if created {
 		status = GroundingCandidate
 	}
-	return GroundedRepresentation{NodeID: nodeID, Similarity: similarity, Status: status, Source: source, Modality: modality, Token: canonical}, nil
+	return GroundedRepresentation{NodeID: nodeID, Similarity: similarity, Status: status, Source: source, Modality: modality, Token: canonical, Timestamp: now.UTC()}, nil
 }
