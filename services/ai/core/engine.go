@@ -78,8 +78,23 @@ func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, er
 		Modality: "text",
 		Tokens:   append([]string(nil), signal.Tokens...),
 	}
+	// Ground the perceived stimulus into the same canonical Brain substrate
+	// before activation. Perception remains identity-free; grounding only maps
+	// the observed representation to an existing or newly created neural node.
+	grounded := make([]knowledge.GroundedRepresentation, 0, len(signal.Tokens))
+	for _, token := range signal.Tokens {
+		representation, groundErr := h.Runtime.GroundObservationAt(token, signal.Source, "text", observedAt)
+		if groundErr != nil {
+			return runtime.CognitiveInterpretation{}, groundErr
+		}
+		grounded = append(grounded, representation)
+	}
 	interpretation, _, err := h.Orchestrator.ProcessObservation(event, observation, nil)
-	return interpretation, err
+	if err != nil {
+		return runtime.CognitiveInterpretation{}, err
+	}
+	interpretation.GroundedRepresentations = append(grounded, interpretation.GroundedRepresentations...)
+	return interpretation, nil
 }
 
 func NewHorizonEngine() *HorizonEngine {
