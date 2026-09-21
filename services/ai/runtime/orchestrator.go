@@ -44,6 +44,11 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 	cognitive, err := o.Runtime.InterpretCognitive(output, observationContext)
 	if err != nil { return CognitiveInterpretation{}, learned, err }
 	cognitive.GroundedRepresentations = grounded
+	inquiryAgenda, inquiryErr := BuildInquiryAgendaFromCognition(cognitive, output.Timestamp)
+	if inquiryErr != nil {
+		return CognitiveInterpretation{}, learned, inquiryErr
+	}
+	cognitive.InquiryAgenda = &inquiryAgenda
 	cognitive.ChangeAwareness = InternalChangeAwareness{
 		BrainIdentity: BrainIdentity,
 		Sequence: output.Sequence,
