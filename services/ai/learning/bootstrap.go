@@ -13,8 +13,6 @@ import (
 //go:embed data/basic_experiences.json
 var foundationalExperienceCorpus []byte
 
-//go:embed data/foundational_experiences.json
-var embodiedFoundationalExperienceCorpus []byte
 
 //go:embed data/foundational_vector_experiences.json
 var foundationalVectorExperienceCorpus []byte
@@ -31,7 +29,6 @@ type Experience struct {
 	IndependenceGroup string    `json:"independence_group,omitempty"`
 	CausalLink        string    `json:"causal_link,omitempty"`
 	ContradictionSet  string    `json:"contradiction_set,omitempty"`
-	Representation    []float64 `json:"representation,omitempty"`
 }
 
 func clamp01(v float64) float64 {
@@ -54,18 +51,7 @@ func (e Experience) evidence(now time.Time) knowledge.ExperienceEvidence {
 func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 { return }
 	if now.IsZero() { now = time.Now().UTC() }
-	now = now.UTC()
-	var representationNode *knowledge.ConceptNode
-	if len(experience.Representation) > 0 {
-		vector := knowledge.NewNeuralVector(experience.Representation)
-		if !vector.Empty() {
-			nodeID, _, _, err := l.Kb.ProjectVectorAt(vector, 0.90, now)
-			if err == nil {
-				representationNode = l.Kb.Registry.GetByID(nodeID)
-			}
-		}
-	}
-	weight := clamp01(experience.Weight)
+	now = now.UTC()	weight := clamp01(experience.Weight)
 	confidence := clamp01(experience.Confidence)
 	if weight == 0 { weight = 0.5 }
 	if confidence == 0 { confidence = 0.5 }
@@ -77,7 +63,6 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 		if node == nil { continue }
 		steps = append(steps, knowledge.PatternStep{NodeID: node.ID, Position: i, Activation: 1})
 		if previous != nil { l.Kb.ConnectAt(previous, node, weight, confidence, false, now) }
-		if representationNode != nil && i == 0 { l.Kb.ConnectAt(representationNode, node, weight, confidence, false, now) }
 		previous = node
 		node.LastActivation = now
 	}
