@@ -13,6 +13,9 @@ import (
 //go:embed data/basic_experiences.json
 var foundationalExperienceCorpus []byte
 
+//go:embed data/foundational_vector_experiences.json
+var foundationalVectorExperienceCorpus []byte
+
 type Experience struct {
 	Sequence          []string  `json:"sequence"`
 	Weight            float64   `json:"weight"`
@@ -89,7 +92,18 @@ func (l *LearningUnit) loadExperienceData(data []byte, now time.Time) (int, erro
 }
 
 func (l *LearningUnit) BootstrapBasicExperiences(now time.Time) (int, error) {
-	return l.loadExperienceData(foundationalExperienceCorpus, now)
+	count, err := l.loadExperienceData(foundationalExperienceCorpus, now)
+	if err != nil {
+		return 0, err
+	}
+	var vectorExperiences []FoundationalVectorExperience
+	if err := json.Unmarshal(foundationalVectorExperienceCorpus, &vectorExperiences); err != nil {
+		return count, err
+	}
+	for _, experience := range vectorExperiences {
+		l.LearnFoundationalVectorExperience(experience, now)
+	}
+	return count + len(vectorExperiences), nil
 }
 
 
