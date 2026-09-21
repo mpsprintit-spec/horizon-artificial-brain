@@ -126,3 +126,31 @@ func TestBootstrapBasicExperiencesLoadsDataCorpus(t *testing.T) {
 		t.Fatal("bootstrap produced no learned patterns")
 	}
 }
+
+
+func TestBootstrapBasicExperiencesIncludesDistributedFoundationalVectors(t *testing.T) {
+	brain := knowledge.NewKnowledgeBase()
+	unit := NewLearningUnit(brain)
+	count, err := unit.BootstrapBasicExperiences(time.Unix(300, 0).UTC())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if count < 30 {
+		t.Fatalf("expected language and distributed foundational experiences, got %d", count)
+	}
+	if len(brain.ProjectionPopulations) == 0 {
+		t.Fatal("expected foundational bootstrap to create distributed projection populations")
+	}
+	if len(brain.Patterns.All()) < 20 {
+		t.Fatalf("expected foundational bootstrap to create many temporal patterns, got %d", len(brain.Patterns.All()))
+	}
+	var represented int
+	for _, node := range brain.Registry.Nodes() {
+		if len(node.Representation) > 0 {
+			represented++
+		}
+	}
+	if represented == 0 {
+		t.Fatal("expected numeric foundational experiences to create represented neural units")
+	}
+}
