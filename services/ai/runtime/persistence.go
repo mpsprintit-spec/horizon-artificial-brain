@@ -71,7 +71,8 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	_ = os.Remove(brainPath)
 
 	activationState := r.activation.SnapshotState()
-	checksum, err := checkpointChecksum(brainBytes, activationState, r.lastCognitiveState)
+	cognitiveState := cloneCognitiveState(r.lastCognitiveState)
+	checksum, err := checkpointChecksum(brainBytes, activationState, cognitiveState)
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
@@ -82,8 +83,8 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		Timestamp:     r.nowLocked(),
 		Checksum:      checksum,
 		Brain:         json.RawMessage(brainBytes),
-		Activation:    activationState,
-		CognitiveState: cloneCognitiveState(r.lastCognitiveState),
+		Activation:     activationState,
+		CognitiveState: cognitiveState,
 	}
 	data, err := json.MarshalIndent(snapshot, "", "  ")
 	if err != nil {
