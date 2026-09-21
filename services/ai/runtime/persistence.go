@@ -13,7 +13,7 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/activation"
 )
 
-const BrainSnapshotSchemaVersion = 2
+const BrainSnapshotSchemaVersion = 3
 
 type BrainSnapshot struct {
 	SchemaVersion int                      `json:"schema_version"`
@@ -23,19 +23,21 @@ type BrainSnapshot struct {
 	Checksum      string                   `json:"checksum"`
 	Brain         json.RawMessage          `json:"brain"`
 	Activation    activation.StateSnapshot `json:"activation"`
+	CognitiveState CognitiveState `json:"cognitive_state"`
 }
 
 type checkpointPayload struct {
-	Brain      json.RawMessage          `json:"brain"`
-	Activation activation.StateSnapshot `json:"activation"`
+	Brain          json.RawMessage          `json:"brain"`
+	Activation     activation.StateSnapshot `json:"activation"`
+	CognitiveState CognitiveState           `json:"cognitive_state"`
 }
 
 // checkpointChecksum covers the complete logical neural/runtime state rather
 // than only the serialized Brain graph. Envelope metadata is intentionally
 // excluded so a checkpoint can be verified independently of its timestamp or
 // sequence metadata.
-func checkpointChecksum(brain json.RawMessage, state activation.StateSnapshot) (string, error) {
-	payload, err := json.Marshal(checkpointPayload{Brain: brain, Activation: state})
+func checkpointChecksum(brain json.RawMessage, state activation.StateSnapshot, cognitiveState CognitiveState) (string, error) {
+	payload, err := json.Marshal(checkpointPayload{Brain: brain, Activation: state, CognitiveState: cognitiveState})
 	if err != nil {
 		return "", err
 	}
@@ -69,7 +71,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	_ = os.Remove(brainPath)
 
 	activationState := r.activation.SnapshotState()
-	checksum, err := checkpointChecksum(brainBytes, activationState)
+	checksum, err := checkpointChecksum(brainBytes, activationState, r.lastCognitiveState)
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
@@ -81,6 +83,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		Checksum:      checksum,
 		Brain:         json.RawMessage(brainBytes),
 		Activation:    activationState,
+		CognitiveState: cloneCognitiveState(r.lastCognitiveState),
 	}
 	data, err := json.MarshalIndent(snapshot, "", "  ")
 	if err != nil {
@@ -135,7 +138,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}
-	checksum, err := checkpointChecksum(snapshot.Brain, snapshot.Activation)
+	checksum, err := checkpointChecksum(snapshot.Brain, snapshot.Activation, snapshot.CognitiveState)
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
@@ -154,6 +157,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 		return fmt.Errorf("restore brain: %w", err)
 	}
 	r.activation.RestoreState(snapshot.Activation)
+	r.lastCognitiveState = cloneCognitiveState(snapshot.CognitiveState)
 	r.seq = snapshot.Sequence
 	return nil
 }
