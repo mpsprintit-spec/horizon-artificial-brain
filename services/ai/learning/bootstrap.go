@@ -91,3 +91,92 @@ func (l *LearningUnit) loadExperienceData(data []byte, now time.Time) (int, erro
 func (l *LearningUnit) BootstrapBasicExperiences(now time.Time) (int, error) {
 	return l.loadExperienceData(foundationalExperienceCorpus, now)
 }
+
+
+type FoundationalVectorExperience struct {
+	ExperienceID string          `json:"experience_id"`
+	Modality     string          `json:"modality"`
+	Vectors      [][]float64     `json:"vectors"`
+	Weight       float64         `json:"weight"`
+	Confidence   float64         `json:"confidence"`
+	Reliability  float64         `json:"reliability"`
+	CausalLink   string          `json:"causal_link,omitempty"`
+}
+
+func (l *LearningUnit) LearnFoundationalVectorExperience(experience FoundationalVectorExperience, now time.Time) {
+	if l == nil || l.Kb == nil || len(experience.Vectors) == 0 {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	weight := clamp01(experience.Weight)
+	if weight == 0 {
+		weight = 0.6
+	}
+	confidence := clamp01(experience.Confidence)
+	if confidence == 0 {
+		confidence = 0.75
+	}
+	reliability := clamp01(experience.Reliability)
+	if reliability == 0 {
+		reliability = confidence
+	}
+
+	var previous *knowledge.ConceptNode
+	steps := make([]knowledge.PatternStep, 0, len(experience.Vectors))
+	for index, values := range experience.Vectors {
+		vector := knowledge.NewNeuralVector(values)
+		if vector.Empty() {
+			continue
+		}
+		population, err := l.Kb.ProjectVectorPopulationAt(vector, 0.90, 4, now)
+		if err != nil || len(population.Units) == 0 {
+			continue
+		}
+		anchor := l.Kb.Registry.GetByID(population.Units[0].NodeID)
+		if anchor == nil {
+			continue
+		}
+		steps = append(steps, knowledge.PatternStep{NodeID: anchor.ID, Position: index, Activation: population.Units[0].Activation})
+		if previous != nil {
+			l.Kb.ConnectAt(previous, anchor, weight, confidence, false, now)
+		}
+		previous = anchor
+	}
+	if len(steps) == 0 {
+		return
+	}
+	result := steps[len(steps)-1].NodeID
+	evidence := knowledge.ExperienceEvidence{
+		ExperienceID: experience.ExperienceID,
+		Source: "foundational-bootstrap",
+		Modality: experience.Modality,
+		Timestamp: now,
+		Reliability: reliability,
+		IndependenceGroup: experience.ExperienceID,
+		CausalLink: experience.CausalLink,
+	}
+	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, evidence)
+	if pattern != nil {
+		pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
+	}
+}
+
+func (l *LearningUnit) LoadFoundationalVectorExperiences(path string, now time.Time) (int, error) {
+	if l == nil || l.Kb == nil {
+		return 0, fmt.Errorf("learning unit or knowledge base is nil")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return 0, err
+	}
+	var experiences []FoundationalVectorExperience
+	if err := json.Unmarshal(data, &experiences); err != nil {
+		return 0, err
+	}
+	for _, experience := range experiences {
+		l.LearnFoundationalVectorExperience(experience, now)
+	}
+	return len(experiences), nil
+}
