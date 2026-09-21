@@ -108,3 +108,44 @@ func TestBrainRuntimeRejectsActivationStateTampering(t *testing.T) {
 func testExperience() learning.Experience {
 	return learning.Experience{Sequence: []string{"saya", "ingin", "belajar"}, Weight: 0.8, Confidence: 0.6, ExperienceID: "checkpoint-test", Source: "test", Modality: "language", Reliability: 0.8, IndependenceGroup: "checkpoint"}
 }
+
+func TestBrainRuntimeCheckpointRestoresCognitiveStateContinuity(t *testing.T) {
+	brain := knowledge.NewBrain()
+	r := NewBrainRuntime(brain)
+	orchestrator := NewCognitiveOrchestrator(r)
+	at := time.Date(2026, 9, 21, 5, 0, 0, 0, time.UTC)
+	observation := ObservationInput{Source: "sensor", Modality: "text", Tokens: []string{"gelas", "air"}}
+
+	first, _, err := orchestrator.ProcessObservation(Event{ID: "persist-state-1", Stimulus: []string{"gelas"}, Cycles: 1, Timestamp: at}, observation, nil)
+	if err != nil {
+		t.Fatalf("first ProcessObservation: %v", err)
+	}
+	second, _, err := orchestrator.ProcessObservation(Event{ID: "persist-state-2", Stimulus: []string{"gelas", "air"}, Cycles: 1, Timestamp: at.Add(time.Second)}, observation, nil)
+	if err != nil {
+		t.Fatalf("second ProcessObservation: %v", err)
+	}
+	if second.State.Sequence <= first.State.Sequence {
+		t.Fatalf("expected advancing cognitive sequence, got %d after %d", second.State.Sequence, first.State.Sequence)
+	}
+
+	path := filepath.Join(t.TempDir(), "brain.json")
+	if err := r.Checkpoint(path); err != nil {
+		t.Fatalf("checkpoint: %v", err)
+	}
+
+	restored := NewBrainRuntime(knowledge.NewBrain())
+	if err := restored.RestoreCheckpoint(path); err != nil {
+		t.Fatalf("restore: %v", err)
+	}
+	restoredOrchestrator := NewCognitiveOrchestrator(restored)
+	third, _, err := restoredOrchestrator.ProcessObservation(Event{ID: "persist-state-3", Stimulus: []string{"gelas", "air"}, Cycles: 1, Timestamp: at.Add(2 * time.Second)}, observation, nil)
+	if err != nil {
+		t.Fatalf("third ProcessObservation after restore: %v", err)
+	}
+	if third.ChangeAwareness.StateDelta.FromSequence != second.State.Sequence {
+		t.Fatalf("restored state delta starts at %d, want checkpointed cognitive sequence %d", third.ChangeAwareness.StateDelta.FromSequence, second.State.Sequence)
+	}
+	if third.ChangeAwareness.StateDelta.ToSequence != third.State.Sequence {
+		t.Fatalf("restored state delta ends at %d, want current sequence %d", third.ChangeAwareness.StateDelta.ToSequence, third.State.Sequence)
+	}
+}
