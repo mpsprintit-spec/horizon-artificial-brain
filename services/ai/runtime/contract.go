@@ -34,6 +34,19 @@ type CognitiveStateDelta struct {
 	PredictionErrorDelta float64
 }
 
+func cloneCognitiveState(in CognitiveState) CognitiveState {
+	return CognitiveState{
+		BrainIdentity: in.BrainIdentity,
+		Sequence: in.Sequence,
+		Timestamp: in.Timestamp,
+		ActiveNodeIDs: append([]knowledge.NodeID(nil), in.ActiveNodeIDs...),
+		Activations: cloneNodeValues(in.Activations),
+		Confidence: cloneNodeValues(in.Confidence),
+		Resonance: in.Resonance,
+		PredictionError: in.PredictionError,
+	}
+}
+
 func (s CognitiveState) Diff(previous CognitiveState) CognitiveStateDelta {
 	added := make([]knowledge.NodeID, 0)
 	removed := make([]knowledge.NodeID, 0)
