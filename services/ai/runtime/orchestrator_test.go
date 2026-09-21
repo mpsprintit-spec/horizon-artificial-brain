@@ -69,3 +69,36 @@ func TestCognitiveOrchestratorDataGroundingUsesEventTime(t *testing.T) {
 	if node == nil { t.Fatal("grounded node is missing") }
 	if !node.LastActivation.Equal(at) { t.Fatalf("data grounding timestamp = %v, want %v", node.LastActivation, at) }
 }
+
+func TestCognitiveOrchestratorBuildsActiveInquiryFromNeuralUncertainty(t *testing.T) {
+	at := time.Date(2026, 9, 21, 10, 0, 0, 0, time.UTC)
+	orchestrator := NewCognitiveOrchestrator(NewBrainRuntime(nil))
+	observation := ObservationInput{Source: "sensor", Modality: "vision", Tokens: []string{"gelas"}}
+	cognitive, _, err := orchestrator.ProcessObservation(Event{
+		ID: "inquiry-integration",
+		Stimulus: []string{"gelas"},
+		Cycles: 1,
+		Timestamp: at,
+	}, observation, nil)
+	if err != nil {
+		t.Fatalf("ProcessObservation: %v", err)
+	}
+	if cognitive.InquiryAgenda == nil {
+		t.Fatal("cognitive interpretation did not expose an inquiry agenda")
+	}
+	if cognitive.InquiryAgenda.BrainIdentity != BrainIdentity {
+		t.Fatalf("inquiry brain identity = %q, want %q", cognitive.InquiryAgenda.BrainIdentity, BrainIdentity)
+	}
+	if cognitive.InquiryAgenda.Sequence != cognitive.State.Sequence {
+		t.Fatalf("inquiry sequence = %d, want cognitive sequence %d", cognitive.InquiryAgenda.Sequence, cognitive.State.Sequence)
+	}
+	if cognitive.InquiryAgenda.Selected == nil {
+		t.Fatal("inquiry agenda did not select a candidate")
+	}
+	if len(cognitive.InquiryAgenda.Evaluations) != len(DefaultInquiryCandidates(cognitive.Answer.Uncertainty.Level)) {
+		t.Fatalf("inquiry evaluations = %d, want candidate count", len(cognitive.InquiryAgenda.Evaluations))
+	}
+	if cognitive.InquiryAgenda.Selected.RequiresAuthorization {
+		t.Fatal("inquiry selection must not itself authorize an action")
+	}
+}
