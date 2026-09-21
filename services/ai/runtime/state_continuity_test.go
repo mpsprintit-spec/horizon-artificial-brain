@@ -45,10 +45,28 @@ func TestCognitiveStateContinuityTracksActualTransitions(t *testing.T) {
 		t.Fatalf("second state delta ends at %d, want current sequence %d",
 			second.ChangeAwareness.StateDelta.ToSequence, second.State.Sequence)
 	}
-	if len(second.ChangeAwareness.StateDelta.AddedNodeIDs) != 0 {
-		t.Fatalf("second repeated observation incorrectly reports added nodes: %v", second.ChangeAwareness.StateDelta.AddedNodeIDs)
+	air := runtime.brain.Fetch("air")
+	if air == nil {
+		t.Fatal("air should already be grounded by the first observation")
+	}
+	if len(second.ChangeAwareness.StateDelta.AddedNodeIDs) != 1 || second.ChangeAwareness.StateDelta.AddedNodeIDs[0] != air.ID {
+		t.Fatalf("second cognitive transition should add the newly active air node: %v", second.ChangeAwareness.StateDelta.AddedNodeIDs)
 	}
 	if len(second.ChangeAwareness.StateDelta.ActivationDelta) == 0 {
 		t.Fatal("second cognitive transition should report activation continuity/change")
+	}
+
+	third, _, err := orchestrator.ProcessObservation(Event{
+		ID: "state-transition-3", Stimulus: []string{"gelas", "air"}, Cycles: 1, Timestamp: at.Add(2 * time.Second),
+	}, observation, nil)
+	if err != nil {
+		t.Fatalf("third ProcessObservation: %v", err)
+	}
+	if third.ChangeAwareness.StateDelta.FromSequence != second.State.Sequence {
+		t.Fatalf("third state delta starts at %d, want previous sequence %d",
+			third.ChangeAwareness.StateDelta.FromSequence, second.State.Sequence)
+	}
+	if len(third.ChangeAwareness.StateDelta.AddedNodeIDs) != 0 {
+		t.Fatalf("third repeated observation incorrectly reports added nodes: %v", third.ChangeAwareness.StateDelta.AddedNodeIDs)
 	}
 }
