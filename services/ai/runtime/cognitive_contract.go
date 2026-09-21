@@ -35,6 +35,7 @@ type CognitiveInterpretation struct {
 	Answer                  Answer
 	Recommendation          *Recommendation
 	ChangeAwareness         InternalChangeAwareness
+	InquiryAgenda           *InquiryAgenda
 }
 
 func ToCognitiveInterpretation(observation Observation, interpretation Interpretation) CognitiveInterpretation {
