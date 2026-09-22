@@ -26,7 +26,7 @@ func TestProcessInquiryOutcomeUsesRegisteredActionBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	execution, err := CaptureExecutionForTest(runtime, InquiryExecution{
+	execution, err := runtime.CaptureInquiryPrediction(InquiryExecution{
 		Proposal: InquiryProposal{
 			BrainIdentity: BrainIdentity,
 			Sequence: 12,
@@ -107,6 +107,52 @@ func TestProcessInquiryOutcomeRejectsUnboundExecutionBeforeObservation(t *testin
 }
 
 
-func CaptureExecutionForTest(r *BrainRuntime, execution InquiryExecution, now time.Time) (InquiryExecution, error) {
-	return r.CaptureInquiryPrediction(execution, now)
+
+func TestProcessInquiryOutcomeRejectsMissingPredictionBeforeObservation(t *testing.T) {
+	now := time.Date(2026, 9, 22, 13, 0, 0, 0, time.UTC)
+	brain := knowledge.NewBrain()
+	runtime := NewBrainRuntime(brain)
+	orch := NewCognitiveOrchestrator(runtime)
+	node := brain.Store("bound")
+
+	if err := runtime.RegisterActionBinding(ActionBinding{
+		RequestID: "inquiry-14-focus",
+		BrainIdentity: BrainIdentity,
+		Intent: "inquiry:focus",
+		TargetNodeIDs: []knowledge.NodeID{node.ID},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	result := InquiryResult{
+		Execution: InquiryExecution{
+			Proposal: InquiryProposal{
+				BrainIdentity: BrainIdentity,
+				Sequence: 14,
+				CandidateID: "focus",
+				Action: InquiryFocus,
+			},
+			Request: ExecutionRequest{
+				RequestID: "inquiry-14-focus",
+				BrainIdentity: BrainIdentity,
+				Expiry: now.Add(time.Minute),
+				authorized: true,
+			},
+		},
+		Observation: ObservationInput{
+			Source: "camera",
+			Modality: "vision",
+			Tokens: []string{"unexpected"},
+		},
+		Success: true,
+		Reliability: 0.9,
+	}
+
+	_, _, _, err := orch.ProcessInquiryOutcome(result, now)
+	if err == nil {
+		t.Fatal("expected missing prediction snapshot to be rejected")
+	}
+	if brain.Registry.Get("unexpected") != nil {
+		t.Fatal("missing prediction snapshot allowed observation injection")
+	}
 }
