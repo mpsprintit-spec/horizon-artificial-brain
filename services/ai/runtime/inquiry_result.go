@@ -101,5 +101,18 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 	if err != nil {
 		return CognitiveInterpretation{}, learned, sequence, err
 	}
+	if len(result.Execution.Prediction.State) == 0 {
+		return CognitiveInterpretation{}, learned, sequence, errors.New("inquiry execution has no pre-action prediction snapshot")
+	}
+	predictionError := o.Runtime.activation.PredictionError(result.Execution.Prediction, interpretation.State.Activations)
+	if absFloat(predictionError-interpretation.State.PredictionError) > 1e-9 {
+		return CognitiveInterpretation{}, learned, sequence, errors.New("inquiry prediction snapshot does not match cognitive prediction error")
+	}
+	result.PredictionError = predictionError
 	return interpretation, learned, sequence, nil
+}
+
+func absFloat(v float64) float64 {
+	if v < 0 { return -v }
+	return v
 }
