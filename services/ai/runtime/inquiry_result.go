@@ -66,6 +66,9 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 	if err := ValidateInquiryExecution(result.Execution, now); err != nil {
 		return CognitiveInterpretation{}, false, 0, err
 	}
+	if len(result.Execution.Prediction.State) == 0 {
+		return CognitiveInterpretation{}, false, 0, errors.New("inquiry execution has no pre-action prediction snapshot")
+	}
 	observedAt := result.Event.Timestamp
 	if observedAt.IsZero() {
 		observedAt = now.UTC()
@@ -100,9 +103,6 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 	interpretation, learned, err := o.ProcessObservation(result.Event, result.Observation, result.Experience)
 	if err != nil {
 		return CognitiveInterpretation{}, learned, sequence, err
-	}
-	if len(result.Execution.Prediction.State) == 0 {
-		return CognitiveInterpretation{}, learned, sequence, errors.New("inquiry execution has no pre-action prediction snapshot")
 	}
 	predictionError := o.Runtime.activation.PredictionError(result.Execution.Prediction, interpretation.State.Activations)
 	if absFloat(predictionError-interpretation.State.PredictionError) > 1e-9 {
