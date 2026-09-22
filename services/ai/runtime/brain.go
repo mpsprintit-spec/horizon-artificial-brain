@@ -144,7 +144,7 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	return output, nil
 }
 func (r *BrainRuntime) LastSequence() uint64 { if r == nil { return 0 }; r.mu.Lock(); defer r.mu.Unlock(); return r.seq }
-func cognitiveOutputFromResult(identity string, sequence uint64, now time.Time, result activation.Result) CognitiveOutput { return CognitiveOutput{BrainIdentity: identity, Sequence: sequence, Timestamp: now, RankedNodeIDs: rankedNodeIDs(result.RankedNodes), Activations: cloneNodeValues(result.Activations), Resonance: result.Resonance} }
+func cognitiveOutputFromResult(identity string, sequence uint64, now time.Time, result activation.Result) CognitiveOutput { return CognitiveOutput{BrainIdentity: identity, Sequence: sequence, Timestamp: now, RankedNodeIDs: rankedNodeIDs(result.RankedNodes), Activations: cloneNodeValues(result.Activations), Resonance: result.Resonance, PredictionError: result.PredictionError} }
 func rankedNodeIDs(nodes []*knowledge.ConceptNode) []knowledge.NodeID { out := make([]knowledge.NodeID, 0, len(nodes)); for _, node := range nodes { if node != nil { out = append(out, node.ID) } }; return out }
 func cloneNodeValues(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 { if in == nil { return map[knowledge.NodeID]float64{} }; out := make(map[knowledge.NodeID]float64, len(in)); for id, value := range in { out[id] = value }; return out }
 func cloneContext(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 { if in == nil { return nil }; out := make(map[knowledge.NodeID]float64, len(in)); for id, value := range in { out[id] = value }; return out }
