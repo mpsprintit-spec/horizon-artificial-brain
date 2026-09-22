@@ -14,6 +14,9 @@ func TestProcessInquiryOutcomeUsesRegisteredActionBinding(t *testing.T) {
 	orch := NewCognitiveOrchestrator(runtime)
 
 	node, _, err := brain.Registry.GetOrCreate("cup")
+	if _, err := runtime.CognitiveProcess(Event{Stimulus: []string{"cup"}, Cycles: 1, Timestamp: now}); err != nil {
+		t.Fatal(err)
+	}
 	if err := runtime.RegisterActionBinding(ActionBinding{
 		RequestID: "inquiry-12-focus",
 		BrainIdentity: BrainIdentity,
@@ -23,21 +26,26 @@ func TestProcessInquiryOutcomeUsesRegisteredActionBinding(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	result := InquiryResult{
-		Execution: InquiryExecution{
-			Proposal: InquiryProposal{
-				BrainIdentity: BrainIdentity,
-				Sequence: 12,
-				CandidateID: "focus",
-				Action: InquiryFocus,
-			},
-			Request: ExecutionRequest{
-				RequestID: "inquiry-12-focus",
-				BrainIdentity: BrainIdentity,
-				Expiry: now.Add(time.Minute),
-				authorized: true,
-			},
+	execution, err := CaptureExecutionForTest(runtime, InquiryExecution{
+		Proposal: InquiryProposal{
+			BrainIdentity: BrainIdentity,
+			Sequence: 12,
+			CandidateID: "focus",
+			Action: InquiryFocus,
 		},
+		Request: ExecutionRequest{
+			RequestID: "inquiry-12-focus",
+			BrainIdentity: BrainIdentity,
+			Expiry: now.Add(time.Minute),
+			authorized: true,
+		},
+	}, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	result := InquiryResult{
+		Execution: execution,
 		Event: Event{ID: "focus-outcome", Timestamp: now},
 		Observation: ObservationInput{
 			Source: "camera",
@@ -96,4 +104,9 @@ func TestProcessInquiryOutcomeRejectsUnboundExecutionBeforeObservation(t *testin
 	if runtime.brain.Registry.Get("unbound") != nil {
 		t.Fatal("unbound outcome injected observation into Brain")
 	}
+}
+
+
+func CaptureExecutionForTest(r *BrainRuntime, execution InquiryExecution, now time.Time) (InquiryExecution, error) {
+	return r.CaptureInquiryPrediction(execution, now)
 }
