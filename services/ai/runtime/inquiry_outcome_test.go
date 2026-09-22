@@ -13,7 +13,7 @@ func TestProcessInquiryOutcomeUsesRegisteredActionBinding(t *testing.T) {
 	runtime := NewBrainRuntime(brain)
 	orch := NewCognitiveOrchestrator(runtime)
 
-	node := brain.Registry.GetOrCreate("cup")
+	node, _, err := brain.Registry.GetOrCreate("cup")
 	if err := runtime.RegisterActionBinding(ActionBinding{
 		RequestID: "inquiry-12-focus",
 		BrainIdentity: BrainIdentity,
