@@ -13,9 +13,11 @@ import (
 // observation.
 type InquiryResult struct {
 	Execution InquiryExecution
-	Event     Event
+	Event Event
 	Observation ObservationInput
 	Experience *learning.Experience
+	Success bool
+	Reliability float64
 }
 
 // ProcessInquiryResult validates the execution boundary before accepting any
@@ -44,4 +46,60 @@ func (o *CognitiveOrchestrator) ProcessInquiryResult(result InquiryResult, now t
 	result.Event.Source = result.Observation.Source
 	result.Event.Modality = result.Observation.Modality
 	return o.ProcessObservation(result.Event, result.Observation, result.Experience)
+}
+
+// ProcessInquiryOutcome records the verified execution outcome through the
+// existing evidence/promotion subsystem and then feeds the same observation
+// through the canonical cognitive pipeline. No second learning or memory
+// subsystem is created here.
+//
+// The action binding must have been registered for the exact execution
+// RequestID. Outcome learning therefore remains constrained by the explicit
+// neural targets declared by the action binding.
+func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now time.Time) (CognitiveInterpretation, bool, uint64, error) {
+	if o == nil || o.Runtime == nil {
+		return CognitiveInterpretation{}, false, 0, errors.New("cognitive orchestrator is not initialized")
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	if err := ValidateInquiryExecution(result.Execution, now); err != nil {
+		return CognitiveInterpretation{}, false, 0, err
+	}
+	observedAt := result.Event.Timestamp
+	if observedAt.IsZero() {
+		observedAt = now.UTC()
+	}
+	source := result.Observation.Source
+	if source == "" {
+		source = "inquiry-outcome"
+	}
+	modality := result.Observation.Modality
+	if modality == "" {
+		modality = "inquiry-result"
+	}
+	sequence, err := o.Runtime.ObserveOutcome(OutcomeEvent{
+		RequestID: result.Execution.Request.RequestID,
+		BrainIdentity: result.Execution.Request.BrainIdentity,
+		Success: result.Success,
+		Observation: append([]string(nil), result.Observation.Tokens...),
+		Source: source,
+		Modality: modality,
+		ObservedAt: observedAt,
+		Reliability: result.Reliability,
+	})
+	if err != nil {
+		return CognitiveInterpretation{}, false, 0, err
+	}
+	if result.Event.ID == "" {
+		result.Event.ID = result.Execution.Request.RequestID
+	}
+	result.Event.Timestamp = observedAt
+	result.Event.Source = source
+	result.Event.Modality = modality
+	interpretation, learned, err := o.ProcessObservation(result.Event, result.Observation, result.Experience)
+	if err != nil {
+		return CognitiveInterpretation{}, learned, sequence, err
+	}
+	return interpretation, learned, sequence, nil
 }
