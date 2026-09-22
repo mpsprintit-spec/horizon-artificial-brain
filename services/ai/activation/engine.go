@@ -17,7 +17,7 @@ type Engine struct {
 }
 
 type Request struct { StimulusTokens []string; ContextBoosts map[knowledge.NodeID]float64; Cycles int; Now time.Time }
-type Result struct { Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode }
+type Result struct { Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode; PredictionError float64 }
 type Prediction struct { State, Confidence map[knowledge.NodeID]float64 }
 type ThoughtResult struct { Result; Prediction Prediction; PredictionError float64 }
 
@@ -28,14 +28,27 @@ func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkW
 
 func (e *Engine) ActivateWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
-	e.mu.RLock(); previous:=cloneState(e.lastPrediction); e.mu.RUnlock()
+	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
 	state:=map[knowledge.NodeID]float64{}; conf:=map[knowledge.NodeID]float64{}
 	for _,token:=range req.StimulusTokens { if n:=e.Memory.Fetch(token); n!=nil { state[n.ID]=1; conf[n.ID]=1 } }
 	for id,b:=range req.ContextBoosts { state[id]+=b; conf[id]=max(conf[id],b) }
 	state=normalize(state); pre:=cloneState(state); state,conf=e.advance(state,conf,req.Now,req.Cycles); result:=e.converge(state,conf,req.Now)
 	e.ApplyActivityPlasticity(pre,result.Activations,req.Now)
-	if len(previous)>0 { err:=stateDifference(previous,result.Activations); e.ApplyPredictionErrorPlasticity(previous,result.Activations,err,req.Now) }
-	e.mu.Lock(); e.internalState=cloneState(result.Activations); e.internalConfidence=cloneState(result.Confidence); e.lastPrediction=map[knowledge.NodeID]float64{}; e.lastPredictionConf=map[knowledge.NodeID]float64{}; e.mu.Unlock()
+
+	predictionError:=0.0
+	if len(previousPrediction)>0 {
+		predictionError=stateDifference(previousPrediction,result.Activations)
+		e.ApplyPredictionErrorPlasticity(previousPrediction,result.Activations,predictionError,req.Now)
+	}
+	nextPrediction, nextPredictionConfidence := e.advance(result.Activations,result.Confidence,req.Now,req.Cycles)
+
+	e.mu.Lock()
+	e.internalState=cloneState(result.Activations)
+	e.internalConfidence=cloneState(result.Confidence)
+	e.lastPrediction=cloneState(nextPrediction)
+	e.lastPredictionConf=cloneState(nextPredictionConfidence)
+	e.mu.Unlock()
+	result.PredictionError=predictionError
 	return result
 }
 
