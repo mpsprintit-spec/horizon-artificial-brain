@@ -142,3 +142,21 @@ func ValidateInquiryExecution(execution InquiryExecution, now time.Time) error {
 	}
 	return nil
 }
+
+
+// CaptureInquiryPrediction binds an authorized inquiry to the exact neural
+// prediction that existed immediately before external execution.
+func (r *BrainRuntime) CaptureInquiryPrediction(execution InquiryExecution, at time.Time) (InquiryExecution, error) {
+	if r == nil || r.activation == nil {
+		return InquiryExecution{}, errors.New("brain runtime is not initialized")
+	}
+	if err := ValidateInquiryExecution(execution, at); err != nil {
+		return InquiryExecution{}, err
+	}
+	if at.IsZero() {
+		at = time.Now().UTC()
+	}
+	execution.Prediction = r.activation.PredictionSnapshot()
+	execution.PredictionCapturedAt = at.UTC()
+	return execution, nil
+}
