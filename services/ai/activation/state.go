@@ -37,3 +37,24 @@ func (e *Engine) RestoreState(snapshot StateSnapshot) {
 	e.lastPrediction = cloneState(snapshot.LastPrediction)
 	e.lastPredictionConf = cloneState(snapshot.LastPredictionConf)
 }
+
+
+// PredictionSnapshot returns the current expected neural state at the exact
+// boundary before an external event. The returned maps are defensive copies.
+func (e *Engine) PredictionSnapshot() Prediction {
+	if e == nil {
+		return Prediction{State: map[knowledge.NodeID]float64{}, Confidence: map[knowledge.NodeID]float64{}}
+	}
+	e.mu.RLock()
+	defer e.mu.RUnlock()
+	return Prediction{State: cloneState(e.lastPrediction), Confidence: cloneState(e.lastPredictionConf)}
+}
+
+// PredictionError compares a captured prediction with the resulting neural
+// state without mutating the substrate.
+func (e *Engine) PredictionError(prediction Prediction, actual map[knowledge.NodeID]float64) float64 {
+	if e == nil {
+		return 0
+	}
+	return stateDifference(prediction.State, actual)
+}
