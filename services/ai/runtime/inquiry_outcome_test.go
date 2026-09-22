@@ -50,7 +50,7 @@ func TestProcessInquiryOutcomeUsesRegisteredActionBinding(t *testing.T) {
 		Observation: ObservationInput{
 			Source: "camera",
 			Modality: "vision",
-			Tokens: []string{"cup"},
+			Tokens: []string{"unexpected"},
 		},
 		Success: true,
 		Reliability: 0.9,
@@ -68,6 +68,9 @@ func TestProcessInquiryOutcomeUsesRegisteredActionBinding(t *testing.T) {
 	}
 	if len(interpretation.GroundedRepresentations) != 1 {
 		t.Fatalf("expected one grounded representation, got %d", len(interpretation.GroundedRepresentations))
+	}
+	if interpretation.State.PredictionError <= 0 {
+		t.Fatalf("expected inquiry outcome to produce prediction error, got %v", interpretation.State.PredictionError)
 	}
 }
 
