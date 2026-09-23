@@ -41,6 +41,7 @@ func (e *Engine) ActivateWith(req Request) Result {
 		e.ApplyPredictionErrorPlasticity(previousPrediction,result.Activations,predictionError,req.Now)
 	}
 	nextPrediction, nextPredictionConfidence := e.advance(result.Activations,result.Confidence,req.Now,req.Cycles)
+	nextPrediction, nextPredictionConfidence = e.applyPatternPrediction(nextPrediction, nextPredictionConfidence, result.Activations)
 
 	e.mu.Lock()
 	e.internalState=cloneState(result.Activations)
@@ -51,6 +52,33 @@ func (e *Engine) ActivateWith(req Request) Result {
 	result.PredictionError=predictionError
 	return result
 }
+
+func (e *Engine) applyPatternPrediction(prediction, confidence, actual map[knowledge.NodeID]float64) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+	if e == nil || e.Memory == nil || e.Memory.Patterns == nil || len(actual) == 0 {
+		return prediction, confidence
+	}
+	out := cloneState(prediction)
+	outConfidence := cloneState(confidence)
+	for _, id := range sortedNodeIDs(actual) {
+		if actual[id] <= e.Threshold { continue }
+		cue := []knowledge.PatternStep{{NodeID: id, Position: 0, Activation: actual[id]}}
+		matches := e.Memory.Patterns.CompleteTrace(cue, nil)
+		if len(matches) == 0 { continue }
+		limit := len(matches)
+		if limit > 3 { limit = 3 }
+		for _, pattern := range matches[:limit] {
+			if pattern == nil || len(pattern.Sequence) == 0 || pattern.Result == id { continue }
+			strength := clamp01(pattern.Weight) * clamp01(pattern.Confidence)
+			strength *= minFloat(float64(pattern.Frequency), 10) / 10
+			if strength <= 0 { continue }
+			if strength > 0.35 { strength = 0.35 }
+			out[pattern.Result] = max(out[pattern.Result], strength)
+			outConfidence[pattern.Result] = max(outConfidence[pattern.Result], strength)
+		}
+	}
+	return normalize(out), normalize(outConfidence)
+}
+
 
 func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
 	if e == nil || e.Memory == nil { return cloneState(state), cloneState(confidence) }
