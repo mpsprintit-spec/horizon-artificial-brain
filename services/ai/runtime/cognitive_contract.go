@@ -34,6 +34,7 @@ type CognitiveInterpretation struct {
 	Interpretation          Interpretation
 	Answer                  Answer
 	Recommendation          *Recommendation
+	Consequence              *ConsequenceAssessment
 	ChangeAwareness         InternalChangeAwareness
 	InquiryAgenda           *InquiryAgenda
 }
