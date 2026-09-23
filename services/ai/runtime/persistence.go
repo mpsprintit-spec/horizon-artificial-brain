@@ -13,7 +13,7 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/activation"
 )
 
-const BrainSnapshotSchemaVersion = 3
+const BrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
 	SchemaVersion int                      `json:"schema_version"`
@@ -24,6 +24,7 @@ type BrainSnapshot struct {
 	Brain         json.RawMessage          `json:"brain"`
 	Activation    activation.StateSnapshot `json:"activation"`
 	CognitiveState CognitiveState `json:"cognitive_state"`
+	InquiryValence map[InquiryAction]float64 `json:"inquiry_valence"`
 }
 
 type checkpointPayload struct {
