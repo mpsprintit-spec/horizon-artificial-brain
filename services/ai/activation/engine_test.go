@@ -120,3 +120,43 @@ func TestContradictoryCausalOutcomesRemainAvailable(t *testing.T) {
 		t.Fatalf("expected both causal traces to remain: A=%d B=%d", len(patternsA), len(patternsB))
 	}
 }
+
+
+func TestPredictionErrorChangesLearnedTraceStrength(t *testing.T) {
+	kb := knowledge.NewKnowledgeBase()
+	target := kb.Store("target")
+	outcome := kb.Store("outcome")
+	pattern := kb.Patterns.LearnTrace(
+		[]knowledge.PatternStep{
+			{NodeID: target.ID, Position: 0, Activation: 1},
+			{NodeID: outcome.ID, Position: 1, Activation: 1},
+		},
+		nil, outcome.ID, 0.9, 0.9,
+	)
+	beforeWeight := pattern.Weight
+	beforeConfidence := pattern.Confidence
+
+	e := NewEngine(kb)
+	e.ActivateWith(Request{
+		StimulusTokens: []string{"target"},
+		Cycles: 1,
+		Now: time.Now().UTC(),
+	})
+	e.ApplyPredictionErrorPlasticity(
+		map[knowledge.NodeID]float64{target.ID: 0.8, outcome.ID: 0.8},
+		map[knowledge.NodeID]float64{target.ID: 0.8, outcome.ID: 0.0},
+		0.8,
+		time.Now().UTC().Add(time.Second),
+	)
+
+	patterns := kb.Patterns.ResultsFor(outcome.ID)
+	if len(patterns) != 1 {
+		t.Fatalf("expected one causal trace after reconsolidation, got %d", len(patterns))
+	}
+	if patterns[0].Weight >= beforeWeight {
+		t.Fatalf("expected prediction error to weaken learned trace: before=%v after=%v", beforeWeight, patterns[0].Weight)
+	}
+	if patterns[0].Confidence >= beforeConfidence {
+		t.Fatalf("expected prediction error to reduce trace confidence: before=%v after=%v", beforeConfidence, patterns[0].Confidence)
+	}
+}
