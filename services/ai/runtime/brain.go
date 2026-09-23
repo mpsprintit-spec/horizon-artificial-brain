@@ -55,13 +55,14 @@ type BrainRuntime struct {
 	mu sync.Mutex
 	seq uint64
 	lastCognitiveState CognitiveState
+	inquiryValence map[InquiryAction]float64
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBrain() }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), clock: WallClock{}}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}}
 }
 
 // DNF returns the structural facade bound to the exact same canonical Brain.
