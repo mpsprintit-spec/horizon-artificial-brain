@@ -23,6 +23,7 @@ type LoggedEvent struct {
 	Event         *Event               `json:"event,omitempty"`
 	Experience    *learning.Experience `json:"experience,omitempty"`
 	Outcome       *OutcomeEvent        `json:"outcome,omitempty"`
+	Consequence  *InquiryConsequenceEvent `json:"consequence,omitempty"`
 }
 
 const (
@@ -30,6 +31,7 @@ const (
 	EventTypeLearn = "learn"
 	EventTypeThink = "think"
 	EventTypeOutcome = "outcome"
+	EventTypeConsequence = "consequence"
 )
 
 type EventLog struct {
@@ -119,6 +121,9 @@ func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
 		case EventTypeOutcome:
 			if logged.Outcome == nil { return errors.New("outcome event has no outcome payload") }
 			if _, err := brainRuntime.ObserveOutcome(*logged.Outcome); err != nil { return err }
+		case EventTypeConsequence:
+			if logged.Consequence == nil { return errors.New("consequence event has no consequence payload") }
+			if _, err := brainRuntime.RecordInquiryConsequenceEvent(*logged.Consequence, logged.Timestamp); err != nil { return err }
 		default:
 			return fmt.Errorf("unknown event type %q", logged.Type)
 		}
