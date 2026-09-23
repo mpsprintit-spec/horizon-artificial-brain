@@ -18,6 +18,7 @@ type InquiryResult struct {
 	Experience *learning.Experience
 	Success bool
 	Reliability float64
+	PredictionError float64
 }
 
 // ProcessInquiryResult validates the execution boundary before accepting any
