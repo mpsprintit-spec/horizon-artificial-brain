@@ -93,7 +93,7 @@ func (e *Engine) ApplyConsequencePlasticity(valence, informationGain float64, no
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
-	valence = clampSigned(valence)
+	if valence < -1 { valence = -1 } else if valence > 1 { valence = 1 }
 	informationGain = clamp01(informationGain)
 	gain := 0.5 + 0.5*informationGain
 
