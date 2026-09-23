@@ -18,6 +18,9 @@ type InquiryResult struct {
 	Experience *learning.Experience
 	Success bool
 	Reliability float64
+	Cost float64
+	Risk float64
+	InformationGain float64
 	PredictionError float64
 }
 
@@ -114,6 +117,9 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 		Success: result.Success,
 		Reliability: result.Reliability,
 		Reversible: result.Execution.Proposal.Reversibility,
+		Cost: result.Cost,
+		Risk: result.Risk,
+		InformationGain: result.InformationGain,
 		PredictionError: predictionError,
 	})
 	interpretation.Consequence = &consequence
