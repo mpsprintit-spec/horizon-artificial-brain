@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/activation"
 )
 
 // InquiryProposal is the safety-neutral bridge between cognitive inquiry
@@ -30,6 +32,10 @@ type InquiryProposal struct {
 type InquiryExecution struct {
 	Proposal InquiryProposal
 	Request  ExecutionRequest
+	// Prediction is the neural expectation captured immediately before
+	// external inquiry execution. It is provenance, not a second memory store.
+	Prediction activation.Prediction
+	PredictionCapturedAt time.Time
 }
 
 // BuildInquiryProposal converts one selected inquiry evaluation into a
