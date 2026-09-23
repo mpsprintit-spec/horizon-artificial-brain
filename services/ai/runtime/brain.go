@@ -93,6 +93,21 @@ func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error {
 	return nil
 }
 
+func (r *BrainRuntime) actionBinding(requestID string) (ActionBinding, bool) {
+	if r == nil {
+		return ActionBinding{}, false
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	binding, ok := r.actions[requestID]
+	if !ok {
+		return ActionBinding{}, false
+	}
+	binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...)
+	binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...)
+	return binding, true
+}
+
 func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if clock == nil { r.clock = WallClock{} } else { r.clock = clock } }
 func (r *BrainRuntime) nowLocked() time.Time {
 	if r.clock == nil { r.clock = WallClock{} }
