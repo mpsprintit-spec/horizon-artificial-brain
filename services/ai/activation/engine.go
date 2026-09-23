@@ -69,7 +69,9 @@ func (e *Engine) applyPatternPrediction(prediction, confidence, actual map[knowl
 		for _, pattern := range matches[:limit] {
 			if pattern == nil || len(pattern.Sequence) == 0 || pattern.Result == id { continue }
 			strength := clamp01(pattern.Weight) * clamp01(pattern.Confidence)
-			strength *= minFloat(float64(pattern.Frequency), 10) / 10
+			frequency := float64(pattern.Frequency)
+			if frequency > 10 { frequency = 10 }
+			strength *= frequency / 10
 			if strength <= 0 { continue }
 			if strength > 0.35 { strength = 0.35 }
 			out[pattern.Result] = max(out[pattern.Result], strength)
