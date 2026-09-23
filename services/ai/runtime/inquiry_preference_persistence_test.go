@@ -1,9 +1,10 @@
 package runtime
 
 import (
+	"encoding/json"
+	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
@@ -59,5 +60,3 @@ func TestBrainRuntimeCheckpointChecksumCoversInquiryValence(t *testing.T) {
 		t.Fatal("expected checksum failure after inquiry valence tampering")
 	}
 }
-
-var _ = time.Time{}
