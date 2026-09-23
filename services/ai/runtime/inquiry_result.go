@@ -117,8 +117,14 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 		PredictionError: predictionError,
 	})
 	interpretation.Consequence = &consequence
-	o.Runtime.RecordInquiryConsequence(result.Execution.Proposal.Action, consequence.Valence)
-	return interpretation, learned, sequence, nil
+	finalSequence, err := o.Runtime.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+		Action: result.Execution.Proposal.Action,
+		Valence: consequence.Valence,
+	}, observedAt)
+	if err != nil {
+		return CognitiveInterpretation{}, learned, sequence, err
+	}
+	return interpretation, learned, finalSequence, nil
 }
 
 func absFloat(v float64) float64 {
