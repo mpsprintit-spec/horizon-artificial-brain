@@ -2,14 +2,16 @@ package runtime
 
 import "math"
 
-// ConsequenceInput is the bounded, outcome-level signal used to derive
-// valence. It describes what happened; it does not authorize future action.
+// ConsequenceInput is the bounded, outcome-level signal used to derive a
+// consequence profile. It describes what happened; it does not authorize
+// future action.
 type ConsequenceInput struct {
 	Success bool
 	Reliability float64
 	Reversible bool
 	Cost float64
 	Risk float64
+	InformationGain float64
 	PredictionError float64
 }
 
@@ -21,26 +23,26 @@ type ConsequenceAssessment struct {
 	Reversible bool
 	Cost float64
 	Risk float64
+	InformationGain float64
 	PredictionError float64
 	Valence float64
 }
 
 // AssessConsequence derives bounded valence from an observed outcome.
-// Success/failure supplies the primary direction; cost, risk and prediction
-// error modulate magnitude. Prediction error alone cannot make a successful
-// outcome negative or a failed outcome positive.
+// Success/failure supplies the primary direction; reliability, cost and risk
+// modulate magnitude. Information gain is retained as an outcome dimension,
+// but is not silently treated as positive or negative valence.
 func AssessConsequence(input ConsequenceInput) ConsequenceAssessment {
 	reliability := clamp01(input.Reliability)
 	cost := clamp01(input.Cost)
 	risk := clamp01(input.Risk)
+	informationGain := clamp01(input.InformationGain)
 	errorSignal := clamp01(input.PredictionError)
 
 	base := -1.0
 	if input.Success {
 		base = 1.0
 	}
-	// Reliability scales the outcome signal. Cost/risk are consequence
-	// penalties rather than independent semantic judgments.
 	modifier := 1.0 - (0.35 * cost) - (0.25 * risk)
 	if input.Success {
 		modifier += 0.15 * errorSignal
@@ -59,6 +61,7 @@ func AssessConsequence(input ConsequenceInput) ConsequenceAssessment {
 		Reversible: input.Reversible,
 		Cost: cost,
 		Risk: risk,
+		InformationGain: informationGain,
 		PredictionError: errorSignal,
 		Valence: valence,
 	}
