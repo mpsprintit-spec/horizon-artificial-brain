@@ -78,6 +78,41 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	}
 }
 
+func (l *LearningUnit) LearnOutcomeTrace(targetNodeIDs, outcomeNodeIDs []knowledge.NodeID, weight, confidence float64, evidence knowledge.ExperienceEvidence, now time.Time) {
+	if l == nil || l.Kb == nil || len(targetNodeIDs) == 0 || len(outcomeNodeIDs) == 0 {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	steps := make([]knowledge.PatternStep, 0, len(targetNodeIDs)+len(outcomeNodeIDs))
+	position := 0
+	for _, id := range targetNodeIDs {
+		if l.Kb.Registry.GetByID(id) == nil {
+			continue
+		}
+		steps = append(steps, knowledge.PatternStep{NodeID: id, Position: position, Activation: 1})
+		position++
+	}
+	for _, id := range outcomeNodeIDs {
+		if l.Kb.Registry.GetByID(id) == nil {
+			continue
+		}
+		steps = append(steps, knowledge.PatternStep{NodeID: id, Position: position, Activation: 1})
+		position++
+	}
+	if len(steps) < 2 {
+		return
+	}
+	result := steps[len(steps)-1].NodeID
+	weight = clamp01(weight)
+	confidence = clamp01(confidence)
+	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, evidence)
+	if pattern != nil {
+		pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
+	}
+}
+
 func (l *LearningUnit) LoadExperiences(path string, now time.Time) (int, error) {
 	if l == nil || l.Kb == nil { return 0, fmt.Errorf("learning unit or knowledge base is nil") }
 	data, err := os.ReadFile(path)
