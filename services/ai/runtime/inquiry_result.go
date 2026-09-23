@@ -123,6 +123,7 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 		PredictionError: predictionError,
 	})
 	interpretation.Consequence = &consequence
+	o.Runtime.activation.ApplyConsequencePlasticity(consequence.Valence, consequence.InformationGain, observedAt)
 	finalSequence, err := o.Runtime.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
 		Action: result.Execution.Proposal.Action,
 		Valence: consequence.Valence,
