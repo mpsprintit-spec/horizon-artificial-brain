@@ -117,6 +117,7 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 		PredictionError: predictionError,
 	})
 	interpretation.Consequence = &consequence
+	o.Runtime.RecordInquiryConsequence(result.Execution.Proposal.Action, consequence.Valence)
 	return interpretation, learned, sequence, nil
 }
 
