@@ -110,6 +110,13 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 		return CognitiveInterpretation{}, learned, sequence, errors.New("inquiry prediction snapshot does not match cognitive prediction error")
 	}
 	result.PredictionError = predictionError
+	consequence := AssessConsequence(ConsequenceInput{
+		Success: result.Success,
+		Reliability: result.Reliability,
+		Reversible: result.Execution.Proposal.Reversibility,
+		PredictionError: predictionError,
+	})
+	interpretation.Consequence = &consequence
 	return interpretation, learned, sequence, nil
 }
 
