@@ -26,7 +26,6 @@ func TestLearnedCausalTraceInfluencesPrediction(t *testing.T) {
 	kb := knowledge.NewKnowledgeBase()
 	target := kb.Store("target")
 	outcome := kb.Store("outcome")
-	unexpected := kb.Store("unexpected")
 	pattern := kb.Patterns.LearnTrace(
 		[]knowledge.PatternStep{
 			{NodeID: target.ID, Position: 0, Activation: 1},
@@ -127,6 +126,7 @@ func TestPredictionErrorChangesLearnedTraceStrength(t *testing.T) {
 	kb := knowledge.NewKnowledgeBase()
 	target := kb.Store("target")
 	outcome := kb.Store("outcome")
+	unexpected := kb.Store("unexpected")
 	pattern := kb.Patterns.LearnTrace(
 		[]knowledge.PatternStep{
 			{NodeID: target.ID, Position: 0, Activation: 1},
