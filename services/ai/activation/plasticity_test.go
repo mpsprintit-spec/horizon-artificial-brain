@@ -49,3 +49,30 @@ func TestPredictionErrorPlasticityDoesNotCreateNewConnection(t *testing.T) {
 		t.Fatal("prediction error must not invent a connection without structural growth evidence")
 	}
 }
+
+
+func TestConsequencePlasticityUsesInformationGainWithoutCreatingConnections(t *testing.T) {
+	kb := knowledge.NewKnowledgeBase()
+	a := kb.Store("a")
+	b := kb.Store("b")
+	kb.Connect(a, b, 0.40, 0.50, false)
+	synapse := a.Synapses[b.ID][0]
+	synapse.Dynamic.Eligibility = 1.0
+	synapse.Dynamic.LastEligibilityUpdate = time.Now().UTC()
+
+	e := NewEngine(kb)
+	before := synapse.Dynamic.Weight
+	e.ApplyConsequencePlasticity(0.8, 1.0, time.Now().UTC())
+	if synapse.Dynamic.Weight <= before {
+		t.Fatalf("positive consequence should strengthen eligible connection: before=%v after=%v", before, synapse.Dynamic.Weight)
+	}
+
+	before = synapse.Dynamic.Weight
+	e.ApplyConsequencePlasticity(-0.8, 1.0, time.Now().UTC())
+	if synapse.Dynamic.Weight >= before {
+		t.Fatalf("negative consequence should weaken eligible connection: before=%v after=%v", before, synapse.Dynamic.Weight)
+	}
+	if len(a.Synapses[b.ID]) != 1 {
+		t.Fatal("consequence plasticity must not create a connection")
+	}
+}
