@@ -74,3 +74,57 @@ func TestEventLogReplaysInquiryConsequencePreference(t *testing.T) {
 		t.Fatalf("replay sequence: got %d want 1", replay.LastSequence())
 	}
 }
+
+
+func TestInquiryConsequencePersistsCausalOutcomeTrace(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	log, err := OpenEventLog(path)
+	if err != nil { t.Fatalf("open log: %v", err) }
+	defer log.Close()
+
+	brain := knowledge.NewBrain()
+	target := brain.Store("action-target")
+	outcome := brain.Store("observed-outcome")
+	r := NewBrainRuntime(brain)
+	r.SetEventLog(log)
+	event := InquiryConsequenceEvent{
+		Action: InquiryFocus, Valence: 0.8, InformationGain: 0.9, Reliability: 0.8,
+		TargetNodeIDs: []knowledge.NodeID{target.ID},
+		OutcomeNodeIDs: []knowledge.NodeID{outcome.ID},
+		CausalLink: "inquiry:test-causal",
+	}
+	at := time.Date(2026, 9, 23, 12, 0, 0, 0, time.UTC)
+	if _, err := r.RecordInquiryConsequenceEvent(event, at); err != nil {
+		t.Fatalf("record consequence: %v", err)
+	}
+	matches := brain.Patterns.MatchTrace([]knowledge.PatternStep{
+		{NodeID: target.ID, Position: 0, Activation: 1},
+		{NodeID: outcome.ID, Position: 1, Activation: 1},
+	}, nil)
+	if len(matches) == 0 {
+		t.Fatal("causal outcome trace was not retained in brain patterns")
+	}
+	if matches[0].Evidence[0].CausalLink != "inquiry:test-causal" {
+		t.Fatalf("causal link mismatch: %+v", matches[0].Evidence)
+	}
+
+	events, err := ReadEventLog(path)
+	if err != nil { t.Fatalf("read log: %v", err) }
+	replayBrain := knowledge.NewBrain()
+	replayTarget := replayBrain.Store("action-target")
+	replayOutcome := replayBrain.Store("observed-outcome")
+	replayEvent := events[0]
+	replayEvent.Consequence.TargetNodeIDs = []knowledge.NodeID{replayTarget.ID}
+	replayEvent.Consequence.OutcomeNodeIDs = []knowledge.NodeID{replayOutcome.ID}
+	replay := NewBrainRuntime(replayBrain)
+	if err := ReplayEventLog(replay, []LoggedEvent{replayEvent}); err != nil {
+		t.Fatalf("replay: %v", err)
+	}
+	replayMatches := replayBrain.Patterns.MatchTrace([]knowledge.PatternStep{
+		{NodeID: replayTarget.ID, Position: 0, Activation: 1},
+		{NodeID: replayOutcome.ID, Position: 1, Activation: 1},
+	}, nil)
+	if len(replayMatches) == 0 {
+		t.Fatal("replay did not reconstruct causal outcome trace")
+	}
+}
