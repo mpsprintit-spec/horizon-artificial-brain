@@ -1,5 +1,7 @@
 package runtime
 
+import "time"
+
 // inquiryPreferenceLearningRate controls how strongly a new consequence
 // updates the action-specific experience signal. The signal is bounded and
 // remains a runtime preference, not an authorization mechanism.
