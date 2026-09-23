@@ -11,6 +11,7 @@ const (
 	predictionLearningRate = 0.12
 	predictionMinWeight    = 0.05
 	predictionMaxWeight    = 0.95
+	consequenceLearningRate = 0.08
 )
 
 func decayPredictionEligibility(eligibility float64, lastUpdate, now time.Time) float64 {
@@ -78,4 +79,46 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 	// reconsolidation signal, not a semantic contradiction detector: competing
 	// traces remain in the same Brain and retain their evidence history.
 	e.Memory.Patterns.ReconsolidateFromState(predicted, actual, errorSignal)
+}
+
+
+// ApplyConsequencePlasticity reinforces or weakens already-eligible neural
+// connections from the observed consequence of an inquiry. Information gain
+// controls how strongly the consequence is retained; it never changes the
+// sign of valence. No new connections are created.
+func (e *Engine) ApplyConsequencePlasticity(valence, informationGain float64, now time.Time) {
+	if e == nil || e.Memory == nil || valence == 0 {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	valence = clampSigned(valence)
+	informationGain = clamp01(informationGain)
+	gain := 0.5 + 0.5*informationGain
+
+	for _, source := range e.Memory.Registry.Nodes() {
+		for _, synapse := range source.OutboundAll() {
+			if synapse == nil || synapse.Inhibitory {
+				continue
+			}
+			eligibility := decayPredictionEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
+			if eligibility <= 0 {
+				continue
+			}
+			magnitude := consequenceLearningRate * abs(valence) * gain * eligibility
+			if valence > 0 {
+				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+magnitude, predictionMinWeight, predictionMaxWeight)
+				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + magnitude*0.5)
+			} else {
+				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-magnitude, predictionMinWeight, predictionMaxWeight)
+				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - magnitude*0.5)
+			}
+			synapse.Dynamic.LastModification = now
+			synapse.Dynamic.LastEligibilityUpdate = now
+			synapse.Dynamic.Eligibility = eligibility
+			synapse.Weight = synapse.Dynamic.Weight
+			synapse.Confidence = synapse.Dynamic.Confidence
+		}
+	}
 }
