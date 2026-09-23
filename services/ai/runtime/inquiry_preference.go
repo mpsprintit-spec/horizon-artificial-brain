@@ -8,17 +8,7 @@ import "time"
 const inquiryPreferenceLearningRate = 0.20
 
 func (r *BrainRuntime) RecordInquiryConsequence(action InquiryAction, valence float64) {
-	if r == nil || action == "" {
-		return
-	}
-	valence = clampSigned(valence)
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if r.inquiryValence == nil {
-		r.inquiryValence = make(map[InquiryAction]float64)
-	}
-	previous := r.inquiryValence[action]
-	r.inquiryValence[action] = clampSigned(previous + inquiryPreferenceLearningRate*(valence-previous))
+	_, _ = r.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{Action: action, Valence: valence}, time.Time{})
 }
 
 // InquiryPriorExperience converts accumulated action valence into the
