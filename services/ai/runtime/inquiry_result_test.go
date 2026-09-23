@@ -153,8 +153,22 @@ func TestInquiryOutcomeClosesPredictionCausalPredictionLoop(t *testing.T) {
 	if outcome == nil {
 		t.Fatal("outcome was not grounded")
 	}
+
+	// The learned causal trace should affect a prediction when its action
+	// target is presented again as a cue. The outcome itself is the result
+	// of the previous inquiry, so the immediately stored prediction belongs
+	// to that completed observation and is not retroactively recomputed.
+	_, err = runtime.CognitiveProcess(Event{
+		ID: "post-outcome-cue",
+		Stimulus: []string{"target"},
+		Cycles: 1,
+		Timestamp: now.Add(2 * time.Second),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
 	predictionAfter := runtime.activation.PredictionSnapshot()
 	if predictionAfter.State[outcome.ID] <= 0 {
-		t.Fatal("causal outcome did not influence subsequent prediction")
+		t.Fatal("learned causal outcome did not influence prediction from the repeated action cue")
 	}
 }
