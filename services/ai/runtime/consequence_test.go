@@ -33,3 +33,16 @@ func TestAssessConsequencePredictionErrorDoesNotReplaceOutcomeDirection(t *testi
 		t.Fatalf("prediction error incorrectly reversed failed outcome: %v", failure.Valence)
 	}
 }
+
+
+func TestAssessConsequencePreservesInformationGainIndependently(t *testing.T) {
+	assessment := AssessConsequence(ConsequenceInput{
+		Success: true, Reliability: 0.8, InformationGain: 0.75,
+	})
+	if assessment.InformationGain != 0.75 {
+		t.Fatalf("information gain was not preserved: %v", assessment.InformationGain)
+	}
+	if assessment.Valence <= 0 {
+		t.Fatalf("successful consequence should remain positive: %v", assessment.Valence)
+	}
+}
