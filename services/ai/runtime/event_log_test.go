@@ -43,3 +43,34 @@ func TestReadEventLogRejectsTruncatedRecord(t *testing.T) {
 	if err := os.WriteFile(path, []byte(`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":1,"type":"learn"`+"\n"), 0600); err != nil { t.Fatalf("write: %v", err) }
 	if _, err := ReadEventLog(path); err == nil { t.Fatal("expected malformed event failure") }
 }
+
+
+func TestEventLogReplaysInquiryConsequencePreference(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	log, err := OpenEventLog(path)
+	if err != nil { t.Fatalf("open log: %v", err) }
+	defer log.Close()
+
+	r := NewBrainRuntime(knowledge.NewBrain())
+	r.SetEventLog(log)
+	if _, err := r.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{Action: InquiryFocus, Valence: 1}, time.Date(2026, 9, 23, 12, 0, 0, 0, time.UTC)); err != nil {
+		t.Fatalf("record consequence: %v", err)
+	}
+	before := r.InquiryPriorExperience(InquiryFocus, 0.50)
+
+	events, err := ReadEventLog(path)
+	if err != nil { t.Fatalf("read log: %v", err) }
+	if len(events) != 1 || events[0].Type != EventTypeConsequence {
+		t.Fatalf("unexpected consequence event log: %+v", events)
+	}
+
+	replay := NewBrainRuntime(knowledge.NewBrain())
+	if err := ReplayEventLog(replay, events); err != nil { t.Fatalf("replay: %v", err) }
+	after := replay.InquiryPriorExperience(InquiryFocus, 0.50)
+	if after != before {
+		t.Fatalf("replayed preference mismatch: got %v want %v", after, before)
+	}
+	if replay.LastSequence() != 1 {
+		t.Fatalf("replay sequence: got %d want 1", replay.LastSequence())
+	}
+}
