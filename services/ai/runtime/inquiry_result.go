@@ -124,10 +124,22 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 	})
 	interpretation.Consequence = &consequence
 	o.Runtime.activation.ApplyConsequencePlasticity(consequence.Valence, consequence.InformationGain, observedAt)
-	finalSequence, err := o.Runtime.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+	binding, bindingOK := o.Runtime.actionBinding(result.Execution.Request.RequestID)
+	outcomeNodeIDs := groundedNodeIDs(interpretation.GroundedRepresentations)
+	causalLink := "inquiry:" + result.Execution.Request.RequestID
+	consequenceEvent := InquiryConsequenceEvent{
 		Action: result.Execution.Proposal.Action,
 		Valence: consequence.Valence,
-	}, observedAt)
+		InformationGain: consequence.InformationGain,
+		PredictionError: consequence.PredictionError,
+		Reliability: consequence.Reliability,
+		CausalLink: causalLink,
+		OutcomeNodeIDs: outcomeNodeIDs,
+	}
+	if bindingOK {
+		consequenceEvent.TargetNodeIDs = binding.TargetNodeIDs
+	}
+	finalSequence, err := o.Runtime.RecordInquiryConsequenceEvent(consequenceEvent, observedAt)
 	if err != nil {
 		return CognitiveInterpretation{}, learned, sequence, err
 	}
