@@ -26,6 +26,7 @@ func TestLearnedCausalTraceInfluencesPrediction(t *testing.T) {
 	kb := knowledge.NewKnowledgeBase()
 	target := kb.Store("target")
 	outcome := kb.Store("outcome")
+	unexpected := kb.Store("unexpected")
 	pattern := kb.Patterns.LearnTrace(
 		[]knowledge.PatternStep{
 			{NodeID: target.ID, Position: 0, Activation: 1},
@@ -144,7 +145,7 @@ func TestPredictionErrorChangesLearnedTraceStrength(t *testing.T) {
 	})
 	e.ApplyPredictionErrorPlasticity(
 		map[knowledge.NodeID]float64{target.ID: 0.8, outcome.ID: 0.8},
-		map[knowledge.NodeID]float64{target.ID: 0.8, outcome.ID: 0.0},
+		map[knowledge.NodeID]float64{target.ID: 0.8, outcome.ID: 0.0, unexpected.ID: 0.9},
 		0.8,
 		time.Now().UTC().Add(time.Second),
 	)
