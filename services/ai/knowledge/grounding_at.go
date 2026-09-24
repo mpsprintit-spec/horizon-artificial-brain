@@ -19,16 +19,25 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 
 	vector := observationVector(canonical, modality)
 
-	nodeID, similarity, created, err := k.ProjectVectorAt(vector, threshold, now)
-	if err != nil {
-		return GroundedRepresentation{}, err
+	_, hadPopulation := k.findExactProjectionPopulation(vector)
+	population, err := k.ProjectVectorPopulationAt(vector, threshold, defaultProjectionPopulation, now)
+	if err != nil || len(population.Units) == 0 {
+		if err != nil {
+			return GroundedRepresentation{}, err
+		}
+		return GroundedRepresentation{}, ErrEmptyNeuralVector
+	}
+	populationIDs := make([]NodeID, 0, len(population.Units))
+	for _, unit := range population.Units {
+		populationIDs = append(populationIDs, unit.NodeID)
 	}
 	status := GroundingExisting
-	if created {
+	if !hadPopulation {
 		status = GroundingCandidate
 	}
 	return GroundedRepresentation{
-		NodeID: nodeID, Similarity: similarity, Status: status,
+		NodeID: populationIDs[0], Population: populationIDs,
+		Similarity: population.Units[0].Activation, Status: status,
 		Source: source, Modality: modality, Token: canonical,
 		Timestamp: now.UTC(),
 	}, nil
