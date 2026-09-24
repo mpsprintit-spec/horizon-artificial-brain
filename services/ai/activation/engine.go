@@ -36,7 +36,7 @@ func (e *Engine) ActivateWith(req Request) Result {
 		if canonical == "" {
 			continue
 		}
-		population, err := e.Memory.ProjectVectorPopulation(observationVector(canonical, "language"), e.Threshold, 4)
+		population, err := e.Memory.ProjectVectorPopulation(knowledge.EncodeObservation(canonical, "language"), e.Threshold, 4)
 		if err != nil {
 			continue
 		}
