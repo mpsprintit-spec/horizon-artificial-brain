@@ -11,7 +11,6 @@ type NodeID int64
 // context; no lexical token is stored on the unit.
 type ConceptNode struct {
 	ID                NodeID                `json:"id"`
-	Token             string                `json:"token,omitempty"`
 	Representation    []float64             `json:"representation,omitempty"`
 	Activation        float64               `json:"activation"`
 	RestingActivation float64               `json:"resting_activation"`
