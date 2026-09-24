@@ -1,51 +1,25 @@
 package knowledge
 
-import (
-	"errors"
-	"strings"
-	"time"
-)
+import "time"
 
-// GetOrCreateAt is the event-time variant of GetOrCreate. New neural units
-// receive their initial history from the supplied event timestamp, preventing
-// wall-clock creation time from entering replayed neural state.
+// GetOrCreateAt is the event-time language-adapter path. The lexical form is
+// immediately encoded into the shared neural substrate; it is never retained
+// as semantic identity on the neural unit.
 func (r *TokenRegistry) GetOrCreateAt(token string, now time.Time) (*ConceptNode, bool, error) {
 	canonical := canonicalToken(token)
 	if canonical == "" {
-		return nil, false, errors.New("token is empty")
+		return nil, false, ErrEmptyNeuralVector
 	}
-	if now.IsZero() {
-		now = time.Now().UTC()
-	} else {
-		now = now.UTC()
-	}
-
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if id, ok := r.byToken[canonical]; ok {
-		n := r.byID[id]
-		n.Frequency++
-		n.LastActivation = now
-		return n, false, nil
-	}
-
-	n := newConceptNode(r.nextID, canonical)
-	n.UsageHistory = []time.Time{now}
-	n.LastActivation = now
-	n.Frequency = 1
-	r.nextID++
-	r.byToken[canonical] = n.ID
-	r.byID[n.ID] = n
-	return n, true, nil
+	return r.GetOrCreateRepresentationAt(observationVector(canonical, "language"), 0.999999, now)
 }
 
-// StoreAt exposes event-time token creation through the same Brain substrate;
-// it does not create another memory representation.
+// StoreAt presents language through the same distributed substrate used by
+// other modalities. No token-indexed memory is created.
 func (k *KnowledgeBase) StoreAt(token string, now time.Time) *ConceptNode {
 	if k == nil || k.Registry == nil {
 		return nil
 	}
-	n, _, err := k.Registry.GetOrCreateAt(strings.TrimSpace(token), now)
+	n, _, _, err := k.Registry.GetOrCreateAt(token, now)
 	if err != nil {
 		return nil
 	}
