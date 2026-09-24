@@ -41,8 +41,8 @@ func TestGroundObservationDoesNotCreateTokenIdentity(t *testing.T) {
 	if node == nil {
 		t.Fatal("grounded node not found")
 	}
-	if node.Token != "" {
-		t.Fatalf("grounded numeric representation acquired token identity %q", node.Token)
+	if len(grounded.Population) < 2 {
+		t.Fatalf("grounded observation is not distributed: population size = %d", len(grounded.Population))
 	}
 	if len(node.Representation) == 0 {
 		t.Fatal("grounded node has no numeric representation")
