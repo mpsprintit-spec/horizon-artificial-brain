@@ -2,6 +2,7 @@ package knowledge
 
 import (
 	"os"
+	"strings"
 	"path/filepath"
 	"testing"
 )
@@ -108,5 +109,26 @@ func TestLegacySingleSynapseJSONLoads(t *testing.T) {
 	}
 	if x.FindSynapse(y.ID, RelationHas, false) == nil {
 		t.Fatal("legacy single synapse not migrated")
+	}
+}
+
+
+func TestBrainPersistenceContainsDistributedStateNotLexicalIdentity(t *testing.T) {
+	brain := NewBrain()
+	brain.Store("gelas")
+	dir := t.TempDir()
+	path := filepath.Join(dir, "brain.json")
+	if err := brain.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(data), "gelas") || strings.Contains(string(data), ""token"") {
+		t.Fatal("brain persistence retained lexical identity")
+	}
+	if len(brain.Registry.Nodes()) < defaultProjectionPopulation {
+		t.Fatalf("expected distributed population, got %d units", len(brain.Registry.Nodes()))
 	}
 }
