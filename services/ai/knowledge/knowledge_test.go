@@ -68,7 +68,9 @@ func TestSaveLoadPreservesMultiRelation(t *testing.T) {
 	}
 	cat := kb2.Fetch("cat")
 	leg := kb2.Fetch("leg")
-	if cat.FindSynapse(leg.ID, RelationHas, false) == nil || cat.FindSynapse(leg.ID, RelationCause, false) == nil {
+	cat = kb2.Registry.GetByID(1)
+	leg = kb2.Registry.GetByID(2)
+	if cat == nil || leg == nil || cat.FindSynapse(leg.ID, RelationHas, false) == nil || cat.FindSynapse(leg.ID, RelationCause, false) == nil {
 		t.Fatal("multi-relation lost after save/load")
 	}
 	_ = os.Remove(path)
@@ -99,8 +101,8 @@ func TestLegacySingleSynapseJSONLoads(t *testing.T) {
 	if err := kb.Load(path); err != nil {
 		t.Fatal(err)
 	}
-	x := kb.Fetch("x")
-	y := kb.Fetch("y")
+	x := kb.Registry.GetByID(1)
+	y := kb.Registry.GetByID(2)
 	if x == nil || y == nil {
 		t.Fatal("nodes missing")
 	}
