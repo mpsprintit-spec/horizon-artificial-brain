@@ -2,6 +2,7 @@ package activation
 
 import (
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -30,7 +31,24 @@ func (e *Engine) ActivateWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
 	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
 	state:=map[knowledge.NodeID]float64{}; conf:=map[knowledge.NodeID]float64{}
-	for _,token:=range req.StimulusTokens { if n:=e.Memory.Fetch(token); n!=nil { state[n.ID]=1; conf[n.ID]=1 } }
+	for _,token:=range req.StimulusTokens {
+		canonical := strings.TrimSpace(token)
+		if canonical == "" {
+			continue
+		}
+		population, err := e.Memory.ProjectVectorPopulation(observationVector(canonical, "language"), e.Threshold, 4)
+		if err != nil {
+			continue
+		}
+		for _, unit := range population.Units {
+			level := clamp01(unit.Activation)
+			if level <= 0 {
+				continue
+			}
+			state[unit.NodeID] = max(state[unit.NodeID], level)
+			conf[unit.NodeID] = max(conf[unit.NodeID], level)
+		}
+	}
 	for id,b:=range req.ContextBoosts { state[id]+=b; conf[id]=max(conf[id],b) }
 	state=normalize(state); pre:=cloneState(state); state,conf=e.advance(state,conf,req.Now,req.Cycles); result:=e.converge(state,conf,req.Now)
 	e.ApplyActivityPlasticity(pre,result.Activations,req.Now)
