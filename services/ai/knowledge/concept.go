@@ -5,11 +5,14 @@ import "time"
 // NodeID is the stable internal identifier of one neural unit.
 type NodeID int64
 
-// ConceptNode is a physical/internal neural unit in the shared substrate.
+// ConceptNode is a compatibility alias; neural state is represented by NeuralUnit.
+type ConceptNode = NeuralUnit
+
+// NeuralUnit is a physical/internal neural unit in the shared substrate.
 // It carries only substrate state and numeric representation. Semantic meaning
 // is distributed across populations, connectivity, temporal dynamics, and
 // context; no lexical token is stored on the unit.
-type ConceptNode struct {
+type NeuralUnit struct {
 	ID                NodeID                `json:"id"`
 	Representation    []float64             `json:"representation,omitempty"`
 	Activation        float64               `json:"activation"`
@@ -23,7 +26,7 @@ type ConceptNode struct {
 	Synapses          map[NodeID]SynapseList `json:"synapses"`
 }
 
-func newConceptNode(id NodeID) *ConceptNode {
+func newConceptNode(id NodeID) *NeuralUnit {
 	return newConceptNodeAt(id, time.Now().UTC())
 }
 
