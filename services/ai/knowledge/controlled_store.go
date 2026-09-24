@@ -10,7 +10,8 @@ func (r *TokenRegistry) GetOrCreateAt(token string, now time.Time) (*ConceptNode
 	if canonical == "" {
 		return nil, false, ErrEmptyNeuralVector
 	}
-	return r.GetOrCreateRepresentationAt(observationVector(canonical, "language"), 0.999999, now)
+	node, created, _, err := r.GetOrCreateRepresentationAt(observationVector(canonical, "language"), 0.999999, now)
+	return node, created, err
 }
 
 // StoreAt presents language through the same distributed substrate used by
