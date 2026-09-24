@@ -4,7 +4,7 @@ import "time"
 
 // GetOrCreateRepresentationAt is the event-time variant of numeric grounding.
 // It keeps replayed representation activation independent of wall-clock time.
-func (r *TokenRegistry) GetOrCreateRepresentationAt(vector NeuralVector, threshold float64, now time.Time) (*ConceptNode, bool, float64, error) {
+func (r *NeuralRegistry) GetOrCreateRepresentationAt(vector NeuralVector, threshold float64, now time.Time) (*ConceptNode, bool, float64, error) {
 	if vector.Empty() {
 		return nil, false, 0, ErrEmptyNeuralVector
 	}
