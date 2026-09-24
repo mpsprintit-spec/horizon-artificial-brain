@@ -22,6 +22,7 @@ const (
 // was obtained without turning the source token into semantic knowledge.
 type GroundedRepresentation struct {
 	NodeID     NodeID
+	Population []NodeID
 	Similarity float64
 	Status     GroundingStatus
 	Source     string
@@ -44,17 +45,22 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	}
 
 	vector := observationVector(canonical, modality)
-	nodeID, similarity, created, err := k.ProjectVector(vector, threshold)
-	if err != nil {
-		return GroundedRepresentation{}, err
+	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
+	if err != nil || len(population.Units) == 0 {
+		if err != nil {
+			return GroundedRepresentation{}, err
+		}
+		return GroundedRepresentation{}, ErrEmptyNeuralVector
 	}
-	status := GroundingExisting
-	if created {
-		status = GroundingCandidate
+	populationIDs := make([]NodeID, 0, len(population.Units))
+	for _, unit := range population.Units {
+		populationIDs = append(populationIDs, unit.NodeID)
 	}
+	anchor := populationIDs[0]
 	return GroundedRepresentation{
-		NodeID: nodeID, Similarity: similarity, Status: status,
-		Source: source, Modality: modality, Token: canonical, Timestamp: time.Now().UTC(),
+		NodeID: anchor, Population: populationIDs, Similarity: population.Units[0].Activation,
+		Status: GroundingExisting, Source: source, Modality: modality,
+		Token: canonical, Timestamp: time.Now().UTC(),
 	}, nil
 }
 
