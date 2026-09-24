@@ -90,3 +90,11 @@ func observationVector(token, modality string) NeuralVector {
 	}
 	return NewNeuralVector(values)
 }
+
+
+// EncodeObservation is the boundary encoder for language and sensor inputs.
+// It produces a modality-neutral numeric representation; the lexical or
+// sensor surface form is not retained by the neural substrate.
+func EncodeObservation(value, modality string) NeuralVector {
+	return observationVector(value, modality)
+}
