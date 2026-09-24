@@ -5,9 +5,10 @@ import "time"
 // NodeID is the stable internal identifier of one neural unit.
 type NodeID int64
 
-// ConceptNode is a neural unit in the shared substrate. Token remains an
-// optional language-facing anchor for compatibility; Representation is the
-// modality-neutral numeric representation used by non-language experience.
+// ConceptNode is a physical/internal neural unit in the shared substrate.
+// It carries only substrate state and numeric representation. Semantic meaning
+// is distributed across populations, connectivity, temporal dynamics, and
+// context; no lexical token is stored on the unit.
 type ConceptNode struct {
 	ID                NodeID                `json:"id"`
 	Token             string                `json:"token,omitempty"`
