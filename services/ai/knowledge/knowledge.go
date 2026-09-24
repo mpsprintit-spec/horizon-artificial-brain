@@ -9,16 +9,22 @@ import (
 	"time"
 )
 
-type TokenRegistry struct {
+type NeuralRegistry struct {
 	mu       sync.RWMutex
 	nextID   NodeID
 	byID     map[NodeID]*ConceptNode
 }
 
-func NewTokenRegistry() *TokenRegistry { return &TokenRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode)} }
+func NewNeuralRegistry() *NeuralRegistry { return &NeuralRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode)} }
+
+// TokenRegistry is retained only as a source-compatibility alias during migration.
+// It is not token-indexed and stores no lexical identity.
+type TokenRegistry = NeuralRegistry
+
+func NewNeuralRegistry() *NeuralRegistry { return NewNeuralRegistry() }
 func canonicalToken(token string) string { return strings.ToLower(strings.TrimSpace(token)) }
 
-func (r *TokenRegistry) GetOrCreate(token string) (*ConceptNode, bool, error) {
+func (r *NeuralRegistry) GetOrCreate(token string) (*ConceptNode, bool, error) {
 	canonical := canonicalToken(token)
 	if canonical == "" {
 		return nil, false, errors.New("token is empty")
@@ -105,7 +111,7 @@ func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold
 // fields so repeated experiences can recover the same population without
 // turning similar experiences into one identical representation.
 type KnowledgeBase struct {
-	Registry             *TokenRegistry
+	Registry             *NeuralRegistry
 	Patterns             *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
 	projectionMu         sync.RWMutex
