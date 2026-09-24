@@ -13,8 +13,8 @@ func TestTokenRegistryPreventsDuplicateNodes(t *testing.T) {
 	if first.ID != second.ID {
 		t.Fatalf("expected one unique node for canonical token, got %d and %d", first.ID, second.ID)
 	}
-	if len(kb.Registry.Nodes()) != 1 {
-		t.Fatalf("expected one node, got %d", len(kb.Registry.Nodes()))
+	if len(kb.Registry.Nodes()) != defaultProjectionPopulation {
+		t.Fatalf("expected one distributed population of %d units, got %d", defaultProjectionPopulation, len(kb.Registry.Nodes()))
 	}
 }
 
