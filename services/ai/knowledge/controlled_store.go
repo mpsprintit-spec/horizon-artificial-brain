@@ -5,7 +5,7 @@ import "time"
 // GetOrCreateAt is the event-time language-adapter path. The lexical form is
 // immediately encoded into the shared neural substrate; it is never retained
 // as semantic identity on the neural unit.
-func (r *TokenRegistry) GetOrCreateAt(token string, now time.Time) (*ConceptNode, bool, error) {
+func (r *NeuralRegistry) GetOrCreateAt(token string, now time.Time) (*ConceptNode, bool, error) {
 	canonical := canonicalToken(token)
 	if canonical == "" {
 		return nil, false, ErrEmptyNeuralVector
