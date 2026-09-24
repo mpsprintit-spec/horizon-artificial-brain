@@ -6,7 +6,7 @@ import (
 )
 
 func TestGetOrCreateRepresentationAtPreservesEventTime(t *testing.T) {
-	registry := NewTokenRegistry()
+	registry := NewNeuralRegistry()
 	at := time.Date(2026, 9, 19, 12, 34, 56, 0, time.UTC)
 
 	node, created, _, err := registry.GetOrCreateRepresentationAt(
