@@ -7,6 +7,7 @@ import "errors"
 // already present before this grounding call.
 type GroundedVector struct {
 	NodeID   NodeID
+	Population []NodeID
 	Similarity float64
 	Existing bool
 }
@@ -22,13 +23,22 @@ func (k *KnowledgeBase) GroundVector(vector NeuralVector) (GroundedVector, error
 	}
 
 	const threshold = 0.90
-	nodeID, similarity, created, err := k.ProjectVector(vector, threshold)
-	if err != nil {
-		return GroundedVector{}, err
+	_, hadPopulation := k.findExactProjectionPopulation(vector)
+	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
+	if err != nil || len(population.Units) == 0 {
+		if err != nil {
+			return GroundedVector{}, err
+		}
+		return GroundedVector{}, ErrEmptyNeuralVector
+	}
+	ids := make([]NodeID, 0, len(population.Units))
+	for _, unit := range population.Units {
+		ids = append(ids, unit.NodeID)
 	}
 	return GroundedVector{
-		NodeID: nodeID,
-		Similarity: similarity,
-		Existing: !created,
+		NodeID: ids[0],
+		Population: ids,
+		Similarity: population.Units[0].Activation,
+		Existing: hadPopulation,
 	}, nil
 }
