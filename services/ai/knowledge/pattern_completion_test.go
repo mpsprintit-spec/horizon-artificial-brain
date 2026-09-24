@@ -70,3 +70,29 @@ func TestCompleteTraceDoesNotInventUnseenContinuation(t *testing.T) {
 		t.Fatal("completion returned a continuation that was never learned")
 	}
 }
+
+
+func TestCompleteTraceRespectsTemporalCausalDirection(t *testing.T) {
+	brain := NewBrain()
+	a := brain.Store("a")
+	b := brain.Store("b")
+
+	brain.Patterns.LearnTrace([]PatternStep{
+		{NodeID: a.ID, Position: 0, Activation: 1},
+		{NodeID: b.ID, Position: 1, Delta: 10},
+	}, nil, b.ID, 0.9, 0.9)
+	brain.Patterns.LearnTrace([]PatternStep{
+		{NodeID: b.ID, Position: 0, Activation: 1},
+		{NodeID: a.ID, Position: 1, Delta: 10},
+	}, nil, a.ID, 0.9, 0.9)
+
+	matches := brain.Patterns.CompleteTrace([]PatternStep{
+		{NodeID: a.ID, Position: 0, Activation: 1},
+	}, nil)
+	if len(matches) != 1 {
+		t.Fatalf("expected only the A→B trace for A as the temporal cue, got %d", len(matches))
+	}
+	if matches[0].Result != b.ID {
+		t.Fatalf("expected A→B result B, got %v", matches[0].Result)
+	}
+}
