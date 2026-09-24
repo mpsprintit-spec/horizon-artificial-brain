@@ -124,11 +124,18 @@ func (k *KnowledgeBase) Fetch(token string) *ConceptNode {
 	return k.Registry.Get(token)
 }
 func (k *KnowledgeBase) Store(token string) *ConceptNode {
-	if k == nil || k.Registry == nil { return nil }
-	k.mu.Lock()
-	defer k.mu.Unlock()
-	n, _, _ := k.Registry.GetOrCreate(token)
-	return n
+	if k == nil || k.Registry == nil {
+		return nil
+	}
+	canonical := canonicalToken(token)
+	if canonical == "" {
+		return nil
+	}
+	population, err := k.ProjectVectorPopulation(observationVector(canonical, "language"), 0.999999, defaultProjectionPopulation)
+	if err != nil || len(population.Units) == 0 {
+		return nil
+	}
+	return k.Registry.GetByID(population.Units[0].NodeID)
 }
 
 // ProjectVector presents numeric experience to the same neural substrate used
