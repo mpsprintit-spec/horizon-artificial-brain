@@ -23,15 +23,14 @@ type ConceptNode struct {
 	Synapses          map[NodeID]SynapseList `json:"synapses"`
 }
 
-func newConceptNode(id NodeID, token string) *ConceptNode {
-	return newConceptNodeAt(id, token, time.Now().UTC())
+func newConceptNode(id NodeID) *ConceptNode {
+	return newConceptNodeAt(id, time.Now().UTC())
 }
 
-func newConceptNodeAt(id NodeID, token string, now time.Time) *ConceptNode {
+func newConceptNodeAt(id NodeID, now time.Time) *ConceptNode {
 	if now.IsZero() { now = time.Now().UTC() } else { now = now.UTC() }
 	return &ConceptNode{
 		ID:                id,
-		Token:             token,
 		Activation:        0,
 		RestingActivation: 0.05,
 		Threshold:         0.25,
@@ -49,7 +48,7 @@ func newRepresentationNode(id NodeID, representation []float64) *ConceptNode {
 }
 
 func newRepresentationNodeAt(id NodeID, representation []float64, now time.Time) *ConceptNode {
-	n := newConceptNodeAt(id, "", now)
+	n := newConceptNodeAt(id, now)
 	n.UsageHistory = nil
 	n.Representation = append([]float64(nil), representation...)
 	return n
