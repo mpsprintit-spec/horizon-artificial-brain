@@ -45,6 +45,7 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	}
 
 	vector := observationVector(canonical, modality)
+	_, hadPopulation := k.findExactProjectionPopulation(vector)
 	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
 	if err != nil || len(population.Units) == 0 {
 		if err != nil {
@@ -57,9 +58,13 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 		populationIDs = append(populationIDs, unit.NodeID)
 	}
 	anchor := populationIDs[0]
+	status := GroundingExisting
+	if !hadPopulation {
+		status = GroundingCandidate
+	}
 	return GroundedRepresentation{
 		NodeID: anchor, Population: populationIDs, Similarity: population.Units[0].Activation,
-		Status: GroundingExisting, Source: source, Modality: modality,
+		Status: status, Source: source, Modality: modality,
 		Token: canonical, Timestamp: time.Now().UTC(),
 	}, nil
 }
