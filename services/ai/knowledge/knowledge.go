@@ -13,26 +13,62 @@ type TokenRegistry struct {
 	mu       sync.RWMutex
 	nextID   NodeID
 	byID     map[NodeID]*ConceptNode
-	byToken  map[string]NodeID
 }
 
-func NewTokenRegistry() *TokenRegistry { return &TokenRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode), byToken: make(map[string]NodeID)} }
+func NewTokenRegistry() *TokenRegistry { return &TokenRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode)} }
 func canonicalToken(token string) string { return strings.ToLower(strings.TrimSpace(token)) }
 
 func (r *TokenRegistry) GetOrCreate(token string) (*ConceptNode, bool, error) {
 	canonical := canonicalToken(token)
-	if canonical == "" { return nil, false, errors.New("token is empty") }
-	r.mu.Lock(); defer r.mu.Unlock()
-	if id, ok := r.byToken[canonical]; ok {
-		n := r.byID[id]; n.Frequency++; n.LastActivation = time.Now().UTC(); return n, false, nil
+	if canonical == "" {
+		return nil, false, errors.New("token is empty")
 	}
-	n := newConceptNode(r.nextID, canonical); r.nextID++; n.Frequency = 1
-	r.byToken[canonical] = n.ID; r.byID[n.ID] = n
-	return n, true, nil
+	// Language is an input adapter only. The lexical form is immediately
+	// converted into a modality-neutral numeric representation and is never
+	// stored on the neural unit or used as its identity.
+	return r.GetOrCreateRepresentation(observationVector(canonical, "language"), 0.999999)
 }
-func (r *TokenRegistry) Get(token string) *ConceptNode { r.mu.RLock(); defer r.mu.RUnlock(); return r.byID[r.byToken[canonicalToken(token)]] }
-func (r *TokenRegistry) GetByID(id NodeID) *ConceptNode { r.mu.RLock(); defer r.mu.RUnlock(); return r.byID[id] }
-func (r *TokenRegistry) Nodes() []*ConceptNode { r.mu.RLock(); defer r.mu.RUnlock(); nodes := make([]*ConceptNode, 0, len(r.byID)); for _, n := range r.byID { nodes = append(nodes, n) }; return nodes }
+
+func (r *TokenRegistry) Get(token string) *ConceptNode {
+	canonical := canonicalToken(token)
+	if canonical == "" {
+		return nil
+	}
+	vector := observationVector(canonical, "language")
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	best := (*ConceptNode)(nil)
+	bestScore := 0.0
+	for _, node := range r.byID {
+		if len(node.Representation) != len(vector.Values) {
+			continue
+		}
+		score := NewNeuralVector(node.Representation).Similarity(vector)
+		if score > bestScore {
+			best, bestScore = node, score
+		}
+	}
+	if best != nil && bestScore >= 0.999999 {
+		return best
+	}
+	return nil
+}
+
+func (r *TokenRegistry) GetByID(id NodeID) *ConceptNode {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.byID[id]
+}
+
+func (r *TokenRegistry) Nodes() []*ConceptNode {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	nodes := make([]*ConceptNode, 0, len(r.byID))
+	for _, n := range r.byID {
+		nodes = append(nodes, n)
+	}
+	return nodes
+}
 
 // GetOrCreateRepresentation reuses an existing numeric neural unit when its
 // learned prototype is sufficiently similar. Token identity is not involved.
@@ -150,7 +186,7 @@ func (k *KnowledgeBase) Load(path string) error {
 	defer k.mu.Unlock()
 	b, err := os.ReadFile(path); if err != nil { return err }; var graph persistedGraph; if err := json.Unmarshal(b, &graph); err != nil { return err }
 	registry := NewTokenRegistry(); var maxID NodeID
-	for _, node := range graph.Nodes { if node == nil { continue }; node.Token = canonicalToken(node.Token); if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.Token != "" { registry.byToken[node.Token] = node.ID }; if node.ID > maxID { maxID = node.ID } }
+	for _, node := range graph.Nodes { if node == nil { continue }; if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.ID > maxID { maxID = node.ID } }
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
