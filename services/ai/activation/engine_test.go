@@ -227,3 +227,39 @@ func TestUnknownLanguageStimulusStillUsesDistributedProjectionPath(t *testing.T)
 		t.Fatalf("expected one distributed projection population, got %d", got)
 	}
 }
+
+
+func TestPlasticityMutatesDynamicsWithoutCreatingNeuralTopology(t *testing.T) {
+	kb := knowledge.NewKnowledgeBase()
+	a := kb.Store("a")
+	b := kb.Store("b")
+	kb.Connect(a, b, 0.6, 0.8, false)
+
+	e := NewEngine(kb)
+	now := time.Unix(300, 0).UTC()
+	beforeNodes := len(kb.Registry.Nodes())
+	beforePopulations := len(kb.ProjectionPopulations)
+	beforeSynapses := len(a.OutboundAll())
+
+	e.ApplyActivityPlasticity(
+		map[knowledge.NodeID]float64{a.ID: 1},
+		map[knowledge.NodeID]float64{a.ID: 0.8, b.ID: 0.9},
+		now,
+	)
+	e.ApplyPredictionErrorPlasticity(
+		map[knowledge.NodeID]float64{a.ID: 0.8, b.ID: 0.8},
+		map[knowledge.NodeID]float64{a.ID: 0.8, b.ID: 0.1},
+		0.9,
+		now.Add(time.Millisecond),
+	)
+
+	if got := len(kb.Registry.Nodes()); got != beforeNodes {
+		t.Fatalf("plasticity created neural nodes: before=%d after=%d", beforeNodes, got)
+	}
+	if got := len(kb.ProjectionPopulations); got != beforePopulations {
+		t.Fatalf("plasticity created projection populations: before=%d after=%d", beforePopulations, got)
+	}
+	if got := len(a.OutboundAll()); got != beforeSynapses {
+		t.Fatalf("plasticity changed synapse topology: before=%d after=%d", beforeSynapses, got)
+	}
+}
