@@ -50,65 +50,54 @@ func TestGroundObservationDoesNotCreateTokenIdentity(t *testing.T) {
 }
 
 
-func TestGroundObservationBindsCrossModalExperienceToCanonicalConcept(t *testing.T) {
-	kb := NewKnowledgeBase()
-	canonical := kb.Store("air")
-	if canonical == nil {
-		t.Fatal("expected canonical air representation")
-	}
 
-	grounded, err := kb.GroundObservation("air", "camera-1", "vision", 0.25)
+func TestGroundObservationKeepsCrossModalSurfacePopulationsDistinct(t *testing.T) {
+	brain := NewBrain()
+	language, err := brain.GroundObservation("air", "text", "language", 0.95)
 	if err != nil {
-		t.Fatalf("GroundObservation failed: %v", err)
+		t.Fatal(err)
 	}
-	if grounded.Status != GroundingExisting {
-		t.Fatalf("expected existing canonical grounding, got %s", grounded.Status)
+	vision, err := brain.GroundObservation("air", "camera", "vision", 0.95)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if grounded.NodeID != canonical.ID {
-		t.Fatalf("cross-modal observation fragmented canonical concept: canonical=%d grounded=%d", canonical.ID, grounded.NodeID)
+	if language.Status != GroundingCandidate || vision.Status != GroundingCandidate {
+		t.Fatalf("first observations should remain surface candidates: language=%s vision=%s", language.Status, vision.Status)
 	}
-	if len(grounded.Population) != 1 || grounded.Population[0] != canonical.ID {
-		t.Fatalf("expected canonical unit as the only binding, got %v", grounded.Population)
+	if language.NodeID == vision.NodeID {
+		t.Fatalf("cross-modal surface observations collapsed into one neural unit: %d", language.NodeID)
 	}
-	if got := len(kb.Registry.Nodes()); got != 1 {
-		t.Fatalf("cross-modal grounding created extra substrate nodes: got %d", got)
+	if len(language.Population) != defaultProjectionPopulation || len(vision.Population) != defaultProjectionPopulation {
+		t.Fatalf("expected two distributed surface populations of %d: language=%d vision=%d", defaultProjectionPopulation, len(language.Population), len(vision.Population))
 	}
-	if got := len(kb.ProjectionPopulations); got != 0 {
-		t.Fatalf("cross-modal grounding created a distributed population for a canonical concept: got %d", got)
+	if got := len(brain.ProjectionPopulations); got != 2 {
+		t.Fatalf("expected separate surface populations, got %d", got)
 	}
 }
 
-func TestUnknownCrossModalExperienceReusesItsDistributedPopulation(t *testing.T) {
-	kb := NewKnowledgeBase()
-
-	first, err := kb.GroundObservation("unknown-object", "camera-1", "vision", 0.25)
+func TestGroundObservationReusesPopulationWithinSameModality(t *testing.T) {
+	brain := NewBrain()
+	first, err := brain.GroundObservation("air", "camera-1", "vision", 0.95)
 	if err != nil {
-		t.Fatalf("first grounding failed: %v", err)
+		t.Fatal(err)
 	}
-	if first.Status != GroundingCandidate {
-		t.Fatalf("expected first observation to be a candidate, got %s", first.Status)
-	}
-	if len(first.Population) != defaultProjectionPopulation {
-		t.Fatalf("expected distributed population of %d, got %d", defaultProjectionPopulation, len(first.Population))
-	}
-
-	second, err := kb.GroundObservation("unknown-object", "microphone-1", "audio", 0.25)
+	second, err := brain.GroundObservation("air", "camera-2", "vision", 0.95)
 	if err != nil {
-		t.Fatalf("second grounding failed: %v", err)
+		t.Fatal(err)
 	}
 	if second.Status != GroundingExisting {
-		t.Fatalf("expected repeated numeric experience to reuse its population, got %s", second.Status)
+		t.Fatalf("same-modality repeat should reuse its population, got %s", second.Status)
 	}
 	if second.NodeID != first.NodeID {
-		t.Fatalf("repeated experience changed anchor: first=%d second=%d", first.NodeID, second.NodeID)
+		t.Fatalf("same-modality repeat changed anchor: first=%d second=%d", first.NodeID, second.NodeID)
 	}
 	if len(second.Population) != len(first.Population) {
-		t.Fatalf("repeated experience changed population size: first=%d second=%d", len(first.Population), len(second.Population))
+		t.Fatalf("same-modality repeat changed population size: first=%d second=%d", len(first.Population), len(second.Population))
 	}
-	if got := len(kb.Registry.Nodes()); got != defaultProjectionPopulation {
-		t.Fatalf("repeated experience grew topology: got %d nodes", got)
+	if got := len(brain.Registry.Nodes()); got != defaultProjectionPopulation {
+		t.Fatalf("same-modality repeat grew topology: got %d nodes", got)
 	}
-	if got := len(kb.ProjectionPopulations); got != 1 {
-		t.Fatalf("expected one reusable distributed population, got %d", got)
+	if got := len(brain.ProjectionPopulations); got != 1 {
+		t.Fatalf("same-modality repeat created another population: got %d", got)
 	}
 }
