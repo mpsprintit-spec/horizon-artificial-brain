@@ -40,9 +40,6 @@ func (u *Engine) Understand(result activation.Result, stimulus []string, trace T
 	for _, node := range result.RankedNodes {
 		level := result.Activations[node.ID]
 		conf := result.Confidence[node.ID]
-		if isAffixMarker(node.Token) {
-			continue
-		}
 		// Horizon 2 P0: Dominant/Supporting are computational organization labels,
 		// not semantic relevance boundaries. Low local activation nodes stay available
 		// so bridges can participate in interpretation. Final relevance is decided by coherence.
@@ -64,7 +61,7 @@ func (u *Engine) Understand(result activation.Result, stimulus []string, trace T
 	}
 	if includeStimulus {
 		for _, token := range stimulus {
-			if n := u.Memory.Fetch(token); n != nil && !isAffixMarker(n.Token) {
+			if n := u.Memory.Fetch(token); n != nil {
 				if !ContainsID(rep.DominantNodes, n.ID) && !ContainsID(rep.SupportingNodes, n.ID) {
 					rep.SupportingNodes = append(rep.SupportingNodes, n.ID)
 					trace.Add("Understanding", n, result.Confidence[n.ID], "stimulus retention")
@@ -345,9 +342,11 @@ func (u *Engine) BuildSemanticNeighborhood(
 		id knowledge.NodeID
 		sc float64
 	}
-	ctxSet := map[string]bool{}
+	ctxNodeSet := map[knowledge.NodeID]bool{}
 	for _, tok := range contextTokens {
-		ctxSet[tok] = true
+		if n := u.Memory.Fetch(tok); n != nil {
+			ctxNodeSet[n.ID] = true
+		}
 	}
 	degree := map[knowledge.NodeID]int{}
 	for _, e := range nb.Edges {
@@ -364,7 +363,7 @@ func (u *Engine) BuildSemanticNeighborhood(
 		}
 		conn := clamp01(float64(degree[id]) / 6.0)
 		ctx := 0.0
-		if n := u.Memory.Registry.GetByID(id); n != nil && ctxSet[n.Token] {
+		if ctxNodeSet[id] {
 			ctx = 0.2
 		}
 		// Bridge protection: nodes that sit on paths between stimulus nodes get a floor score
