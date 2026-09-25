@@ -334,9 +334,9 @@ func chooseFocusFromStructure(kb *knowledge.KnowledgeBase, interp *Interpretatio
 	if len(interp.Nodes) == 0 {
 		return 0
 	}
-	stimSet := map[string]bool{}
+	stimSet := map[knowledge.NodeID]bool{}
 	for _, t := range stimulus {
-		stimSet[t] = true
+		if n := kb.Fetch(t); n != nil { stimSet[n.ID] = true }
 	}
 	typedOutKinds := map[knowledge.NodeID]map[knowledge.RelationKind]bool{}
 	assocOut := map[knowledge.NodeID]int{}
@@ -387,12 +387,12 @@ func chooseFocusFromStructure(kb *knowledge.KnowledgeBase, interp *Interpretatio
 					continue
 				}
 				if r.SourceID == id {
-					if tn := kb.Registry.GetByID(r.TargetID); tn != nil && stimSet[tn.Token] {
+					if tn := kb.Registry.GetByID(r.TargetID); tn != nil && stimSet[tn.ID] {
 						interStim += 0.55
 					}
 				}
 				if r.TargetID == id {
-					if sn := kb.Registry.GetByID(r.SourceID); sn != nil && stimSet[sn.Token] {
+					if sn := kb.Registry.GetByID(r.SourceID); sn != nil && stimSet[sn.ID] {
 						interStim += 0.25
 					}
 				}
@@ -401,7 +401,7 @@ func chooseFocusFromStructure(kb *knowledge.KnowledgeBase, interp *Interpretatio
 		stimBonus := 0.0
 		inStim := false
 		if kb != nil {
-			if n := kb.Registry.GetByID(id); n != nil && stimSet[n.Token] {
+			if n := kb.Registry.GetByID(id); n != nil && stimSet[n.ID] {
 				inStim = true
 				stimBonus = 0.15
 			}
@@ -414,7 +414,7 @@ func chooseFocusFromStructure(kb *knowledge.KnowledgeBase, interp *Interpretatio
 				if kb == nil {
 					break
 				}
-				if on := kb.Registry.GetByID(oid); on != nil && stimSet[on.Token] && oid != id {
+				if on := kb.Registry.GetByID(oid); on != nil && stimSet[on.ID] && oid != id {
 					externalOnlyPenalty = 0.4
 					break
 				}
@@ -604,13 +604,13 @@ func scoreInterpretation(
 		interp.HistoryScore = clamp01(histSum / float64(histCount))
 	}
 	if len(contextTokens) > 0 && kb != nil {
-		ctxSet := map[string]bool{}
+		ctxSet := map[knowledge.NodeID]bool{}
 		for _, t := range contextTokens {
-			ctxSet[t] = true
+			if n := kb.Fetch(t); n != nil { ctxSet[n.ID] = true }
 		}
 		hit := 0
 		for _, id := range interp.Nodes {
-			if n := kb.Registry.GetByID(id); n != nil && ctxSet[n.Token] {
+			if n := kb.Registry.GetByID(id); n != nil && ctxSet[n.ID] {
 				hit++
 			}
 		}
@@ -690,7 +690,7 @@ func scoreInterpretation(
 	}
 	if kb != nil {
 		if f := kb.Registry.GetByID(focus); f != nil {
-			interp.EvidenceNotes = append(interp.EvidenceNotes, "focus="+f.Token)
+			interp.EvidenceNotes = append(interp.EvidenceNotes, fmt.Sprintf("focus=node:%d", f.ID))
 		}
 	}
 }
