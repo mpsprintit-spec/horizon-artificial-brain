@@ -45,19 +45,10 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	}
 
 	vector := observationVector(canonical, modality)
-	// If the language/input adapter has already established a canonical unit,
-	// bind the observation to that unit instead of creating a new distributed
-	// population. Distributed populations are reserved for genuinely new
-	// numeric experience; canonical concepts must not fragment during runtime.
-	if existing := k.Registry.Get(canonical); existing != nil {
-		existing.Activation = 1
-		existing.LastActivation = time.Now().UTC()
-		return GroundedRepresentation{
-			NodeID: existing.ID, Population: []NodeID{existing.ID}, Similarity: 1,
-			Status: GroundingExisting, Source: source, Modality: modality,
-			Token: canonical, Timestamp: time.Now().UTC(),
-		}, nil
-	}
+	// Surface representations remain modality-specific. A written form,
+	// sound, image, or physical sensor reading may later become linked by
+	// experience, but it must not collapse into one canonical neural unit merely
+	// because an adapter supplied the same textual hint.
 	_, hadPopulation := k.findExactProjectionPopulation(vector)
 	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
 	if err != nil || len(population.Units) == 0 {
@@ -91,11 +82,12 @@ func observationVector(token, modality string) NeuralVector {
 	const dimensions = 16
 	values := make([]float64, dimensions)
 	h := fnv.New64a()
-	// The neural substrate is modality-neutral: the same observed concept
-	// must map to the same deterministic numeric basin whether it arrives
-	// through language, vision, or another adapter. Modality remains
-	// provenance metadata and must not fragment the canonical population.
-	_ = modality
+	// Surface encoders are modality-specific at this boundary. The substrate
+	// may later discover cross-modal relations through shared experience, but
+	// modality must remain distinguishable so a written symbol is not
+	// automatically identical to the physical referent.
+	_, _ = h.Write([]byte(strings.ToLower(modality)))
+	_, _ = h.Write([]byte{0})
 	_, _ = h.Write([]byte(strings.ToLower(token)))
 	seed := h.Sum64()
 	for i := range values {
@@ -109,8 +101,9 @@ func observationVector(token, modality string) NeuralVector {
 
 
 // EncodeObservation is the boundary encoder for language and sensor inputs.
-// It produces a modality-neutral numeric representation; the lexical or
-// sensor surface form is not retained by the neural substrate.
+// It produces a numeric surface representation. The lexical or sensor surface
+// form is not retained by the neural substrate; modality remains an encoder
+// dimension so different surfaces can be linked without being collapsed.
 func EncodeObservation(value, modality string) NeuralVector {
 	return observationVector(value, modality)
 }
