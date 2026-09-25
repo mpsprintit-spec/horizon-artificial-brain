@@ -82,7 +82,6 @@ func (n *ConceptNode) FindDynamicSynapse(target NodeID, inhibitory bool) *Synaps
 // conceptNodeJSON supports backward-compatible load of map[NodeID]*Synapse.
 type conceptNodeJSON struct {
 	ID                NodeID                     `json:"id"`
-	Token             string                     `json:"token"`
 	Activation        float64                    `json:"activation"`
 	RestingActivation float64                    `json:"resting_activation"`
 	Threshold         float64                    `json:"threshold"`
@@ -123,7 +122,6 @@ func (n *ConceptNode) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.ID = raw.ID
-	n.Token = raw.Token
 	n.Activation = raw.Activation
 	n.RestingActivation = raw.RestingActivation
 	n.Threshold = raw.Threshold
