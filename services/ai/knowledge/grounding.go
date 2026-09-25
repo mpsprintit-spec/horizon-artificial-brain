@@ -120,3 +120,35 @@ func observationVector(token, modality string) NeuralVector {
 func EncodeObservation(value, modality string) NeuralVector {
 	return observationVector(value, modality)
 }
+
+
+// BindGroundedRepresentations records a learned cross-modal co-occurrence in
+// the canonical Pattern substrate. It keeps surface populations distinct and
+// expresses their shared grounding through an experience trace rather than a
+// semantic label or merged neural unit.
+func (k *KnowledgeBase) BindGroundedRepresentations(left, right GroundedRepresentation, now time.Time) *PatternSynapse {
+	if k == nil || k.Patterns == nil || left.NodeID == 0 || right.NodeID == 0 || left.NodeID == right.NodeID {
+		return nil
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	sequence := []PatternStep{
+		{NodeID: left.NodeID, Position: 0, Delta: 0, Activation: clamp01(left.Similarity)},
+		{NodeID: right.NodeID, Position: 1, Delta: 0, Activation: clamp01(right.Similarity)},
+	}
+	evidence := ExperienceEvidence{
+		Source: left.Source + "|" + right.Source,
+		Modality: left.Modality + "|" + right.Modality,
+		Timestamp: now.UTC(),
+		Reliability: 0.5,
+		IndependenceGroup: left.Source + "|" + right.Source,
+	}
+	if evidence.Source == "|" {
+		evidence.Source = "cross-modal-grounding"
+	}
+	if evidence.Modality == "|" {
+		evidence.Modality = "cross-modal"
+	}
+	return k.Patterns.LearnTraceWithEvidence(sequence, nil, right.NodeID, 0.5, 0.5, evidence)
+}
