@@ -16,8 +16,8 @@ type Proposition struct {
 	TargetID   knowledge.NodeID
 	ObjectID   knowledge.NodeID
 	Relation   knowledge.RelationKind
-	TargetTok  string
-	ObjectTok  string
+	TargetTok  string // legacy surface label; populated by the language adapter
+	ObjectTok  string // legacy surface label; populated by the language adapter
 	Strength   float64
 	Requested  bool // true = from stimulus-linked claim, false = background fact
 }
@@ -901,10 +901,9 @@ func preferredRequestedProps(props []Proposition) []Proposition {
 }
 
 func tokenOf(kb *knowledge.KnowledgeBase, id knowledge.NodeID) string {
-	if n := kb.Registry.GetByID(id); n != nil {
-		return n.Token
-	}
-	return ""
+	// Neural units intentionally do not expose lexical identity. Surface labels
+	// must come from the current language/input adapter, not the substrate.
+	return fmt.Sprintf("node:%d", id)
 }
 
 func FormatEvidencePath(p EvidencePath) string {
