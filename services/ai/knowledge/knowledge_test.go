@@ -67,10 +67,8 @@ func TestSaveLoadPreservesMultiRelation(t *testing.T) {
 	if err := kb2.Load(path); err != nil {
 		t.Fatal(err)
 	}
-	cat := kb2.Fetch("cat")
-	leg := kb2.Fetch("leg")
-	cat = kb2.Registry.GetByID(1)
-	leg = kb2.Registry.GetByID(2)
+	cat := kb2.Registry.GetByID(a.ID)
+	leg := kb2.Registry.GetByID(b.ID)
 	if cat == nil || leg == nil || cat.FindSynapse(leg.ID, RelationHas, false) == nil || cat.FindSynapse(leg.ID, RelationCause, false) == nil {
 		t.Fatal("multi-relation lost after save/load")
 	}
