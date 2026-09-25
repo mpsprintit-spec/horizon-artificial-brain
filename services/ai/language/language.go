@@ -47,6 +47,8 @@ func sentencePattern(subject string, kind knowledge.RelationKind, object string)
 	}
 }
 
+func surfaceLabel(id knowledge.NodeID) string { return fmt.Sprintf("node:%d", id) }
+
 func capitalize(s string) string {
 	if s == "" {
 		return s
@@ -96,7 +98,7 @@ func (e *Engine) Generate(best thinking.Hypothesis, confidence float64, needsWeb
 			id := s.TargetID
 			if s.Kind == knowledge.RelationIsA && !s.Inhibitory {
 				if object := e.Kb.Registry.GetByID(id); object != nil {
-					return hedge(sentencePattern(subject.Token, knowledge.RelationIsA, object.Token), s.Confidence, needsWebSearch)
+					return hedge(sentencePattern(surfaceLabel(subject.ID), knowledge.RelationIsA, surfaceLabel(object.ID)), s.Confidence, needsWebSearch)
 				}
 			}
 		}
@@ -122,7 +124,7 @@ func (e *Engine) Generate(best thinking.Hypothesis, confidence float64, needsWeb
 
 	if bestScore >= 0 {
 		if object := e.Kb.Registry.GetByID(bestObjectID); object != nil {
-			return hedge(sentencePattern(subject.Token, bestKind, object.Token), bestRelConfidence, needsWebSearch)
+			return hedge(sentencePattern(surfaceLabel(subject.ID), bestKind, surfaceLabel(object.ID)), bestRelConfidence, needsWebSearch)
 		}
 	}
 
@@ -142,12 +144,12 @@ func (e *Engine) Generate(best thinking.Hypothesis, confidence float64, needsWeb
 	}
 	if bestInference != nil {
 		if object := e.Kb.Registry.GetByID(bestInference.TargetID); object != nil {
-			core := sentencePattern(subject.Token, bestInference.Kind, object.Token)
+			core := sentencePattern(surfaceLabel(subject.ID), bestInference.Kind, surfaceLabel(object.ID))
 			return hedge(core, bestInference.Confidence, false) + " (disimpulkan, bukan diajarkan langsung)"
 		}
 	}
 
-	return hedge(subject.Token, confidence, needsWebSearch)
+	return hedge(surfaceLabel(subject.ID), confidence, needsWebSearch)
 }
 // Confirm menjawab pertanyaan ya/tidak -- beda dari Generate yang menyusun
 // kalimat pernyataan biasa.
@@ -210,7 +212,7 @@ func (e *Engine) Realize(interp *thinking.Interpretation, confidence float64, ne
 		if subjN == nil || objN == nil {
 			continue
 		}
-		key := subjN.Token + "|" + string(r.Kind) + "|" + objN.Token
+		key := surfaceLabel(subjN.ID) + "|" + string(r.Kind) + "|" + surfaceLabel(objN.ID)
 		if used[key] {
 			continue
 		}
@@ -231,10 +233,10 @@ func (e *Engine) Realize(interp *thinking.Interpretation, confidence float64, ne
 		default:
 			pri = 0
 		}
-		items = append(items, item{subjN.Token, objN.Token, r.Kind, pri})
+		items = append(items, item{surfaceLabel(subjN.ID), surfaceLabel(objN.ID), r.Kind, pri})
 	}
 	if len(items) == 0 {
-		return hedge(focus.Token, confidence, needsWebSearch)
+		return hedge(surfaceLabel(focus.ID), confidence, needsWebSearch)
 	}
 	for i := 0; i < len(items); i++ {
 		for j := i + 1; j < len(items); j++ {
@@ -294,7 +296,7 @@ func (e *Engine) RealizeEvaluation(interp *thinking.Interpretation, confidence f
 	focus := e.Kb.Registry.GetByID(interp.FocusID)
 	focusTok := ""
 	if focus != nil {
-		focusTok = focus.Token
+		focusTok = surfaceLabel(focus.ID)
 	}
 	switch status {
 	case thinking.EvalSupported:
