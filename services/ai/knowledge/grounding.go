@@ -31,6 +31,17 @@ type GroundedRepresentation struct {
 	Timestamp  time.Time
 }
 
+// SurfaceAnnotation is an adapter-boundary association between an observed
+// surface form and the neural population that produced it. It is not neural
+// identity and does not assign semantic meaning to a unit.
+type SurfaceAnnotation struct {
+	Surface     string   `json:"surface"`
+	Modality    string   `json:"modality"`
+	NodeID      NodeID  `json:"node_id"`
+	Population  []NodeID `json:"population"`
+	LastSeen    time.Time `json:"last_seen"`
+}
+
 // GroundObservation converts an unknown textual observation into a numeric
 // candidate and projects it into the same brain substrate used by non-language
 // experience. Existing compatible representations are reused; otherwise a new
@@ -66,10 +77,12 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	if !hadPopulation {
 		status = GroundingCandidate
 	}
+	now := time.Now().UTC()
+	k.recordSurfaceAnnotation(canonical, modality, anchor, populationIDs, now)
 	return GroundedRepresentation{
 		NodeID: anchor, Population: populationIDs, Similarity: population.Units[0].Activation,
 		Status: status, Source: source, Modality: modality,
-		Token: canonical, Timestamp: time.Now().UTC(),
+		Token: canonical, Timestamp: now,
 	}, nil
 }
 
