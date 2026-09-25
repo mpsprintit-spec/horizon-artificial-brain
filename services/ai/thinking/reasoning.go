@@ -147,9 +147,12 @@ func (t *ThinkingEngine) think(prompt string, contextTokens []string, includeSti
 	if bestInterp != nil {
 		thought.Confidence = clamp01((thought.Confidence + bestInterp.TotalScore) / 2)
 		for _, id := range bestInterp.Nodes {
-			if n := t.Activation.Memory.Registry.GetByID(id); n != nil && !contains(thought.Concepts, n.Token) {
-				thought.Concepts = append(thought.Concepts, n.Token)
-				trace.Add("Interpretation", n, bestInterp.TotalScore, "member of I*")
+			if n := t.Activation.Memory.Registry.GetByID(id); n != nil {
+				label := fmt.Sprintf("node:%d", n.ID)
+				if !contains(thought.Concepts, label) {
+					thought.Concepts = append(thought.Concepts, label)
+					trace.Add("Interpretation", n, bestInterp.TotalScore, "member of I*")
+				}
 			}
 		}
 		for _, note := range bestInterp.EvidenceNotes {
@@ -171,7 +174,7 @@ func (t *ThinkingEngine) think(prompt string, contextTokens []string, includeSti
 
 	for _, id := range rep.ConflictNodes {
 		if n := t.Activation.Memory.Registry.GetByID(id); n != nil {
-			thought.Conflicts = append(thought.Conflicts, n.Token)
+			thought.Conflicts = append(thought.Conflicts, fmt.Sprintf("node:%d", n.ID))
 		}
 	}
 	if thought.Confidence < t.MetaCognition.MinConfidence {
