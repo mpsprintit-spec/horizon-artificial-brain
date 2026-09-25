@@ -114,7 +114,9 @@ type KnowledgeBase struct {
 	Registry             *NeuralRegistry
 	Patterns             *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+	SurfaceAnnotations   []SurfaceAnnotation `json:"surface_annotations,omitempty"`
 	projectionMu         sync.RWMutex
+	annotationMu         sync.RWMutex
 	mu                   sync.RWMutex
 }
 
@@ -127,7 +129,58 @@ func (k *KnowledgeBase) RUnlock() { if k != nil { k.mu.RUnlock() } }
 func NewKnowledgeBase() *KnowledgeBase { return &KnowledgeBase{Registry: NewTokenRegistry(), Patterns: NewPatternIndex()} }
 func (k *KnowledgeBase) Fetch(token string) *ConceptNode {
 	if k == nil || k.Registry == nil { return nil }
-	return k.Registry.Get(token)
+	if node := k.Registry.Get(token); node != nil {
+		return node
+	}
+	canonical := canonicalToken(token)
+	if canonical == "" {
+		return nil
+	}
+	k.annotationMu.RLock()
+	annotations := append([]SurfaceAnnotation(nil), k.SurfaceAnnotations...)
+	k.annotationMu.RUnlock()
+	// Compatibility lookup: prefer a language annotation, otherwise use the
+	// most recently observed surface. Cognition should consume grounded NodeIDs
+	// rather than call this lexical adapter.
+	var fallback *SurfaceAnnotation
+	for i := range annotations {
+		if annotations[i].Surface != canonical || annotations[i].NodeID == 0 {
+			continue
+		}
+		if annotations[i].Modality == "language" {
+			fallback = &annotations[i]
+			break
+		}
+		copy := annotations[i]
+		if fallback == nil || copy.LastSeen.After(fallback.LastSeen) {
+			fallback = &copy
+		}
+	}
+	if fallback == nil {
+		return nil
+	}
+	return k.Registry.GetByID(fallback.NodeID)
+}
+
+func (k *KnowledgeBase) recordSurfaceAnnotation(surface, modality string, nodeID NodeID, population []NodeID, now time.Time) {
+	if k == nil || surface == "" || nodeID == 0 {
+		return
+	}
+	k.annotationMu.Lock()
+	defer k.annotationMu.Unlock()
+	for i := range k.SurfaceAnnotations {
+		annotation := &k.SurfaceAnnotations[i]
+		if annotation.Surface == surface && annotation.Modality == modality {
+			annotation.NodeID = nodeID
+			annotation.Population = append(annotation.Population[:0], population...)
+			annotation.LastSeen = now
+			return
+		}
+	}
+	k.SurfaceAnnotations = append(k.SurfaceAnnotations, SurfaceAnnotation{
+		Surface: surface, Modality: modality, NodeID: nodeID,
+		Population: append([]NodeID(nil), population...), LastSeen: now,
+	})
 }
 func (k *KnowledgeBase) Store(token string) *ConceptNode {
 	if k == nil || k.Registry == nil {
@@ -141,6 +194,7 @@ func (k *KnowledgeBase) Store(token string) *ConceptNode {
 	if err != nil {
 		return nil
 	}
+	k.recordSurfaceAnnotation(canonical, "language", nodeID, []NodeID{nodeID}, time.Now().UTC())
 	return k.Registry.GetByID(nodeID)
 }
 
@@ -191,6 +245,7 @@ type persistedGraph struct {
 	Nodes                 []*ConceptNode      `json:"nodes"`
 	Patterns              []*PatternSynapse   `json:"patterns,omitempty"`
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+	SurfaceAnnotations   []SurfaceAnnotation `json:"surface_annotations,omitempty"`
 }
 
 func (k *KnowledgeBase) Load(path string) error {
@@ -203,6 +258,7 @@ func (k *KnowledgeBase) Load(path string) error {
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
+	k.annotationMu.Lock(); k.SurfaceAnnotations = append([]SurfaceAnnotation(nil), graph.SurfaceAnnotations...); k.annotationMu.Unlock()
 	return nil
 }
 func (k *KnowledgeBase) Save(path string) error {
@@ -216,7 +272,10 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k.Registry != nil { nodes = k.Registry.Nodes() }
 	var patterns []*PatternSynapse
 	if k.Patterns != nil { patterns = k.Patterns.All() }
-	b, e := json.MarshalIndent(persistedGraph{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations}, "", "  ")
+	k.annotationMu.RLock()
+	annotations := append([]SurfaceAnnotation(nil), k.SurfaceAnnotations...)
+	k.annotationMu.RUnlock()
+	b, e := json.MarshalIndent(persistedGraph{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations, SurfaceAnnotations: annotations}, "", "  ")
 	if e != nil { return e }
 	return os.WriteFile(path, b, 0644)
 }
