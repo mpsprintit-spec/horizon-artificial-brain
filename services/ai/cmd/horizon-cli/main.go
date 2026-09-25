@@ -161,7 +161,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	concepts := make([]string, 0, len(result.Interpretation.RankedNodeIDs))
 	for _, id := range result.Interpretation.RankedNodeIDs {
 		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil && fmt.Sprintf("node:%d", node.ID) != "" {
-			concepts = append(concepts, node.Token)
+			concepts = append(concepts, fmt.Sprintf("node:%d", node.ID))
 		}
 	}
 	c.context = deriveContext(nil, concepts)
@@ -171,7 +171,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	}
 	return pipelineResult{
 		Input: input,
-		Tokens: result.Observatiofmt.Sprintf("node:%d", n.ID)s,
+		Tokens: result.Observations,
 		Answer: answer,
 		Path: "neural_runtime",
 		Confidence: result.Answer.Confidence,
@@ -200,7 +200,7 @@ func (c *cli) handleCommand(input string) bool {
 	case "nodes":
 		var tokens []string
 		for _, n := range c.horizon.Knowledge.Registry.Nodes() {
-			tokens = append(tokens, n.Token)
+			tokens = append(tokens, fmt.Sprintf("node:%d", n.ID))
 		}
 		fmt.Fprintf(c.out, "Nodes (%d): %s\n", len(tokens), strings.Join(tokens, ", "))
 	case "synapses":
