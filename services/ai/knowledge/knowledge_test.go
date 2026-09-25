@@ -125,7 +125,7 @@ func TestBrainPersistenceContainsDistributedStateNotLexicalIdentity(t *testing.T
 	if err != nil {
 		t.Fatal(err)
 	}
-	if strings.Contains(string(data), "gelas") || strings.Contains(string(data), ""token"") {
+	if strings.Contains(string(data), "gelas") || strings.Contains(string(data), "\"token\"") {
 		t.Fatal("brain persistence retained lexical identity")
 	}
 	if len(brain.Registry.Nodes()) < defaultProjectionPopulation {
