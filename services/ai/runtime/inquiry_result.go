@@ -125,7 +125,7 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 	interpretation.Consequence = &consequence
 	o.Runtime.activation.ApplyConsequencePlasticity(consequence.Valence, consequence.InformationGain, observedAt)
 	binding, bindingOK := o.Runtime.actionBinding(result.Execution.Request.RequestID)
-	outcomeNodeIDs := groundedNodeIDs(interpretation.GroundedRepresentations)
+	outcomeNodeIDs := groundedPopulationNodeIDs(interpretation.GroundedRepresentations)
 	causalLink := "inquiry:" + result.Execution.Request.RequestID
 	consequenceEvent := InquiryConsequenceEvent{
 		Action: result.Execution.Proposal.Action,
