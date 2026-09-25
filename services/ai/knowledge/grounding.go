@@ -45,6 +45,19 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	}
 
 	vector := observationVector(canonical, modality)
+	// If the language/input adapter has already established a canonical unit,
+	// bind the observation to that unit instead of creating a new distributed
+	// population. Distributed populations are reserved for genuinely new
+	// numeric experience; canonical concepts must not fragment during runtime.
+	if existing := k.Registry.Get(canonical); existing != nil {
+		existing.Activation = 1
+		existing.LastActivation = time.Now().UTC()
+		return GroundedRepresentation{
+			NodeID: existing.ID, Population: []NodeID{existing.ID}, Similarity: 1,
+			Status: GroundingExisting, Source: source, Modality: modality,
+			Token: canonical, Timestamp: time.Now().UTC(),
+		}, nil
+	}
 	_, hadPopulation := k.findExactProjectionPopulation(vector)
 	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
 	if err != nil || len(population.Units) == 0 {
