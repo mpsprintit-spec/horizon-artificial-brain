@@ -102,3 +102,33 @@ func TestCognitiveOrchestratorBuildsActiveInquiryFromNeuralUncertainty(t *testin
 		t.Fatal("inquiry selection must not itself authorize an action")
 	}
 }
+
+
+func TestCognitiveOrchestratorFeedsGroundedPopulationDirectlyIntoSubstrate(t *testing.T) {
+	orchestrator := NewCognitiveOrchestrator(NewBrainRuntime(nil))
+	observation := ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"cup"}}
+	cognitive, _, err := orchestrator.ProcessObservation(Event{
+		ID: "grounded-population-input",
+		Cycles: 1,
+		Timestamp: time.Date(2026, 9, 25, 1, 0, 0, 0, time.UTC),
+	}, observation, nil)
+	if err != nil {
+		t.Fatalf("ProcessObservation failed: %v", err)
+	}
+	if len(cognitive.GroundedRepresentations) != 1 {
+		t.Fatalf("expected one grounded representation, got %d", len(cognitive.GroundedRepresentations))
+	}
+	population := cognitive.GroundedRepresentations[0].Population
+	if len(population) != 4 {
+		t.Fatalf("expected distributed population of 4, got %d", len(population))
+	}
+	for _, id := range population {
+		node := orchestrator.Runtime.brain.Registry.GetByID(id)
+		if node == nil {
+			t.Fatalf("grounded population node %d missing", id)
+		}
+		if node.Activation <= 0 {
+			t.Fatalf("grounded population node %d never entered cognitive activation", id)
+		}
+	}
+}
