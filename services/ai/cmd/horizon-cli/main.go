@@ -171,7 +171,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	}
 	return pipelineResult{
 		Input: input,
-		Tokens: result.Observations,
+		Tokens: strings.Fields(input),
 		Answer: answer,
 		Path: "neural_runtime",
 		Confidence: result.Answer.Confidence,
@@ -234,7 +234,7 @@ func (c *cli) handleCommand(input string) bool {
 			var words []string
 			for _, id := range cl.Members {
 				if n := c.horizon.Knowledge.Registry.GetByID(id); n != nil {
-					words = append(words, n.Token)
+					words = append(words, fmt.Sprintf("node:%d", n.ID))
 				}
 			}
 			status := "belum cukup mapan"
@@ -321,12 +321,12 @@ func (c *cli) handleCommand(input string) bool {
 				var words []string
 				for _, id := range ps.Members {
 					if n := c.horizon.Knowledge.Registry.GetByID(id); n != nil {
-						words = append(words, n.Token)
+						words = append(words, fmt.Sprintf("node:%d", n.ID))
 					}
 				}
 				resultWord := "?"
 				if n := c.horizon.Knowledge.Registry.GetByID(ps.Result); n != nil {
-					resultWord = n.Token
+					resultWord = fmt.Sprintf("node:%d", n.ID)
 				}
 				fmt.Fprintf(c.out, "{%s} -> %s (weight=%.2f confidence=%.2f freq=%d)\n",
 					strings.Join(words, ", "), resultWord, ps.Weight, ps.Confidence, ps.Frequency)
@@ -398,7 +398,7 @@ func rankedTokens(h *core.HorizonEngine) []string {
 	ranked := nodes[len(nodes)-1].RankedNodes
 	out := make([]string, 0, len(ranked))
 	for _, n := range ranked {
-		out = append(out, n.Token)
+		out = append(out, fmt.Sprintf("node:%d", n.ID))
 	}
 	sort.Strings(out)
 	return out
