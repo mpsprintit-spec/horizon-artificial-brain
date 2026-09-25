@@ -19,6 +19,19 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 
 	vector := observationVector(canonical, modality)
 
+	// Event-time grounding must preserve the same canonical binding rule as
+	// wall-clock grounding. A previously stored concept is reactivated rather
+	// than expanded into a fresh distributed population.
+	if existing := k.Registry.Get(canonical); existing != nil {
+		existing.Activation = 1
+		existing.LastActivation = now.UTC()
+		return GroundedRepresentation{
+			NodeID: existing.ID, Population: []NodeID{existing.ID}, Similarity: 1,
+			Status: GroundingExisting, Source: source, Modality: modality,
+			Token: canonical, Timestamp: now.UTC(),
+		}, nil
+	}
+
 	_, hadPopulation := k.findExactProjectionPopulation(vector)
 	if !hadPopulation && k.Registry.Get(canonical) != nil {
 		hadPopulation = true
