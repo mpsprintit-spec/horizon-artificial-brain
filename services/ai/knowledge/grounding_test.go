@@ -101,3 +101,37 @@ func TestGroundObservationReusesPopulationWithinSameModality(t *testing.T) {
 		t.Fatalf("same-modality repeat created another population: got %d", got)
 	}
 }
+
+
+func TestBindGroundedRepresentationsKeepsModalitiesDistinctAndLearnsSharedPattern(t *testing.T) {
+	brain := NewBrain()
+	written, err := brain.GroundObservation("api", "text", "language", 0.95)
+	if err != nil {
+		t.Fatal(err)
+	}
+	visual, err := brain.GroundObservation("api", "camera", "vision", 0.95)
+	if err != nil {
+		t.Fatal(err)
+	}
+	pattern := brain.BindGroundedRepresentations(written, visual, time.Unix(10, 0).UTC())
+	if pattern == nil {
+		t.Fatal("expected cross-modal grounding pattern")
+	}
+	if len(pattern.Members) != 2 || pattern.Members[0] != written.NodeID || pattern.Members[1] != visual.NodeID {
+		t.Fatalf("unexpected shared pattern members: %v", pattern.Members)
+	}
+	if written.NodeID == visual.NodeID {
+		t.Fatal("shared grounding must not collapse surface populations")
+	}
+
+	repeated := brain.BindGroundedRepresentations(written, visual, time.Unix(11, 0).UTC())
+	if repeated == nil || repeated.ID != pattern.ID {
+		t.Fatal("repeated cross-modal experience should consolidate the existing pattern")
+	}
+	if repeated.Frequency != 2 {
+		t.Fatalf("expected shared grounding frequency 2, got %d", repeated.Frequency)
+	}
+	if len(brain.Registry.Nodes()) != defaultProjectionPopulation*2 {
+		t.Fatalf("cross-modal binding changed neural population topology: got %d nodes", len(brain.Registry.Nodes()))
+	}
+}
