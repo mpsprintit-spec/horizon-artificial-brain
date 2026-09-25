@@ -160,7 +160,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 
 	concepts := make([]string, 0, len(result.Interpretation.RankedNodeIDs))
 	for _, id := range result.Interpretation.RankedNodeIDs {
-		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil && node.Token != "" {
+		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil && fmt.Sprintf("node:%d", node.ID) != "" {
 			concepts = append(concepts, node.Token)
 		}
 	}
@@ -171,7 +171,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	}
 	return pipelineResult{
 		Input: input,
-		Tokens: result.Observation.Tokens,
+		Tokens: result.Observatiofmt.Sprintf("node:%d", n.ID)s,
 		Answer: answer,
 		Path: "neural_runtime",
 		Confidence: result.Answer.Confidence,
@@ -276,7 +276,7 @@ func (c *cli) handleCommand(input string) bool {
 				target := c.horizon.Knowledge.Registry.GetByID(id)
 				name := "?"
 				if target != nil {
-					name = target.Token
+					name = fmt.Sprintf("node:%d", target.ID)
 				}
 				fmt.Fprintf(c.out, "  --[%s]--> %s (weight=%.2f confidence=%.2f)\n", s.Kind, name, s.Weight, s.Confidence)
 			}
@@ -287,7 +287,7 @@ func (c *cli) handleCommand(input string) bool {
 				}
 				if list := other.SynapsesTo(node.ID); len(list) > 0 {
 					s := list[0]
-					fmt.Fprintf(c.out, "  %s --[%s]--> (weight=%.2f confidence=%.2f)\n", other.Token, s.Kind, s.Weight, s.Confidence)
+					fmt.Fprintf(c.out, "  %s --[%s]--> (weight=%.2f confidence=%.2f)\n", fmt.Sprintf("node:%d", other.ID), s.Kind, s.Weight, s.Confidence)
 				}
 			}
 			return true
