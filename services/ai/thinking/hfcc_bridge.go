@@ -127,8 +127,5 @@ func tokenRef(kb *knowledge.KnowledgeBase, id knowledge.NodeID) string {
 	if kb == nil {
 		return fmt.Sprintf("#%d", id)
 	}
-	if n := kb.Registry.GetByID(id); n != nil {
-		return n.Token
-	}
-	return fmt.Sprintf("#%d", id)
+return fmt.Sprintf("#%d", id)
 }
