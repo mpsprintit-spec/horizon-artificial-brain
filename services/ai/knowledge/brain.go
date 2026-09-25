@@ -1,5 +1,7 @@
 package knowledge
 
+import "time"
+
 // Brain is the canonical name for Horizon's single persistent neural
 // substrate. It is an alias of the existing substrate type so the migration
 // does not create a second storage implementation or duplicate state.
@@ -14,3 +16,6 @@ type Brain = KnowledgeBase
 func NewBrain() *Brain {
 	return NewKnowledgeBase()
 }
+
+
+// DistributedState is the canonical sparse neural state of Horizon. It carries only numeric activation over internal neural units; lexical labels are not part of the state.\ntype DistributedState struct { Units []PopulationUnit `json:"units"`; Timestamp time.Time `json:"timestamp"` }\n
