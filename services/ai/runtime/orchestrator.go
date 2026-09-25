@@ -34,7 +34,13 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 	for _, token := range observation.Tokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
 	for _, token := range observation.ContextTokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
 	for _, token := range observation.DataTokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
-	event.Source = observation.Source; event.Modality = observation.Modality; event.ContextTokens = append([]string(nil), observation.ContextTokens...); event.DataTokens = append([]string(nil), observation.DataTokens...)
+	event.Source = observation.Source
+	event.Modality = observation.Modality
+	event.ContextTokens = append([]string(nil), observation.ContextTokens...)
+	event.DataTokens = append([]string(nil), observation.DataTokens...)
+	// Feed the grounded population directly into the canonical substrate.
+	// Surface tokens remain adapter metadata and are not required for cognition.
+	event.StimulusNodeIDs = groundedPopulationNodeIDs(grounded)
 	output, err := o.Runtime.CognitiveProcess(event); if err != nil { return CognitiveInterpretation{}, false, err }
 	learned := false
 	if experience != nil && len(experience.Sequence) > 0 {
@@ -98,4 +104,23 @@ func groundedNodeIDs(grounded []knowledge.GroundedRepresentation) []knowledge.No
 func experienceID(experience *learning.Experience) string {
 	if experience == nil { return "" }
 	return experience.ExperienceID
+}
+
+
+func groundedPopulationNodeIDs(grounded []knowledge.GroundedRepresentation) []knowledge.NodeID {
+	seen := make(map[knowledge.NodeID]struct{})
+	ids := make([]knowledge.NodeID, 0)
+	for _, representation := range grounded {
+		for _, id := range representation.Population {
+			if id == 0 {
+				continue
+			}
+			if _, ok := seen[id]; ok {
+				continue
+			}
+			seen[id] = struct{}{}
+			ids = append(ids, id)
+		}
+	}
+	return ids
 }
