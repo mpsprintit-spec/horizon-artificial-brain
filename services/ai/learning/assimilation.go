@@ -270,21 +270,8 @@ func (l *LearningUnit) triggerKindOrEquivalent(token string) (knowledge.Relation
 	if kind, ok := triggerKind(token); ok {
 		return kind, true
 	}
-	node := l.Kb.Fetch(token)
-	if node == nil {
-		return "", false
-	}
-	for _, s := range node.OutboundAll() {
-			id := s.TargetID
-		if s.Kind != knowledge.RelationEquivalentTo {
-			continue
-		}
-		if target := l.Kb.Registry.GetByID(id); target != nil {
-			if kind, ok := triggerKind(target.Token); ok {
-				return kind, true
-			}
-		}
-	}
+	// Lexical equivalence is handled by the language adapter, not by neural
+	// unit identity. The substrate intentionally contains no Token field.
 	return "", false
 }
 
