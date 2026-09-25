@@ -426,7 +426,7 @@ func chooseFocusFromStructure(kb *knowledge.KnowledgeBase, interp *Interpretatio
 				if kb == nil {
 					break
 				}
-				if on := kb.Registry.GetByID(oid); on != nil && stimSet[on.Token] {
+				if on := kb.Registry.GetByID(oid); on != nil && stimSet[on.ID] {
 					nonStimPenalty = 0.25
 					break
 				}
