@@ -14,8 +14,8 @@ func TestTokenRegistryPreventsDuplicateNodes(t *testing.T) {
 	if first.ID != second.ID {
 		t.Fatalf("expected one unique node for canonical token, got %d and %d", first.ID, second.ID)
 	}
-	if len(kb.Registry.Nodes()) != defaultProjectionPopulation {
-		t.Fatalf("expected one distributed population of %d units, got %d", defaultProjectionPopulation, len(kb.Registry.Nodes()))
+	if len(kb.Registry.Nodes()) != 1 {
+		t.Fatalf("expected one canonical neural unit, got %d", len(kb.Registry.Nodes()))
 	}
 }
 
@@ -126,7 +126,7 @@ func TestBrainPersistenceContainsDistributedStateNotLexicalIdentity(t *testing.T
 	if strings.Contains(string(data), "gelas") || strings.Contains(string(data), "\"token\"") {
 		t.Fatal("brain persistence retained lexical identity")
 	}
-	if len(brain.Registry.Nodes()) < defaultProjectionPopulation {
-		t.Fatalf("expected distributed population, got %d units", len(brain.Registry.Nodes()))
+	if len(brain.Registry.Nodes()) != 1 {
+		t.Fatalf("expected one canonical numeric unit, got %d units", len(brain.Registry.Nodes()))
 	}
 }
