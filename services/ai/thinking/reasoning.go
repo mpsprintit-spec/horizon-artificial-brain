@@ -1,6 +1,7 @@
 package thinking
 
 import (
+	"fmt"
 	"sort"
 	"time"
 
@@ -164,9 +165,12 @@ func (t *ThinkingEngine) think(prompt string, contextTokens []string, includeSti
 				continue
 			}
 			for _, id := range h.Nodes {
-				if n := t.Activation.Memory.Registry.GetByID(id); n != nil && !contains(thought.Concepts, n.Token) {
-					thought.Concepts = append(thought.Concepts, n.Token)
-					trace.Add("Hypothesis", n, h.Confidence, "candidate hypothesis (fallback)")
+				if n := t.Activation.Memory.Registry.GetByID(id); n != nil {
+					label := fmt.Sprintf("node:%d", n.ID)
+					if !contains(thought.Concepts, label) {
+						thought.Concepts = append(thought.Concepts, label)
+						trace.Add("Hypothesis", n, h.Confidence, "candidate hypothesis (fallback)")
+					}
 				}
 			}
 		}
