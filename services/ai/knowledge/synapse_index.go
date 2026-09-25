@@ -107,7 +107,7 @@ func NormalizeSynapses(n *ConceptNode) {
 func (n *ConceptNode) UnmarshalJSON(data []byte) error {
 	var raw struct {
 		ID                NodeID                     `json:"id"`
-		Token             string                     `json:"token"`
+		Representation    []float64                  `json:"representation,omitempty"`
 		Activation        float64                    `json:"activation"`
 		RestingActivation float64                    `json:"resting_activation"`
 		Threshold         float64                    `json:"threshold"`
