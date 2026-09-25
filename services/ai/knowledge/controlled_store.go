@@ -24,9 +24,9 @@ func (k *KnowledgeBase) StoreAt(token string, now time.Time) *ConceptNode {
 	if canonical == "" {
 		return nil
 	}
-	population, err := k.ProjectVectorPopulationAt(observationVector(canonical, "language"), 0.999999, defaultProjectionPopulation, now)
-	if err != nil || len(population.Units) == 0 {
+	nodeID, _, _, err := k.ProjectVectorAt(observationVector(canonical, "language"), 0.999999, now)
+	if err != nil {
 		return nil
 	}
-	return k.Registry.GetByID(population.Units[0].NodeID)
+	return k.Registry.GetByID(nodeID)
 }
