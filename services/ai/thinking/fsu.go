@@ -284,7 +284,7 @@ func BuildFunctionalState(
 				fs.BackgroundFacts = append(fs.BackgroundFacts, Proposition{
 					ID: propID(primary, s.Kind, tid),
 					TargetID: primary, ObjectID: tid, Relation: s.Kind,
-					TargetTok: n.Token, ObjectTok: tokenOf(kb, tid),
+					TargetTok: tokenOf(kb, primary), ObjectTok: tokenOf(kb, tid),
 					Strength: s.Weight * s.Confidence, Requested: false,
 				})
 			}
