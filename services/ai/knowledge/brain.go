@@ -18,4 +18,7 @@ func NewBrain() *Brain {
 }
 
 
-// DistributedState is the canonical sparse neural state of Horizon. It carries only numeric activation over internal neural units; lexical labels are not part of the state.\ntype DistributedState struct { Units []PopulationUnit `json:"units"`; Timestamp time.Time `json:"timestamp"` }\n
+// DistributedState is the canonical sparse neural state of Horizon. It carries only numeric activation over internal neural units; lexical labels are not part of the state.type DistributedState struct {
+	Units []PopulationUnit `json:"units"`
+	Timestamp time.Time `json:"timestamp"`
+}
