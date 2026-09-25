@@ -17,7 +17,13 @@ type Engine struct {
 	lastPrediction, lastPredictionConf map[knowledge.NodeID]float64
 }
 
-type Request struct { StimulusTokens []string; ContextBoosts map[knowledge.NodeID]float64; Cycles int; Now time.Time }
+type Request struct {
+	StimulusTokens []string
+	StimulusNodeIDs []knowledge.NodeID
+	ContextBoosts map[knowledge.NodeID]float64
+	Cycles int
+	Now time.Time
+}
 type Result struct { Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode; PredictionError float64 }
 type Prediction struct { State, Confidence map[knowledge.NodeID]float64 }
 type ThoughtResult struct { Result; Prediction Prediction; PredictionError float64 }
@@ -31,6 +37,15 @@ func (e *Engine) ActivateWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
 	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
 	state:=map[knowledge.NodeID]float64{}; conf:=map[knowledge.NodeID]float64{}
+	// Grounded node IDs are the canonical substrate input path. This lets
+	// vision/audio/touch observations enter cognition without converting them
+	// back into lexical lookup.
+	for _, id := range req.StimulusNodeIDs {
+		if node := e.Memory.Registry.GetByID(id); node != nil {
+			state[id] = max(state[id], 1)
+			conf[id] = max(conf[id], 1)
+		}
+	}
 	for _,token:=range req.StimulusTokens {
 		canonical := strings.TrimSpace(token)
 		if canonical == "" {
