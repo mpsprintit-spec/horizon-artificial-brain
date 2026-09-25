@@ -137,11 +137,11 @@ func (k *KnowledgeBase) Store(token string) *ConceptNode {
 	if canonical == "" {
 		return nil
 	}
-	population, err := k.ProjectVectorPopulation(observationVector(canonical, "language"), 0.999999, defaultProjectionPopulation)
-	if err != nil || len(population.Units) == 0 {
+	nodeID, _, _, err := k.ProjectVector(observationVector(canonical, "language"), 0.999999)
+	if err != nil {
 		return nil
 	}
-	return k.Registry.GetByID(population.Units[0].NodeID)
+	return k.Registry.GetByID(nodeID)
 }
 
 // ProjectVector presents numeric experience to the same neural substrate used
