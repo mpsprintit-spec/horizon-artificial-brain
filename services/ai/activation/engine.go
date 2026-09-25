@@ -36,6 +36,17 @@ func (e *Engine) ActivateWith(req Request) Result {
 		if canonical == "" {
 			continue
 		}
+		// Language activation is an adapter boundary: when a canonical
+		// language representation already exists, reactivate that exact unit.
+		// Do not turn every repeated linguistic stimulus into a new distributed
+		// population. Unknown non-canonical numeric experience is still allowed
+		// to enter through the distributed projection path.
+		if node := e.Memory.Registry.Get(canonical); node != nil {
+			level := 1.0
+			state[node.ID] = max(state[node.ID], level)
+			conf[node.ID] = max(conf[node.ID], level)
+			continue
+		}
 		population, err := e.Memory.ProjectVectorPopulation(knowledge.EncodeObservation(canonical, "language"), e.Threshold, 4)
 		if err != nil {
 			continue
