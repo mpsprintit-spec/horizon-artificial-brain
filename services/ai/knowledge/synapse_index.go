@@ -122,6 +122,7 @@ func (n *ConceptNode) UnmarshalJSON(data []byte) error {
 		return err
 	}
 	n.ID = raw.ID
+	n.Representation = append([]float64(nil), raw.Representation...)
 	n.Activation = raw.Activation
 	n.RestingActivation = raw.RestingActivation
 	n.Threshold = raw.Threshold
