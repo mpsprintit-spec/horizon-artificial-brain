@@ -20,6 +20,9 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	vector := observationVector(canonical, modality)
 
 	_, hadPopulation := k.findExactProjectionPopulation(vector)
+	if !hadPopulation && k.Registry.Get(canonical) != nil {
+		hadPopulation = true
+	}
 	population, err := k.ProjectVectorPopulationAt(vector, threshold, defaultProjectionPopulation, now)
 	if err != nil || len(population.Units) == 0 {
 		if err != nil {
