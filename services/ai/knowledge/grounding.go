@@ -78,8 +78,11 @@ func observationVector(token, modality string) NeuralVector {
 	const dimensions = 16
 	values := make([]float64, dimensions)
 	h := fnv.New64a()
-	_, _ = h.Write([]byte(strings.ToLower(strings.TrimSpace(modality))))
-	_, _ = h.Write([]byte{0})
+	// The neural substrate is modality-neutral: the same observed concept
+	// must map to the same deterministic numeric basin whether it arrives
+	// through language, vision, or another adapter. Modality remains
+	// provenance metadata and must not fragment the canonical population.
+	_ = modality
 	_, _ = h.Write([]byte(strings.ToLower(token)))
 	seed := h.Sum64()
 	for i := range values {
