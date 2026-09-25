@@ -21,7 +21,7 @@ func NewNeuralRegistry() *NeuralRegistry { return &NeuralRegistry{nextID: 1, byI
 // It is not token-indexed and stores no lexical identity.
 type TokenRegistry = NeuralRegistry
 
-func NewNeuralRegistry() *NeuralRegistry { return NewNeuralRegistry() }
+func NewTokenRegistry() *TokenRegistry { return NewNeuralRegistry() }
 func canonicalToken(token string) string { return strings.ToLower(strings.TrimSpace(token)) }
 
 func (r *NeuralRegistry) GetOrCreate(token string) (*ConceptNode, bool, error) {
