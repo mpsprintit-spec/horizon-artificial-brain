@@ -121,7 +121,7 @@ type PathTrace struct{ Steps []TraceStep }
 type TraceStep struct {
 	Stage      string
 	NodeID     knowledge.NodeID
-	Token      string
+	Representation []float64
 	Confidence float64
 	Note       string
 	Time       time.Time
@@ -131,7 +131,7 @@ func (p *PathTrace) Add(stage string, node *knowledge.ConceptNode, confidence fl
 	step := TraceStep{Stage: stage, Confidence: confidence, Note: note, Time: time.Now().UTC()}
 	if node != nil {
 		step.NodeID = node.ID
-		step.Token = node.Token
+		step.Representation = append([]float64(nil), node.Representation...)
 	}
 	p.Steps = append(p.Steps, step)
 }
