@@ -140,7 +140,7 @@ func TestFSU2_E_NoSiblingDog(t *testing.T) {
 	}
 	for _, r := range th.BestInterpretation.Relations {
 		s := kb.Registry.GetByID(r.SourceID)
-		if s != nil && s.Token == "anjing" {
+		if s != nil && s.ID == kb.Fetch("anjing").ID {
 			t.Fatal("anjing must not be primary I* relation source")
 		}
 	}
@@ -192,7 +192,7 @@ func TestFSU2_H_LearningIsA(t *testing.T) {
 		t.Fatal("expected I*")
 	}
 	f := kb.Registry.GetByID(th.BestInterpretation.FocusID)
-	if f == nil || f.Token != "saya" {
+	if f == nil || f.ID != kb.Fetch("saya").ID {
 		t.Fatalf("focus saya, got %v", f)
 	}
 }
@@ -217,7 +217,7 @@ func TestFUG_FishSwimPropositionBinding(t *testing.T) {
 	}
 	i := th.BestInterpretation
 	f := kb.Registry.GetByID(i.FocusID)
-	if f == nil || f.Token != "ikan" {
+	if f == nil || f.ID != kb.Fetch("ikan").ID {
 		t.Fatalf("focus must be ikan, got %v", f)
 	}
 	found := false
