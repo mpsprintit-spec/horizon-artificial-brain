@@ -161,3 +161,69 @@ func TestPredictionErrorChangesLearnedTraceStrength(t *testing.T) {
 		t.Fatalf("expected prediction error to reduce trace confidence: before=%v after=%v", beforeConfidence, patterns[0].Confidence)
 	}
 }
+
+
+func TestKnownLanguageStimulusReactivatesCanonicalUnitWithoutPopulationGrowth(t *testing.T) {
+	kb := knowledge.NewKnowledgeBase()
+	a := kb.Store("saya")
+	b := kb.Store("ingin")
+	c := kb.Store("belajar")
+	e := NewEngine(kb)
+	now := time.Unix(100, 0).UTC()
+
+	first := e.ActivateWith(Request{
+		StimulusTokens: []string{"saya", "ingin", "belajar"},
+		Cycles:        2,
+		Now:           now,
+	})
+	if !first.Converged {
+		t.Fatal("expected first activation to converge")
+	}
+	if got := len(kb.Registry.Nodes()); got != 3 {
+		t.Fatalf("expected canonical substrate to remain at 3 nodes, got %d", got)
+	}
+	if got := len(kb.ProjectionPopulations); got != 0 {
+		t.Fatalf("known language stimulus must not create projection populations, got %d", got)
+	}
+	if first.Activations[a.ID] <= 0 || first.Activations[b.ID] <= 0 || first.Activations[c.ID] <= 0 {
+		t.Fatalf("expected canonical units to activate: %v", first.Activations)
+	}
+
+	second := e.ActivateWith(Request{
+		StimulusTokens: []string{"saya", "ingin", "belajar"},
+		Cycles:        2,
+		Now:           now.Add(time.Second),
+	})
+	if !second.Converged {
+		t.Fatal("expected repeated activation to converge")
+	}
+	if got := len(kb.Registry.Nodes()); got != 3 {
+		t.Fatalf("repeated language activation created new substrate nodes: got %d", got)
+	}
+	if got := len(kb.ProjectionPopulations); got != 0 {
+		t.Fatalf("repeated known language activation created projection populations: got %d", got)
+	}
+	if second.Activations[a.ID] <= 0 || second.Activations[b.ID] <= 0 || second.Activations[c.ID] <= 0 {
+		t.Fatalf("expected repeated activation to reuse canonical units: %v", second.Activations)
+	}
+}
+
+func TestUnknownLanguageStimulusStillUsesDistributedProjectionPath(t *testing.T) {
+	kb := knowledge.NewKnowledgeBase()
+	e := NewEngine(kb)
+
+	result := e.ActivateWith(Request{
+		StimulusTokens: []string{"air"},
+		Cycles:        1,
+		Now:           time.Unix(200, 0).UTC(),
+	})
+	if !result.Converged {
+		t.Fatal("expected unknown stimulus activation to converge")
+	}
+	if got := len(kb.Registry.Nodes()); got != 4 {
+		t.Fatalf("expected unknown experience to create one distributed population of 4 nodes, got %d", got)
+	}
+	if got := len(kb.ProjectionPopulations); got != 1 {
+		t.Fatalf("expected one distributed projection population, got %d", got)
+	}
+}
