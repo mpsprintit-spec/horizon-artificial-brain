@@ -263,3 +263,19 @@ func TestPlasticityMutatesDynamicsWithoutCreatingNeuralTopology(t *testing.T) {
 		t.Fatalf("plasticity changed synapse topology: before=%d after=%d", beforeSynapses, got)
 	}
 }
+
+func TestStimulusNodeActivationDoesNotImplyCertainty(t *testing.T) {
+	brain := knowledge.NewBrain()
+	node := brain.Store("uji")
+	engine := NewEngine(brain)
+	result := engine.Activate(Request{
+		StimulusNodeIDs: []knowledge.NodeID{node.ID},
+		Cycles: 1,
+	})
+	if result.Activations[node.ID] <= 0 {
+		t.Fatalf("expected stimulus node to activate, got %.3f", result.Activations[node.ID])
+	}
+	if result.Confidence[node.ID] >= 1 {
+		t.Fatalf("stimulus activation must not imply certainty, got %.3f", result.Confidence[node.ID])
+	}
+}
