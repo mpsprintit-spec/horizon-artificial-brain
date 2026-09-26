@@ -71,7 +71,7 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	// A distributed outcome has multiple members; keep the first observed
 	// outcome unit as the population anchor so adapter-level resolution and
 	// prediction refer to the same learned population without collapsing it.
-	result := outcomeNodeIDs[0]
+	result := steps[len(steps)-1].NodeID
 	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, experience.evidence(now))
 	if pattern != nil {
 		// Recompute confidence from the retained evidence rather than repeatedly
