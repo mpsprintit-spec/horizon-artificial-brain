@@ -27,32 +27,60 @@ func (p *PatternIndex) ReconsolidateCompetition(cue []PatternStep, context []Con
 }
 
 // ReconsolidateFromState connects an observed prediction error to learned
-// traces without requiring a semantic label. Patterns are selected by overlap
-// between their early learned state and the predicted/actual population state.
-// The operation is conservative and never removes a pattern.
+// traces without requiring a semantic label. A trace is adapted only when its
+// learned result was part of the predicted state and that result failed to
+// occur. This prevents an unrelated unexpected population from weakening every
+// trace that merely shares some active nodes.
 func (p *PatternIndex) ReconsolidateFromState(predicted, actual map[NodeID]float64, predictionError float64) {
 	if p == nil || predictionError <= 0 || len(predicted) == 0 { return }
 	if predictionError > 1 { predictionError = 1 }
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
 	for _, pattern := range p.patterns {
 		if pattern == nil || len(pattern.Sequence) < 2 { continue }
+
+		predictedResult := clamp01(predicted[pattern.Result])
+		actualResult := clamp01(actual[pattern.Result])
+		resultMismatch := predictedResult - actualResult
+		if resultMismatch <= 0 {
+			continue
+		}
+
+		// Measure support from the learned cue, excluding the result itself.
+		// For distributed outcomes this remains valid even when the result is
+		// the final unit of a multi-node population.
 		cueStrength := 0.0
-		for i, step := range pattern.Sequence {
-			if i >= 3 { break }
-			level := predicted[step.NodeID]
-			if level <= 0 { break }
+		for _, step := range pattern.Sequence {
+			if step.NodeID == pattern.Result {
+				break
+			}
+			level := clamp01(predicted[step.NodeID])
+			if level <= 0 {
+				break
+			}
 			cueStrength += level
 		}
-		if cueStrength == 0 { continue }
+		if cueStrength <= 0 {
+			continue
+		}
+
 		unexpected := 0.0
 		for id, level := range actual {
-			if level <= 0 || predicted[id] != 0 { continue }
+			if level <= 0 || predicted[id] != 0 {
+				continue
+			}
 			unexpected += level
 		}
-		if unexpected <= 0 { continue }
-		adjustment := ReconsolidationGain * predictionError * clamp01(cueStrength/3) * clamp01(unexpected)
-		if adjustment == 0 { continue }
+		unexpectedFactor := 0.5 + 0.5*clamp01(unexpected)
+		adjustment := ReconsolidationGain *
+			predictionError *
+			clamp01(cueStrength/3) *
+			resultMismatch *
+			unexpectedFactor
+		if adjustment <= 0 {
+			continue
+		}
 		pattern.Weight = clamp01(pattern.Weight - adjustment)
 		pattern.Confidence = clamp01(pattern.Confidence - adjustment*0.5)
 	}
