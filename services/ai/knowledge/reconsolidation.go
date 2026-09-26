@@ -42,10 +42,12 @@ func (p *PatternIndex) ReconsolidateFromState(predicted, actual map[NodeID]float
 
 		predictedResult := clamp01(predicted[pattern.Result])
 		actualResult := clamp01(actual[pattern.Result])
-		resultMismatch := predictedResult - actualResult
-		if resultMismatch <= 0 {
+		// A result that is still observed is not a failed result. Partial
+		// activation can reflect graded evidence and must not erase a trace.
+		if predictedResult <= 0 || actualResult > 0 {
 			continue
 		}
+		resultMismatch := predictedResult
 
 		// Measure support from the learned cue, excluding the result itself.
 		// For distributed outcomes this remains valid even when the result is
