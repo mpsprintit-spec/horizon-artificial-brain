@@ -132,3 +132,22 @@ func TestCognitiveOrchestratorFeedsGroundedPopulationDirectlyIntoSubstrate(t *te
 		}
 	}
 }
+
+
+func TestCognitiveOrchestratorDoesNotReencodeGroundedVisionAsLanguage(t *testing.T) {
+	runtime := NewBrainRuntime(knowledge.NewBrain())
+	orch := NewCognitiveOrchestrator(runtime)
+	at := time.Date(2026, 9, 26, 1, 0, 0, 0, time.UTC)
+	_, _, err := orch.ProcessObservation(Event{ID: "modal-identity", Timestamp: at, Cycles: 1}, ObservationInput{
+		Source: "camera", Modality: "vision", Tokens: []string{"cup"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := len(runtime.brain.ProjectionPopulations); got != 1 {
+		t.Fatalf("grounded vision event was re-encoded into another population: got %d populations", got)
+	}
+	if got := len(runtime.brain.Registry.Nodes()); got != 4 {
+		t.Fatalf("grounded vision event created duplicate neural units: got %d nodes", got)
+	}
+}
