@@ -268,7 +268,7 @@ func TestStimulusNodeActivationDoesNotImplyCertainty(t *testing.T) {
 	brain := knowledge.NewBrain()
 	node := brain.Store("uji")
 	engine := NewEngine(brain)
-	result := engine.Activate(Request{
+	result := engine.ActivateWith(Request{
 		StimulusNodeIDs: []knowledge.NodeID{node.ID},
 		Cycles: 1,
 	})
