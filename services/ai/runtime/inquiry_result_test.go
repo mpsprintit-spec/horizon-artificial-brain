@@ -77,8 +77,13 @@ func TestProcessInquiryResultFeedsObservationIntoCanonicalPipeline(t *testing.T)
 	if len(interpretation.GroundedRepresentations) != 2 {
 		t.Fatalf("expected two grounded representations, got %d", len(interpretation.GroundedRepresentations))
 	}
-	if runtime.brain.Registry.Get("cup") == nil || runtime.brain.Registry.Get("table") == nil {
-		t.Fatal("inquiry observation did not enter the canonical Brain")
+	for _, representation := range interpretation.GroundedRepresentations {
+		if representation.NodeID == 0 {
+			t.Fatal("inquiry observation did not enter the canonical Brain substrate")
+		}
+		if runtime.brain.Registry.GetByID(representation.NodeID) == nil {
+			t.Fatalf("grounded node %d is missing from canonical Brain", representation.NodeID)
+		}
 	}
 	if interpretation.InquiryAgenda == nil {
 		t.Fatal("inquiry result did not return the next inquiry agenda")
@@ -134,7 +139,7 @@ func TestInquiryOutcomeClosesPredictionCausalPredictionLoop(t *testing.T) {
 		Prediction: prediction,
 		PredictionCapturedAt: now,
 	}
-	_, _, _, err = orch.ProcessInquiryOutcome(InquiryResult{
+	interpretation, _, _, err := orch.ProcessInquiryOutcome(InquiryResult{
 		Execution: execution,
 		Event: Event{ID: requestID, Timestamp: now.Add(time.Second)},
 		Observation: ObservationInput{
@@ -150,7 +155,13 @@ func TestInquiryOutcomeClosesPredictionCausalPredictionLoop(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	outcome := brain.Fetch("outcome")
+	if len(interpretation.GroundedRepresentations) == 0 {
+		t.Fatal("outcome produced no grounded representation")
+	}
+	outcome := brain.Registry.GetByID(interpretation.GroundedRepresentations[0].NodeID)
+	if outcome == nil {
+		t.Fatal("outcome anchor is missing from the canonical Brain")
+	}
 	if outcome == nil {
 		t.Fatal("outcome was not grounded")
 	}
@@ -234,9 +245,12 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 	}, now.Add(time.Second)); err != nil {
 		t.Fatal(err)
 	}
-	b := brain.Fetch("b")
-	if b == nil {
+	if len(firstInterpretation.GroundedRepresentations) == 0 {
 		t.Fatal("first outcome B was not grounded")
+	}
+	b := brain.Registry.GetByID(firstInterpretation.GroundedRepresentations[0].NodeID)
+	if b == nil {
+		t.Fatal("first outcome B anchor is missing")
 	}
 
 	_, err = runtime.CognitiveProcess(Event{
@@ -269,9 +283,12 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 		t.Fatal(err)
 	}
 
-	cNode := brain.Fetch("c")
-	if cNode == nil {
+	if len(secondInterpretation.GroundedRepresentations) == 0 {
 		t.Fatal("contradictory outcome C was not grounded")
+	}
+	cNode := brain.Registry.GetByID(secondInterpretation.GroundedRepresentations[0].NodeID)
+	if cNode == nil {
+		t.Fatal("contradictory outcome C anchor is missing")
 	}
 	bAfter := brain.Patterns.ResultsFor(b.ID)
 	if len(bAfter) != 1 {
@@ -306,7 +323,7 @@ func TestInquiryOutcomeUsesCapturedPredictionAfterInterveningCognitiveState(t *t
 	target := brain.Store("target")
 	runtime := NewBrainRuntime(brain)
 	orch := NewCognitiveOrchestrator(runtime)
-	requestID := "inquiry-explicit-prediction"
+	requestID := "inquiry-30-focus"
 	if err := runtime.RegisterActionBinding(ActionBinding{RequestID: requestID, BrainIdentity: BrainIdentity, Intent: "inquiry:focus", TargetNodeIDs: []knowledge.NodeID{target.ID}}); err != nil { t.Fatal(err) }
 	preAction, err := runtime.CognitiveProcess(Event{ID: "pre-action-explicit", Stimulus: []string{"target"}, Cycles: 1, Timestamp: now})
 	if err != nil { t.Fatal(err) }
