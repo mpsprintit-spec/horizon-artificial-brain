@@ -3,6 +3,8 @@ package runtime
 import (
 	"testing"
 	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 func TestCognitiveOrchestratorUsesSingleRuntimeBrain(t *testing.T) {
