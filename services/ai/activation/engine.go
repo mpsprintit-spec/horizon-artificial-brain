@@ -95,8 +95,11 @@ func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.Nod
 		cue := []knowledge.PatternStep{{NodeID:id,Position:0,Activation:actual[id]}}
 		matches := e.Memory.Patterns.CompleteTrace(cue,nil)
 		if len(matches)==0 { continue }
-		limit:=len(matches); if limit>3 { limit=3 }
-		for _, pattern := range matches[:limit] {
+		// A learned outcome can be a distributed population. Do not truncate
+		// the causal matches to an arbitrary top-3 set, because doing so can
+		// discard population members and make an otherwise learned outcome
+		// disappear from future prediction.
+		for _, pattern := range matches {
 			if pattern==nil || len(pattern.Sequence)==0 || pattern.Result==id { continue }
 			strength:=clamp01(pattern.Weight)*clamp01(pattern.Confidence)
 			// Frequency ranks repeated evidence but must not suppress a newly
