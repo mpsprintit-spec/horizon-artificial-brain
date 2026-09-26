@@ -182,6 +182,33 @@ func (k *KnowledgeBase) recordSurfaceAnnotation(surface, modality string, nodeID
 		Population: append([]NodeID(nil), population...), LastSeen: now,
 	})
 }
+// SurfaceForNode resolves adapter metadata for a neural node without making
+// the surface form part of neural identity. A distributed population is
+// represented by one annotation anchored at its first member, so resolution
+// also checks population membership.
+func (k *KnowledgeBase) SurfaceForNode(id NodeID, modality string) string {
+	if k == nil || id == 0 { return "" }
+	k.annotationMu.RLock()
+	defer k.annotationMu.RUnlock()
+	best := ""
+	var bestSeen time.Time
+	for _, annotation := range k.SurfaceAnnotations {
+		if modality != "" && annotation.Modality != modality { continue }
+		match := annotation.NodeID == id
+		if !match {
+			for _, member := range annotation.Population {
+				if member == id { match = true; break }
+			}
+		}
+		if !match || annotation.Surface == "" { continue }
+		if best == "" || annotation.LastSeen.After(bestSeen) {
+			best = annotation.Surface
+			bestSeen = annotation.LastSeen
+		}
+	}
+	return best
+}
+
 func (k *KnowledgeBase) Store(token string) *ConceptNode {
 	if k == nil || k.Registry == nil {
 		return nil
