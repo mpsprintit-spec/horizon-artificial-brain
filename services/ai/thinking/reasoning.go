@@ -271,18 +271,7 @@ func BuildHypotheses(rep understanding.CognitiveRepresentation, result activatio
 
 func surfaceLabel(kb *knowledge.KnowledgeBase, id knowledge.NodeID) string {
 	if kb != nil {
-		// Prefer a language surface annotation because it is the user-facing
-		// realization of the numeric neural representation.
-		for _, a := range kb.SurfaceAnnotations {
-			if a.NodeID == id && a.Modality == "language" && a.Surface != "" {
-				return a.Surface
-			}
-		}
-		for _, a := range kb.SurfaceAnnotations {
-			if a.NodeID == id && a.Surface != "" {
-				return a.Surface
-			}
-		}
+		if label := kb.SurfaceForNode(id, "language"); label != "" { return label }
 	}
 	return fmt.Sprintf("node:%d", id)
 }
