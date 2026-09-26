@@ -794,7 +794,7 @@ func DecideEvaluation(interp *Interpretation, fs FunctionalState, kb *knowledge.
 				Weight: r.Weight, Confidence: r.Confidence, Inhibitory: r.Inhibitory,
 			})
 		}
-		paths = append(paths, findEvidencePathsFromActive(kb, prop.TargetID, prop.ObjectID, edgeIndex, nil)...)
+		paths = append(paths, findEvidencePathsFromActive(kb, prop.TargetID, prop.ObjectID, edgeIndex, nil, nil)...)
 	}
 	constr := interp.Constraints
 	if len(constr) == 0 {
