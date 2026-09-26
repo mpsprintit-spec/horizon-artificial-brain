@@ -1,6 +1,9 @@
 package knowledge
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestGroundObservationCreatesCandidateThenReusesRepresentation(t *testing.T) {
 	brain := NewBrain()
