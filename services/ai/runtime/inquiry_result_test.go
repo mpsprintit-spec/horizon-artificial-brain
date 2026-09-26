@@ -304,7 +304,6 @@ func TestInquiryOutcomeUsesCapturedPredictionAfterInterveningCognitiveState(t *t
 	now := time.Date(2026, 9, 26, 12, 0, 0, 0, time.UTC)
 	brain := knowledge.NewBrain()
 	target := brain.Store("target")
-	intervening := brain.Store("intervening")
 	runtime := NewBrainRuntime(brain)
 	orch := NewCognitiveOrchestrator(runtime)
 	requestID := "inquiry-explicit-prediction"
