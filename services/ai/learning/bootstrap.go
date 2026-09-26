@@ -107,12 +107,17 @@ func (l *LearningUnit) LearnOutcomeTrace(targetNodeIDs, outcomeNodeIDs []knowled
 	if len(steps) < 2 {
 		return
 	}
-	result := steps[len(steps)-1].NodeID
 	weight = clamp01(weight)
 	confidence = clamp01(confidence)
-	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, evidence)
-	if pattern != nil {
-		pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
+
+	// A distributed outcome is a population, not a single result node. Learn
+	// one causal trace for each outcome member so prediction can reconstruct
+	// the full population rather than only the final member of the sequence.
+	for _, outcomeID := range outcomeNodeIDs {
+		pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, outcomeID, weight, confidence, evidence)
+		if pattern != nil {
+			pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
+		}
 	}
 }
 
