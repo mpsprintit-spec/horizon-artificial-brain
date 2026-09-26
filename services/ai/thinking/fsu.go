@@ -312,7 +312,7 @@ func BuildFunctionalState(
 		if p.Relation != knowledge.RelationCanDo {
 			continue
 		}
-		paths := findEvidencePathsFromActive(kb, p.TargetID, p.ObjectID, edgeIndex, activeRels)
+		paths := findEvidencePathsFromActive(kb, p.TargetID, p.ObjectID, edgeIndex, activeRels, surfaceByID)
 		fs.EvidencePaths = append(fs.EvidencePaths, paths...)
 	}
 
