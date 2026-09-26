@@ -147,13 +147,34 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 			interpreted.GroundedRepresentations[1].NodeID, first.ID, second.ID)
 	}
 	for i, representation := range interpreted.GroundedRepresentations {
-		if representation.Status != "existing" {
-			t.Fatalf("recovery grounding[%d] status = %q, want existing", i, representation.Status)
+		if representation.Status != "candidate" {
+			t.Fatalf("first text recovery[%d] status = %q, want candidate", i, representation.Status)
 		}
 		if !representation.Timestamp.Equal(recoveryAt) {
-			t.Fatalf("recovery grounding[%d] timestamp = %v, want %v", i, representation.Timestamp, recoveryAt)
+			t.Fatalf("first text recovery[%d] timestamp = %v, want %v", i, representation.Timestamp, recoveryAt)
 		}
 	}
+
+	secondRecoveryAt := recoveryAt.Add(time.Second)
+	recovered, _, err := NewCognitiveOrchestrator(runtime).ProcessObservation(Event{
+		ID: "p1-inquiry-recovery-repeat",
+		Stimulus: observation.Tokens,
+		Timestamp: secondRecoveryAt,
+		Cycles: 1,
+	}, observation, nil)
+	if err != nil { t.Fatalf("ProcessObservation repeated recovery: %v", err) }
+	for i, representation := range recovered.GroundedRepresentations {
+		if representation.Status != "existing" {
+			t.Fatalf("repeated text recovery[%d] status = %q, want existing", i, representation.Status)
+		}
+		if !representation.Timestamp.Equal(secondRecoveryAt) {
+			t.Fatalf("repeated text recovery[%d] timestamp = %v, want %v", i, representation.Timestamp, secondRecoveryAt)
+		}
+		if representation.NodeID != interpreted.GroundedRepresentations[i].NodeID {
+			t.Fatalf("repeated text recovery[%d] changed anchor: got %d want %d", i, representation.NodeID, interpreted.GroundedRepresentations[i].NodeID)
+		}
+	}
+
 	if interpreted.State.BrainIdentity != BrainIdentity {
 		t.Fatalf("recovery brain identity = %q, want %q", interpreted.State.BrainIdentity, BrainIdentity)
 	}
