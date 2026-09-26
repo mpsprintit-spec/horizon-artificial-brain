@@ -10,6 +10,22 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/understanding"
 )
 
+func testSurfaceLabel(kb *knowledge.KnowledgeBase, id knowledge.NodeID) string {
+	if kb != nil {
+		for _, a := range kb.SurfaceAnnotations {
+			if a.NodeID == id && a.Modality == "language" && a.Surface != "" {
+				return a.Surface
+			}
+		}
+		for _, a := range kb.SurfaceAnnotations {
+			if a.NodeID == id && a.Surface != "" {
+				return a.Surface
+			}
+		}
+	}
+	return fmt.Sprintf("node:%d", id)
+}
+
 func seedCatGraph(kb *knowledge.KnowledgeBase) {
 	cat := kb.Store("kucing")
 	animal := kb.Store("hewan")
@@ -32,7 +48,7 @@ func TestNeighborhoodRetainsLowActivationStructure(t *testing.T) {
 	tokens := map[string]bool{}
 	for _, id := range thought.BestInterpretation.Nodes {
 		if n := kb.Registry.GetByID(id); n != nil {
-			tokens[fmt.Sprintf("node:%d", n.ID)] = true
+			tokens[testSurfaceLabel(kb, n.ID)] = true
 		}
 	}
 	for _, need := range []string{"kucing", "kaki", "berjalan", "hewan"} {
@@ -44,7 +60,7 @@ func TestNeighborhoodRetainsLowActivationStructure(t *testing.T) {
 	stateTokens := map[string]bool{}
 	for _, id := range engine.LastState.ActiveNodes {
 		if n := kb.Registry.GetByID(id); n != nil {
-			stateTokens[fmt.Sprintf("node:%d", n.ID)] = true
+			stateTokens[testSurfaceLabel(kb, n.ID)] = true
 		}
 	}
 	if !stateTokens["kaki"] || !stateTokens["berjalan"] {
@@ -116,7 +132,7 @@ func TestBridgeLowActivationKeptInNeighborhood(t *testing.T) {
 	}
 	foundBridge := false
 	for _, id := range engine.LastState.ActiveNodes {
-		if n := kb.Registry.GetByID(id); n != nil && fmt.Sprintf("node:%d", n.ID) == "bridge" {
+		if n := kb.Registry.GetByID(id); n != nil && testSurfaceLabel(kb, n.ID) == "bridge" {
 			foundBridge = true
 		}
 	}
@@ -124,7 +140,7 @@ func TestBridgeLowActivationKeptInNeighborhood(t *testing.T) {
 		// also check I*
 		if thought.BestInterpretation != nil {
 			for _, id := range thought.BestInterpretation.Nodes {
-				if n := kb.Registry.GetByID(id); n != nil && fmt.Sprintf("node:%d", n.ID) == "bridge" {
+				if n := kb.Registry.GetByID(id); n != nil && testSurfaceLabel(kb, n.ID) == "bridge" {
 					foundBridge = true
 				}
 			}
@@ -216,8 +232,8 @@ func TestFocusEmergent_TypedConceptBeatsAssociationHub(t *testing.T) {
 	if focus == nil {
 		t.Fatal("nil focus")
 	}
-	if fmt.Sprintf("node:%d", focus.ID) != "conceptx" {
-		t.Fatalf("expected focus=conceptx (typed structure), got %s", fmt.Sprintf("node:%d", focus.ID))
+	if testSurfaceLabel(kb, focus.ID) != "conceptx" {
+		t.Fatalf("expected focus=conceptx (typed structure), got %s", testSurfaceLabel(kb, focus.ID))
 	}
 }
 
@@ -240,10 +256,10 @@ func TestFocusEmergent_StimulusConceptNotStolenBySharedTarget(t *testing.T) {
 		t.Fatal("expected I*")
 	}
 	focus := kb.Registry.GetByID(thought.BestInterpretation.FocusID)
-	if focus == nil || fmt.Sprintf("node:%d", focus.ID) != "entityy" {
+	if focus == nil || testSurfaceLabel(kb, focus.ID) != "entityy" {
 		got := ""
 		if focus != nil {
-			got = fmt.Sprintf("node:%d", focus.ID)
+			got = testSurfaceLabel(kb, focus.ID)
 		}
 		t.Fatalf("expected focus=entityy, got %s", got)
 	}
@@ -270,10 +286,10 @@ func TestFocusEmergent_QueryWordsDoNotBecomeFocus(t *testing.T) {
 		t.Fatal("expected I*")
 	}
 	focus := kb.Registry.GetByID(thought.BestInterpretation.FocusID)
-	if focus == nil || fmt.Sprintf("node:%d", focus.ID) != "topicz" {
+	if focus == nil || testSurfaceLabel(kb, focus.ID) != "topicz" {
 		got := ""
 		if focus != nil {
-			got = fmt.Sprintf("node:%d", focus.ID)
+			got = testSurfaceLabel(kb, focus.ID)
 		}
 		t.Fatalf("expected focus=topicz, got %s", got)
 	}
@@ -306,10 +322,10 @@ func TestDirectVsCollateral_SameMemoryDifferentStimulus(t *testing.T) {
 		t.Fatal("kutu: expected I*")
 	}
 	focusFlea := kb.Registry.GetByID(thFlea.BestInterpretation.FocusID)
-	if focusFlea == nil || fmt.Sprintf("node:%d", focusFlea.ID) != "kutu" {
+	if focusFlea == nil || testSurfaceLabel(kb, focusFlea.ID) != "kutu" {
 		got := ""
 		if focusFlea != nil {
-			got = fmt.Sprintf("node:%d", focusFlea.ID)
+			got = testSurfaceLabel(kb, focusFlea.ID)
 		}
 		t.Fatalf("kutu: expected focus=kutu, got %s", got)
 	}
@@ -321,10 +337,10 @@ func TestDirectVsCollateral_SameMemoryDifferentStimulus(t *testing.T) {
 		if src == nil || tgt == nil {
 			continue
 		}
-		if fmt.Sprintf("node:%d", src.ID) == "kutu" && fmt.Sprintf("node:%d", tgt.ID) == "hewan" {
+		if testSurfaceLabel(kb, src.ID) == "kutu" && testSurfaceLabel(kb, tgt.ID) == "hewan" {
 			hasFleaIsA = true
 		}
-		if (fmt.Sprintf("node:%d", src.ID) == "kucing" || fmt.Sprintf("node:%d", src.ID) == "anjing" || fmt.Sprintf("node:%d", src.ID) == "burung") && fmt.Sprintf("node:%d", tgt.ID) == "hewan" {
+		if (testSurfaceLabel(kb, src.ID) == "kucing" || testSurfaceLabel(kb, src.ID) == "anjing" || testSurfaceLabel(kb, src.ID) == "burung") && testSurfaceLabel(kb, tgt.ID) == "hewan" {
 			siblingAsSource = true
 		}
 	}
@@ -338,15 +354,15 @@ func TestDirectVsCollateral_SameMemoryDifferentStimulus(t *testing.T) {
 	avail := map[string]bool{}
 	for _, id := range engine.LastState.ActiveNodes {
 		if n := kb.Registry.GetByID(id); n != nil {
-			avail[fmt.Sprintf("node:%d", n.ID)] = true
+			avail[testSurfaceLabel(kb, n.ID)] = true
 		}
 	}
 	if !avail["kucing"] && !avail["anjing"] && !avail["burung"] {
 		// neighborhood may still hold them even if not in ActiveNodes naming — check edges
 		for _, r := range engine.LastState.ActiveRelations {
 			if s := kb.Registry.GetByID(r.SourceID); s != nil {
-				if fmt.Sprintf("node:%d", s.ID) == "kucing" || fmt.Sprintf("node:%d", s.ID) == "anjing" || fmt.Sprintf("node:%d", s.ID) == "burung" {
-					avail[fmt.Sprintf("node:%d", s.ID)] = true
+				if testSurfaceLabel(kb, s.ID) == "kucing" || testSurfaceLabel(kb, s.ID) == "anjing" || testSurfaceLabel(kb, s.ID) == "burung" {
+					avail[testSurfaceLabel(kb, s.ID)] = true
 				}
 			}
 		}
@@ -365,10 +381,10 @@ func TestDirectVsCollateral_SameMemoryDifferentStimulus(t *testing.T) {
 		t.Fatal("kucing: expected I*")
 	}
 	focusCat := kb.Registry.GetByID(thCat.BestInterpretation.FocusID)
-	if focusCat == nil || fmt.Sprintf("node:%d", focusCat.ID) != "kucing" {
+	if focusCat == nil || testSurfaceLabel(kb, focusCat.ID) != "kucing" {
 		got := ""
 		if focusCat != nil {
-			got = fmt.Sprintf("node:%d", focusCat.ID)
+			got = testSurfaceLabel(kb, focusCat.ID)
 		}
 		t.Fatalf("kucing: expected focus=kucing, got %s", got)
 	}
@@ -392,10 +408,10 @@ func TestDirectVsCollateral_SameMemoryDifferentStimulus(t *testing.T) {
 		t.Fatal("anjing: expected I*")
 	}
 	focusDog := kb.Registry.GetByID(thDog.BestInterpretation.FocusID)
-	if focusDog == nil || fmt.Sprintf("node:%d", focusDog.ID) != "anjing" {
+	if focusDog == nil || testSurfaceLabel(kb, focusDog.ID) != "anjing" {
 		got := ""
 		if focusDog != nil {
-			got = fmt.Sprintf("node:%d", focusDog.ID)
+			got = testSurfaceLabel(kb, focusDog.ID)
 		}
 		t.Fatalf("anjing: expected focus=anjing, got %s", got)
 	}
@@ -445,24 +461,24 @@ func TestFunctionWordNotAutoFocus(t *testing.T) {
 	if focus == nil {
 		t.Fatal("nil focus")
 	}
-	if fmt.Sprintf("node:%d", focus.ID) == "relx" {
+	if testSurfaceLabel(kb, focus.ID) == "relx" {
 		t.Fatalf("function-like token with external typed structure must not auto-become focus, got relx")
 	}
 	// Prefer content endpoint of the inter-stimulus relation
-	if fmt.Sprintf("node:%d", focus.ID) != "entitya" && fmt.Sprintf("node:%d", focus.ID) != "entityb" {
-		t.Fatalf("expected focus on entitya or entityb, got %s", fmt.Sprintf("node:%d", focus.ID))
+	if testSurfaceLabel(kb, focus.ID) != "entitya" && testSurfaceLabel(kb, focus.ID) != "entityb" {
+		t.Fatalf("expected focus on entitya or entityb, got %s", testSurfaceLabel(kb, focus.ID))
 	}
 	// I* should include entitya→entityb when possible
 	found := false
 	for _, r := range thought.BestInterpretation.Relations {
 		s := kb.Registry.GetByID(r.SourceID)
 		tg := kb.Registry.GetByID(r.TargetID)
-		if s != nil && tg != nil && fmt.Sprintf("node:%d", s.ID) == "entitya" && fmt.Sprintf("node:%d", tg.ID) == "entityb" {
+		if s != nil && tg != nil && testSurfaceLabel(kb, s.ID) == "entitya" && testSurfaceLabel(kb, tg.ID) == "entityb" {
 			found = true
 		}
 	}
 	if !found {
-		t.Log("note: entitya→entityb not in I* relations; focus=", fmt.Sprintf("node:%d", focus.ID))
+		t.Log("note: entitya→entityb not in I* relations; focus=", testSurfaceLabel(kb, focus.ID))
 	}
 }
 
@@ -489,7 +505,7 @@ func TestBridgeSurvivesHighDegreeDistractors(t *testing.T) {
 	}
 	foundAvail := false
 	for _, id := range engine.LastState.ActiveNodes {
-		if n := kb.Registry.GetByID(id); n != nil && fmt.Sprintf("node:%d", n.ID) == "bridgey" {
+		if n := kb.Registry.GetByID(id); n != nil && testSurfaceLabel(kb, n.ID) == "bridgey" {
 			foundAvail = true
 		}
 	}
@@ -499,7 +515,7 @@ func TestBridgeSurvivesHighDegreeDistractors(t *testing.T) {
 	foundI := false
 	if thought.BestInterpretation != nil {
 		for _, id := range thought.BestInterpretation.Nodes {
-			if n := kb.Registry.GetByID(id); n != nil && fmt.Sprintf("node:%d", n.ID) == "bridgey" {
+			if n := kb.Registry.GetByID(id); n != nil && testSurfaceLabel(kb, n.ID) == "bridgey" {
 				foundI = true
 			}
 		}
@@ -509,7 +525,7 @@ func TestBridgeSurvivesHighDegreeDistractors(t *testing.T) {
 			}
 			s := kb.Registry.GetByID(r.SourceID)
 			tg := kb.Registry.GetByID(r.TargetID)
-			if s != nil && tg != nil && (fmt.Sprintf("node:%d", s.ID) == "bridgey" || fmt.Sprintf("node:%d", tg.ID) == "bridgey") {
+			if s != nil && tg != nil && (testSurfaceLabel(kb, s.ID) == "bridgey" || testSurfaceLabel(kb, tg.ID) == "bridgey") {
 				foundI = true
 			}
 		}
