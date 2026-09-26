@@ -160,8 +160,10 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 
 	concepts := make([]string, 0, len(result.Interpretation.RankedNodeIDs))
 	for _, id := range result.Interpretation.RankedNodeIDs {
-		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil && fmt.Sprintf("node:%d", node.ID) != "" {
-			concepts = append(concepts, fmt.Sprintf("node:%d", node.ID))
+		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil {
+			label := c.horizon.Knowledge.SurfaceForNode(id, "language")
+			if label == "" { label = fmt.Sprintf("node:%d", node.ID) }
+			if !containsString(concepts, label) { concepts = append(concepts, label) }
 		}
 	}
 	c.context = deriveContext(nil, concepts)
@@ -374,6 +376,11 @@ func (c *cli) synapseCount() int {
 var contextNoise = map[string]bool{
 	"itu": true, "ini": true, "adalah": true, "yang": true, "dan": true,
 	"di": true, "ke": true, "dari": true, "untuk": true, "dengan": true,
+}
+
+func containsString(values []string, target string) bool {
+	for _, value := range values { if value == target { return true } }
+	return false
 }
 
 func deriveContext(tokens, concepts []string) []string {
