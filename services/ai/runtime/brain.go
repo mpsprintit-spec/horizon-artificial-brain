@@ -127,7 +127,13 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil { return activation.Result{}, 0, errors.New("brain runtime is not initialized") }
 	r.mu.Lock(); defer r.mu.Unlock(); if event.Timestamp.IsZero() { event.Timestamp = r.nowLocked() }; nextSeq := r.seq + 1
 	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
-	result := r.activation.ActivateWith(activation.Request{StimulusTokens: append([]string(nil), event.Stimulus...), ContextBoosts: cloneContext(event.Context), Cycles: event.Cycles, Now: event.Timestamp}); r.seq = nextSeq; return result, r.seq, nil
+	result := r.activation.ActivateWith(activation.Request{
+		StimulusTokens: append([]string(nil), event.Stimulus...),
+		StimulusNodeIDs: append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),
+		ContextBoosts: cloneContext(event.Context),
+		Cycles: event.Cycles,
+		Now: event.Timestamp,
+	}); r.seq = nextSeq; return result, r.seq, nil
 }
 func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
 func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) { return r.ThinkAt(cycles, time.Time{}) }
