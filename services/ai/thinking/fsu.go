@@ -105,10 +105,14 @@ func BuildFunctionalState(
 	}
 	stimIDs := map[knowledge.NodeID]bool{}
 	stimSet := map[string]bool{}
+	surfaceByID := map[knowledge.NodeID]string{}
 	for _, t := range stimulus {
 		stimSet[t] = true
 		if n := kb.Fetch(t); n != nil {
 			stimIDs[n.ID] = true
+			if _, exists := surfaceByID[n.ID]; !exists {
+				surfaceByID[n.ID] = t
+			}
 		}
 	}
 
@@ -170,7 +174,7 @@ func BuildFunctionalState(
 		fs.RequestedProps = append(fs.RequestedProps, Proposition{
 			ID: propID(src, kind, tgt),
 			TargetID: src, ObjectID: tgt, Relation: kind,
-			TargetTok: tokenOf(kb, src), ObjectTok: tokenOf(kb, tgt),
+			TargetTok: surfaceOf(surfaceByID, src), ObjectTok: surfaceOf(surfaceByID, tgt),
 			Strength: strength, Requested: true,
 		})
 	}
@@ -284,7 +288,7 @@ func BuildFunctionalState(
 				fs.BackgroundFacts = append(fs.BackgroundFacts, Proposition{
 					ID: propID(primary, s.Kind, tid),
 					TargetID: primary, ObjectID: tid, Relation: s.Kind,
-					TargetTok: tokenOf(kb, primary), ObjectTok: tokenOf(kb, tid),
+					TargetTok: surfaceOf(surfaceByID, primary), ObjectTok: surfaceOf(surfaceByID, tid),
 					Strength: s.Weight * s.Confidence, Requested: false,
 				})
 			}
@@ -297,7 +301,7 @@ func BuildFunctionalState(
 		edgeIndex[e.SourceID] = append(edgeIndex[e.SourceID], e)
 	}
 	for _, p := range fs.RequestedProps {
-		paths := findEvidencePathsFromActive(kb, p.TargetID, p.ObjectID, edgeIndex, activeRels)
+		paths := findEvidencePathsFromActive(kb, p.TargetID, p.ObjectID, edgeIndex, activeRels, surfaceByID)
 		fs.EvidencePaths = append(fs.EvidencePaths, paths...)
 		if len(fs.EvidencePaths) >= maxEvidencePaths {
 			break
@@ -314,7 +318,7 @@ func BuildFunctionalState(
 
 	// Constraints ONLY from functional contrast/condition structure in active state,
 	// not from "node lies on path".
-	fs.Constraints = constraintsFromFunctionalStructure(kb, stimIDs, activeRels, fs.RequestedProps)
+	fs.Constraints = constraintsFromFunctionalStructure(kb, stimIDs, activeRels, fs.RequestedProps, surfaceByID)
 
 	// Goal structure from graph roles only (no word dictionary).
 	// framing "empty" = framing tokens with no synapses yet (unknown surface words)
@@ -459,6 +463,7 @@ func constraintsFromFunctionalStructure(
 	stimIDs map[knowledge.NodeID]bool,
 	active []understanding.ActiveEdge,
 	req []Proposition,
+	surfaceByID map[knowledge.NodeID]string,
 ) []Constraint {
 	var out []Constraint
 	seen := map[knowledge.NodeID]bool{}
@@ -467,7 +472,7 @@ func constraintsFromFunctionalStructure(
 			return
 		}
 		seen[id] = true
-		out = append(out, Constraint{ConceptID: id, Token: tokenOf(kb, id), Role: role, Note: note})
+		out = append(out, Constraint{ConceptID: id, Token: surfaceOf(surfaceByID, id), Role: role, Note: note})
 	}
 	for _, e := range active {
 		// Constraint edge requires BOTH ends in current stimulus (not merely available neighborhood).
@@ -509,6 +514,7 @@ func findEvidencePathsFromActive(
 	from, to knowledge.NodeID,
 	edgeIndex map[knowledge.NodeID][]understanding.ActiveEdge,
 	active []understanding.ActiveEdge,
+	surfaceByID map[knowledge.NodeID]string,
 ) []EvidencePath {
 	var out []EvidencePath
 	// Direct in active edges
@@ -516,7 +522,7 @@ func findEvidencePathsFromActive(
 		if e.TargetID == to && !e.Inhibitory {
 			out = append(out, EvidencePath{
 				NodeIDs: []knowledge.NodeID{from, to},
-				Tokens:  []string{tokenOf(kb, from), tokenOf(kb, to)},
+				Tokens:  []string{surfaceOf(surfaceByID, from), surfaceOf(surfaceByID, to)},
 				Relations: []knowledge.RelationKind{e.Kind}, Support: true, Length: 1,
 				Confidence: e.Confidence, Note: "direct_active",
 			})
@@ -539,7 +545,7 @@ func findEvidencePathsFromActive(
 			}
 			out = append(out, EvidencePath{
 				NodeIDs: []knowledge.NodeID{from, e1.TargetID, to},
-				Tokens:  []string{tokenOf(kb, from), tokenOf(kb, e1.TargetID), tokenOf(kb, to)},
+				Tokens:  []string{surfaceOf(surfaceByID, from), surfaceOf(surfaceByID, e1.TargetID), surfaceOf(surfaceByID, to)},
 				Relations: []knowledge.RelationKind{e1.Kind, e2.Kind}, Support: true, Length: 2,
 				Confidence: (e1.Confidence + e2.Confidence) / 2, Note: "derived_active",
 			})
@@ -822,51 +828,34 @@ func DecideEvaluation(interp *Interpretation, fs FunctionalState, kb *knowledge.
 }
 
 func selectPrimaryRequested(interp *Interpretation, fs FunctionalState) Proposition {
-	stimPos := map[string]int{}
+	stimPos := map[knowledge.NodeID]int{}
 	for i, tok := range fs.Stimulus {
-		stimPos[tok] = i
+		for _, p := range fs.RequestedProps {
+			if p.TargetTok == tok && p.TargetID != 0 {
+				if _, ok := stimPos[p.TargetID]; !ok { stimPos[p.TargetID] = i }
+			}
+			if p.ObjectTok == tok && p.ObjectID != 0 {
+				if _, ok := stimPos[p.ObjectID]; !ok { stimPos[p.ObjectID] = i }
+			}
+		}
 	}
 	var cands []Proposition
-	for _, p := range interp.Propositions {
-		if p.Requested {
-			cands = append(cands, p)
-		}
-	}
-	for _, p := range fs.RequestedProps {
-		cands = append(cands, p)
-	}
+	for _, p := range interp.Propositions { if p.Requested { cands = append(cands, p) } }
+	for _, p := range fs.RequestedProps { cands = append(cands, p) }
 	if len(cands) == 0 {
-		if len(interp.Propositions) > 0 {
-			return interp.Propositions[0]
-		}
+		if len(interp.Propositions) > 0 { return interp.Propositions[0] }
 		return Proposition{}
 	}
 	best := cands[0]
 	for _, p := range cands[1:] {
-		// Prefer can_do over other relations
-		if p.Relation == knowledge.RelationCanDo && best.Relation != knowledge.RelationCanDo {
-			best = p
-			continue
-		}
-		if p.Relation != knowledge.RelationCanDo && best.Relation == knowledge.RelationCanDo {
-			continue
-		}
-		// Prefer stronger evidence strength
-		if p.Strength > best.Strength+0.05 {
-			best = p
-			continue
-		}
-		if best.Strength > p.Strength+0.05 {
-			continue
-		}
-		// Tie-break: later object in stimulus (capability patient tends to be late)
-		if stimPos[p.ObjectTok] > stimPos[best.ObjectTok] {
-			best = p
-		}
+		if p.Relation == knowledge.RelationCanDo && best.Relation != knowledge.RelationCanDo { best = p; continue }
+		if p.Relation != knowledge.RelationCanDo && best.Relation == knowledge.RelationCanDo { continue }
+		if p.Strength > best.Strength+0.05 { best = p; continue }
+		if best.Strength > p.Strength+0.05 { continue }
+		if stimPos[p.ObjectID] > stimPos[best.ObjectID] { best = p }
 	}
 	return best
 }
-
 
 func preferredRequestedProps(props []Proposition) []Proposition {
 	if len(props) == 0 {
@@ -900,9 +889,10 @@ func preferredRequestedProps(props []Proposition) []Proposition {
 	return props
 }
 
-func tokenOf(kb *knowledge.KnowledgeBase, id knowledge.NodeID) string {
-	// Neural units intentionally do not expose lexical identity. Surface labels
-	// must come from the current language/input adapter, not the substrate.
+func surfaceOf(surfaceByID map[knowledge.NodeID]string, id knowledge.NodeID) string {
+	if surfaceByID != nil {
+		if surface, ok := surfaceByID[id]; ok && surface != "" { return surface }
+	}
 	return fmt.Sprintf("node:%d", id)
 }
 
