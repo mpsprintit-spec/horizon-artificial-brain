@@ -57,13 +57,20 @@ func (e *Engine) ActivateWith(req Request) Result {
 			conf[node.ID] = max(conf[node.ID], level)
 			continue
 		}
-		population, err := e.Memory.ProjectVectorPopulation(knowledge.EncodeObservation(canonical, "language"), e.Threshold, 4)
+		// Unknown language observations must pass through the language grounding
+		// boundary, not directly through population projection. Direct projection
+		// creates valid neural units but does not register the surface annotation
+		// needed to realize the neural state back into language.
+		grounded, err := e.Memory.GroundObservation(canonical, "activation", "language", e.Threshold)
 		if err != nil { continue }
-		for _, unit := range population.Units {
-			level := clamp01(unit.Activation)
+		vector := knowledge.EncodeObservation(canonical, "language")
+		for _, nodeID := range grounded.Population {
+			node := e.Memory.Registry.GetByID(nodeID)
+			if node == nil { continue }
+			level := clamp01(knowledge.NewNeuralVector(node.Representation).Similarity(vector))
 			if level <= 0 { continue }
-			state[unit.NodeID]=max(state[unit.NodeID],level)
-			conf[unit.NodeID]=max(conf[unit.NodeID],level)
+			state[nodeID]=max(state[nodeID],level)
+			conf[nodeID]=max(conf[nodeID],level)
 		}
 	}
 	for id,b:=range req.ContextBoosts { state[id]+=b; conf[id]=max(conf[id],b) }
