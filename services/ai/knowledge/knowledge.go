@@ -245,7 +245,6 @@ type persistedGraph struct {
 	Nodes                 []*ConceptNode      `json:"nodes"`
 	Patterns              []*PatternSynapse   `json:"patterns,omitempty"`
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
-	SurfaceAnnotations   []SurfaceAnnotation `json:"surface_annotations,omitempty"`
 }
 
 func (k *KnowledgeBase) Load(path string) error {
@@ -258,7 +257,7 @@ func (k *KnowledgeBase) Load(path string) error {
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
-	k.annotationMu.Lock(); k.SurfaceAnnotations = append([]SurfaceAnnotation(nil), graph.SurfaceAnnotations...); k.annotationMu.Unlock()
+
 	return nil
 }
 func (k *KnowledgeBase) Save(path string) error {
@@ -272,10 +271,7 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k.Registry != nil { nodes = k.Registry.Nodes() }
 	var patterns []*PatternSynapse
 	if k.Patterns != nil { patterns = k.Patterns.All() }
-	k.annotationMu.RLock()
-	annotations := append([]SurfaceAnnotation(nil), k.SurfaceAnnotations...)
-	k.annotationMu.RUnlock()
-	b, e := json.MarshalIndent(persistedGraph{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations, SurfaceAnnotations: annotations}, "", "  ")
+b, e := json.MarshalIndent(persistedGraph{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations}, "", "  ")
 	if e != nil { return e }
 	return os.WriteFile(path, b, 0644)
 }
