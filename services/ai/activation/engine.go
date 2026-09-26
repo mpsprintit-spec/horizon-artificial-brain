@@ -21,6 +21,11 @@ type Request struct {
 	StimulusTokens []string
 	StimulusNodeIDs []knowledge.NodeID
 	ContextBoosts map[knowledge.NodeID]float64
+	// PredictionOverride is an explicit pre-event prediction snapshot supplied
+	// by an external causal boundary (for example an inquiry execution). When
+	// present, it is authoritative for prediction-error plasticity for this
+	// transition; the engine's recurrent prediction remains the default path.
+	PredictionOverride *Prediction
 	Cycles int
 	Now time.Time
 }
@@ -36,32 +41,20 @@ func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkW
 func (e *Engine) ActivateWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
 	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
+	if req.PredictionOverride != nil {
+		previousPrediction = cloneState(req.PredictionOverride.State)
+	}
 	state:=map[knowledge.NodeID]float64{}; conf:=map[knowledge.NodeID]float64{}
-	// Grounded node IDs are the canonical substrate input path. This lets
-	// vision/audio/touch observations enter cognition without converting them
-	// back into lexical lookup.
-	for _, id := range req.StimulusNodeIDs {
+	for _, id:=range req.StimulusNodeIDs {
 		if node := e.Memory.Registry.GetByID(id); node != nil {
 			state[id] = max(state[id], 1)
 			conf[id] = max(conf[id], 1)
 		}
 	}
-	// Once a modality adapter has supplied grounded substrate IDs, they are
-	// authoritative for this event. Do not re-encode the same surface tokens
-	// as a second modality population.
-	if len(req.StimulusNodeIDs) > 0 {
-		req.StimulusTokens = nil
-	}
+	if len(req.StimulusNodeIDs) > 0 { req.StimulusTokens = nil }
 	for _,token:=range req.StimulusTokens {
 		canonical := strings.TrimSpace(token)
-		if canonical == "" {
-			continue
-		}
-		// Language activation is an adapter boundary: when a canonical
-		// language representation already exists, reactivate that exact unit.
-		// Do not turn every repeated linguistic stimulus into a new distributed
-		// population. Unknown non-canonical numeric experience is still allowed
-		// to enter through the distributed projection path.
+		if canonical == "" { continue }
 		if node := e.Memory.Registry.Get(canonical); node != nil {
 			level := 1.0
 			state[node.ID] = max(state[node.ID], level)
@@ -69,14 +62,10 @@ func (e *Engine) ActivateWith(req Request) Result {
 			continue
 		}
 		population, err := e.Memory.ProjectVectorPopulation(knowledge.EncodeObservation(canonical, "language"), e.Threshold, 4)
-		if err != nil {
-			continue
-		}
+		if err != nil { continue }
 		for _, unit := range population.Units {
 			level := clamp01(unit.Activation)
-			if level <= 0 {
-				continue
-			}
+			if level <= 0 { continue }
 			state[unit.NodeID] = max(state[unit.NodeID], level)
 			conf[unit.NodeID] = max(conf[unit.NodeID], level)
 		}
@@ -103,10 +92,8 @@ func (e *Engine) ActivateWith(req Request) Result {
 	return result
 }
 
-func (e *Engine) applyPatternPrediction(prediction, confidence, actual map[knowledge.NodeID]float64) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
-	if e == nil || e.Memory == nil || e.Memory.Patterns == nil || len(actual) == 0 {
-		return prediction, confidence
-	}
+func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.NodeID]float64, actual map[knowledge.NodeID]float64) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+	if e == nil || e.Memory == nil || e.Memory.Patterns == nil || len(actual) == 0 { return prediction, confidence }
 	out := cloneState(prediction)
 	outConfidence := cloneState(confidence)
 	for _, id := range sortedNodeIDs(actual) {
@@ -114,13 +101,11 @@ func (e *Engine) applyPatternPrediction(prediction, confidence, actual map[knowl
 		cue := []knowledge.PatternStep{{NodeID: id, Position: 0, Activation: actual[id]}}
 		matches := e.Memory.Patterns.CompleteTrace(cue, nil)
 		if len(matches) == 0 { continue }
-		limit := len(matches)
-		if limit > 3 { limit = 3 }
+		limit := len(matches); if limit > 3 { limit = 3 }
 		for _, pattern := range matches[:limit] {
 			if pattern == nil || len(pattern.Sequence) == 0 || pattern.Result == id { continue }
 			strength := clamp01(pattern.Weight) * clamp01(pattern.Confidence)
-			frequency := float64(pattern.Frequency)
-			if frequency > 10 { frequency = 10 }
+			frequency := float64(pattern.Frequency); if frequency > 10 { frequency = 10 }
 			strength *= frequency / 10
 			if strength <= 0 { continue }
 			if strength > 0.35 { strength = 0.35 }
@@ -130,7 +115,6 @@ func (e *Engine) applyPatternPrediction(prediction, confidence, actual map[knowl
 	}
 	return normalize(out), normalize(outConfidence)
 }
-
 
 func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
 	if e == nil || e.Memory == nil { return cloneState(state), cloneState(confidence) }
