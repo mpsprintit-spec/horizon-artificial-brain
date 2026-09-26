@@ -298,3 +298,26 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 		t.Fatal("historical outcome B disappeared instead of remaining as a weaker alternative")
 	}
 }
+
+
+func TestInquiryOutcomeUsesCapturedPredictionAfterInterveningCognitiveState(t *testing.T) {
+	now := time.Date(2026, 9, 26, 12, 0, 0, 0, time.UTC)
+	brain := knowledge.NewBrain()
+	target := brain.Store("target")
+	intervening := brain.Store("intervening")
+	runtime := NewBrainRuntime(brain)
+	orch := NewCognitiveOrchestrator(runtime)
+	requestID := "inquiry-explicit-prediction"
+	if err := runtime.RegisterActionBinding(ActionBinding{RequestID: requestID, BrainIdentity: BrainIdentity, Intent: "inquiry:focus", TargetNodeIDs: []knowledge.NodeID{target.ID}}); err != nil { t.Fatal(err) }
+	preAction, err := runtime.CognitiveProcess(Event{ID: "pre-action-explicit", Stimulus: []string{"target"}, Cycles: 1, Timestamp: now})
+	if err != nil { t.Fatal(err) }
+	captured := preAction.Prediction
+	if len(captured.State) == 0 { t.Fatal("expected captured pre-action prediction") }
+	if _, err := runtime.CognitiveProcess(Event{ID: "intervening-state", Stimulus: []string{"intervening"}, Cycles: 1, Timestamp: now.Add(500 * time.Millisecond)}); err != nil { t.Fatal(err) }
+	execution := InquiryExecution{Proposal: InquiryProposal{BrainIdentity: BrainIdentity, Sequence: 30, CandidateID: "focus", Action: InquiryFocus, Reversibility: true}, Request: ExecutionRequest{RequestID: requestID, BrainIdentity: BrainIdentity, Expiry: now.Add(time.Minute), authorized: true}, Prediction: captured, PredictionCapturedAt: now}
+	interpretation, _, _, err := orch.ProcessInquiryOutcome(InquiryResult{Execution: execution, Event: Event{ID: "explicit-prediction-outcome", Timestamp: now.Add(time.Second)}, Observation: ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"unexpected"}}, Success: true, Reliability: 1, InformationGain: 1}, now.Add(time.Second))
+	if err != nil { t.Fatal(err) }
+	expected := runtime.activation.PredictionError(captured, interpretation.State.Activations)
+	if interpretation.State.PredictionError != expected { t.Fatalf("outcome did not use captured prediction: got=%v want=%v", interpretation.State.PredictionError, expected) }
+	if interpretation.State.PredictionError <= 0 { t.Fatal("expected non-zero prediction error from unexpected outcome") }
+}
