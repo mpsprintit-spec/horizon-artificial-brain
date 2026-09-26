@@ -237,7 +237,7 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 		t.Fatal(err)
 	}
 	firstExecution := execution("inquiry-20-focus", 20, output.Prediction, now)
-	if _, _, _, err = orch.ProcessInquiryOutcome(InquiryResult{
+	firstInterpretation, _, _, err := orch.ProcessInquiryOutcome(InquiryResult{
 		Execution: firstExecution,
 		Event: Event{ID: "outcome-b", Timestamp: now.Add(time.Second)},
 		Observation: ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"b"}},
@@ -274,7 +274,7 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 
 	register("inquiry-21-focus", 21)
 	secondExecution := execution("inquiry-21-focus", 21, predictionB, now.Add(2*time.Second))
-	if _, _, _, err = orch.ProcessInquiryOutcome(InquiryResult{
+	secondInterpretation, _, _, err := orch.ProcessInquiryOutcome(InquiryResult{
 		Execution: secondExecution,
 		Event: Event{ID: "outcome-c", Timestamp: now.Add(3 * time.Second)},
 		Observation: ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"c"}},
