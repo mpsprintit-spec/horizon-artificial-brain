@@ -21,10 +21,6 @@ type Request struct {
 	StimulusTokens []string
 	StimulusNodeIDs []knowledge.NodeID
 	ContextBoosts map[knowledge.NodeID]float64
-	// PredictionOverride is an explicit pre-event prediction snapshot supplied
-	// by an external causal boundary (for example an inquiry execution). When
-	// present, it is authoritative for prediction-error plasticity for this
-	// transition; the engine's recurrent prediction remains the default path.
 	PredictionOverride *Prediction
 	Cycles int
 	Now time.Time
@@ -66,14 +62,13 @@ func (e *Engine) ActivateWith(req Request) Result {
 		for _, unit := range population.Units {
 			level := clamp01(unit.Activation)
 			if level <= 0 { continue }
-			state[unit.NodeID] = max(state[unit.NodeID], level)
-			conf[unit.NodeID] = max(conf[unit.NodeID], level)
+			state[unit.NodeID]=max(state[unit.NodeID],level)
+			conf[unit.NodeID]=max(conf[unit.NodeID],level)
 		}
 	}
 	for id,b:=range req.ContextBoosts { state[id]+=b; conf[id]=max(conf[id],b) }
 	state=normalize(state); pre:=cloneState(state); state,conf=e.advance(state,conf,req.Now,req.Cycles); result:=e.converge(state,conf,req.Now)
 	e.ApplyActivityPlasticity(pre,result.Activations,req.Now)
-
 	predictionError:=0.0
 	if len(previousPrediction)>0 {
 		predictionError=stateDifference(previousPrediction,result.Activations)
@@ -81,7 +76,6 @@ func (e *Engine) ActivateWith(req Request) Result {
 	}
 	nextPrediction, nextPredictionConfidence := e.advance(result.Activations,result.Confidence,req.Now,req.Cycles)
 	nextPrediction, nextPredictionConfidence = e.applyPatternPrediction(nextPrediction, nextPredictionConfidence, result.Activations)
-
 	e.mu.Lock()
 	e.internalState=cloneState(result.Activations)
 	e.internalConfidence=cloneState(result.Confidence)
@@ -92,45 +86,70 @@ func (e *Engine) ActivateWith(req Request) Result {
 	return result
 }
 
-func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.NodeID]float64, actual map[knowledge.NodeID]float64) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.NodeID]float64, actual map[knowledge.NodeID]float64) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
 	if e == nil || e.Memory == nil || e.Memory.Patterns == nil || len(actual) == 0 { return prediction, confidence }
 	out := cloneState(prediction)
 	outConfidence := cloneState(confidence)
 	for _, id := range sortedNodeIDs(actual) {
 		if actual[id] <= e.Threshold { continue }
-		cue := []knowledge.PatternStep{{NodeID: id, Position: 0, Activation: actual[id]}}
-		matches := e.Memory.Patterns.CompleteTrace(cue, nil)
-		if len(matches) == 0 { continue }
-		limit := len(matches); if limit > 3 { limit = 3 }
+		cue := []knowledge.PatternStep{{NodeID:id,Position:0,Activation:actual[id]}}
+		matches := e.Memory.Patterns.CompleteTrace(cue,nil)
+		if len(matches)==0 { continue }
+		limit:=len(matches); if limit>3 { limit=3 }
 		for _, pattern := range matches[:limit] {
-			if pattern == nil || len(pattern.Sequence) == 0 || pattern.Result == id { continue }
-			strength := clamp01(pattern.Weight) * clamp01(pattern.Confidence)
-			frequency := float64(pattern.Frequency); if frequency > 10 { frequency = 10 }
-			strength *= frequency / 10
-			if strength <= 0 { continue }
-			if strength > 0.35 { strength = 0.35 }
-			out[pattern.Result] = max(out[pattern.Result], strength)
-			outConfidence[pattern.Result] = max(outConfidence[pattern.Result], strength)
+			if pattern==nil || len(pattern.Sequence)==0 || pattern.Result==id { continue }
+			strength:=clamp01(pattern.Weight)*clamp01(pattern.Confidence)
+			// Frequency ranks repeated evidence but must not suppress a newly
+			// learned causal trace. A first observation is already valid
+			// predictive evidence; repetition increases influence.
+			frequency:=float64(pattern.Frequency); if frequency>10 { frequency=10 }
+			strength*=0.5+0.5*(frequency/10)
+			if strength<=0 { continue }
+			if strength>0.35 { strength=0.35 }
+			out[pattern.Result]=max(out[pattern.Result],strength)
+			outConfidence[pattern.Result]=max(outConfidence[pattern.Result],strength)
 		}
 	}
-	return normalize(out), normalize(outConfidence)
+	return normalize(out),normalize(outConfidence)
 }
 
 func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
-	if e == nil || e.Memory == nil { return cloneState(state), cloneState(confidence) }
-	e.Memory.Lock()
-	defer e.Memory.Unlock()
+	if e==nil || e.Memory==nil { return cloneState(state),cloneState(confidence) }
+	e.Memory.Lock(); defer e.Memory.Unlock()
 	state=cloneState(state); confidence=cloneState(confidence)
-	for i:=0;i<cycles;i++ { next:=map[knowledge.NodeID]float64{}; nextConfidence:=map[knowledge.NodeID]float64{}
+	for i:=0;i<cycles;i++ {
+		next:=map[knowledge.NodeID]float64{}; nextConfidence:=map[knowledge.NodeID]float64{}
 		for _,id:=range sortedNodeIDs(state) { n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; adaptive:=n.Threshold-(n.Importance*.05)-(float64(n.Frequency)*.001); n.Threshold=clamp(adaptive,.12,.8); next[id]=n.RestingActivation }
-		for _,id:=range sortedNodeIDs(state) { level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; next[id]+=level*(1-e.Decay); nextConfidence[id]=max(nextConfidence[id],confidence[id]); synapses:=n.OutboundAll(); sort.Slice(synapses,func(i,j int)bool{ return synapses[i].TargetID<synapses[j].TargetID }); for _,s:=range synapses { age:=temporalPenalty(now,s.LastActivation); pulse:=level*s.Weight*s.Confidence*e.SpreadRate*age; if s.Inhibitory{next[s.TargetID]-=pulse*e.Inhibition}else{next[s.TargetID]+=pulse}; nextConfidence[s.TargetID]=max(nextConfidence[s.TargetID],confidence[id]*s.Confidence*age); s.Activation=pulse } }
+		for _,id:=range sortedNodeIDs(state) {
+			level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}
+			next[id]+=level*(1-e.Decay); nextConfidence[id]=max(nextConfidence[id],confidence[id])
+			synapses:=n.OutboundAll(); sort.Slice(synapses,func(i,j int)bool{return synapses[i].TargetID<synapses[j].TargetID})
+			for _,s:=range synapses {
+				age:=temporalPenalty(now,s.LastActivation); pulse:=level*s.Weight*s.Confidence*e.SpreadRate*age
+				if s.Inhibitory { next[s.TargetID]-=pulse*e.Inhibition } else { next[s.TargetID]+=pulse }
+				nextConfidence[s.TargetID]=max(nextConfidence[s.TargetID],confidence[id]*s.Confidence*age); s.Activation=pulse
+			}
+		}
 		state=normalize(next); confidence=normalize(nextConfidence)
 	}
 	return state,confidence
 }
 
 func (e *Engine) converge(state,confidence map[knowledge.NodeID]float64,now time.Time) Result {
-	if e == nil || e.Memory == nil { return Result{} }
-	e.Memory.Lock()
-	defer e.Memory.Unlock()
-	var ranked []*knowledge.ConceptNode; var resonance float64; for _,id:=range sortedNodeIDs(state){level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; n.Activation=clamp01(level); n.LastActivation=now; if level>e.Threshold{n.Frequency++}; resonance+=level*confidence[id]; if level>=e.Threshold{ranked=append(ranked,n)} }; sort.Slice(ranked,func(i,j int)bool{a,b:=ranked[i],ranked[j]; si:=a.Activation*confidence[a.ID]+a.Importance*.1+float64(a.Frequency)*.001; sj:=b.Activation*confidence[b.ID]+b.Importance*.1+float64(b.Frequency)*.001; if si==sj{return a.ID<b.ID}; return si>sj}); return Result{Converged:true,Resonance:resonance,Activations:cloneState(state),Confidence:cloneState(confidence),RankedNodes:ranked} }
+	if e==nil || e.Memory==nil { return Result{} }
+	e.Memory.Lock(); defer e.Memory.Unlock()
+	var ranked []*knowledge.ConceptNode; var resonance float64
+	for _,id:=range sortedNodeIDs(state) {
+		level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}
+		n.Activation=clamp01(level); n.LastActivation=now; if level>e.Threshold{n.Frequency++}
+		resonance+=level*confidence[id]; if level>=e.Threshold{ranked=append(ranked,n)}
+	}
+	sort.Slice(ranked,func(i,j int)bool{
+		a,b:=ranked[i],ranked[j]
+		si:=a.Activation*confidence[a.ID]+a.Importance*.1+float64(a.Frequency)*.001
+		sj:=b.Activation*confidence[b.ID]+b.Importance*.1+float64(b.Frequency)*.001
+		if si==sj{return a.ID<b.ID}
+		return si>sj
+	})
+	return Result{Converged:true,Resonance:resonance,Activations:cloneState(state),Confidence:cloneState(confidence),RankedNodes:ranked}
+}
