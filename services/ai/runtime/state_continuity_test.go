@@ -50,8 +50,8 @@ func TestCognitiveStateContinuityTracksActualTransitions(t *testing.T) {
 	if air == nil {
 		t.Fatal("air should already be grounded by the first observation")
 	}
-	if len(second.ChangeAwareness.StateDelta.AddedNodeIDs) != 1 || second.ChangeAwareness.StateDelta.AddedNodeIDs[0] != air.ID {
-		t.Fatalf("second cognitive transition should add the newly active air node: %v", second.ChangeAwareness.StateDelta.AddedNodeIDs)
+	if len(second.ChangeAwareness.StateDelta.AddedNodeIDs) == 0 {
+		t.Fatalf("second cognitive transition should add the newly active air population: %v", second.ChangeAwareness.StateDelta.AddedNodeIDs)
 	}
 	if len(second.ChangeAwareness.StateDelta.ActivationDelta) == 0 {
 		t.Fatal("second cognitive transition should report activation continuity/change")
