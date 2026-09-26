@@ -43,8 +43,13 @@ func (e *Engine) ActivateWith(req Request) Result {
 	state:=map[knowledge.NodeID]float64{}; conf:=map[knowledge.NodeID]float64{}
 	for _, id:=range req.StimulusNodeIDs {
 		if node := e.Memory.Registry.GetByID(id); node != nil {
+			// A stimulus can be injected at full activation strength without
+			// claiming that its interpretation is certain. Confidence must come
+			// from substrate evidence, not from the fact that the node was selected
+			// as an input. Importance provides only a bounded prior here; recurrent
+			// evidence and learned structure can increase confidence later.
 			state[id] = max(state[id], 1)
-			conf[id] = max(conf[id], 1)
+			conf[id] = max(conf[id], 0.5*clamp01(node.Importance))
 		}
 	}
 	if len(req.StimulusNodeIDs) > 0 { req.StimulusTokens = nil }
