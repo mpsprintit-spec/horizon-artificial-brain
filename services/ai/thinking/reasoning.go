@@ -147,9 +147,21 @@ func (t *ThinkingEngine) think(prompt string, contextTokens []string, includeSti
 
 	if bestInterp != nil {
 		thought.Confidence = clamp01((thought.Confidence + bestInterp.TotalScore) / 2)
+		// Surface labels are adapter metadata. They are resolved only at the
+		// language boundary; node identity remains numeric and substrate-native.
+		// Context is ordered first so an explicit contextual anchor can influence
+		// the first reported concept without changing the underlying neural IDs.
+		for _, tok := range contextTokens {
+			if n := t.Activation.Memory.Fetch(tok); n != nil {
+				if !contains(thought.Concepts, tok) {
+					thought.Concepts = append(thought.Concepts, tok)
+					trace.Add("Context", n, result.Confidence[n.ID], "context surface resolved to active node")
+				}
+			}
+		}
 		for _, id := range bestInterp.Nodes {
 			if n := t.Activation.Memory.Registry.GetByID(id); n != nil {
-				label := fmt.Sprintf("node:%d", n.ID)
+				label := surfaceLabel(t.Activation.Memory, id)
 				if !contains(thought.Concepts, label) {
 					thought.Concepts = append(thought.Concepts, label)
 					trace.Add("Interpretation", n, bestInterp.TotalScore, "member of I*")
@@ -166,7 +178,7 @@ func (t *ThinkingEngine) think(prompt string, contextTokens []string, includeSti
 			}
 			for _, id := range h.Nodes {
 				if n := t.Activation.Memory.Registry.GetByID(id); n != nil {
-					label := fmt.Sprintf("node:%d", n.ID)
+					label := surfaceLabel(t.Activation.Memory, id)
 					if !contains(thought.Concepts, label) {
 						thought.Concepts = append(thought.Concepts, label)
 						trace.Add("Hypothesis", n, h.Confidence, "candidate hypothesis (fallback)")
@@ -255,6 +267,24 @@ func BuildHypotheses(rep understanding.CognitiveRepresentation, result activatio
 		})
 	}
 	return hs
+}
+
+func surfaceLabel(kb *knowledge.KnowledgeBase, id knowledge.NodeID) string {
+	if kb != nil {
+		// Prefer a language surface annotation because it is the user-facing
+		// realization of the numeric neural representation.
+		for _, a := range kb.SurfaceAnnotations {
+			if a.NodeID == id && a.Modality == "language" && a.Surface != "" {
+				return a.Surface
+			}
+		}
+		for _, a := range kb.SurfaceAnnotations {
+			if a.NodeID == id && a.Surface != "" {
+				return a.Surface
+			}
+		}
+	}
+	return fmt.Sprintf("node:%d", id)
 }
 
 func contains(tokens []string, token string) bool {
