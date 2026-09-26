@@ -242,7 +242,8 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 		Event: Event{ID: "outcome-b", Timestamp: now.Add(time.Second)},
 		Observation: ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"b"}},
 		Success: true, Reliability: 1, InformationGain: 1,
-	}, now.Add(time.Second)); err != nil {
+	}, now.Add(time.Second))
+	if err != nil {
 		t.Fatal(err)
 	}
 	if len(firstInterpretation.GroundedRepresentations) == 0 {
@@ -279,7 +280,8 @@ func TestInquiryOutcomeAdaptsTemporalCausalPredictionAfterContradiction(t *testi
 		Event: Event{ID: "outcome-c", Timestamp: now.Add(3 * time.Second)},
 		Observation: ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"c"}},
 		Success: true, Reliability: 1, InformationGain: 1,
-	}, now.Add(3*time.Second)); err != nil {
+	}, now.Add(3*time.Second))
+	if err != nil {
 		t.Fatal(err)
 	}
 
