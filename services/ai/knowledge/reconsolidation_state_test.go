@@ -14,8 +14,8 @@ func TestReconsolidateFromStateWeakensExistingTraceWithoutDeletingIt(t *testing.
 	beforeCount := len(index.All())
 
 	index.ReconsolidateFromState(
-		map[NodeID]float64{1: 0.8, 2: 0},
-		map[NodeID]float64{1: 0.8, 2: 0.9},
+		map[NodeID]float64{1: 0.8, 2: 0.8},
+		map[NodeID]float64{1: 0.8, 3: 0.9},
 		0.8,
 	)
 
@@ -23,10 +23,10 @@ func TestReconsolidateFromStateWeakensExistingTraceWithoutDeletingIt(t *testing.
 		t.Fatalf("reconsolidation deleted or created a pattern: before=%d after=%d", beforeCount, len(index.All()))
 	}
 	if pattern.Weight >= beforeWeight {
-		t.Fatalf("expected unexpected state to weaken trace weight: before=%v after=%v", beforeWeight, pattern.Weight)
+		t.Fatalf("expected failed predicted result to weaken trace weight: before=%v after=%v", beforeWeight, pattern.Weight)
 	}
 	if pattern.Confidence >= beforeConfidence {
-		t.Fatalf("expected unexpected state to reduce trace confidence: before=%v after=%v", beforeConfidence, pattern.Confidence)
+		t.Fatalf("expected failed predicted result to reduce trace confidence: before=%v after=%v", beforeConfidence, pattern.Confidence)
 	}
 }
 
