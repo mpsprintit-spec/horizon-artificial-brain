@@ -46,6 +46,12 @@ func (e *Engine) ActivateWith(req Request) Result {
 			conf[id] = max(conf[id], 1)
 		}
 	}
+	// Once a modality adapter has supplied grounded substrate IDs, they are
+	// authoritative for this event. Do not re-encode the same surface tokens
+	// as a second modality population.
+	if len(req.StimulusNodeIDs) > 0 {
+		req.StimulusTokens = nil
+	}
 	for _,token:=range req.StimulusTokens {
 		canonical := strings.TrimSpace(token)
 		if canonical == "" {
