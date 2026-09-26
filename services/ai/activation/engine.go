@@ -105,6 +105,13 @@ func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.Nod
 			frequency:=float64(pattern.Frequency); if frequency>10 { frequency=10 }
 			strength*=0.5+0.5*(frequency/10)
 			if strength<=0 { continue }
+			// Reconsolidation weakens contradicted traces but does not erase
+			// their historical possibility. Keep a small predictive floor so
+			// a weakened alternative remains representable alongside the new
+			// competing outcome.
+			if strength < 0.01 {
+				strength = 0.01
+			}
 			if strength>0.35 { strength=0.35 }
 			out[pattern.Result]=max(out[pattern.Result],strength)
 			outConfidence[pattern.Result]=max(outConfidence[pattern.Result],strength)
