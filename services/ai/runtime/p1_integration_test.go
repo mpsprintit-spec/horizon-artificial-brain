@@ -140,9 +140,9 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 	if len(interpreted.GroundedRepresentations) != 2 {
 		t.Fatalf("recovery grounding count = %d, want 2", len(interpreted.GroundedRepresentations))
 	}
-	if interpreted.GroundedRepresentations[0].NodeID != first.ID ||
-		interpreted.GroundedRepresentations[1].NodeID != second.ID {
-		t.Fatalf("recovery grounding IDs = %d,%d; want %d,%d",
+	if interpreted.GroundedRepresentations[0].NodeID == first.ID ||
+		interpreted.GroundedRepresentations[1].NodeID == second.ID {
+		t.Fatalf("text surface grounding incorrectly collapsed into language-store identity: got %d,%d; language nodes=%d,%d",
 			interpreted.GroundedRepresentations[0].NodeID,
 			interpreted.GroundedRepresentations[1].NodeID, first.ID, second.ID)
 	}
