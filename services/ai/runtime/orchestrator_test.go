@@ -142,7 +142,7 @@ func TestCognitiveOrchestratorDoesNotReencodeGroundedVisionAsLanguage(t *testing
 	at := time.Date(2026, 9, 26, 1, 0, 0, 0, time.UTC)
 	_, _, err := orch.ProcessObservation(Event{ID: "modal-identity", Timestamp: at, Cycles: 1}, ObservationInput{
 		Source: "camera", Modality: "vision", Tokens: []string{"cup"},
-	})
+	}, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
