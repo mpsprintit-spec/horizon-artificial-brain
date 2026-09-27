@@ -1,6 +1,9 @@
 package knowledge
 
-import "time"
+import (
+	"math"
+	"time"
+)
 
 const maxExperienceTraces = 64
 
@@ -233,16 +236,5 @@ func expDecay(x float64) float64 {
 	if x <= 0 {
 		return 1
 	}
-	// A short polynomial approximation is sufficient for the bounded learning
-	// signal used here and avoids introducing another dependency into knowledge.
-	term := 1.0
-	sum := 1.0
-	for i := 1; i <= 8; i++ {
-		term *= -x / float64(i)
-		sum += term
-		if sum <= 0 {
-			return 0
-		}
-	}
-	return clamp01(sum)
+	return clamp01(math.Exp(-x))
 }
