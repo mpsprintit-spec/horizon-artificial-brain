@@ -2,7 +2,16 @@
   "nodes": [
     {
       "id": 1,
-      "representation": [1,0,0,0,0,0,0,0],
+      "representation": [
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -11,11 +20,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"2":[{"target_id":2,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "2": [
+          {
+            "target_id": 2,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 2,
-      "representation": [0,1,0,0,0,0,0,0],
+      "representation": [
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -24,11 +63,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"3":[{"target_id":3,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "3": [
+          {
+            "target_id": 3,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 3,
-      "representation": [0,0,1,0,0,0,0,0],
+      "representation": [
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -37,11 +106,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"4":[{"target_id":4,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "4": [
+          {
+            "target_id": 4,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 4,
-      "representation": [0,0,0,1,0,0,0,0],
+      "representation": [
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -50,11 +149,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"5":[{"target_id":5,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "5": [
+          {
+            "target_id": 5,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 5,
-      "representation": [0,0,0,0,1,0,0,0],
+      "representation": [
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -63,11 +192,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"6":[{"target_id":6,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "6": [
+          {
+            "target_id": 6,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 6,
-      "representation": [0,0,0,0,0,1,0,0],
+      "representation": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -76,11 +235,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"7":[{"target_id":7,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "7": [
+          {
+            "target_id": 7,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 7,
-      "representation": [0,0,0,0,0,0,1,0],
+      "representation": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        0
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -89,11 +278,41 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"8":[{"target_id":8,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "8": [
+          {
+            "target_id": 8,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     },
     {
       "id": 8,
-      "representation": [0,0,0,0,0,0,0,1],
+      "representation": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
       "activation": 0.35,
       "resting_activation": 0.05,
       "threshold": 0.5,
@@ -102,9 +321,144 @@
       "plasticity": 0.8,
       "usage_history": [],
       "last_activation": "0001-01-01T00:00:00Z",
-      "synapses": {"1":[{"target_id":1,"weight":0.18,"activation":0,"frequency":1,"confidence":0.10,"inhibitory":false,"dynamic":{"weight":0.18,"activation":0,"eligibility":0,"confidence":0.10,"frequency":1,"last_activation":"0001-01-01T00:00:00Z","last_modification":"0001-01-01T00:00:00Z","last_eligibility_update":"0001-01-01T00:00:00Z"}}]}
+      "synapses": {
+        "1": [
+          {
+            "target_id": 1,
+            "weight": 0.18,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.1,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.18,
+              "activation": 0,
+              "eligibility": 0,
+              "confidence": 0.1,
+              "frequency": 1,
+              "last_activation": "0001-01-01T00:00:00Z",
+              "last_modification": "0001-01-01T00:00:00Z",
+              "last_eligibility_update": "0001-01-01T00:00:00Z"
+            }
+          }
+        ]
+      }
     }
   ],
   "patterns": [],
-  "projection_populations": []
+  "projection_populations": [
+    {
+      "units": [
+        {
+          "node_id": 1,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 2,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 3,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 4,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 5,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 6,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 7,
+          "activation": 0.35
+        }
+      ]
+    },
+    {
+      "units": [
+        {
+          "node_id": 8,
+          "activation": 0.35
+        }
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "brain_identity": {
+    "id": "horizon",
+    "generation": 0
+  },
+  "brain_state": {
+    "attention_state": {
+      "novelty": 0.7,
+      "uncertainty": 0.8
+    },
+    "curiosity_state": {
+      "pressure": 0.65
+    },
+    "prediction_state": {
+      "error_sensitivity": 0.8
+    },
+    "plasticity_state": {
+      "baseline": 0.8,
+      "transition_strength": 0.25
+    },
+    "memory_state": {
+      "retention": 0.6,
+      "priority": 0.5
+    },
+    "learning_policy_state": {
+      "novelty_sensitivity": 0.7,
+      "uncertainty_sensitivity": 0.8,
+      "memory_retention": 0.6,
+      "curiosity_pressure": 0.65
+    },
+    "bootstrap_experiences": [
+      {
+        "id": "bootstrap-experience-001",
+        "populations": [
+          1,
+          2,
+          3,
+          4
+        ],
+        "activation": 0.35,
+        "confidence": 0.1,
+        "provenance": {
+          "origin": "bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      }
+    ]
+  }
 }
