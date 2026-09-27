@@ -18,7 +18,7 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/evolution"
 )
 
-const memoryFile = "brain_memory.json"
+const memoryFile = "services/ai/brain_memory.json"
 
 type cli struct {
 	horizon    *core.HorizonEngine
