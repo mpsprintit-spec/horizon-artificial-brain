@@ -413,10 +413,7 @@
     }
   ],
   "schema_version": 1,
-  "brain_identity": {
-    "id": "horizon",
-    "generation": 0
-  },
+  "brain_identity": "horizon",
   "brain_state": {
     "attention_state": {
       "novelty": 0.7,
