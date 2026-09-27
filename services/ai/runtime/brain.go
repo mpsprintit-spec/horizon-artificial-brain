@@ -172,7 +172,113 @@ func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, erro
 func (r *BrainRuntime) ThinkAt(cycles int, timestamp time.Time) (activation.ThoughtResult, uint64, error) { if r == nil || r.brain == nil || r.activation == nil { return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); now := timestamp; if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; if r.eventLog != nil { event := Event{Cycles: cycles, Timestamp: now}; if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeThink, Timestamp: now, Event: &event}); err != nil { return activation.ThoughtResult{}, r.seq, err } }; thought := r.activation.ThinkWithPredictionAt(cycles, now); r.seq = nextSeq; return thought, r.seq, nil }
 type CognitiveOutput struct { BrainIdentity string; Sequence uint64; Timestamp time.Time; RankedNodeIDs []knowledge.NodeID; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; Resonance float64; PredictionError float64; Prediction activation.Prediction; StateDelta CognitiveStateDelta }
 func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) { if r == nil { return CognitiveOutput{}, errors.New("brain runtime is not initialized") }; if event.Timestamp.IsZero() { r.mu.Lock(); event.Timestamp = r.nowLocked(); r.mu.Unlock() }; result, sequence, err := r.Process(event); if err != nil { return CognitiveOutput{}, err }; output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result); output.Prediction = r.activation.PredictionSnapshot(); r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp); r.brain.ApplyMemoryDynamics(event.Timestamp); r.mu.Lock(); output.StateDelta = output.State().Diff(r.lastCognitiveState); r.lastCognitiveState = output.State(); r.mu.Unlock(); return output, nil }
-func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) { thought, sequence, err := r.Think(cycles); if err != nil { return CognitiveOutput{}, err }; now := r.now(); output := CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: now, RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}; r.brain.RecordLearningSignal(output.PredictionError, now); r.brain.ApplyMemoryDynamics(now); r.mu.Lock(); output.StateDelta = output.State().Diff(r.lastCognitiveState); r.lastCognitiveState = output.State(); r.mu.Unlock(); return output, nil }
+func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
+	if r == nil || r.brain == nil {
+		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
+	}
+	now := r.now()
+	// Autonomous cognition needs an endogenous drive when no external event is
+	// present. The drive is deterministic: it prefers underused neural units
+	// and increases with persistent uncertainty/curiosity. It is not random
+	// stimulation and it does not assign semantic meaning to any node.
+	r.applyCuriosityDrive(now)
+
+	thought, sequence, err := r.ThinkAt(cycles, now)
+	if err != nil {
+		return CognitiveOutput{}, err
+	}
+	output := CognitiveOutput{
+		BrainIdentity: BrainIdentity,
+		Sequence: sequence,
+		Timestamp: now,
+		RankedNodeIDs: rankedNodeIDs(thought.RankedNodes),
+		Activations: cloneNodeValues(thought.Activations),
+		Confidence: cloneNodeValues(thought.Confidence),
+		Resonance: thought.Resonance,
+		PredictionError: thought.PredictionError,
+		Prediction: thought.Prediction,
+	}
+	r.brain.RecordLearningSignal(output.PredictionError, now)
+	r.brain.ApplyMemoryDynamics(now)
+	r.mu.Lock()
+	output.StateDelta = output.State().Diff(r.lastCognitiveState)
+	r.lastCognitiveState = output.State()
+	r.mu.Unlock()
+	return output, nil
+}
+
+// applyCuriosityDrive injects a bounded endogenous context signal before an
+// autonomous thought cycle. Novelty is derived from usage history and
+// uncertainty from the persistent prediction signal. The least-used
+// under-activated populations therefore become candidates for exploration.
+// No semantic label, random noise, or external input is introduced.
+func (r *BrainRuntime) applyCuriosityDrive(now time.Time) {
+	if r == nil || r.brain == nil || now.IsZero() {
+		return
+	}
+	predictionError := clamp01(r.brain.BrainState.PredictionState["last_error"])
+	policy := r.brain.BrainState.LearningPolicyState
+	pressure := clamp01(policy.CuriosityPressure)
+	if pressure <= 0 {
+		pressure = 0.65
+	}
+	noveltySensitivity := clamp01(policy.NoveltySensitivity)
+	uncertaintySensitivity := clamp01(policy.UncertaintySensitivity)
+
+	type candidate struct {
+		node *knowledge.ConceptNode
+		score float64
+	}
+	candidates := make([]candidate, 0)
+	for _, node := range r.brain.Registry.Nodes() {
+		if node == nil {
+			continue
+		}
+		usage := 1.0 / (1.0 + float64(maxInt64(node.Frequency, 0)))
+		underActivation := clamp01(1.0 - node.Activation)
+		novelty := clamp01(usage * noveltySensitivity)
+		uncertainty := clamp01((0.5 * underActivation) + (0.5 * predictionError)) * uncertaintySensitivity
+		score := pressure * clamp01(novelty+uncertainty)
+		if score <= 0.05 {
+			continue
+		}
+		candidates = append(candidates, candidate{node: node, score: score})
+	}
+	if len(candidates) == 0 {
+		return
+	}
+	sort.SliceStable(candidates, func(i, j int) bool {
+		if candidates[i].score == candidates[j].score {
+			return candidates[i].node.ID < candidates[j].node.ID
+		}
+		return candidates[i].score > candidates[j].score
+	})
+	boost := clamp01(candidates[0].score * 0.30)
+	if boost <= 0 {
+		return
+	}
+	r.brain.BrainState.CuriosityState["drive"] = candidates[0].score
+	r.brain.BrainState.CuriosityState["target_node"] = float64(candidates[0].node.ID)
+	r.brain.BrainState.CuriosityState["last_update_unix"] = float64(now.UnixNano())
+
+	// Injecting the drive through activation's existing ContextBoosts keeps
+	// curiosity inside the same neural substrate rather than creating a second
+	// cognition engine.
+	r.activation.ActivateWith(activation.Request{
+		ContextBoosts: map[knowledge.NodeID]float64{
+			candidates[0].node.ID: boost,
+		},
+		Cycles: 1,
+		Now: now,
+	})
+}
+
+func maxInt64(value int64, floor int64) int64 {
+	if value < floor {
+		return floor
+	}
+	return value
+}
 func (r *BrainRuntime) LastSequence() uint64 { if r == nil { return 0 }; r.mu.Lock(); defer r.mu.Unlock(); return r.seq }
 func cognitiveOutputFromResult(identity string, sequence uint64, now time.Time, result activation.Result) CognitiveOutput {
 	return CognitiveOutput{
