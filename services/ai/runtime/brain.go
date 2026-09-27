@@ -71,6 +71,46 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 }
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
+
+// ActivateBootstrap rehydrates the persistent bootstrap populations into the
+// runtime activation state after the canonical brain has been loaded. It does
+// not create semantic definitions or additional memory; it only reactivates
+// the numeric populations already persisted in BrainState.
+func (r *BrainRuntime) ActivateBootstrap(now time.Time) (activation.Result, error) {
+	if r == nil || r.brain == nil || r.activation == nil {
+		return activation.Result{}, errors.New("brain runtime is not initialized")
+	}
+	if now.IsZero() {
+		now = r.now()
+	}
+
+	context := make(map[knowledge.NodeID]float64)
+	for _, experience := range r.brain.BrainState.BootstrapExperiences {
+		level := experience.Activation
+		if level <= 0 {
+			level = 0.35
+		}
+		level = clamp01(level)
+		for _, nodeID := range experience.Populations {
+			if r.brain.Registry.GetByID(nodeID) == nil {
+				continue
+			}
+			if level > context[nodeID] {
+				context[nodeID] = level
+			}
+		}
+	}
+	if len(context) == 0 {
+		return activation.Result{}, nil
+	}
+
+	return r.activation.ActivateWith(activation.Request{
+		ContextBoosts: context,
+		Cycles:        1,
+		Now:           now,
+	}), nil
+}
+
 func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error { if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }; if binding.RequestID == "" { return errors.New("action binding request ID is required") }; if binding.BrainIdentity == "" { binding.BrainIdentity = BrainIdentity }; if binding.BrainIdentity != BrainIdentity { return errors.New("action binding belongs to a different brain") }; if len(binding.TargetNodeIDs) == 0 && len(binding.Synapses) == 0 { return errors.New("action binding requires at least one neural target") }; for _, syn := range binding.Synapses { if r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil { return errors.New("action binding references an unknown synapse node") } }; r.mu.Lock(); defer r.mu.Unlock(); binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); r.actions[binding.RequestID] = binding; return nil }
 func (r *BrainRuntime) actionBinding(requestID string) (ActionBinding, bool) { if r == nil { return ActionBinding{}, false }; r.mu.Lock(); defer r.mu.Unlock(); binding, ok := r.actions[requestID]; if !ok { return ActionBinding{}, false }; binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); return binding, true }
 func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if clock == nil { r.clock = WallClock{} } else { r.clock = clock } }
