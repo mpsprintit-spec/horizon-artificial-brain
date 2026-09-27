@@ -51,7 +51,7 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 	cognitive, err := o.Runtime.InterpretCognitive(output, observationContext)
 	if err != nil { return CognitiveInterpretation{}, learned, err }
 	cognitive.GroundedRepresentations = grounded
-	inquiryAgenda, inquiryErr := BuildInquiryAgendaFromCognition(cognitive, output.Timestamp)
+	inquiryAgenda, inquiryErr := o.Runtime.PlanInquiry(cognitive.Answer.Uncertainty.Level, output.Timestamp)
 	if inquiryErr != nil {
 		return CognitiveInterpretation{}, learned, inquiryErr
 	}
