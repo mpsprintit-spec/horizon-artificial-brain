@@ -1,7 +1,6 @@
 package knowledge_test
 
 import (
-	"sort"
 	"testing"
 	"time"
 
