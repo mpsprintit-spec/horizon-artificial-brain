@@ -158,3 +158,91 @@ func (k *KnowledgeBase) ReinforceTransitionPopulation(previous, current []NodeID
 	k.BrainState.MemoryState["last_transition_priority"] = memoryPriority
 	return nil
 }
+
+
+// ApplyMemoryDynamics performs time-dependent retention on the existing
+// substrate. Forgetting reduces the influence of old connections and the
+// priority of old temporal traces, but does not delete historical structure.
+func (k *KnowledgeBase) ApplyMemoryDynamics(now time.Time) {
+	if k == nil {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+
+	k.mu.Lock()
+	defer k.mu.Unlock()
+
+	retention := k.BrainState.MemoryState["retention"]
+	if retention <= 0 {
+		retention = k.BrainState.LearningPolicyState.MemoryRetention
+	}
+	if retention <= 0 {
+		retention = 0.6
+	}
+	retention = clamp01(retention)
+
+	// Retention controls the time constant: stronger retention means slower
+	// forgetting. The floor prevents old traces from disappearing in one pass.
+	const halfLifeHours = 24.0
+	for _, source := range k.Registry.Nodes() {
+		if source == nil {
+			continue
+		}
+		for _, list := range source.Synapses {
+			for _, synapse := range list {
+				if synapse == nil || synapse.Dynamic.LastModification.IsZero() {
+					continue
+				}
+				ageHours := now.Sub(synapse.Dynamic.LastModification).Hours()
+				if ageHours <= 0 {
+					continue
+				}
+				forgetRate := (1.0 - retention) / halfLifeHours
+				factor := expDecay(ageHours * forgetRate)
+				synapse.Dynamic.Weight = clamp01(synapse.Dynamic.Weight * factor)
+				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence * (0.5 + 0.5*factor))
+				synapse.Dynamic.Eligibility = clamp01(synapse.Dynamic.Eligibility * factor)
+				syncSynapseLegacyState(synapse)
+			}
+		}
+	}
+
+	for i := range k.BrainState.ExperienceTraces {
+		trace := &k.BrainState.ExperienceTraces[i]
+		if trace.CurrentAt.IsZero() {
+			continue
+		}
+		ageHours := now.Sub(trace.CurrentAt).Hours()
+		if ageHours <= 0 {
+			continue
+		}
+		forgetRate := (1.0 - retention) / halfLifeHours
+		factor := expDecay(ageHours * forgetRate)
+		trace.MemoryPriority = clamp01(trace.MemoryPriority * factor)
+	}
+
+	k.BrainState.MemoryState["last_decay_unix"] = float64(now.UnixNano())
+	k.BrainState.MemoryState["effective_retention"] = retention
+}
+
+// expDecay is a small local exponential decay helper. It intentionally keeps
+// memory dynamics numeric and independent of semantic categories.
+func expDecay(x float64) float64 {
+	if x <= 0 {
+		return 1
+	}
+	// A short polynomial approximation is sufficient for the bounded learning
+	// signal used here and avoids introducing another dependency into knowledge.
+	term := 1.0
+	sum := 1.0
+	for i := 1; i <= 8; i++ {
+		term *= -x / float64(i)
+		sum += term
+		if sum <= 0 {
+			return 0
+		}
+	}
+	return clamp01(sum)
+}
