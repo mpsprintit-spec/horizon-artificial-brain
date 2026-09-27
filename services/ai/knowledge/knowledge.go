@@ -117,18 +117,17 @@ type BootstrapExperience struct { ID string `json:"id"`; Populations []NodeID `j
 
 type LearningPolicyState struct { NoveltySensitivity float64 `json:"novelty_sensitivity"`; UncertaintySensitivity float64 `json:"uncertainty_sensitivity"`; MemoryRetention float64 `json:"memory_retention"`; CuriosityPressure float64 `json:"curiosity_pressure"` }
 
-type BrainState struct { AttentionState map[string]float64 `json:"attention_state,omitempty"`; CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`; PredictionState map[string]float64 `json:"prediction_state,omitempty"`; PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`; MemoryState map[string]float64 `json:"memory_state,omitempty"`; LearningPolicyState LearningPolicyState `json:"learning_policy_state"`; BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"` }
+type BrainState struct { AttentionState map[string]float64 `json:"attention_state,omitempty"`; CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`; PredictionState map[string]float64 `json:"prediction_state,omitempty"`; PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`; MemoryState map[string]float64 `json:"memory_state,omitempty"`; LearningPolicyState LearningPolicyState `json:"learning_policy_state"`; BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`; ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"` }
 
 type KnowledgeBase struct {
-	Registry             *NeuralRegistry
-	Patterns             *PatternIndex
+	Registry              *NeuralRegistry
+	Patterns              *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
-	BrainState             BrainState `json:"brain_state"`
-	SurfaceAnnotations   []SurfaceAnnotation `json:"surface_annotations,omitempty"`
 	BrainState            BrainState `json:"brain_state"`
-	projectionMu         sync.RWMutex
-	annotationMu         sync.RWMutex
-	mu                   sync.RWMutex
+	SurfaceAnnotations    []SurfaceAnnotation `json:"surface_annotations,omitempty"`
+	projectionMu          sync.RWMutex
+	annotationMu          sync.RWMutex
+	mu                    sync.RWMutex
 }
 
 // Lock serializes mutations to the canonical neural substrate.
@@ -298,11 +297,12 @@ func hydrateSynapseDynamicState(s *Synapse) {
 }
 
 type persistedGraph struct {
-	SchemaVersion int `json:"schema_version,omitempty"`
-	BrainIdentity string `json:"brain_identity,omitempty"`
-	Nodes                 []*ConceptNode      `json:"nodes"`
-	Patterns              []*PatternSynapse   `json:"patterns,omitempty"`
-	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+	SchemaVersion          int                    `json:"schema_version,omitempty"`
+	BrainIdentity          string                 `json:"brain_identity,omitempty"`
+	Nodes                  []*ConceptNode         `json:"nodes"`
+	Patterns               []*PatternSynapse      `json:"patterns,omitempty"`
+	ProjectionPopulations  []ProjectionPopulation `json:"projection_populations,omitempty"`
+	BrainState              BrainState             `json:"brain_state"`
 }
 
 func (k *KnowledgeBase) Load(path string) error {
@@ -316,9 +316,45 @@ func (k *KnowledgeBase) Load(path string) error {
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
 	k.BrainState = graph.BrainState
+	k.normalizeBrainState()
 
 	return nil
 }
+
+func (k *KnowledgeBase) normalizeBrainState() {
+	if k == nil {
+		return
+	}
+	if k.BrainState.AttentionState == nil {
+		k.BrainState.AttentionState = map[string]float64{}
+	}
+	if k.BrainState.CuriosityState == nil {
+		k.BrainState.CuriosityState = map[string]float64{}
+	}
+	if k.BrainState.PredictionState == nil {
+		k.BrainState.PredictionState = map[string]float64{}
+	}
+	if k.BrainState.PlasticityState == nil {
+		k.BrainState.PlasticityState = map[string]float64{}
+	}
+	if k.BrainState.MemoryState == nil {
+		k.BrainState.MemoryState = map[string]float64{}
+	}
+	policy := &k.BrainState.LearningPolicyState
+	if policy.NoveltySensitivity <= 0 {
+		policy.NoveltySensitivity = 0.70
+	}
+	if policy.UncertaintySensitivity <= 0 {
+		policy.UncertaintySensitivity = 0.80
+	}
+	if policy.MemoryRetention <= 0 {
+		policy.MemoryRetention = 0.60
+	}
+	if policy.CuriosityPressure <= 0 {
+		policy.CuriosityPressure = 0.65
+	}
+}
+
 func (k *KnowledgeBase) Save(path string) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.RLock()
