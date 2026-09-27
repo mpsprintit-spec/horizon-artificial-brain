@@ -110,11 +110,21 @@ func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold
 // dynamic connections. ProjectionPopulations records distributed receptive
 // fields so repeated experiences can recover the same population without
 // turning similar experiences into one identical representation.
+type BootstrapProvenance struct { Origin string `json:"origin"`; DirectExperience bool `json:"direct_experience"`; Status string `json:"status"` }
+
+type BootstrapExperience struct { ID string `json:"id"`; Populations []NodeID `json:"populations"`; TemporalTrace []time.Time `json:"temporal_trace,omitempty"`; Activation float64 `json:"activation"`; Confidence float64 `json:"confidence"`; Provenance BootstrapProvenance `json:"provenance"` }
+
+type LearningPolicyState struct { NoveltySensitivity float64 `json:"novelty_sensitivity"`; UncertaintySensitivity float64 `json:"uncertainty_sensitivity"`; MemoryRetention float64 `json:"memory_retention"`; CuriosityPressure float64 `json:"curiosity_pressure"` }
+
+type BrainState struct { AttentionState map[string]float64 `json:"attention_state,omitempty"`; CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`; PredictionState map[string]float64 `json:"prediction_state,omitempty"`; PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`; MemoryState map[string]float64 `json:"memory_state,omitempty"`; LearningPolicyState LearningPolicyState `json:"learning_policy_state"`; BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"` }
+
 type KnowledgeBase struct {
 	Registry             *NeuralRegistry
 	Patterns             *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+	BrainState             BrainState `json:"brain_state"`
 	SurfaceAnnotations   []SurfaceAnnotation `json:"surface_annotations,omitempty"`
+	BrainState            BrainState `json:"brain_state"`
 	projectionMu         sync.RWMutex
 	annotationMu         sync.RWMutex
 	mu                   sync.RWMutex
@@ -126,7 +136,25 @@ func (k *KnowledgeBase) Unlock() { if k != nil { k.mu.Unlock() } }
 func (k *KnowledgeBase) RLock() { if k != nil { k.mu.RLock() } }
 func (k *KnowledgeBase) RUnlock() { if k != nil { k.mu.RUnlock() } }
 
-func NewKnowledgeBase() *KnowledgeBase { return &KnowledgeBase{Registry: NewTokenRegistry(), Patterns: NewPatternIndex()} }
+func NewKnowledgeBase() *KnowledgeBase {
+	return &KnowledgeBase{
+		Registry: NewTokenRegistry(),
+		Patterns: NewPatternIndex(),
+		BrainState: BrainState{
+			AttentionState: map[string]float64{},
+			CuriosityState: map[string]float64{},
+			PredictionState: map[string]float64{},
+			PlasticityState: map[string]float64{},
+			MemoryState: map[string]float64{},
+			LearningPolicyState: LearningPolicyState{
+				NoveltySensitivity: 0.70,
+				UncertaintySensitivity: 0.80,
+				MemoryRetention: 0.60,
+				CuriosityPressure: 0.65,
+			},
+		},
+	}
+}
 func (k *KnowledgeBase) Fetch(token string) *ConceptNode {
 	if k == nil || k.Registry == nil { return nil }
 	if node := k.Registry.Get(token); node != nil {
@@ -269,6 +297,8 @@ func hydrateSynapseDynamicState(s *Synapse) {
 }
 
 type persistedGraph struct {
+	SchemaVersion int `json:"schema_version,omitempty"`
+	BrainIdentity string `json:"brain_identity,omitempty"`
 	Nodes                 []*ConceptNode      `json:"nodes"`
 	Patterns              []*PatternSynapse   `json:"patterns,omitempty"`
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
@@ -284,6 +314,7 @@ func (k *KnowledgeBase) Load(path string) error {
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
+	k.BrainState = graph.BrainState
 
 	return nil
 }
@@ -298,7 +329,7 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k.Registry != nil { nodes = k.Registry.Nodes() }
 	var patterns []*PatternSynapse
 	if k.Patterns != nil { patterns = k.Patterns.All() }
-b, e := json.MarshalIndent(persistedGraph{Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations}, "", "  ")
+b, e := json.MarshalIndent(persistedGraph{SchemaVersion: 1, BrainIdentity: "horizon", Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations, BrainState: k.BrainState}, "", "  ")
 	if e != nil { return e }
 	return os.WriteFile(path, b, 0644)
 }
