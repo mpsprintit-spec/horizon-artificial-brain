@@ -10,6 +10,13 @@ import (
 // transition. The supplied timestamp is used for temporal decay/plasticity so
 // event-log replay can reproduce the same transition.
 func (e *Engine) ThinkWithPredictionAt(cycles int, now time.Time) ThoughtResult {
+	return e.ThinkWithContextAt(cycles, nil, now)
+}
+
+// ThinkWithContextAt performs one recurrent transition while adding an
+// endogenous context signal to the existing neural state. The context is
+// additive and therefore cannot replace the current recurrent trajectory.
+func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]float64, now time.Time) ThoughtResult {
 	if cycles < 1 {
 		cycles = 1
 	}
@@ -24,6 +31,14 @@ func (e *Engine) ThinkWithPredictionAt(cycles int, now time.Time) ThoughtResult 
 	confidence := cloneState(e.internalConfidence)
 	previousPrediction := cloneState(e.lastPrediction)
 	e.mu.RUnlock()
+
+	for id, boost := range context {
+		if boost <= 0 { continue }
+		state[id] += boost
+		confidence[id] = max(confidence[id], boost)
+	}
+	state = normalize(state)
+	confidence = normalize(confidence)
 
 	if len(state) == 0 {
 		return ThoughtResult{Result: Result{
