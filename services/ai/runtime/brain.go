@@ -299,6 +299,65 @@ func maxInt64(value int64, floor int64) int64 {
 	}
 	return value
 }
+// PlanInquiry creates an internal information-seeking trajectory from the
+// current uncertainty and persisted learning strategy. It records the selected
+// policy result in the canonical brain state but never executes an external action.
+func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAgenda, error) {
+	if r == nil || r.brain == nil {
+		return InquiryAgenda{}, errors.New("brain runtime is not initialized")
+	}
+	if at.IsZero() {
+		at = r.now()
+	}
+	uncertainty = clamp01(uncertainty)
+	candidates := DefaultInquiryCandidates(uncertainty)
+	policy := r.brain.BrainState.LearningPolicyState
+
+	for i := range candidates {
+		factor := 1.0
+		switch candidates[i].Action {
+		case InquiryReobserve, InquiryFocus:
+			factor += 0.40 * clamp01(policy.RepeatObservationBias)
+		case InquiryChangeView, InquiryImitate, InquirySafeManipulation:
+			factor += 0.40 * clamp01(policy.ExplorationBias)
+		case InquiryWait:
+			factor += 0.30 * clamp01(policy.DeferConclusionBias)
+		}
+		candidates[i].ExpectedInformationGain = clamp01(candidates[i].ExpectedInformationGain * factor)
+	}
+
+	agenda, err := BuildInquiryAgenda(BrainIdentity, r.LastSequence(), at, candidates, DefaultInquiryPolicy())
+	if err != nil {
+		return InquiryAgenda{}, err
+	}
+	agenda.Uncertainty = uncertainty
+	if agenda.Selected != nil {
+		r.brain.RecordInquirySelection(
+			agenda.Sequence,
+			string(agenda.Selected.Action),
+			uncertainty,
+			agenda.Selected.InformationValue,
+			clamp01(agenda.Selected.Score/1.85),
+			at,
+		)
+	}
+	return agenda, nil
+}
+
+// CompleteInquiry closes the pending internal trajectory after an observation
+// or other authorized adapter result. It updates the persisted learning
+// strategy; it does not execute, authorize, or infer an external action.
+func (r *BrainRuntime) CompleteInquiry(observedInformationGain, predictionError float64, at time.Time) error {
+	if r == nil || r.brain == nil {
+		return errors.New("brain runtime is not initialized")
+	}
+	if at.IsZero() {
+		at = r.now()
+	}
+	r.brain.RecordInquiryOutcome(observedInformationGain, predictionError, at)
+	return nil
+}
+
 func (r *BrainRuntime) LastSequence() uint64 { if r == nil { return 0 }; r.mu.Lock(); defer r.mu.Unlock(); return r.seq }
 func cognitiveOutputFromResult(identity string, sequence uint64, now time.Time, result activation.Result) CognitiveOutput {
 	return CognitiveOutput{
