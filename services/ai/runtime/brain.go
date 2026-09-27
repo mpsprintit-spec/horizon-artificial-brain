@@ -59,6 +59,7 @@ type BrainRuntime struct {
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
+	lastObservationAt time.Time
 	inquiryValence map[InquiryAction]float64
 }
 
@@ -93,11 +94,10 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	r.seq = nextSeq
 	return result, r.seq, nil
 }
-// LearnObservedTransition binds the previous grounded observation population
-// to the current one as a substrate-native dynamic transition. It is experiential
-// plasticity, not trusted semantic knowledge: no lexical label or RelationKind is
-// introduced, and the transition is only available after two observations occur
-// in sequence within this runtime.
+// LearnObservedTransition binds consecutive grounded populations as a
+// substrate-native temporal transition. The actual reinforcement is delegated
+// to the canonical brain state so prediction error, plasticity, and memory
+// priority can alter future learning without introducing semantic labels.
 func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now time.Time) error {
 	if r == nil || r.brain == nil {
 		return errors.New("brain runtime is not initialized")
@@ -105,37 +105,26 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	if now.IsZero() {
 		now = r.now()
 	}
+
 	r.mu.Lock()
-	defer r.mu.Unlock()
 	if len(current) == 0 {
 		r.lastObservationPopulation = nil
+		r.lastObservationAt = time.Time{}
+		r.mu.Unlock()
 		return nil
 	}
+
 	previous := append([]knowledge.NodeID(nil), r.lastObservationPopulation...)
+	previousAt := r.lastObservationAt
 	r.lastObservationPopulation = append([]knowledge.NodeID(nil), current...)
+	r.lastObservationAt = now
+	r.mu.Unlock()
+
 	if len(previous) == 0 {
 		return nil
 	}
 
-	const transitionStrength = 0.25
-	for _, sourceID := range previous {
-		source := r.brain.Registry.GetByID(sourceID)
-		if source == nil {
-			continue
-		}
-		for _, targetID := range current {
-			if sourceID == targetID {
-				continue
-			}
-			target := r.brain.Registry.GetByID(targetID)
-			if target == nil {
-				continue
-			}
-			r.brain.Connect(source, target, transitionStrength, transitionStrength, false)
-		}
-	}
-	_ = now // reserved for temporal synapse metadata as the substrate evolves
-	return nil
+	return r.brain.ReinforceTransitionPopulation(previous, current, previousAt, now, 0.25)
 }
 
 func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
