@@ -99,6 +99,11 @@ func (c *cli) startup() error {
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Fprintf(c.out, "! Memory load skipped: %v\n", err)
 	}
+	if err == nil {
+		if _, activationErr := c.horizon.Runtime.ActivateBootstrap(time.Now().UTC()); activationErr != nil {
+			fmt.Fprintf(c.out, "! Bootstrap activation skipped: %v\n", activationErr)
+		}
+	}
 	fmt.Fprintln(c.out, "✓ Neural Memory")
 	fmt.Fprintln(c.out, "✓ Activation Engine")
 	fmt.Fprintln(c.out, "✓ Understanding Engine")
