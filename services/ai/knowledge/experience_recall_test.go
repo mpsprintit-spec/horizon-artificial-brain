@@ -1,19 +1,21 @@
-package knowledge
+package knowledge_test
 
 import (
+	"sort"
 	"testing"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 func TestExperienceTransitionCanBeReactivatedWithoutLanguageLabels(t *testing.T) {
-	brain := NewBrain()
+	brain := knowledge.NewBrain()
 
 	// Two distinct numeric experiences. No lexical token or semantic label is
 	// supplied to the neural substrate.
-	previous := NewNeuralVector([]float64{1, 0, 0, 0})
-	current := NewNeuralVector([]float64{0, 1, 0, 0})
+	previous := knowledge.NewNeuralVector([]float64{1, 0, 0, 0})
+	current := knowledge.NewNeuralVector([]float64{0, 1, 0, 0})
 
 	before, err := brain.ProjectVectorPopulation(previous, 0.90, 4)
 	if err != nil {
@@ -28,7 +30,7 @@ func TestExperienceTransitionCanBeReactivatedWithoutLanguageLabels(t *testing.T)
 		t.Fatal("expected both experiences to have neural populations")
 	}
 
-	beforeIDs := make([]NodeID, 0, len(before.Units))
+	beforeIDs := make([]knowledge.NodeID, 0, len(before.Units))
 	for _, unit := range before.Units {
 		beforeIDs = append(beforeIDs, unit.NodeID)
 	}
