@@ -115,9 +115,39 @@ type BootstrapProvenance struct { Origin string `json:"origin"`; DirectExperienc
 
 type BootstrapExperience struct { ID string `json:"id"`; Populations []NodeID `json:"populations"`; TemporalTrace []time.Time `json:"temporal_trace,omitempty"`; Activation float64 `json:"activation"`; Confidence float64 `json:"confidence"`; Provenance BootstrapProvenance `json:"provenance"` }
 
-type LearningPolicyState struct { NoveltySensitivity float64 `json:"novelty_sensitivity"`; UncertaintySensitivity float64 `json:"uncertainty_sensitivity"`; MemoryRetention float64 `json:"memory_retention"`; CuriosityPressure float64 `json:"curiosity_pressure"` }
+type LearningPolicyState struct {
+	NoveltySensitivity float64 `json:"novelty_sensitivity"`
+	UncertaintySensitivity float64 `json:"uncertainty_sensitivity"`
+	MemoryRetention float64 `json:"memory_retention"`
+	CuriosityPressure float64 `json:"curiosity_pressure"`
+	ExplorationBias float64 `json:"exploration_bias"`
+	RepeatObservationBias float64 `json:"repeat_observation_bias"`
+	DeferConclusionBias float64 `json:"defer_conclusion_bias""
+}
 
-type BrainState struct { AttentionState map[string]float64 `json:"attention_state,omitempty"`; CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`; PredictionState map[string]float64 `json:"prediction_state,omitempty"`; PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`; MemoryState map[string]float64 `json:"memory_state,omitempty"`; LearningPolicyState LearningPolicyState `json:"learning_policy_state"`; BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`; ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"` }
+type InquiryState struct {
+	Sequence uint64 `json:"sequence"`
+	LastUpdated time.Time `json:"last_updated"`
+	Pending bool `json:"pending"`
+	SelectedAction string `json:"selected_action,omitempty"`
+	Uncertainty float64 `json:"uncertainty"`
+	ExpectedInformationGain float64 `json:"expected_information_gain"`
+	SelectedScore float64 `json:"selected_score"`
+	ObservedInformationGain float64 `json:"observed_information_gain"`
+	OutcomePredictionError float64 `json:"outcome_prediction_error"`
+}
+
+type BrainState struct {
+	AttentionState map[string]float64 `json:"attention_state,omitempty"`
+	CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`
+	PredictionState map[string]float64 `json:"prediction_state,omitempty"`
+	PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`
+	MemoryState map[string]float64 `json:"memory_state,omitempty"`
+	LearningPolicyState LearningPolicyState `json:"learning_policy_state"`
+	InquiryState InquiryState `json:"inquiry_state"`
+	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`
+	ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"`
+}
 
 type KnowledgeBase struct {
 	Registry              *NeuralRegistry
@@ -151,6 +181,9 @@ func NewKnowledgeBase() *KnowledgeBase {
 				UncertaintySensitivity: 0.80,
 				MemoryRetention: 0.60,
 				CuriosityPressure: 0.65,
+				ExplorationBias: 0.30,
+				RepeatObservationBias: 0.20,
+				DeferConclusionBias: 0.20,
 			},
 		},
 	}
@@ -352,6 +385,58 @@ func (k *KnowledgeBase) normalizeBrainState() {
 	}
 	if policy.CuriosityPressure <= 0 {
 		policy.CuriosityPressure = 0.65
+	}
+	if policy.ExplorationBias <= 0 {
+		policy.ExplorationBias = 0.30
+	}
+	if policy.RepeatObservationBias <= 0 {
+		policy.RepeatObservationBias = 0.20
+	}
+	if policy.DeferConclusionBias <= 0 {
+		policy.DeferConclusionBias = 0.20
+	}
+	k.BrainState.InquiryState.Uncertainty = clamp01(k.BrainState.InquiryState.Uncertainty)
+	k.BrainState.InquiryState.ExpectedInformationGain = clamp01(k.BrainState.InquiryState.ExpectedInformationGain)
+	k.BrainState.InquiryState.SelectedScore = clamp01(k.BrainState.InquiryState.SelectedScore)
+	k.BrainState.InquiryState.ObservedInformationGain = clamp01(k.BrainState.InquiryState.ObservedInformationGain)
+	k.BrainState.InquiryState.OutcomePredictionError = clamp01(k.BrainState.InquiryState.OutcomePredictionError)
+}
+
+// RecordInquirySelection persists the internal inquiry decision without
+// executing the selected action. Only the numeric trajectory is persisted.
+func (k *KnowledgeBase) RecordInquirySelection(sequence uint64, action string, uncertainty, informationGain, score float64, now time.Time) {
+	if k == nil || action == "" { return }
+	if now.IsZero() { now = time.Now().UTC() }
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	k.BrainState.InquiryState = InquiryState{
+		Sequence: sequence, LastUpdated: now.UTC(), Pending: true,
+		SelectedAction: action, Uncertainty: clamp01(uncertainty),
+		ExpectedInformationGain: clamp01(informationGain), SelectedScore: clamp01(score),
+	}
+}
+
+// RecordInquiryOutcome closes the inquiry trajectory and adapts the persisted
+// learning strategy from observed information gain and prediction error.
+func (k *KnowledgeBase) RecordInquiryOutcome(observedInformationGain, predictionError float64, now time.Time) {
+	if k == nil { return }
+	if now.IsZero() { now = time.Now().UTC() }
+	observedInformationGain = clamp01(observedInformationGain)
+	predictionError = clamp01(predictionError)
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	state := &k.BrainState.InquiryState
+	state.LastUpdated = now.UTC()
+	state.Pending = false
+	state.ObservedInformationGain = observedInformationGain
+	state.OutcomePredictionError = predictionError
+	policy := &k.BrainState.LearningPolicyState
+	policy.ExplorationBias = clamp01(policy.ExplorationBias + 0.20*predictionError)
+	policy.RepeatObservationBias = clamp01(policy.RepeatObservationBias + 0.15*predictionError)
+	policy.DeferConclusionBias = clamp01(policy.DeferConclusionBias + 0.10*predictionError)
+	policy.CuriosityPressure = clamp01(policy.CuriosityPressure + 0.10*predictionError)
+	if observedInformationGain > 0.70 && predictionError < 0.25 {
+		policy.ExplorationBias = clamp01(policy.ExplorationBias + 0.05*observedInformationGain)
 	}
 }
 
