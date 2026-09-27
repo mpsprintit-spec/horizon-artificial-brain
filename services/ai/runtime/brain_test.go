@@ -90,3 +90,56 @@ func TestBrainRuntimeSerializesConcurrentTransitions(t *testing.T) {
 	if len(seen) != workers { t.Fatalf("got %d unique sequences, want %d", len(seen), workers) }
 	if got := r.LastSequence(); got != workers { t.Fatalf("last sequence = %d, want %d", got, workers) }
 }
+
+func TestBrainRuntimeCuriosityDriveTargetsUnderusedNeuralState(t *testing.T) {
+	brain := knowledge.NewBrain()
+	first := brain.Store("alpha")
+	second := brain.Store("beta")
+	if first == nil || second == nil {
+		t.Fatal("expected bootstrap neural units")
+	}
+	first.Frequency = 20
+	first.Activation = 0.9
+	second.Frequency = 1
+	second.Activation = 0.05
+	r := NewBrainRuntime(brain)
+
+	_, err := r.CognitiveThink(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	target := brain.BrainState.CuriosityState["target_node"]
+	if int64(target) != int64(second.ID) {
+		t.Fatalf("curiosity target = %v, want node %d", target, second.ID)
+	}
+	if brain.BrainState.CuriosityState["drive"] <= 0 {
+		t.Fatal("curiosity drive did not activate")
+	}
+}
+
+func TestBrainRuntimeAutonomousCyclesChangeStateWithoutInput(t *testing.T) {
+	brain := knowledge.NewBrain()
+	for _, surface := range []string{"a", "b", "c", "d"} {
+		brain.Store(surface)
+	}
+	r := NewBrainRuntime(brain)
+
+	first, err := r.CognitiveThink(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := r.CognitiveThink(1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if second.Sequence <= first.Sequence {
+		t.Fatalf("sequence did not advance: %d -> %d", first.Sequence, second.Sequence)
+	}
+	if len(second.Activations) == 0 {
+		t.Fatal("autonomous cycle produced no activation")
+	}
+	if brain.BrainState.CuriosityState["last_update_unix"] <= 0 {
+		t.Fatal("curiosity state was not updated")
+	}
+}
