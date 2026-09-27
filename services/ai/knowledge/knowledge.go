@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -331,6 +332,15 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k.Patterns != nil { patterns = k.Patterns.All() }
 b, e := json.MarshalIndent(persistedGraph{SchemaVersion: 1, BrainIdentity: "horizon", Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations, BrainState: k.BrainState}, "", "  ")
 	if e != nil { return e }
-	return os.WriteFile(path, b, 0644)
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil { return err }
+	tmp, err := os.CreateTemp(dir, ".brain-memory-*.tmp")
+	if err != nil { return err }
+	tmpName := tmp.Name()
+	defer os.Remove(tmpName)
+	if _, err := tmp.Write(b); err != nil { _ = tmp.Close(); return err }
+	if err := tmp.Sync(); err != nil { _ = tmp.Close(); return err }
+	if err := tmp.Close(); err != nil { return err }
+	return os.Rename(tmpName, path)
 }
 func clamp01(v float64) float64 { if v < 0 { return 0 }; if v > 1 { return 1 }; return v }
