@@ -122,7 +122,7 @@ type LearningPolicyState struct {
 	CuriosityPressure float64 `json:"curiosity_pressure"`
 	ExplorationBias float64 `json:"exploration_bias"`
 	RepeatObservationBias float64 `json:"repeat_observation_bias"`
-	DeferConclusionBias float64 `json:"defer_conclusion_bias""
+	DeferConclusionBias float64 `json:"defer_conclusion_bias"`
 }
 
 type InquiryState struct {
