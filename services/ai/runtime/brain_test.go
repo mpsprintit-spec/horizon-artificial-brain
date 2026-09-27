@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -142,4 +143,91 @@ func TestBrainRuntimeAutonomousCyclesChangeStateWithoutInput(t *testing.T) {
 	if brain.BrainState.CuriosityState["last_update_unix"] <= 0 {
 		t.Fatal("curiosity state was not updated")
 	}
+}
+
+
+func TestBrainRuntimePlanInquiryPersistsTrajectoryWithoutExecution(t *testing.T) {
+	brain := knowledge.NewBrain()
+	first := brain.Store("first")
+	second := brain.Store("second")
+	if first == nil || second == nil {
+		t.Fatal("expected neural substrate")
+	}
+	first.Frequency = 20
+	first.Activation = 0.9
+	second.Frequency = 1
+	second.Activation = 0.05
+	r := NewBrainRuntime(brain)
+	at := time.Unix(300, 0).UTC()
+
+	agenda, err := r.PlanInquiry(0.9, at)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if agenda.Uncertainty != 0.9 {
+		t.Fatalf("agenda uncertainty = %v, want 0.9", agenda.Uncertainty)
+	}
+	if agenda.Selected == nil {
+		t.Fatal("inquiry agenda has no selected candidate")
+	}
+	if r.LastSequence() != 0 {
+		t.Fatalf("planning inquiry changed execution sequence: %d", r.LastSequence())
+	}
+	state := brain.BrainState.InquiryState
+	if !state.Pending {
+		t.Fatal("inquiry trajectory was not marked pending")
+	}
+	if state.SelectedAction == "" {
+		t.Fatal("selected inquiry action was not persisted")
+	}
+	if state.Sequence != 0 {
+		t.Fatalf("inquiry sequence = %d, want 0", state.Sequence)
+	}
+}
+
+func TestBrainRuntimeInquiryOutcomeChangesAndPersistsLearningStrategy(t *testing.T) {
+	brain := knowledge.NewBrain()
+	brain.Store("a")
+	r := NewBrainRuntime(brain)
+	at := time.Unix(400, 0).UTC()
+
+	if _, err := r.PlanInquiry(0.8, at); err != nil {
+		t.Fatal(err)
+	}
+	before := brain.BrainState.LearningPolicyState
+	if err := r.CompleteInquiry(0.2, 0.9, at.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+	after := brain.BrainState.LearningPolicyState
+	if !(after.ExplorationBias > before.ExplorationBias) {
+		t.Fatalf("exploration bias did not increase: %v -> %v", before.ExplorationBias, after.ExplorationBias)
+	}
+	if !(after.RepeatObservationBias > before.RepeatObservationBias) {
+		t.Fatalf("repeat-observation bias did not increase: %v -> %v", before.RepeatObservationBias, after.RepeatObservationBias)
+	}
+	if !(after.DeferConclusionBias > before.DeferConclusionBias) {
+		t.Fatalf("defer-conclusion bias did not increase: %v -> %v", before.DeferConclusionBias, after.DeferConclusionBias)
+	}
+	if brain.BrainState.InquiryState.Pending {
+		t.Fatal("inquiry trajectory remained pending after outcome")
+	}
+	if brain.BrainState.InquiryState.OutcomePredictionError != 0.9 {
+		t.Fatalf("stored inquiry error = %v, want 0.9", brain.BrainState.InquiryState.OutcomePredictionError)
+	}
+
+	path := t.TempDir() + "/brain_memory.json"
+	if err := brain.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	loaded := knowledge.NewBrain()
+	if err := loaded.Load(path); err != nil {
+		t.Fatal(err)
+	}
+	if loaded.BrainState.InquiryState.SelectedAction != brain.BrainState.InquiryState.SelectedAction {
+		t.Fatalf("selected action was not persisted: %q -> %q", brain.BrainState.InquiryState.SelectedAction, loaded.BrainState.InquiryState.SelectedAction)
+	}
+	if loaded.BrainState.LearningPolicyState.ExplorationBias != after.ExplorationBias {
+		t.Fatalf("exploration bias was not persisted: %v -> %v", after.ExplorationBias, loaded.BrainState.LearningPolicyState.ExplorationBias)
+	}
+	_ = os.Remove(path)
 }
