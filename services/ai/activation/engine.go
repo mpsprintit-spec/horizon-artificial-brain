@@ -34,57 +34,6 @@ func (e *Engine) Activate(tokens []string, cycles int) Result { return e.Activat
 func (e *Engine) Think(cycles int) Result { return e.ThinkWithPrediction(cycles).Result }
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkWithPredictionAt(cycles,time.Now().UTC()) }
 
-func (e *Engine) ThinkWithPredictionAt(cycles int, now time.Time) ThoughtResult {
-	if e == nil || e.Memory == nil {
-		return ThoughtResult{}
-	}
-	if cycles < 1 {
-		cycles = 1
-	}
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
-
-	// Autonomous thought starts from the brain's recurrent state. It does not
-	// inject lexical input or random neural activity. If the recurrent state is
-	// empty, the brain is genuinely quiescent.
-	e.mu.RLock()
-	seed := cloneState(e.internalState)
-	seedConfidence := cloneState(e.internalConfidence)
-	prediction := Prediction{
-		State: cloneState(e.lastPrediction),
-		Confidence: cloneState(e.lastPredictionConf),
-	}
-	e.mu.RUnlock()
-
-	if len(seed) == 0 {
-		seed = cloneState(prediction.State)
-		seedConfidence = cloneState(prediction.Confidence)
-	}
-	if len(seed) == 0 {
-		return ThoughtResult{
-			Result: Result{
-				Converged: true,
-				Activations: map[knowledge.NodeID]float64{},
-				Confidence: map[knowledge.NodeID]float64{},
-			},
-			Prediction: prediction,
-		}
-	}
-
-	result := e.ActivateWith(Request{
-		ContextBoosts: seed,
-		Cycles: cycles,
-		Now: now,
-		PredictionOverride: &prediction,
-	})
-	return ThoughtResult{
-		Result: result,
-		Prediction: e.PredictionSnapshot(),
-		PredictionError: result.PredictionError,
-	}
-}
-
 func (e *Engine) ActivateWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
 	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
