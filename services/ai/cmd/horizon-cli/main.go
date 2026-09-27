@@ -415,11 +415,28 @@ func (c *cli) printBrainState(output runtime.CognitiveOutput) {
 	for _, id := range ids {
 		parts = append(parts, fmt.Sprintf("node:%d A=%.3f C=%.3f", id, output.Activations[id], output.Confidence[id]))
 	}
-	if len(parts) == 0 {
-		parts = append(parts, "—")
+	predIDs := make([]knowledge.NodeID, 0, len(output.Prediction.State))
+	for id, value := range output.Prediction.State {
+		if value > 0.01 {
+			predIDs = append(predIDs, id)
+		}
 	}
-	c.safePrintf("[BRAIN] seq=%d resonance=%.3f error=%.3f active: %s\n",
-		output.Sequence, output.Resonance, output.PredictionError, strings.Join(parts, " | "))
+	sort.Slice(predIDs, func(i, j int) bool {
+		return output.Prediction.State[predIDs[i]] > output.Prediction.State[predIDs[j]]
+	})
+	predParts := make([]string, 0, len(predIDs))
+	for _, id := range predIDs {
+		predParts = append(predParts, fmt.Sprintf("node:%d %.3f", id, output.Prediction.State[id]))
+	}
+	if len(parts) == 0 {
+		parts = append(parts, "QUIESCENT")
+	}
+	if len(predParts) == 0 {
+		predParts = append(predParts, "none")
+	}
+	c.safePrintf("[BRAIN] seq=%d resonance=%.3f error=%.3f active=%s | prediction=%s\n",
+		output.Sequence, output.Resonance, output.PredictionError,
+		strings.Join(parts, " ; "), strings.Join(predParts, " ; "))
 }
 
 func (c *cli) safePrintf(format string, args ...interface{}) {
