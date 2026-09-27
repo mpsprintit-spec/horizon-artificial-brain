@@ -86,6 +86,16 @@ func newCLI(input io.Reader, output io.Writer, memoryPath string) *cli {
 func (c *cli) startup() error {
 	c.printBanner()
 	err := c.horizon.Knowledge.Load(c.memoryPath)
+	if os.IsNotExist(err) {
+		// One-time migration path for older local checkouts. The canonical
+		// runtime store remains services/ai/brain_memory.json.
+		if legacyErr := c.horizon.Knowledge.Load("brain_memory.json"); legacyErr == nil {
+			if saveErr := c.horizon.Knowledge.Save(c.memoryPath); saveErr != nil {
+				fmt.Fprintf(c.out, "! Memory migration save skipped: %v\n", saveErr)
+			}
+			err = nil
+		}
+	}
 	if err != nil && !os.IsNotExist(err) {
 		fmt.Fprintf(c.out, "! Memory load skipped: %v\n", err)
 	}
