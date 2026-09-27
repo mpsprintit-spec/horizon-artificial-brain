@@ -437,7 +437,10 @@
       "novelty_sensitivity": 0.7,
       "uncertainty_sensitivity": 0.8,
       "memory_retention": 0.6,
-      "curiosity_pressure": 0.65
+      "curiosity_pressure": 0.65,
+      "exploration_bias": 0.3,
+      "repeat_observation_bias": 0.2,
+      "defer_conclusion_bias": 0.2
     },
     "bootstrap_experiences": [
       {
@@ -456,6 +459,16 @@
           "status": "initial_hypothesis"
         }
       }
-    ]
+    ],
+    "inquiry_state": {
+      "sequence": 0,
+      "last_updated": "0001-01-01T00:00:00Z",
+      "pending": false,
+      "uncertainty": 0,
+      "expected_information_gain": 0,
+      "selected_score": 0,
+      "observed_information_gain": 0,
+      "outcome_prediction_error": 0
+    }
   }
 }
