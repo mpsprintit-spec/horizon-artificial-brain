@@ -119,7 +119,8 @@ func (c *cli) startup() error {
 	fmt.Fprintln(c.out, "✓ Language Engine")
 	fmt.Fprintln(c.out, "✓ Learning Engine")
 	fmt.Fprintln(c.out, "✓ WebSearch Engine")
-	fmt.Fprintln(c.out, "✓ Brain Monitor: ready — ketik brain untuk aktivitas real-time")
+	fmt.Fprintln(c.out, "✓ Brain Monitor: starting autonomous loop")
+	c.startBrainMonitor()
 	if err != nil && os.IsNotExist(err) {
 		return nil
 	}
@@ -371,13 +372,20 @@ func (c *cli) handleCommand(input string) bool {
 func (c *cli) toggleBrainMonitor() {
 	if c.brainLive {
 		c.stopBrainMonitor()
-		c.safePrintln("[BRAIN] monitor OFF")
+		c.safePrintln("[BRAIN] autonomous loop OFF")
+		return
+	}
+	c.startBrainMonitor()
+	c.safePrintln("[BRAIN] autonomous loop ON")
+}
+
+func (c *cli) startBrainMonitor() {
+	if c.brainLive {
 		return
 	}
 	c.brainLive = true
 	c.brainStop = make(chan struct{})
 	c.brainWG.Add(1)
-	c.safePrintln("[BRAIN] monitor ON — satu thought cycle setiap 250ms")
 	go c.runBrainMonitor(c.brainStop)
 }
 
