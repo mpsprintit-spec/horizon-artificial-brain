@@ -8,10 +8,13 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/core"
 	"github.com/project-horizon/horizon-core/services/ai/perception"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/runtime"
 	"github.com/project-horizon/horizon-core/services/ai/plugin"
 	"github.com/project-horizon/horizon-core/services/ai/thinking"
 	"github.com/project-horizon/horizon-core/services/ai/websearch"
@@ -33,6 +36,10 @@ type cli struct {
 	memoryPath string
 	roleCatalog     *evolution.RoleCatalog
 	roleCatalogPath string
+	brainLive bool
+	brainStop chan struct{}
+	brainWG sync.WaitGroup
+	outputMu sync.Mutex
 }
 
 type pipelineResult struct {
@@ -80,6 +87,7 @@ func newCLI(input io.Reader, output io.Writer, memoryPath string) *cli {
 		memoryPath: memoryPath,
 		roleCatalog:     &evolution.RoleCatalog{},
 		roleCatalogPath: "roles.json",
+		brainStop: make(chan struct{}),
 	}
 }
 
@@ -111,6 +119,7 @@ func (c *cli) startup() error {
 	fmt.Fprintln(c.out, "✓ Language Engine")
 	fmt.Fprintln(c.out, "✓ Learning Engine")
 	fmt.Fprintln(c.out, "✓ WebSearch Engine")
+	fmt.Fprintln(c.out, "✓ Brain Monitor: ready — ketik brain untuk aktivitas real-time")
 	if err != nil && os.IsNotExist(err) {
 		return nil
 	}
@@ -154,6 +163,7 @@ func (c *cli) run(ctx context.Context) {
 		}
 		fmt.Fprintln(c.out, result.Answer)
 	}
+	c.stopBrainMonitor()
 	if err := c.horizon.Knowledge.Save(c.memoryPath); err != nil {
 		fmt.Fprintf(c.out, "Shutdown save warning: %v\n", err)
 	}
@@ -208,9 +218,11 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 func (c *cli) handleCommand(input string) bool {
 	switch strings.ToLower(input) {
 	case "help":
-		fmt.Fprintln(c.out, "Commands: help, exit, quit, memory, nodes, synapses, activation, context, history, clear, save, load, debug on, debug off")
+		fmt.Fprintln(c.out, "Commands: help, exit, quit, brain, memory, nodes, synapses, activation, context, history, clear, save, load, debug on, debug off")
 	case "exit", "quit":
 		fmt.Fprintln(c.out, "Shutting down Horizon...")
+	case "brain":
+		c.toggleBrainMonitor()
 	case "memory":
 		fmt.Fprintf(c.out, "Memory: %d nodes, %d synapses\n", c.nodeCount(), c.synapseCount())
 	case "":
@@ -353,6 +365,73 @@ func (c *cli) handleCommand(input string) bool {
 		return false
 	}
 	return true
+}
+
+
+func (c *cli) toggleBrainMonitor() {
+	if c.brainLive {
+		c.stopBrainMonitor()
+		c.safePrintln("[BRAIN] monitor OFF")
+		return
+	}
+	c.brainLive = true
+	c.brainStop = make(chan struct{})
+	c.brainWG.Add(1)
+	c.safePrintln("[BRAIN] monitor ON — satu thought cycle setiap 250ms")
+	go c.runBrainMonitor(c.brainStop)
+}
+
+func (c *cli) stopBrainMonitor() {
+	if !c.brainLive {
+		return
+	}
+	c.brainLive = false
+	close(c.brainStop)
+	c.brainWG.Wait()
+}
+
+func (c *cli) runBrainMonitor(stop <-chan struct{}) {
+	defer c.brainWG.Done()
+	ticker := time.NewTicker(250 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-stop:
+			return
+		case <-ticker.C:
+			output, err := c.horizon.Runtime.CognitiveThink(1)
+			if err != nil {
+				c.safePrintf("[BRAIN] error: %v\n", err)
+				continue
+			}
+			c.printBrainState(output)
+		}
+	}
+}
+
+func (c *cli) printBrainState(output runtime.CognitiveOutput) {
+	ids := append([]knowledge.NodeID(nil), output.RankedNodeIDs...)
+	parts := make([]string, 0, len(ids))
+	for _, id := range ids {
+		parts = append(parts, fmt.Sprintf("node:%d A=%.3f C=%.3f", id, output.Activations[id], output.Confidence[id]))
+	}
+	if len(parts) == 0 {
+		parts = append(parts, "—")
+	}
+	c.safePrintf("[BRAIN] seq=%d resonance=%.3f error=%.3f active: %s\n",
+		output.Sequence, output.Resonance, output.PredictionError, strings.Join(parts, " | "))
+}
+
+func (c *cli) safePrintf(format string, args ...interface{}) {
+	c.outputMu.Lock()
+	defer c.outputMu.Unlock()
+	fmt.Fprintf(c.out, format, args...)
+}
+
+func (c *cli) safePrintln(value string) {
+	c.outputMu.Lock()
+	defer c.outputMu.Unlock()
+	fmt.Fprintln(c.out, value)
 }
 
 func (c *cli) printDebug(r pipelineResult) {
