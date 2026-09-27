@@ -94,3 +94,119 @@ func TestExperienceTransitionCanBeReactivatedWithoutLanguageLabels(t *testing.T)
 		t.Fatalf("learned transition did not reactivate the subsequent population; activations=%v", result.Activations)
 	}
 }
+
+
+func TestExperienceTransitionCanRecallAThroughBToC(t *testing.T) {
+	brain := knowledge.NewBrain()
+
+	a := knowledge.NewNeuralVector([]float64{1, 0, 0, 0})
+	b := knowledge.NewNeuralVector([]float64{0, 1, 0, 0})
+	c := knowledge.NewNeuralVector([]float64{0, 0, 1, 0})
+
+	before, err := brain.ProjectVectorPopulation(a, 0.90, 4)
+	if err != nil {
+		t.Fatalf("project A: %v", err)
+	}
+	middle, err := brain.ProjectVectorPopulation(b, 0.90, 4)
+	if err != nil {
+		t.Fatalf("project B: %v", err)
+	}
+	after, err := brain.ProjectVectorPopulation(c, 0.90, 4)
+	if err != nil {
+		t.Fatalf("project C: %v", err)
+	}
+
+	beforeIDs := make([]knowledge.NodeID, 0, len(before.Units))
+	for _, unit := range before.Units {
+		beforeIDs = append(beforeIDs, unit.NodeID)
+	}
+
+	if err := brain.LearnVectorTransition(a, b, 0.90, 4, time.Unix(1, 0).UTC()); err != nil {
+		t.Fatalf("learn A->B: %v", err)
+	}
+	if err := brain.LearnVectorTransition(b, c, 0.90, 4, time.Unix(2, 0).UTC()); err != nil {
+		t.Fatalf("learn B->C: %v", err)
+	}
+
+	engine := activation.NewEngine(brain)
+	result := engine.ActivateWith(activation.Request{
+		StimulusNodeIDs: beforeIDs,
+		Cycles:          3,
+		Now:             time.Unix(3, 0).UTC(),
+	})
+
+	var recalledB, recalledC float64
+	for _, unit := range middle.Units {
+		if value := result.Activations[unit.NodeID]; value > recalledB {
+			recalledB = value
+		}
+	}
+	for _, unit := range after.Units {
+		if value := result.Activations[unit.NodeID]; value > recalledC {
+			recalledC = value
+		}
+	}
+
+	if recalledB <= 0 {
+		t.Fatalf("A did not recall B in learned chain; activations=%v", result.Activations)
+	}
+	if recalledC <= 0 {
+		t.Fatalf("A did not propagate through B to recall C; activations=%v", result.Activations)
+	}
+}
+
+func TestExperienceTransitionChainStopsWithoutSecondTransition(t *testing.T) {
+	brain := knowledge.NewBrain()
+
+	a := knowledge.NewNeuralVector([]float64{1, 0, 0, 0})
+	b := knowledge.NewNeuralVector([]float64{0, 1, 0, 0})
+	c := knowledge.NewNeuralVector([]float64{0, 0, 1, 0})
+
+	before, err := brain.ProjectVectorPopulation(a, 0.90, 4)
+	if err != nil {
+		t.Fatalf("project A: %v", err)
+	}
+	middle, err := brain.ProjectVectorPopulation(b, 0.90, 4)
+	if err != nil {
+		t.Fatalf("project B: %v", err)
+	}
+	after, err := brain.ProjectVectorPopulation(c, 0.90, 4)
+	if err != nil {
+		t.Fatalf("project C: %v", err)
+	}
+
+	beforeIDs := make([]knowledge.NodeID, 0, len(before.Units))
+	for _, unit := range before.Units {
+		beforeIDs = append(beforeIDs, unit.NodeID)
+	}
+
+	if err := brain.LearnVectorTransition(a, b, 0.90, 4, time.Unix(1, 0).UTC()); err != nil {
+		t.Fatalf("learn A->B: %v", err)
+	}
+
+	engine := activation.NewEngine(brain)
+	result := engine.ActivateWith(activation.Request{
+		StimulusNodeIDs: beforeIDs,
+		Cycles:          3,
+		Now:             time.Unix(3, 0).UTC(),
+	})
+
+	var recalledB, recalledC float64
+	for _, unit := range middle.Units {
+		if value := result.Activations[unit.NodeID]; value > recalledB {
+			recalledB = value
+		}
+	}
+	for _, unit := range after.Units {
+		if value := result.Activations[unit.NodeID]; value > recalledC {
+			recalledC = value
+		}
+	}
+
+	if recalledB <= 0 {
+		t.Fatalf("A did not recall learned B; activations=%v", result.Activations)
+	}
+	if recalledC > 0 {
+		t.Fatalf("C was recalled without a learned B->C transition: %v; activations=%v", recalledC, result.Activations)
+	}
+}
