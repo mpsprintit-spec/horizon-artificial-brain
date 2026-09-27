@@ -42,6 +42,7 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 	// Surface tokens remain adapter metadata and are not required for cognition.
 	event.StimulusNodeIDs = groundedPopulationNodeIDs(grounded)
 	output, err := o.Runtime.CognitiveProcess(event); if err != nil { return CognitiveInterpretation{}, false, err }
+	if err := o.Runtime.LearnObservedTransition(event.StimulusNodeIDs, event.Timestamp); err != nil { return CognitiveInterpretation{}, false, err }
 	learned := false
 	if experience != nil && len(experience.Sequence) > 0 {
 		if experience.ExperienceID == "" { experience.ExperienceID = event.ID }; if experience.Source == "" { experience.Source = observation.Source }; if experience.Modality == "" { experience.Modality = observation.Modality }; if experience.Timestamp.IsZero() { experience.Timestamp = event.Timestamp }
