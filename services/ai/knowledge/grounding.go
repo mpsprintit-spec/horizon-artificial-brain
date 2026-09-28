@@ -47,6 +47,13 @@ type SurfaceAnnotation struct {
 // experience. Existing compatible representations are reused; otherwise a new
 // tentative neural unit is created.
 func (k *KnowledgeBase) GroundObservation(token, source, modality string, threshold float64) (GroundedRepresentation, error) {
+	return k.GroundObservationAt(token, source, modality, threshold, time.Now().UTC())
+}
+
+// GroundObservationAt is the replay-safe form of GroundObservation. The caller
+// supplies event time so persisted observation provenance does not depend on
+// wall-clock time during event replay.
+func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, threshold float64, now time.Time) (GroundedRepresentation, error) {
 	if k == nil {
 		return GroundedRepresentation{}, errors.New("brain is nil")
 	}
@@ -77,7 +84,11 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 	if !hadPopulation {
 		status = GroundingCandidate
 	}
-	now := time.Now().UTC()
+	if now.IsZero() {
+		now = time.Now().UTC()
+	} else {
+		now = now.UTC()
+	}
 	k.recordSurfaceAnnotation(canonical, modality, anchor, populationIDs, now)
 	return GroundedRepresentation{
 		NodeID: anchor, Population: populationIDs, Similarity: population.Units[0].Activation,
