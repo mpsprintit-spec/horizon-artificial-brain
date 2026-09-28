@@ -66,7 +66,7 @@ func (e *Engine) ActivateWith(req Request) Result {
 		// boundary, not directly through population projection. Direct projection
 		// creates valid neural units but does not register the surface annotation
 		// needed to realize the neural state back into language.
-		grounded, err := e.Memory.GroundObservation(canonical, "activation", "language", e.Threshold)
+		grounded, err := e.Memory.GroundObservationAt(canonical, "activation", "language", e.Threshold, req.Now)
 		if err != nil { continue }
 		vector := knowledge.EncodeObservation(canonical, "language")
 		for _, nodeID := range grounded.Population {
