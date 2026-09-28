@@ -5928,6 +5928,26 @@
             }
           }
         ],
+        "61": [
+          {
+            "target_id": 61,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "62": [
           {
             "target_id": 62,
@@ -6030,6 +6050,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "61": [
+          {
+            "target_id": 61,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6107,6 +6147,24 @@
               "activation": 0,
               "eligibility": 0.8,
               "confidence": 0.4,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          },
+          {
+            "target_id": 61,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.6,
               "frequency": 1,
               "last_activation": "2026-01-01T00:00:00Z",
               "last_modification": "2026-01-01T00:00:00Z",
@@ -6321,6 +6379,24 @@
               "last_modification": "2026-01-01T00:00:00Z",
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
+          },
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
           }
         ],
         "56": [
@@ -6336,6 +6412,26 @@
               "activation": 0,
               "eligibility": 0.8,
               "confidence": 0.4,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "61": [
+          {
+            "target_id": 61,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.6,
               "frequency": 1,
               "last_activation": "2026-01-01T00:00:00Z",
               "last_modification": "2026-01-01T00:00:00Z",
@@ -6422,6 +6518,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6464,6 +6580,24 @@
               "last_modification": "2026-01-01T00:00:00Z",
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
+          },
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
           }
         ],
         "56": [
@@ -6499,6 +6633,26 @@
               "activation": 0,
               "eligibility": 0.8,
               "confidence": 0.4,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "61": [
+          {
+            "target_id": 61,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.6,
               "frequency": 1,
               "last_activation": "2026-01-01T00:00:00Z",
               "last_modification": "2026-01-01T00:00:00Z",
@@ -6585,6 +6739,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6609,6 +6783,26 @@
       "usage_history": [],
       "last_activation": "2026-01-01T00:00:00Z",
       "synapses": {
+        "55": [
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "64": [
           {
             "target_id": 64,
@@ -6668,6 +6862,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6692,6 +6906,26 @@
       "usage_history": [],
       "last_activation": "2026-01-01T00:00:00Z",
       "synapses": {
+        "55": [
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "65": [
           {
             "target_id": 65,
@@ -6751,6 +6985,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6775,6 +7029,26 @@
       "usage_history": [],
       "last_activation": "2026-01-01T00:00:00Z",
       "synapses": {
+        "55": [
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "66": [
           {
             "target_id": 66,
@@ -6834,6 +7108,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6858,6 +7152,26 @@
       "usage_history": [],
       "last_activation": "2026-01-01T00:00:00Z",
       "synapses": {
+        "55": [
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "61": [
           {
             "target_id": 61,
@@ -6917,6 +7231,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -6941,6 +7275,26 @@
       "usage_history": [],
       "last_activation": "2026-01-01T00:00:00Z",
       "synapses": {
+        "55": [
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "61": [
           {
             "target_id": 61,
@@ -7060,6 +7414,26 @@
               "last_eligibility_update": "2026-01-01T00:00:00Z"
             }
           }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
         ]
       }
     },
@@ -7084,6 +7458,26 @@
       "usage_history": [],
       "last_activation": "2026-01-01T00:00:00Z",
       "synapses": {
+        "55": [
+          {
+            "target_id": 55,
+            "weight": 0.3,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.6,
+            "inhibitory": true,
+            "dynamic": {
+              "weight": 0.3,
+              "activation": 0,
+              "eligibility": 0.8,
+              "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
         "61": [
           {
             "target_id": 61,
@@ -7217,6 +7611,26 @@
               "activation": 0,
               "eligibility": 1,
               "confidence": 0.6,
+              "frequency": 1,
+              "last_activation": "2026-01-01T00:00:00Z",
+              "last_modification": "2026-01-01T00:00:00Z",
+              "last_eligibility_update": "2026-01-01T00:00:00Z"
+            }
+          }
+        ],
+        "91": [
+          {
+            "target_id": 91,
+            "weight": 0.28,
+            "activation": 0,
+            "frequency": 1,
+            "confidence": 0.55,
+            "inhibitory": false,
+            "dynamic": {
+              "weight": 0.28,
+              "activation": 0,
+              "eligibility": 1,
+              "confidence": 0.55,
               "frequency": 1,
               "last_activation": "2026-01-01T00:00:00Z",
               "last_modification": "2026-01-01T00:00:00Z",
@@ -13809,6 +14223,173 @@
       "weight": 0.55,
       "confidence": 0.35,
       "frequency": 1
+    },
+    {
+      "id": 21,
+      "members": [
+        31,
+        25,
+        43,
+        109
+      ],
+      "sequence": [
+        {
+          "node_id": 31,
+          "position": 0,
+          "delta": 40000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 25,
+          "position": 1,
+          "delta": 80000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 43,
+          "position": 2,
+          "delta": 120000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 109,
+          "position": 3,
+          "delta": 160000000,
+          "activation": 0.3
+        }
+      ],
+      "context": [],
+      "result": 109,
+      "weight": 0.6,
+      "confidence": 0.4,
+      "frequency": 1
+    },
+    {
+      "id": 22,
+      "members": [
+        49,
+        13,
+        19,
+        55
+      ],
+      "sequence": [
+        {
+          "node_id": 49,
+          "position": 0,
+          "delta": 40000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 13,
+          "position": 1,
+          "delta": 80000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 19,
+          "position": 2,
+          "delta": 120000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 55,
+          "position": 3,
+          "delta": 160000000,
+          "activation": 0.3
+        }
+      ],
+      "context": [],
+      "result": 55,
+      "weight": 0.6,
+      "confidence": 0.4,
+      "frequency": 1
+    },
+    {
+      "id": 23,
+      "members": [
+        61,
+        79,
+        85,
+        55,
+        91
+      ],
+      "sequence": [
+        {
+          "node_id": 61,
+          "position": 0,
+          "delta": 40000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 79,
+          "position": 1,
+          "delta": 80000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 85,
+          "position": 2,
+          "delta": 120000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 55,
+          "position": 3,
+          "delta": 160000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 91,
+          "position": 4,
+          "delta": 200000000,
+          "activation": 0.3
+        }
+      ],
+      "context": [],
+      "result": 91,
+      "weight": 0.6,
+      "confidence": 0.4,
+      "frequency": 1
+    },
+    {
+      "id": 24,
+      "members": [
+        73,
+        67,
+        43,
+        91
+      ],
+      "sequence": [
+        {
+          "node_id": 73,
+          "position": 0,
+          "delta": 40000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 67,
+          "position": 1,
+          "delta": 80000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 43,
+          "position": 2,
+          "delta": 120000000,
+          "activation": 0.3
+        },
+        {
+          "node_id": 91,
+          "position": 3,
+          "delta": 160000000,
+          "activation": 0.3
+        }
+      ],
+      "context": [],
+      "result": 91,
+      "weight": 0.6,
+      "confidence": 0.4,
+      "frequency": 1
     }
   ],
   "projection_populations": [
@@ -13858,6 +14439,16 @@
         7,
         8
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "fast"
     },
     {
@@ -13905,6 +14496,16 @@
         12,
         13,
         14
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "medium"
     },
@@ -13954,6 +14555,16 @@
         19,
         20
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "slow"
     },
     {
@@ -14001,6 +14612,16 @@
         24,
         25,
         26
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "multi"
     },
@@ -14050,6 +14671,16 @@
         31,
         32
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "fast"
     },
     {
@@ -14097,6 +14728,16 @@
         36,
         37,
         38
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "medium"
     },
@@ -14146,6 +14787,16 @@
         43,
         44
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "slow"
     },
     {
@@ -14193,6 +14844,16 @@
         48,
         49,
         50
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "multi"
     },
@@ -14242,6 +14903,16 @@
         55,
         56
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "fast"
     },
     {
@@ -14290,6 +14961,16 @@
         61,
         62
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "medium"
     },
     {
@@ -14329,6 +15010,16 @@
         }
       ],
       "learning_target": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
+      "counterevidence_targets": [
         61,
         62,
         63,
@@ -14386,6 +15077,16 @@
         73,
         74
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "multi"
     },
     {
@@ -14433,6 +15134,16 @@
         78,
         79,
         80
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "fast"
     },
@@ -14482,6 +15193,16 @@
         85,
         86
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "medium"
     },
     {
@@ -14529,6 +15250,16 @@
         90,
         91,
         92
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "slow"
     },
@@ -14578,6 +15309,16 @@
         97,
         98
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "multi"
     },
     {
@@ -14625,6 +15366,16 @@
         102,
         103,
         104
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "fast"
     },
@@ -14674,6 +15425,16 @@
         109,
         110
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "medium"
     },
     {
@@ -14721,6 +15482,16 @@
         114,
         115,
         116
+      ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
       ],
       "temporal_scale": "slow"
     },
@@ -14770,6 +15541,16 @@
         121,
         122
       ],
+      "counterevidence_targets": [
+        61,
+        62,
+        63,
+        64,
+        65,
+        66,
+        67,
+        68
+      ],
       "temporal_scale": "multi"
     }
   ],
@@ -14796,7 +15577,7 @@
     "memory_state": {
       "retention": 0.6,
       "priority": 0.5,
-      "bootstrap_temporal_traces": 20
+      "bootstrap_temporal_traces": 24
     },
     "self_model_state": {
       "continuity": 0.2,
@@ -15348,6 +16129,96 @@
           "direct_experience": false,
           "status": "initial_hypothesis"
         }
+      },
+      {
+        "id": "bootstrap-agency-outcome",
+        "populations": [
+          31,
+          25,
+          43,
+          109
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-object-continuity",
+        "populations": [
+          49,
+          13,
+          19,
+          55
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-thought-simulation",
+        "populations": [
+          61,
+          79,
+          85,
+          55,
+          91
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z",
+          "2026-01-01T00:00:00.160Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-curiosity-inquiry",
+        "populations": [
+          73,
+          67,
+          43,
+          91
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
       }
     ],
     "episodes": [
@@ -15864,6 +16735,96 @@
           "2026-01-01T00:00:00.075Z"
         ],
         "activation": 0.25,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-agency-outcome",
+        "populations": [
+          31,
+          25,
+          43,
+          109
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-object-continuity",
+        "populations": [
+          49,
+          13,
+          19,
+          55
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-thought-simulation",
+        "populations": [
+          61,
+          79,
+          85,
+          55,
+          91
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z",
+          "2026-01-01T00:00:00.160Z"
+        ],
+        "activation": 0.3,
+        "confidence": 0.2,
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      },
+      {
+        "id": "bootstrap-curiosity-inquiry",
+        "populations": [
+          73,
+          67,
+          43,
+          91
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z"
+        ],
+        "activation": 0.3,
         "confidence": 0.2,
         "provenance": {
           "origin": "developmental_bootstrap",
