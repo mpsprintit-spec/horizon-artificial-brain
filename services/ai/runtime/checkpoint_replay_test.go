@@ -1,6 +1,8 @@
 package runtime
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -88,8 +90,15 @@ func TestEventReplayReproducesCheckpointedRuntimeState(t *testing.T) {
 	if err != nil { t.Fatalf("read original checkpoint: %v", err) }
 	replayedData, err := readCheckpointForTest(replayedPath)
 	if err != nil { t.Fatalf("read replayed checkpoint: %v", err) }
-	if !reflect.DeepEqual(originalData.Brain, replayedData.Brain) || !reflect.DeepEqual(originalData.Activation, replayedData.Activation) {
-		t.Fatal("event replay did not reproduce neural and recurrent runtime state")
+	brainEqual := reflect.DeepEqual(originalData.Brain, replayedData.Brain)
+	activationEqual := reflect.DeepEqual(originalData.Activation, replayedData.Activation)
+	if !brainEqual || !activationEqual {
+		originalBrainHash := sha256.Sum256(originalData.Brain)
+		replayedBrainHash := sha256.Sum256(replayedData.Brain)
+		t.Fatalf("event replay did not reproduce neural and recurrent runtime state: brain_equal=%t activation_equal=%t brain_len=%d/%d brain_sha=%s/%s activation=%+v/%+v",
+			brainEqual, activationEqual, len(originalData.Brain), len(replayedData.Brain),
+			hex.EncodeToString(originalBrainHash[:]), hex.EncodeToString(replayedBrainHash[:]),
+			originalData.Activation, replayedData.Activation)
 	}
 }
 
