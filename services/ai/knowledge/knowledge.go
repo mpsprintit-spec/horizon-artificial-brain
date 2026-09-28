@@ -357,8 +357,39 @@ func (k *KnowledgeBase) Load(path string) error {
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
 	k.BrainState = graph.BrainState
 	k.normalizeBrainState()
+	k.normalizeBootstrapState()
 
 	return nil
+}
+
+// normalizeBootstrapState upgrades older persisted bootstrap populations to the
+// current materialization schema without changing their neural identities.
+// This is migration metadata only: it never invents semantic labels or world
+// facts and never creates a second memory store.
+func (k *KnowledgeBase) normalizeBootstrapState() {
+	if k == nil || len(k.ProjectionPopulations) == 0 {
+		return
+	}
+	limit := len(BootstrapNetworkDomains)
+	if len(k.ProjectionPopulations) < limit {
+		limit = len(k.ProjectionPopulations)
+	}
+	for i := 0; i < limit; i++ {
+		population := &k.ProjectionPopulations[i]
+		if population.Domain == "" {
+			population.Domain = BootstrapNetworkDomains[i].Name
+		}
+		if len(population.LearningTarget) == 0 {
+			for _, unit := range population.Units {
+				if unit.NodeID != 0 {
+					population.LearningTarget = append(population.LearningTarget, unit.NodeID)
+				}
+			}
+		}
+		if population.TemporalScale == "" {
+			population.TemporalScale = bootstrapTemporalScale(i)
+		}
+	}
 }
 
 func (k *KnowledgeBase) normalizeBrainState() {
