@@ -14,10 +14,15 @@ var (
 	ErrEmptyNeuralVector = errors.New("neural vector is empty")
 )
 
-type ProjectionPopulation struct{ Units []PopulationUnit }
+type ProjectionPopulation struct {
+	Domain string `json:"domain,omitempty"`
+	Units []PopulationUnit `json:"units"`
+	LearningTarget []NodeID `json:"learning_target,omitempty"`
+	TemporalScale string `json:"temporal_scale,omitempty"`
+}
 type PopulationUnit struct {
-	NodeID     NodeID
-	Activation float64
+	NodeID NodeID `json:"node_id"`
+	Activation float64 `json:"activation"`
 }
 
 // ProjectVectorPopulation recruits a sparse population from the same Brain
