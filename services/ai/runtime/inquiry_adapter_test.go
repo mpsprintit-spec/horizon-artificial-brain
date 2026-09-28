@@ -38,11 +38,19 @@ func TestProcessInquiryObservationClosesPreviousTrajectoryBeforePlanningNext(t *
 	orch := NewCognitiveOrchestrator(rt)
 	at := time.Date(2026, 9, 28, 12, 0, 0, 0, time.UTC)
 
-	initialAgenda, err := rt.PlanInquiry(0.8, at)
+	cognitiveInput, _, err := orch.ProcessObservation(
+		Event{ID: "inquiry-input", Cycles: 1, Timestamp: at},
+		ObservationInput{Source: "vision-sensor", Modality: "vision", Tokens: []string{"cup"}},
+		nil,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
-	request, err := orch.RequestInquiry(initialAgenda)
+	initialAgenda := cognitiveInput.InquiryAgenda
+	if initialAgenda == nil {
+		t.Fatal("initial inquiry agenda was not planned")
+	}
+	request, err := orch.RequestInquiry(*initialAgenda)
 	if err != nil {
 		t.Fatal(err)
 	}
