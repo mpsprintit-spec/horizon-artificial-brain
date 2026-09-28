@@ -143,9 +143,13 @@ type BrainState struct {
 	PredictionState map[string]float64 `json:"prediction_state,omitempty"`
 	PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`
 	MemoryState map[string]float64 `json:"memory_state,omitempty"`
+	SelfModelState map[string]float64 `json:"self_model_state,omitempty"`
+	SocialModelState map[string]float64 `json:"social_model_state,omitempty"`
+	ValueState map[string]float64 `json:"value_state,omitempty"`
 	LearningPolicyState LearningPolicyState `json:"learning_policy_state"`
 	InquiryState InquiryState `json:"inquiry_state"`
 	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`
+	Episodes []BootstrapExperience `json:"episodes,omitempty"`
 	ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"`
 }
 
@@ -176,6 +180,9 @@ func NewKnowledgeBase() *KnowledgeBase {
 			PredictionState: map[string]float64{},
 			PlasticityState: map[string]float64{},
 			MemoryState: map[string]float64{},
+			SelfModelState: map[string]float64{},
+			SocialModelState: map[string]float64{},
+			ValueState: map[string]float64{},
 			LearningPolicyState: LearningPolicyState{
 				NoveltySensitivity: 0.70,
 				UncertaintySensitivity: 0.80,
@@ -372,6 +379,15 @@ func (k *KnowledgeBase) normalizeBrainState() {
 	}
 	if k.BrainState.MemoryState == nil {
 		k.BrainState.MemoryState = map[string]float64{}
+	}
+	if k.BrainState.SelfModelState == nil {
+		k.BrainState.SelfModelState = map[string]float64{}
+	}
+	if k.BrainState.SocialModelState == nil {
+		k.BrainState.SocialModelState = map[string]float64{}
+	}
+	if k.BrainState.ValueState == nil {
+		k.BrainState.ValueState = map[string]float64{}
 	}
 	policy := &k.BrainState.LearningPolicyState
 	if policy.NoveltySensitivity <= 0 {
