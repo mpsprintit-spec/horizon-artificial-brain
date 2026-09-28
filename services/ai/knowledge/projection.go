@@ -18,6 +18,7 @@ type ProjectionPopulation struct {
 	Domain string `json:"domain,omitempty"`
 	Units []PopulationUnit `json:"units"`
 	LearningTarget []NodeID `json:"learning_target,omitempty"`
+	CounterEvidenceTargets []NodeID `json:"counterevidence_targets,omitempty"`
 	TemporalScale string `json:"temporal_scale,omitempty"`
 }
 type PopulationUnit struct {
