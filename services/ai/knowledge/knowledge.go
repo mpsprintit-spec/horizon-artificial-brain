@@ -52,7 +52,7 @@ func (r *TokenRegistry) Get(token string) *ConceptNode {
 			continue
 		}
 		score := NewNeuralVector(node.Representation).Similarity(vector)
-		if score > bestScore {
+		if score > bestScore || (score == bestScore && (best == nil || node.ID < best.ID)) {
 			best, bestScore = node, score
 		}
 	}
