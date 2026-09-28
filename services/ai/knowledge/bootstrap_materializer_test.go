@@ -21,10 +21,10 @@ func TestMaterializeBootstrapCreatesDistributedDevelopmentalNetwork(t *testing.T
 	if got := len(brain.Patterns.All()); got != len(BootstrapNetworkDomains)+4 {
 		t.Fatalf("temporal pattern count = %d, want %d", got, len(BootstrapNetworkDomains)+4)
 	}
-	if got := len(brain.BrainState.BootstrapExperiences); got != len(BootstrapNetworkDomains) {
+	if got := len(brain.BrainState.BootstrapExperiences); got != len(BootstrapNetworkDomains)+4 {
 		t.Fatalf("bootstrap experience count = %d, want %d", got, len(BootstrapNetworkDomains))
 	}
-	if got := len(brain.BrainState.Episodes); got != len(BootstrapNetworkDomains) {
+	if got := len(brain.BrainState.Episodes); got != len(BootstrapNetworkDomains)+4 {
 		t.Fatalf("episode count = %d, want %d", got, len(BootstrapNetworkDomains))
 	}
 
