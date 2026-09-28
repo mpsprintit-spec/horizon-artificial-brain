@@ -37,5 +37,5 @@ func sequenceSimilarity(a,b []PatternStep)float64{if len(a)==0||len(b)==0{return
 func contextSimilarity(a,b []ContextFrame)float64{if len(a)==0||len(b)==0{if len(a)==0&&len(b)==0{return 1};return 0};bByID:=make(map[NodeID]ContextFrame,len(b));for _,f:=range b{bByID[f.NodeID]=f};matched:=0.0;for _,f:=range a{if other,ok:=bByID[f.NodeID];ok{matched+=(1-abs(f.Activation-other.Activation))*(1-abs(f.Weight-other.Weight))}};return clamp01(matched/float64(maxInt(len(a),len(b))))}
 func abs(v float64)float64{if v<0{return -v};return v}
 func maxInt(a,b int)int{if a>b{return a};return b}
-func (p *PatternIndex) All() []*PatternSynapse {p.mu.RLock();defer p.mu.RUnlock();out:=make([]*PatternSynapse,0,len(p.patterns));for _,ps:=range p.patterns{out=append(out,ps)};return out}
+func (p *PatternIndex) All() []*PatternSynapse {p.mu.RLock();defer p.mu.RUnlock();out:=make([]*PatternSynapse,0,len(p.patterns));for _,ps:=range p.patterns{out=append(out,ps)};sort.Slice(out,func(i,j int)bool{return out[i].ID<out[j].ID});return out}
 func (p *PatternIndex) ResultsFor(id NodeID) []*PatternSynapse {p.mu.RLock();defer p.mu.RUnlock();var out []*PatternSynapse;for _,ps:=range p.patterns{if ps.Result==id{out=append(out,ps)}};return out}
