@@ -94,6 +94,7 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			Units: populationUnits(pool, 0.25),
 			LearningTarget: append([]NodeID(nil), pool...),
 			CounterEvidenceTargets: append([]NodeID(nil), pools[10]...),
+			CounterEvidenceTargets: append([]NodeID(nil), pools[10]...),
 			TemporalScale: bootstrapTemporalScale(domainIndex),
 		})
 
@@ -196,11 +197,58 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 		connectBootstrapAt(brain.Registry.GetByID(sourceID), brain.Registry.GetByID(pools[10][0]), 0.30, 0.60, false, at)
 	}
 
+	// Prediction and error form an explicit reciprocal learning circuit:
+	// prediction excites error detection; error supplies inhibitory counterevidence
+	// back to prediction. This is a developmental mechanism, not a semantic fact.
+	predictionPool := pools[9]
+	errorPool := pools[10]
+	for i := 0; i < bootstrapSharedUnits; i++ {
+		prediction := brain.Registry.GetByID(predictionPool[i])
+		errNode := brain.Registry.GetByID(errorPool[i])
+		brain.Connect(prediction, errNode, 0.32, 0.65, false)
+		brain.Connect(errNode, prediction, 0.18, 0.55, true)
+	}
+
+	composites := []struct {
+		id       string
+		members  []NodeID
+		interval time.Duration
+	}{
+		{id: "bootstrap-agency-outcome", members: []NodeID{pools[5][0], pools[4][0], pools[6][0], pools[18][0]}, interval: 40 * time.Millisecond},
+		{id: "bootstrap-object-continuity", members: []NodeID{pools[8][0], pools[2][0], pools[3][0], pools[9][0]}, interval: 40 * time.Millisecond},
+		{id: "bootstrap-thought-simulation", members: []NodeID{pools[10][0], pools[13][0], pools[14][0], pools[9][0], pools[15][0]}, interval: 40 * time.Millisecond},
+		{id: "bootstrap-curiosity-inquiry", members: []NodeID{pools[11][0], pools[10][0], pools[6][0], pools[14][0]}, interval: 40 * time.Millisecond},
+	}
+	for _, composite := range composites {
+		sequence := make([]PatternStep, len(composite.members))
+		trace := make([]time.Time, len(composite.members))
+		for i, id := range composite.members {
+			sequence[i] = PatternStep{NodeID: id, Position: i, Delta: time.Duration(i+1) * composite.interval, Activation: 0.30}
+			trace[i] = at.Add(time.Duration(i) * composite.interval)
+		}
+		brain.Patterns.LearnTrace(sequence, nil, composite.members[len(composite.members)-1], 0.60, 0.40)
+		experience := BootstrapExperience{
+			ID: composite.id, Populations: append([]NodeID(nil), composite.members...),
+			TemporalTrace: trace, Activation: 0.30, Confidence: 0.20,
+			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
+		}
+		brain.BrainState.BootstrapExperiences = append(brain.BrainState.BootstrapExperiences, experience)
+		brain.BrainState.Episodes = append(brain.BrainState.Episodes, experience)
+	}
+
+	brain.BrainState.AttentionState["novelty"] = brain.BrainState.LearningPolicyState.NoveltySensitivity
+	brain.BrainState.AttentionState["uncertainty"] = brain.BrainState.LearningPolicyState.UncertaintySensitivity
 	brain.BrainState.AttentionState["bootstrap_domains"] = float64(len(BootstrapNetworkDomains))
+	brain.BrainState.PredictionState["error_sensitivity"] = brain.BrainState.LearningPolicyState.UncertaintySensitivity
 	brain.BrainState.PredictionState["bootstrap_prediction_paths"] = float64(len(BootstrapNetworkDomains))
 	brain.BrainState.PredictionState["bootstrap_error_paths"] = float64(len(BootstrapNetworkDomains))
+	brain.BrainState.PlasticityState["baseline"] = 0.8
+	brain.BrainState.PlasticityState["transition_strength"] = 0.25
 	brain.BrainState.PlasticityState["bootstrap_population_paths"] = float64(len(BootstrapNetworkDomains))
+	brain.BrainState.CuriosityState["pressure"] = brain.BrainState.LearningPolicyState.CuriosityPressure
 	brain.BrainState.CuriosityState["bootstrap_uncertainty_drive"] = 0.65
+	brain.BrainState.MemoryState["retention"] = brain.BrainState.LearningPolicyState.MemoryRetention
+	brain.BrainState.MemoryState["priority"] = 0.5
 	brain.BrainState.MemoryState["bootstrap_temporal_traces"] = float64(len(brain.BrainState.Episodes))
 	brain.BrainState.SelfModelState["continuity"] = 0.20
 	brain.BrainState.SelfModelState["agency"] = 0.20
