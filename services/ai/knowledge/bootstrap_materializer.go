@@ -94,7 +94,6 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			Units: populationUnits(pool, 0.25),
 			LearningTarget: append([]NodeID(nil), pool...),
 			CounterEvidenceTargets: append([]NodeID(nil), pools[10]...),
-			CounterEvidenceTargets: append([]NodeID(nil), pools[10]...),
 			TemporalScale: bootstrapTemporalScale(domainIndex),
 		})
 
