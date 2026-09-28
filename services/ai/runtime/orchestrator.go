@@ -18,6 +18,14 @@ type ObservationInput struct { Source string; Modality string; Tokens []string; 
 // and interpreted. Grounding is provenance only: it never authorizes action and
 // never promotes a candidate observation into trusted knowledge by itself.
 func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation ObservationInput, experience *learning.Experience) (CognitiveInterpretation, bool, error) {
+	return o.processObservation(event, observation, experience, true)
+}
+
+// processObservation performs the observation -> grounding -> cognition path.
+// planInquiry controls whether this observation starts a new inquiry trajectory.
+// Inquiry feedback uses false so the completed inquiry is closed before the
+// next inquiry is planned.
+func (o *CognitiveOrchestrator) processObservation(event Event, observation ObservationInput, experience *learning.Experience, planInquiry bool) (CognitiveInterpretation, bool, error) {
 	if o == nil || o.Runtime == nil { return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized") }
 	observationContext := Observation{Source: observation.Source, Modality: observation.Modality, Tokens: append([]string(nil), observation.Tokens...), ContextTokens: append([]string(nil), observation.ContextTokens...), DataTokens: append([]string(nil), observation.DataTokens...)}
 	grounded := make([]knowledge.GroundedRepresentation, 0, len(observation.Tokens)+len(observation.ContextTokens)+len(observation.DataTokens))
@@ -51,11 +59,13 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 	cognitive, err := o.Runtime.InterpretCognitive(output, observationContext)
 	if err != nil { return CognitiveInterpretation{}, learned, err }
 	cognitive.GroundedRepresentations = grounded
-	inquiryAgenda, inquiryErr := o.Runtime.PlanInquiry(cognitive.Answer.Uncertainty.Level, output.Timestamp)
-	if inquiryErr != nil {
-		return CognitiveInterpretation{}, learned, inquiryErr
+	if planInquiry {
+		inquiryAgenda, inquiryErr := o.Runtime.PlanInquiry(cognitive.Answer.Uncertainty.Level, output.Timestamp)
+		if inquiryErr != nil {
+			return CognitiveInterpretation{}, learned, inquiryErr
+		}
+		cognitive.InquiryAgenda = &inquiryAgenda
 	}
-	cognitive.InquiryAgenda = &inquiryAgenda
 	cognitive.ChangeAwareness = InternalChangeAwareness{
 		BrainIdentity: BrainIdentity,
 		Sequence: output.Sequence,
@@ -70,6 +80,49 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 			ChangedNodeIDs: groundedNodeIDs(grounded),
 		}},
 	}
+	return cognitive, learned, nil
+}
+
+// RequestInquiry converts the selected internal policy decision into an adapter
+// request. Creating the request is not execution and does not authorize an
+// external action.
+func (o *CognitiveOrchestrator) RequestInquiry(agenda InquiryAgenda) (InquiryRequest, error) {
+	if o == nil || o.Runtime == nil {
+		return InquiryRequest{}, errors.New("cognitive orchestrator is not initialized")
+	}
+	return o.Runtime.BuildInquiryRequest(agenda)
+}
+
+// ProcessInquiryObservation closes the selected inquiry only after an adapter
+// returns an observation. The observed information gain is derived from the
+// inquiry uncertainty and the uncertainty produced by the returned observation.
+// A new inquiry is planned only after the previous trajectory is closed.
+func (o *CognitiveOrchestrator) ProcessInquiryObservation(request InquiryRequest, event Event, observation ObservationInput, experience *learning.Experience) (CognitiveInterpretation, bool, error) {
+	if o == nil || o.Runtime == nil {
+		return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized")
+	}
+	if request.BrainIdentity != BrainIdentity {
+		return CognitiveInterpretation{}, false, errors.New("inquiry request belongs to a different brain")
+	}
+	if request.RequestID == "" {
+		return CognitiveInterpretation{}, false, errors.New("inquiry request ID is required")
+	}
+	if request.Action == "" {
+		return CognitiveInterpretation{}, false, errors.New("inquiry request action is required")
+	}
+	cognitive, learned, err := o.processObservation(event, observation, experience, false)
+	if err != nil {
+		return CognitiveInterpretation{}, learned, err
+	}
+	observedInformationGain := clamp01(request.Uncertainty - clamp01(cognitive.Answer.Uncertainty.Level))
+	if err := o.Runtime.CompleteInquiry(observedInformationGain, cognitive.State.PredictionError, cognitive.State.Timestamp); err != nil {
+		return CognitiveInterpretation{}, learned, err
+	}
+	agenda, err := o.Runtime.PlanInquiry(cognitive.Answer.Uncertainty.Level, cognitive.State.Timestamp)
+	if err != nil {
+		return CognitiveInterpretation{}, learned, err
+	}
+	cognitive.InquiryAgenda = &agenda
 	return cognitive, learned, nil
 }
 
