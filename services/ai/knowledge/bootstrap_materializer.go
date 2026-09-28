@@ -171,9 +171,13 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			sequence[i] = PatternStep{NodeID: id, Position: i, Delta: time.Duration(i+1)*40*time.Millisecond, Activation: 0.30}
 		}
 		brain.Patterns.LearnTrace(sequence, nil, item.members[len(item.members)-1], 0.60, 0.40)
+		trace := make([]time.Time, len(item.members))
+		for i := range trace {
+			trace[i] = at.Add(time.Duration(i) * 40 * time.Millisecond)
+		}
 		experience := BootstrapExperience{
 			ID: item.id, Populations: append([]NodeID(nil), item.members...),
-			TemporalTrace: []time.Time{at, at.Add(40*time.Millisecond), at.Add(80*time.Millisecond)},
+			TemporalTrace: trace,
 			Activation: 0.30, Confidence: 0.20,
 			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
 		}
