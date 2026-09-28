@@ -2,7 +2,7 @@ package runtime
 
 import (
 	"crypto/sha256"
-	"encoding/hex"
+	"encoding/hex"\n\t"fmt"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -95,11 +95,43 @@ func TestEventReplayReproducesCheckpointedRuntimeState(t *testing.T) {
 	if !brainEqual || !activationEqual {
 		originalBrainHash := sha256.Sum256(originalData.Brain)
 		replayedBrainHash := sha256.Sum256(replayedData.Brain)
-		t.Fatalf("event replay did not reproduce neural and recurrent runtime state: brain_equal=%t activation_equal=%t brain_len=%d/%d brain_sha=%s/%s activation=%+v/%+v",
+		t.Fatalf("event replay did not reproduce neural and recurrent runtime state: brain_equal=%t activation_equal=%t brain_len=%d/%d brain_sha=%s/%s brain_diff=%s activation=%+v/%+v",
 			brainEqual, activationEqual, len(originalData.Brain), len(replayedData.Brain),
 			hex.EncodeToString(originalBrainHash[:]), hex.EncodeToString(replayedBrainHash[:]),
 			originalData.Activation, replayedData.Activation)
 	}
+}
+
+type checkpointBrainForTest struct {
+	Nodes []json.RawMessage `json:"nodes"`
+	Patterns []json.RawMessage `json:"patterns"`
+	ProjectionPopulations []json.RawMessage `json:"projection_populations"`
+}
+
+func diagnoseBrainDifference(t *testing.T, original, replayed json.RawMessage) string {
+	t.Helper()
+	var a, b checkpointBrainForTest
+	if err := json.Unmarshal(original, &a); err != nil { return "original brain decode: " + err.Error() }
+	if err := json.Unmarshal(replayed, &b); err != nil { return "replayed brain decode: " + err.Error() }
+	if len(a.Nodes) != len(b.Nodes) { return fmt.Sprintf("nodes length %d/%d", len(a.Nodes), len(b.Nodes)) }
+	for i := range a.Nodes {
+		if !reflect.DeepEqual(a.Nodes[i], b.Nodes[i]) {
+			return fmt.Sprintf("node index %d differs: original=%s replayed=%s", i, a.Nodes[i], b.Nodes[i])
+		}
+	}
+	if len(a.Patterns) != len(b.Patterns) { return fmt.Sprintf("patterns length %d/%d", len(a.Patterns), len(b.Patterns)) }
+	for i := range a.Patterns {
+		if !reflect.DeepEqual(a.Patterns[i], b.Patterns[i]) {
+			return fmt.Sprintf("pattern index %d differs: original=%s replayed=%s", i, a.Patterns[i], b.Patterns[i])
+		}
+	}
+	if len(a.ProjectionPopulations) != len(b.ProjectionPopulations) { return fmt.Sprintf("projection populations length %d/%d", len(a.ProjectionPopulations), len(b.ProjectionPopulations)) }
+	for i := range a.ProjectionPopulations {
+		if !reflect.DeepEqual(a.ProjectionPopulations[i], b.ProjectionPopulations[i]) {
+			return fmt.Sprintf("projection population index %d differs: original=%s replayed=%s", i, a.ProjectionPopulations[i], b.ProjectionPopulations[i])
+		}
+	}
+	return "unknown brain byte difference"
 }
 
 func readCheckpointForTest(path string) (BrainSnapshot, error) {
