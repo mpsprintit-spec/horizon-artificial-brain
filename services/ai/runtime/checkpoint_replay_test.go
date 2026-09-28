@@ -99,7 +99,7 @@ func TestEventReplayReproducesCheckpointedRuntimeState(t *testing.T) {
 		t.Fatalf("event replay did not reproduce neural and recurrent runtime state: brain_equal=%t activation_equal=%t brain_len=%d/%d brain_sha=%s/%s brain_diff=%s activation=%+v/%+v",
 			brainEqual, activationEqual, len(originalData.Brain), len(replayedData.Brain),
 			hex.EncodeToString(originalBrainHash[:]), hex.EncodeToString(replayedBrainHash[:]),
-			originalData.Activation, replayedData.Activation)
+			diagnoseBrainDifference(t, originalData.Brain, replayedData.Brain), originalData.Activation, replayedData.Activation)
 	}
 }
 
