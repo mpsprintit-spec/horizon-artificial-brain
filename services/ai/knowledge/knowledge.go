@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -74,6 +75,10 @@ func (r *TokenRegistry) Nodes() []*ConceptNode {
 	for _, n := range r.byID {
 		nodes = append(nodes, n)
 	}
+	// The registry is keyed by a map, so iteration order is undefined.
+	// Checkpoints must serialize the same neural substrate identically across
+	// replay/restart, independent of map iteration order.
+	sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
 	return nodes
 }
 
