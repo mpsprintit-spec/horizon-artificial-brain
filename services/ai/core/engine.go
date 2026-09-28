@@ -89,7 +89,7 @@ func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, er
 }
 
 func NewHorizonEngine() *HorizonEngine {
-	brain := knowledge.NewBrain()
+	brain := knowledge.NewBootstrapBrain()
 	rt := runtime.NewBrainRuntime(brain)
 	core := execution.NewExecutionCore()
 	return &HorizonEngine{
