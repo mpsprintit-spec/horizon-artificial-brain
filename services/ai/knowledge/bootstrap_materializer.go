@@ -103,10 +103,10 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			}
 			for offset := 1; offset <= 2; offset++ {
 				target := brain.Registry.GetByID(pool[(i+offset)%len(pool)])
-				brain.Connect(source, target, 0.24, 0.55, false)
+				connectBootstrapAt(source, target, 0.24, 0.55, false, at)
 			}
 			inhibitoryTarget := brain.Registry.GetByID(pool[(i+3)%len(pool)])
-			brain.Connect(source, inhibitoryTarget, 0.12, 0.40, true)
+			connectBootstrapAt(source, inhibitoryTarget, 0.12, 0.40, true, at)
 		}
 
 		if domainIndex+1 < len(pools) {
@@ -114,8 +114,8 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			for i := 0; i < bootstrapSharedUnits; i++ {
 				a := brain.Registry.GetByID(pool[i])
 				b := brain.Registry.GetByID(nextPool[i])
-				brain.Connect(a, b, 0.28, 0.60, false)
-				brain.Connect(b, a, 0.20, 0.50, false)
+				connectBootstrapAt(a, b, 0.28, 0.60, false, at)
+				connectBootstrapAt(b, a, 0.20, 0.50, false, at)
 			}
 		}
 
@@ -187,6 +187,27 @@ func bootstrapVector(domainIndex, slot int) []float64 {
 			math.Cos(seed*0.37+float64(i)*0.41)*0.5
 	}
 	return values
+}
+
+
+// connectBootstrapAt is the deterministic bootstrap equivalent of Connect.
+// It keeps the generated substrate reproducible for replay/checkpoint tests.
+func connectBootstrapAt(source, target *ConceptNode, weight, confidence float64, inhibitory bool, at time.Time) {
+	if source == nil || target == nil {
+		return
+	}
+	if source.Synapses == nil {
+		source.Synapses = make(map[NodeID]SynapseList)
+	}
+	list := source.Synapses[target.ID]
+	synapse := list.FindDynamic(inhibitory)
+	if synapse == nil {
+		synapse = &Synapse{TargetID: target.ID, Inhibitory: inhibitory}
+		source.Synapses[target.ID] = append(list, synapse)
+	}
+	synapse.Dynamic.Reinforce(weight, confidence, 1, at)
+	syncSynapseLegacyState(synapse)
+	source.LastActivation = at
 }
 
 func populationUnits(ids []NodeID, activation float64) []PopulationUnit {
