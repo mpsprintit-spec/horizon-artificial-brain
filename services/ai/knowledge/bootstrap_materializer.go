@@ -204,8 +204,8 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 	for i := 0; i < bootstrapSharedUnits; i++ {
 		prediction := brain.Registry.GetByID(predictionPool[i])
 		errNode := brain.Registry.GetByID(errorPool[i])
-		brain.Connect(prediction, errNode, 0.32, 0.65, false)
-		brain.Connect(errNode, prediction, 0.18, 0.55, true)
+		brain.ConnectAt(prediction, errNode, 0.32, 0.65, false, at)
+		brain.ConnectAt(errNode, prediction, 0.18, 0.55, true, at)
 	}
 
 	composites := []struct {
