@@ -8,10 +8,18 @@ import (
 func TestBuildInquiryRequestDoesNotExecuteAction(t *testing.T) {
 	rt := NewBrainRuntime(nil)
 	at := time.Date(2026, 9, 28, 12, 0, 0, 0, time.UTC)
-	agenda, err := rt.PlanInquiry(0.8, at)
+	cognitive, _, err := NewCognitiveOrchestrator(rt).ProcessObservation(
+		Event{ID: "request-input", Cycles: 1, Timestamp: at},
+		ObservationInput{Source: "vision-sensor", Modality: "vision", Tokens: []string{"cup"}},
+		nil,
+	)
 	if err != nil {
 		t.Fatal(err)
 	}
+	if cognitive.InquiryAgenda == nil {
+		t.Fatal("cognitive observation did not create an inquiry agenda")
+	}
+	agenda := *cognitive.InquiryAgenda
 	request, err := rt.BuildInquiryRequest(agenda)
 	if err != nil {
 		t.Fatal(err)
