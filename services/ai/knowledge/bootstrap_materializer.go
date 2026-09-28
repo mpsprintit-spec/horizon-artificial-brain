@@ -226,13 +226,9 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			trace[i] = at.Add(time.Duration(i) * composite.interval)
 		}
 		brain.Patterns.LearnTrace(sequence, nil, composite.members[len(composite.members)-1], 0.60, 0.40)
-		experience := BootstrapExperience{
-			ID: composite.id, Populations: append([]NodeID(nil), composite.members...),
-			TemporalTrace: trace, Activation: 0.30, Confidence: 0.20,
-			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
-		}
-		brain.BrainState.BootstrapExperiences = append(brain.BrainState.BootstrapExperiences, experience)
-		brain.BrainState.Episodes = append(brain.BrainState.Episodes, experience)
+		// The composite trace reuses the same developmental pathway IDs as the
+		// explicit special trajectories above. It enriches the temporal pattern
+		// without creating a duplicate bootstrap experience/episode.
 	}
 
 	brain.BrainState.AttentionState["novelty"] = brain.BrainState.LearningPolicyState.NoveltySensitivity
