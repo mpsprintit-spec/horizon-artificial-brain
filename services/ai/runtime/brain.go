@@ -65,7 +65,7 @@ type BrainRuntime struct {
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
-	if brain == nil { brain = knowledge.NewBrain() }
+	if brain == nil { brain = knowledge.NewBootstrapBrain() }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
 	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}}
