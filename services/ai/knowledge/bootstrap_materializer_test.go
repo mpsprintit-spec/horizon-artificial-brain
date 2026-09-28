@@ -18,8 +18,8 @@ func TestMaterializeBootstrapCreatesDistributedDevelopmentalNetwork(t *testing.T
 	if got := len(brain.ProjectionPopulations); got != len(BootstrapNetworkDomains) {
 		t.Fatalf("population count = %d, want %d", got, len(BootstrapNetworkDomains))
 	}
-	if got := len(brain.Patterns.All()); got != len(BootstrapNetworkDomains) {
-		t.Fatalf("temporal pattern count = %d, want %d", got, len(BootstrapNetworkDomains))
+	if got := len(brain.Patterns.All()); got != len(BootstrapNetworkDomains)+4 {
+		t.Fatalf("temporal pattern count = %d, want %d", got, len(BootstrapNetworkDomains)+4)
 	}
 	if got := len(brain.BrainState.BootstrapExperiences); got != len(BootstrapNetworkDomains) {
 		t.Fatalf("bootstrap experience count = %d, want %d", got, len(BootstrapNetworkDomains))
@@ -46,6 +46,11 @@ func TestMaterializeBootstrapCreatesDistributedDevelopmentalNetwork(t *testing.T
 	if shared == 0 {
 		t.Fatal("bootstrap populations are not overlapping")
 	}
+	for _, population := range brain.ProjectionPopulations {
+		if len(population.CounterEvidenceTargets) == 0 {
+			t.Fatalf("population %q has no counterevidence path", population.Domain)
+		}
+	}
 
 	excitatory, inhibitory := 0, 0
 	for _, node := range brain.Registry.Nodes() {
@@ -61,6 +66,14 @@ func TestMaterializeBootstrapCreatesDistributedDevelopmentalNetwork(t *testing.T
 	}
 	if excitatory == 0 || inhibitory == 0 {
 		t.Fatalf("connectivity polarity missing: excitatory=%d inhibitory=%d", excitatory, inhibitory)
+	}
+	if brain.Registry.GetByID(brain.ProjectionPopulations[9].Units[0].NodeID).FindDynamicSynapse(
+		brain.ProjectionPopulations[10].Units[0].NodeID, false) == nil {
+		t.Fatal("prediction -> error pathway is missing")
+	}
+	if brain.Registry.GetByID(brain.ProjectionPopulations[10].Units[0].NodeID).FindDynamicSynapse(
+		brain.ProjectionPopulations[9].Units[0].NodeID, true) == nil {
+		t.Fatal("error -> prediction counterevidence pathway is missing")
 	}
 
 	before := len(brain.Registry.Nodes())
@@ -93,5 +106,34 @@ func TestBootstrapBrainPersistsRequiredDevelopmentalState(t *testing.T) {
 	}
 	if len(loaded.BrainState.Episodes) == 0 {
 		t.Fatal("bootstrap episodes were not persisted")
+	}
+}
+
+func TestBootstrapAblationRetainsAlternativeSubstrate(t *testing.T) {
+	brain := NewBootstrapBrain()
+	population := brain.ProjectionPopulations[5]
+	if len(population.Units) < 4 {
+		t.Fatal("agency population is too small for ablation")
+	}
+	remaining := 0
+	for i, unit := range population.Units {
+		node := brain.Registry.GetByID(unit.NodeID)
+		if node == nil {
+			continue
+		}
+		if i < 2 {
+			node.Activation = 0
+			continue
+		}
+		remaining++
+		if len(node.Synapses) == 0 {
+			t.Fatalf("remaining unit %d lost all connectivity", node.ID)
+		}
+	}
+	if remaining < 2 {
+		t.Fatal("ablation removed the entire developmental pathway")
+	}
+	if len(brain.Registry.Nodes()) < 100 {
+		t.Fatal("partial ablation erased the canonical neural substrate")
 	}
 }
