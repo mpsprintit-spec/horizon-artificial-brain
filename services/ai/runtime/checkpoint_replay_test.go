@@ -2,7 +2,8 @@ package runtime
 
 import (
 	"crypto/sha256"
-	"encoding/hex"\n\t"fmt"
+	"encoding/hex"
+	"fmt"
 	"encoding/json"
 	"os"
 	"path/filepath"
