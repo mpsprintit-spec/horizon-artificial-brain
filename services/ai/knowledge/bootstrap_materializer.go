@@ -214,10 +214,10 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 		members  []NodeID
 		interval time.Duration
 	}{
-		{id: "bootstrap-agency-outcome", members: []NodeID{pools[5][0], pools[4][0], pools[6][0], pools[18][0]}, interval: 40 * time.Millisecond},
+		{id: "bootstrap-agency-outcome", members: []NodeID{pools[5][0], pools[4][0], pools[7][0], pools[18][0]}, interval: 40 * time.Millisecond},
 		{id: "bootstrap-object-continuity", members: []NodeID{pools[8][0], pools[2][0], pools[3][0], pools[9][0]}, interval: 40 * time.Millisecond},
 		{id: "bootstrap-thought-simulation", members: []NodeID{pools[10][0], pools[13][0], pools[14][0], pools[9][0], pools[15][0]}, interval: 40 * time.Millisecond},
-		{id: "bootstrap-curiosity-inquiry", members: []NodeID{pools[11][0], pools[10][0], pools[6][0], pools[14][0]}, interval: 40 * time.Millisecond},
+		{id: "bootstrap-curiosity-inquiry", members: []NodeID{pools[10][7], pools[10][6], pools[7][0], pools[14][6]}, interval: 40 * time.Millisecond},
 	}
 	for _, composite := range composites {
 		sequence := make([]PatternStep, len(composite.members))
