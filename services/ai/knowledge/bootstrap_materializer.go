@@ -93,6 +93,7 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 			Domain: domain.Name,
 			Units: populationUnits(pool, 0.25),
 			LearningTarget: append([]NodeID(nil), pool...),
+			CounterEvidenceTargets: append([]NodeID(nil), pools[10]...),
 			TemporalScale: bootstrapTemporalScale(domainIndex),
 		})
 
@@ -152,6 +153,45 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 		brain.BrainState.Episodes = append(brain.BrainState.Episodes, experience)
 	}
 
+	// Materialize explicit developmental trajectories for agency, object
+	// continuity, internal thinking, and curiosity. These are numeric pathway
+	// patterns, not semantic definitions.
+	special := []struct {
+		id string
+		members []NodeID
+	}{
+		{"bootstrap-agency-outcome", []NodeID{pools[5][0], pools[4][0], pools[7][0], pools[18][0]}},
+		{"bootstrap-object-continuity", []NodeID{pools[8][0], pools[2][0], pools[3][0], pools[9][0]}},
+		{"bootstrap-thought-simulation", []NodeID{pools[10][0], pools[13][0], pools[14][0], pools[9][0], pools[15][0]}},
+		{"bootstrap-curiosity-inquiry", []NodeID{pools[12][0], pools[11][0], pools[7][0], pools[15][0]}},
+	}
+	for _, item := range special {
+		sequence := make([]PatternStep, len(item.members))
+		for i, id := range item.members {
+			sequence[i] = PatternStep{NodeID: id, Position: i, Delta: time.Duration(i+1)*40*time.Millisecond, Activation: 0.30}
+		}
+		brain.Patterns.LearnTrace(sequence, nil, item.members[len(item.members)-1], 0.60, 0.40)
+		experience := BootstrapExperience{
+			ID: item.id, Populations: append([]NodeID(nil), item.members...),
+			TemporalTrace: []time.Time{at, at.Add(40*time.Millisecond), at.Add(80*time.Millisecond)},
+			Activation: 0.30, Confidence: 0.20,
+			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
+		}
+		brain.BrainState.BootstrapExperiences = append(brain.BrainState.BootstrapExperiences, experience)
+		brain.BrainState.Episodes = append(brain.BrainState.Episodes, experience)
+	}
+
+	// Error/contradiction pathways explicitly feed back into prediction and
+	// learning-policy populations, providing a counterevidence route.
+	for _, sourceID := range pools[10] {
+		source := brain.Registry.GetByID(sourceID)
+		connectBootstrapAt(source, brain.Registry.GetByID(pools[9][0]), 0.30, 0.60, true, at)
+		connectBootstrapAt(source, brain.Registry.GetByID(pools[15][0]), 0.28, 0.55, false, at)
+	}
+	for _, sourceID := range pools[9] {
+		connectBootstrapAt(brain.Registry.GetByID(sourceID), brain.Registry.GetByID(pools[10][0]), 0.30, 0.60, false, at)
+	}
+
 	brain.BrainState.AttentionState["bootstrap_domains"] = float64(len(BootstrapNetworkDomains))
 	brain.BrainState.PredictionState["bootstrap_prediction_paths"] = float64(len(BootstrapNetworkDomains))
 	brain.BrainState.PredictionState["bootstrap_error_paths"] = float64(len(BootstrapNetworkDomains))
@@ -176,7 +216,7 @@ func bootstrapMaterialized(brain *Brain) bool {
 	return len(brain.Registry.Nodes()) > 0 &&
 		len(brain.ProjectionPopulations) >= len(BootstrapNetworkDomains) &&
 		len(brain.BrainState.BootstrapExperiences) >= len(BootstrapNetworkDomains) &&
-		len(brain.Patterns.All()) >= len(BootstrapNetworkDomains)
+		len(brain.Patterns.All()) >= len(BootstrapNetworkDomains)+4
 }
 
 func bootstrapVector(domainIndex, slot int) []float64 {
