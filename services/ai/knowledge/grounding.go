@@ -68,7 +68,7 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	// experience, but it must not collapse into one canonical neural unit merely
 	// because an adapter supplied the same textual hint.
 	_, hadPopulation := k.findExactProjectionPopulation(vector)
-	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
+	population, err := k.ProjectVectorPopulationAt(vector, threshold, defaultProjectionPopulation, now)
 	if err != nil || len(population.Units) == 0 {
 		if err != nil {
 			return GroundedRepresentation{}, err
