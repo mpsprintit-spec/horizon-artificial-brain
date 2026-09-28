@@ -386,6 +386,13 @@ func (k *KnowledgeBase) normalizeBootstrapState() {
 				}
 			}
 		}
+		if len(population.CounterEvidenceTargets) == 0 && len(k.ProjectionPopulations) > 10 {
+			for _, unit := range k.ProjectionPopulations[10].Units {
+				if unit.NodeID != 0 {
+					population.CounterEvidenceTargets = append(population.CounterEvidenceTargets, unit.NodeID)
+				}
+			}
+		}
 		if population.TemporalScale == "" {
 			population.TemporalScale = bootstrapTemporalScale(i)
 		}
