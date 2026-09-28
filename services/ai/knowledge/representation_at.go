@@ -24,7 +24,7 @@ func (r *NeuralRegistry) GetOrCreateRepresentationAt(vector NeuralVector, thresh
 			continue
 		}
 		score := NewNeuralVector(node.Representation).Similarity(vector)
-		if score > bestScore {
+		if score > bestScore || (score == bestScore && (best == nil || node.ID < best.ID)) {
 			best, bestScore = node, score
 		}
 	}
