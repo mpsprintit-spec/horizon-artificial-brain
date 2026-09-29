@@ -17,7 +17,7 @@ func TestCanonicalBrainMemoryMaterializationSchema(t *testing.T) {
 
 	var document map[string]json.RawMessage
 	if err := json.Unmarshal(data, &document); err != nil { t.Fatal(err) }
-	required := []string{"neural_units", "populations", "synapses", "temporal_patterns", "episodes", "bootstrap_experiences", "attention_state", "prediction_state", "error_state", "memory_state", "curiosity_state", "learning_policy_state", "self_model_state", "social_model_state", "value_state", "plasticity_state", "provenance"}
+	required := []string{"neural_units", "populations", "synapses", "temporal_patterns", "episodes", "bootstrap_experiences", "experience_traces", "attention_state", "prediction_state", "error_state", "memory_state", "curiosity_state", "learning_policy_state", "self_model_state", "social_model_state", "value_state", "plasticity_state", "provenance"}
 	for _, key := range required { if _, ok := document[key]; !ok { t.Fatalf("canonical brain memory is missing %q", key) } }
 	assertNonEmptyArray := func(key string) { var values []json.RawMessage; if err := json.Unmarshal(document[key], &values); err != nil { t.Fatalf("%s is not an array: %v", key, err) }; if len(values) == 0 { t.Fatalf("%s is empty", key) } }
 	for _, key := range []string{"neural_units", "populations", "synapses", "temporal_patterns", "episodes", "bootstrap_experiences", "provenance"} { assertNonEmptyArray(key) }
@@ -47,9 +47,10 @@ func TestCanonicalBrainMemoryArtifactInRepository(t *testing.T) {
 		TemporalPatterns []json.RawMessage `json:"temporal_patterns"`
 		Episodes []json.RawMessage `json:"episodes"`
 		BootstrapExperiences []json.RawMessage `json:"bootstrap_experiences"`
+		ExperienceTraces []json.RawMessage `json:"experience_traces"`
 		Provenance []json.RawMessage `json:"provenance"`
 	}
 	if err := json.Unmarshal(data, &document); err != nil { t.Fatal(err) }
 	if document.SchemaVersion != 2 { t.Fatalf("schema_version = %d, want 2", document.SchemaVersion) }
-	for name, values := range map[string][]json.RawMessage{"neural_units": document.NeuralUnits, "populations": document.Populations, "synapses": document.Synapses, "temporal_patterns": document.TemporalPatterns, "episodes": document.Episodes, "bootstrap_experiences": document.BootstrapExperiences, "provenance": document.Provenance} { if len(values) == 0 { t.Fatalf("repository brain_memory.json has empty %s", name) } }
+	for name, values := range map[string][]json.RawMessage{"neural_units": document.NeuralUnits, "populations": document.Populations, "synapses": document.Synapses, "temporal_patterns": document.TemporalPatterns, "episodes": document.Episodes, "bootstrap_experiences": document.BootstrapExperiences, "experience_traces": document.ExperienceTraces, "provenance": document.Provenance} { if len(values) == 0 { t.Fatalf("repository brain_memory.json has empty %s", name) } }
 }
