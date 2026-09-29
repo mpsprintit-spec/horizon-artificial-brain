@@ -505,14 +505,7 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.RLock()
 	defer k.mu.RUnlock()
-	k.projectionMu.RLock()
-	populations := append([]ProjectionPopulation(nil), k.ProjectionPopulations...)
-	k.projectionMu.RUnlock()
-	var nodes []*ConceptNode
-	if k.Registry != nil { nodes = k.Registry.Nodes() }
-	var patterns []*PatternSynapse
-	if k.Patterns != nil { patterns = k.Patterns.All() }
-b, e := marshalCanonicalBrain(k)
+	b, e := marshalCanonicalBrain(k)
 	if e != nil { return e }
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil { return err }
