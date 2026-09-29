@@ -63,6 +63,8 @@ type canonicalBrainFile struct {
 }
 
 func marshalCanonicalBrain(k *KnowledgeBase) ([]byte, error) {
+	k.projectionMu.RLock()
+	defer k.projectionMu.RUnlock()
 	nodes := k.Registry.Nodes()
 	sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
 	neuralUnits := make([]canonicalNeuralUnit, 0, len(nodes))
