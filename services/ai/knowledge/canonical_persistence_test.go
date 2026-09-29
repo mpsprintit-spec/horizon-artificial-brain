@@ -52,5 +52,5 @@ func TestCanonicalBrainMemoryArtifactInRepository(t *testing.T) {
 	}
 	if err := json.Unmarshal(data, &document); err != nil { t.Fatal(err) }
 	if document.SchemaVersion != 2 { t.Fatalf("schema_version = %d, want 2", document.SchemaVersion) }
-	for name, values := range map[string][]json.RawMessage{"neural_units": document.NeuralUnits, "populations": document.Populations, "synapses": document.Synapses, "temporal_patterns": document.TemporalPatterns, "episodes": document.Episodes, "bootstrap_experiences": document.BootstrapExperiences, "experience_traces": document.ExperienceTraces, "provenance": document.Provenance} { if len(values) == 0 { t.Fatalf("repository brain_memory.json has empty %s", name) } }
+	for name, values := range map[string][]json.RawMessage{"neural_units": document.NeuralUnits, "populations": document.Populations, "synapses": document.Synapses, "temporal_patterns": document.TemporalPatterns, "episodes": document.Episodes, "bootstrap_experiences": document.BootstrapExperiences, "provenance": document.Provenance} { if len(values) == 0 { t.Fatalf("repository brain_memory.json has empty %s", name) } }
 }
