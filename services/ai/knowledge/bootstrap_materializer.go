@@ -89,12 +89,21 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 
 	for domainIndex, domain := range BootstrapNetworkDomains {
 		pool := pools[domainIndex]
+		predictionTargets := pool
+		if domainIndex+1 < len(pools) {
+			predictionTargets = pools[domainIndex+1]
+		}
 		brain.ProjectionPopulations = append(brain.ProjectionPopulations, ProjectionPopulation{
 			Domain: domain.Name,
 			Units: populationUnits(pool, 0.25),
 			LearningTarget: append([]NodeID(nil), pool...),
+			PredictionTargets: append([]NodeID(nil), predictionTargets...),
+			ErrorTargets: append([]NodeID(nil), pools[10]...),
+			PlasticityTargets: append([]NodeID(nil), pool...),
 			CounterEvidenceTargets: append([]NodeID(nil), pools[10]...),
 			TemporalScale: bootstrapTemporalScale(domainIndex),
+			BootstrapExperienceID: "bootstrap-" + domain.Name,
+			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
 		})
 
 		for i, sourceID := range pool {
