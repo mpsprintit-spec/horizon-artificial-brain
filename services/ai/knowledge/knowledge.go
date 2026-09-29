@@ -400,6 +400,29 @@ func (k *KnowledgeBase) normalizeBootstrapState() {
 				}
 			}
 		}
+		if len(population.PredictionTargets) == 0 {
+			targetIndex := i + 1
+			if targetIndex >= len(k.ProjectionPopulations) { targetIndex = i }
+			for _, unit := range k.ProjectionPopulations[targetIndex].Units {
+				if unit.NodeID != 0 { population.PredictionTargets = append(population.PredictionTargets, unit.NodeID) }
+			}
+		}
+		if len(population.ErrorTargets) == 0 && len(k.ProjectionPopulations) > 10 {
+			for _, unit := range k.ProjectionPopulations[10].Units {
+				if unit.NodeID != 0 { population.ErrorTargets = append(population.ErrorTargets, unit.NodeID) }
+			}
+		}
+		if len(population.PlasticityTargets) == 0 {
+			for _, unit := range population.Units {
+				if unit.NodeID != 0 { population.PlasticityTargets = append(population.PlasticityTargets, unit.NodeID) }
+			}
+		}
+		if population.BootstrapExperienceID == "" {
+			population.BootstrapExperienceID = "bootstrap-" + population.Domain
+		}
+		if population.Provenance.Origin == "" {
+			population.Provenance = BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"}
+		}
 		if population.TemporalScale == "" {
 			population.TemporalScale = bootstrapTemporalScale(i)
 		}
