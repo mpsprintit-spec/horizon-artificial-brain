@@ -18,8 +18,13 @@ type ProjectionPopulation struct {
 	Domain string `json:"domain,omitempty"`
 	Units []PopulationUnit `json:"units"`
 	LearningTarget []NodeID `json:"learning_target,omitempty"`
+	PredictionTargets []NodeID `json:"prediction_targets,omitempty"`
+	ErrorTargets []NodeID `json:"error_targets,omitempty"`
+	PlasticityTargets []NodeID `json:"plasticity_targets,omitempty"`
 	CounterEvidenceTargets []NodeID `json:"counterevidence_targets,omitempty"`
 	TemporalScale string `json:"temporal_scale,omitempty"`
+	BootstrapExperienceID string `json:"bootstrap_experience_id,omitempty"`
+	Provenance BootstrapProvenance `json:"provenance"`
 }
 type PopulationUnit struct {
 	NodeID NodeID `json:"node_id"`
