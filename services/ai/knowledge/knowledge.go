@@ -354,13 +354,15 @@ func (k *KnowledgeBase) Load(path string) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.Lock()
 	defer k.mu.Unlock()
-	b, err := os.ReadFile(path); if err != nil { return err }; var graph persistedGraph; if err := json.Unmarshal(b, &graph); err != nil { return err }
+	b, err := os.ReadFile(path); if err != nil { return err }
+	nodes, patterns, populations, state, err := loadCanonicalBrain(b)
+	if err != nil { return err }
 	registry := NewTokenRegistry(); var maxID NodeID
-	for _, node := range graph.Nodes { if node == nil { continue }; if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.ID > maxID { maxID = node.ID } }
+	for _, node := range nodes { if node == nil { continue }; if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.ID > maxID { maxID = node.ID } }
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
-	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range graph.Patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
-	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), graph.ProjectionPopulations...); k.projectionMu.Unlock()
-	k.BrainState = graph.BrainState
+	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
+	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), populations...); k.projectionMu.Unlock()
+	k.BrainState = state
 	k.normalizeBrainState()
 	k.normalizeBootstrapState()
 
@@ -510,7 +512,7 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k.Registry != nil { nodes = k.Registry.Nodes() }
 	var patterns []*PatternSynapse
 	if k.Patterns != nil { patterns = k.Patterns.All() }
-b, e := json.MarshalIndent(persistedGraph{SchemaVersion: 1, BrainIdentity: "horizon", Nodes: nodes, Patterns: patterns, ProjectionPopulations: populations, BrainState: k.BrainState}, "", "  ")
+b, e := marshalCanonicalBrain(k)
 	if e != nil { return e }
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil { return err }
