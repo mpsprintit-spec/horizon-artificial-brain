@@ -48,6 +48,7 @@ type canonicalBrainFile struct {
 	TemporalPatterns []*PatternSynapse `json:"temporal_patterns"`
 	Episodes []BootstrapExperience `json:"episodes"`
 	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences"`
+	ExperienceTraces []ExperienceTrace `json:"experience_traces"`
 	AttentionState map[string]float64 `json:"attention_state"`
 	PredictionState map[string]float64 `json:"prediction_state"`
 	ErrorState map[string]float64 `json:"error_state"`
@@ -111,6 +112,7 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 		TemporalPatterns []*PatternSynapse `json:"temporal_patterns"`
 		Episodes []BootstrapExperience `json:"episodes"`
 		BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences"`
+		ExperienceTraces []ExperienceTrace `json:"experience_traces"`
 		AttentionState map[string]float64 `json:"attention_state"`
 		PredictionState map[string]float64 `json:"prediction_state"`
 		ErrorState map[string]float64 `json:"error_state"`
