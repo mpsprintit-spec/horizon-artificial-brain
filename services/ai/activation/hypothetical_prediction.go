@@ -1,6 +1,7 @@
 package activation
 
 import (
+	"sort"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
