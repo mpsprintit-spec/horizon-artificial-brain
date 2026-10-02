@@ -42,7 +42,6 @@ func TestAdaptPopulationRepresentationConvergesSharedStructureWithoutMerging(t *
 	if node == nil {
 		t.Fatalf("shared unit %d not found", shared)
 	}
-	initialA := NewNeuralVector(node.Representation).Similarity(a)
 	initialB := NewNeuralVector(node.Representation).Similarity(b)
 
 	for i := 0; i < 20; i++ {
