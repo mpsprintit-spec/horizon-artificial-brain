@@ -17,6 +17,10 @@ var (
 type ProjectionPopulation struct {
 	Domain string `json:"domain,omitempty"`
 	Units []PopulationUnit `json:"units"`
+	// Prototype is a learned population-level trace. It is not semantic
+	// identity; it drifts with experience and allows the population to remain
+	// recoverable after its member representations have been reorganized.
+	Prototype []float64 `json:"prototype,omitempty"`
 	LearningTarget []NodeID `json:"learning_target,omitempty"`
 	PredictionTargets []NodeID `json:"prediction_targets,omitempty"`
 	ErrorTargets []NodeID `json:"error_targets,omitempty"`
@@ -71,7 +75,10 @@ func (k *KnowledgeBase) ProjectVectorPopulationAt(vector NeuralVector, threshold
 	}
 
 	candidates := k.matchRepresentationPopulation(vector, threshold)
-	population := ProjectionPopulation{Units: make([]PopulationUnit, 0, populationSize)}
+	population := ProjectionPopulation{
+		Units: make([]PopulationUnit, 0, populationSize),
+		Prototype: append([]float64(nil), vector.Values...),
+	}
 
 	if len(candidates) > 0 {
 		// Similar experiences may share a compatible substrate unit, but they
@@ -132,6 +139,16 @@ func (k *KnowledgeBase) findExactProjectionPopulation(vector NeuralVector) (Proj
 	var best ProjectionPopulation
 	found := false
 	for _, population := range populations {
+		if len(population.Prototype) == len(vector.Values) {
+			score := NewNeuralVector(population.Prototype).Similarity(vector)
+			if score >= projectionExactThreshold && (!found || score > bestScore) {
+				best = population
+				bestScore = score
+				found = true
+			}
+			continue
+		}
+		// Bootstrap/legacy populations may not have a learned prototype yet.
 		for _, unit := range population.Units {
 			node := k.Registry.GetByID(unit.NodeID)
 			if node == nil || len(node.Representation) != len(vector.Values) {
@@ -152,7 +169,10 @@ func (k *KnowledgeBase) registerProjectionPopulation(population ProjectionPopula
 	k.projectionMu.Lock()
 	defer k.projectionMu.Unlock()
 	copyUnits := append([]PopulationUnit(nil), population.Units...)
-	k.ProjectionPopulations = append(k.ProjectionPopulations, ProjectionPopulation{Units: copyUnits})
+	k.ProjectionPopulations = append(k.ProjectionPopulations, ProjectionPopulation{
+		Units: copyUnits,
+		Prototype: append([]float64(nil), population.Prototype...),
+	})
 }
 
 func (k *KnowledgeBase) activateProjectionPopulation(population ProjectionPopulation, vector NeuralVector) ProjectionPopulation {
@@ -161,7 +181,10 @@ func (k *KnowledgeBase) activateProjectionPopulation(population ProjectionPopula
 
 func (k *KnowledgeBase) activateProjectionPopulationAt(population ProjectionPopulation, vector NeuralVector, now time.Time) ProjectionPopulation {
 	if now.IsZero() { now = time.Now().UTC() } else { now = now.UTC() }
-	out := ProjectionPopulation{Units: make([]PopulationUnit, len(population.Units))}
+	out := ProjectionPopulation{
+		Units: make([]PopulationUnit, len(population.Units)),
+		Prototype: append([]float64(nil), population.Prototype...),
+	}
 	for i, unit := range population.Units {
 		node := k.Registry.GetByID(unit.NodeID)
 		if node == nil {
