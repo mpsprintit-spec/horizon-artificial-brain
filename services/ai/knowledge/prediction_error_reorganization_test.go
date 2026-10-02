@@ -27,6 +27,7 @@ func TestPredictionErrorDrivesDistributedRepresentationPlasticity(t *testing.T) 
 	}
 
 	before := append([]float64(nil), otherNode.Representation...)
+	target := append([]float64(nil), actualNode.Representation...)
 	predicted := map[NodeID]float64{otherID: 1}
 	actual := map[NodeID]float64{actualID: 1}
 
@@ -36,14 +37,18 @@ func TestPredictionErrorDrivesDistributedRepresentationPlasticity(t *testing.T) 
 	if after == nil {
 		t.Fatal("experience-specific unit disappeared")
 	}
-	movement := NewNeuralVector(before).Distance(NewNeuralVector(after.Representation))
+	movement := 0.0
+	for i := range before {
+		movement += abs(before[i] - after.Representation[i])
+	}
 	if movement <= 0 {
 		t.Fatalf("prediction error did not reorganize the distributed representation: movement=%v", movement)
 	}
 
-	targetSimilarity := NewNeuralVector(after.Representation).Similarity(NewNeuralVector(actualNode.Representation))
-	if targetSimilarity <= NewNeuralVector(before).Similarity(NewNeuralVector(actualNode.Representation)) {
-		t.Fatalf("representation did not move toward the observed state: before=%v after=%v", NewNeuralVector(before).Similarity(NewNeuralVector(actualNode.Representation)), targetSimilarity)
+	targetSimilarity := NewNeuralVector(after.Representation).Similarity(NewNeuralVector(target))
+	beforeSimilarity := NewNeuralVector(before).Similarity(NewNeuralVector(target))
+	if targetSimilarity <= beforeSimilarity {
+		t.Fatalf("representation did not move toward the observed state: before=%v after=%v", beforeSimilarity, targetSimilarity)
 	}
 }
 
