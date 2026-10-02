@@ -19,6 +19,41 @@ func TestTokenRegistryPreventsDuplicateNodes(t *testing.T) {
 	}
 }
 
+
+func TestSimilarRepresentationsDoNotCollapseIntoOneUnit(t *testing.T) {
+	registry := NewNeuralRegistry()
+	first, created, err := registry.GetOrCreateRepresentation(NewNeuralVector([]float64{1, 0, 0, 0}), 0.75)
+	if err != nil || !created {
+		t.Fatalf("expected first representation to be created: created=%v err=%v", created, err)
+	}
+	second, created, err := registry.GetOrCreateRepresentation(NewNeuralVector([]float64{0.98, 0.20, 0, 0}), 0.75)
+	if err != nil || !created {
+		t.Fatalf("expected similar but distinct experience to create a new unit: created=%v err=%v", created, err)
+	}
+	if first.ID == second.ID {
+		t.Fatalf("similar experiences collapsed into one neural unit: id=%d", first.ID)
+	}
+	if len(registry.Nodes()) != 2 {
+		t.Fatalf("expected two neural units, got %d", len(registry.Nodes()))
+	}
+}
+
+func TestExactRepeatedRepresentationIsRecovered(t *testing.T) {
+	registry := NewNeuralRegistry()
+	vector := NewNeuralVector([]float64{0.4, 0.6, 0.1, 0.2})
+	first, created, err := registry.GetOrCreateRepresentation(vector, 0.75)
+	if err != nil || !created {
+		t.Fatalf("expected first representation to be created: created=%v err=%v", created, err)
+	}
+	second, created, err := registry.GetOrCreateRepresentation(vector, 0.75)
+	if err != nil || created {
+		t.Fatalf("expected exact repeated observation to be recovered: created=%v err=%v", created, err)
+	}
+	if first.ID != second.ID {
+		t.Fatalf("exact repeated observation did not recover the same unit: first=%d second=%d", first.ID, second.ID)
+	}
+}
+
 func TestConnectStrengthensExistingSynapse(t *testing.T) {
 	kb := NewKnowledgeBase()
 	api := kb.Store("api")
