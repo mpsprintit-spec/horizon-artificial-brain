@@ -74,3 +74,86 @@ func TestAdaptPopulationRepresentationConvergesSharedStructureWithoutMerging(t *
 		t.Fatal("plasticity must not collapse distinct populations into one identity")
 	}
 }
+
+
+func TestDifferentExperienceDrivesPopulationSpecialization(t *testing.T) {
+	brain := NewKnowledgeBase()
+	at := time.Date(2026, 10, 2, 11, 0, 0, 0, time.UTC)
+
+	base := NewNeuralVector([]float64{0.95, 0.05, 0, 0})
+	contextB := NewNeuralVector([]float64{0.75, 0.25, 0, 0})
+	contextC := NewNeuralVector([]float64{-0.8, 0.6, 0, 0})
+
+	popA, err := brain.ProjectVectorPopulationAt(base, 0.70, 4, at)
+	if err != nil {
+		t.Fatalf("project A: %v", err)
+	}
+	popB, err := brain.ProjectVectorPopulationAt(contextB, 0.70, 4, at.Add(time.Second))
+	if err != nil {
+		t.Fatalf("project B: %v", err)
+	}
+
+	shared := NodeID(0)
+	for _, a := range popA.Units {
+		for _, b := range popB.Units {
+			if a.NodeID == b.NodeID {
+				shared = a.NodeID
+			}
+		}
+	}
+	if shared == 0 {
+		t.Fatal("expected an initial shared substrate")
+	}
+
+	uniqueB := NodeID(0)
+	for _, b := range popB.Units {
+		seenInA := false
+		for _, a := range popA.Units {
+			if a.NodeID == b.NodeID {
+				seenInA = true
+				break
+			}
+		}
+		if !seenInA {
+				uniqueB = b.NodeID
+				break
+		}
+	}
+	if uniqueB == 0 {
+		t.Fatal("expected population B to contain experience-specific substrate")
+	}
+
+	before := brain.Registry.GetByID(uniqueB)
+	if before == nil {
+		t.Fatalf("unique B unit %d not found", uniqueB)
+	}
+	beforeRepresentation := append([]float64(nil), before.Representation...)
+
+	for i := 0; i < 20; i++ {
+		if _, err := brain.AdaptPopulationRepresentationAt(popA, base, 0.20, at.Add(time.Duration(i+2)*time.Second)); err != nil {
+			t.Fatalf("adapt A[%d]: %v", i, err)
+		}
+		if _, err := brain.AdaptPopulationRepresentationAt(popB, contextC, 0.30, at.Add(time.Duration(i+2)*time.Second)); err != nil {
+			t.Fatalf("adapt B[%d]: %v", i, err)
+		}
+	}
+
+	after := brain.Registry.GetByID(uniqueB)
+	if after == nil {
+		t.Fatalf("unique B unit %d disappeared", uniqueB)
+	}
+	movement := NewNeuralVector(beforeRepresentation).Distance(NewNeuralVector(after.Representation))
+	if movement <= 0.05 {
+		t.Fatalf("experience-specific unit did not specialize under divergent experience: movement=%.6f", movement)
+	}
+
+	baseSimilarity := NewNeuralVector(after.Representation).Similarity(base)
+	contextCSimilarity := NewNeuralVector(after.Representation).Similarity(contextC)
+	if contextCSimilarity <= baseSimilarity {
+		t.Fatalf("specialized unit did not become more compatible with its new experience: base=%.6f new=%.6f", baseSimilarity, contextCSimilarity)
+	}
+
+	if PopulationEquivalent(popA, popB) {
+		t.Fatal("divergent experience must not collapse distinct populations")
+	}
+}
