@@ -45,6 +45,11 @@ func TestInquiryPredictionUsesLearnedActionTargetsWithoutExecution(t *testing.T)
 	if !modeled {
 		t.Fatal("expected learned action model")
 	}
+
+	prediction := rt.activation.PredictOutcomeFromNodes([]knowledge.NodeID{target.ID}, now, 1)
+	if prediction.State[outcome.ID] <= 0 {
+		t.Fatalf("learned causal outcome was not present in hypothetical prediction: %#v", prediction.State)
+	}
 	if value <= 0 {
 		t.Fatalf("expected positive model-derived information value, got %v", value)
 	}
