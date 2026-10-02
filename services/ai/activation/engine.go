@@ -85,6 +85,7 @@ func (e *Engine) ActivateWith(req Request) Result {
 	if len(previousPrediction)>0 {
 		predictionError=stateDifference(previousPrediction,result.Activations)
 		e.ApplyPredictionErrorPlasticity(previousPrediction,result.Activations,predictionError,req.Now)
+		e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction,result.Activations,predictionError,0.20,req.Now)
 	}
 	nextPrediction, nextPredictionConfidence := e.advance(result.Activations,result.Confidence,req.Now,req.Cycles)
 	nextPrediction, nextPredictionConfidence = e.applyPatternPrediction(nextPrediction, nextPredictionConfidence, result.Activations)
