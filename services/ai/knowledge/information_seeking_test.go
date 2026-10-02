@@ -54,7 +54,7 @@ func TestInformationSeekingSelectionIsDeterministic(t *testing.T) {
 func TestRecordInquirySelectionUpdatesNumericBoundary(t *testing.T) {
 	kb := NewKnowledgeBase()
 	candidate := InquiryCandidate{ActionID: "candidate-1", Sequence: 4}
-	kb.RecordInquirySelection(candidate, 0.73, fixedTestTime())
+	kb.RecordInquirySelection(candidate.Sequence, candidate.ActionID, 0.27, 0.73, 0.73, fixedTestTime())
 	state := kb.BrainState.InquiryState
 	if !state.Pending || state.SelectedAction != "candidate-1" {
 		t.Fatalf("selection boundary not persisted: %+v", state)
