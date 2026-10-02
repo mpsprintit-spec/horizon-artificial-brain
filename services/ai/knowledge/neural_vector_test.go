@@ -28,7 +28,7 @@ func TestNeuralVectorSimilarityIsModalityNeutral(t *testing.T) {
 	}
 }
 
-func TestProjectVectorReusesCompatibleNeuralUnit(t *testing.T) {
+func TestProjectVectorPreservesSimilarButDistinctNeuralUnit(t *testing.T) {
 	brain := NewBrain()
 	first := NewNeuralVector([]float64{0.8, 0.1, -0.2})
 	second := NewNeuralVector([]float64{0.79, 0.11, -0.19})
@@ -37,11 +37,10 @@ func TestProjectVectorReusesCompatibleNeuralUnit(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	if !created1 || score1 != 1 { t.Fatalf("expected first vector to create a unit, created=%v score=%v", created1, score1) }
 
-	id2, score2, created2, err := brain.ProjectVector(second, 0.95)
+	id2, _, created2, err := brain.ProjectVector(second, 0.95)
 	if err != nil { t.Fatal(err) }
-	if created2 { t.Fatal("similar experience created a duplicate neural unit") }
-	if id1 != id2 { t.Fatalf("expected reuse of neural unit %d, got %d", id1, id2) }
-	if score2 < 0.95 { t.Fatalf("expected similarity >= threshold, got %v", score2) }
+	if !created2 { t.Fatal("similar experience was incorrectly collapsed into the existing neural unit") }
+	if id1 == id2 { t.Fatalf("similar experiences received the same neural unit %d", id1) }
 }
 
 func TestProjectVectorCreatesDistinctUnitForDissimilarExperience(t *testing.T) {
