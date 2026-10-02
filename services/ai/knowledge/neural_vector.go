@@ -32,3 +32,18 @@ func (v NeuralVector) Similarity(other NeuralVector) float64 {
 }
 
 func (v NeuralVector) Empty() bool { return len(v.Values) == 0 }
+
+
+// Distance returns the mean absolute geometric distance between two numeric
+// representations. It is useful for observing developmental movement without
+// assigning semantic meaning to the coordinates.
+func (v NeuralVector) Distance(other NeuralVector) float64 {
+	if len(v.Values) == 0 || len(v.Values) != len(other.Values) {
+		return 1
+	}
+	var distance float64
+	for i, value := range v.Values {
+		distance += abs(value - other.Values[i])
+	}
+	return distance / float64(len(v.Values))
+}
