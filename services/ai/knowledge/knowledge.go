@@ -81,26 +81,25 @@ func (r *TokenRegistry) Nodes() []*ConceptNode {
 	return nodes
 }
 
-// GetOrCreateRepresentation reuses an existing numeric neural unit when its
-// learned prototype is sufficiently similar. Token identity is not involved.
-// A new unit is created only when no compatible prototype exists.
+// GetOrCreateRepresentation recovers only an exact learned observation.
+// Similarity is deliberately not an identity test: two nearby experiences may
+// share structure without becoming the same neural unit. Distributed overlap
+// is formed by population projection, while this compatibility path preserves
+// exact repeated numeric observations without collapsing merely similar ones.
 func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold float64) (*ConceptNode, bool, error) {
 	if vector.Empty() { return nil, false, errors.New("neural vector is empty") }
-	threshold = clamp(threshold, 0, 1)
+	_ = clamp(threshold, 0, 1) // retained for source compatibility; not used as identity.
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	best := (*ConceptNode)(nil)
-	bestScore := 0.0
 	for _, node := range r.byID {
 		if len(node.Representation) != len(vector.Values) { continue }
 		score := NewNeuralVector(node.Representation).Similarity(vector)
-		if score > bestScore { best, bestScore = node, score }
-	}
-	if best != nil && bestScore >= threshold {
-		best.Frequency++
-		best.LastActivation = time.Now().UTC()
-		return best, false, nil
+		if score >= 0.999999999 {
+			node.Frequency++
+			node.LastActivation = time.Now().UTC()
+			return node, false, nil
+		}
 	}
 
 	n := newRepresentationNode(r.nextID, vector.Values)
