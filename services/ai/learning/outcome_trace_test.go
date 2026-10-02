@@ -37,8 +37,8 @@ func TestLearnOutcomeTracePreservesContradictoryOutcomes(t *testing.T) {
 	unit.LearnOutcomeTrace([]knowledge.NodeID{target.ID}, []knowledge.NodeID{outcomeB.ID}, 0.8, 0.9, evidence, now.Add(time.Second))
 	unit.LearnOutcomeTrace([]knowledge.NodeID{target.ID}, []knowledge.NodeID{outcomeC.ID}, 0.8, 0.9, evidence, now.Add(2*time.Second))
 
-	b := target.SynapsesTo(outcomeB.ID).FindDynamic(false)
-	c := target.SynapsesTo(outcomeC.ID).FindDynamic(false)
+	b := target.FindDynamicSynapse(outcomeB.ID, false)
+	c := target.FindDynamicSynapse(outcomeC.ID, false)
 	if b == nil || c == nil {
 		t.Fatal("contradictory outcomes must remain as separate dynamic connections")
 	}
