@@ -73,7 +73,7 @@ func (k *KnowledgeBase) ApplyPredictionErrorRepresentationPlasticity(
 		if len(population.Prototype) != len(actualVector.Values) {
 			population.Prototype = append([]float64(nil), actualVector.Values...)
 		} else {
-			for dimension, value := range actualVector.Values {
+			for dimension := range actualVector.Values {
 				population.Prototype[dimension] = clamp(
 					population.Prototype[dimension]+effectiveRate*errorVector[dimension],
 					-1, 1,
