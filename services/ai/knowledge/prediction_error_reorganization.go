@@ -1,6 +1,9 @@
 package knowledge
 
-import "time"
+import (
+	"sort"
+	"time"
+)
 
 // ApplyPredictionErrorRepresentationPlasticity converts a prediction mismatch
 // into distributed representation drift. The target state is reconstructed from
@@ -123,7 +126,14 @@ func weightedRepresentationVector(registry *NeuralRegistry, state map[NodeID]flo
 
 	var values []float64
 	total := 0.0
-	for id, activation := range state {
+	ids := make([]int, 0, len(state))
+	for id := range state {
+		ids = append(ids, int(id))
+	}
+	sort.Ints(ids)
+	for _, rawID := range ids {
+		id := NodeID(rawID)
+		activation := state[id]
 		activation = clamp01(activation)
 		if activation <= 0 {
 			continue
