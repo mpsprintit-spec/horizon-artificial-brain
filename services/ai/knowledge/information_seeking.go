@@ -105,21 +105,6 @@ func SelectInformationSeekingCandidate(candidates []InquiryCandidate, currentUnc
 	return best, clamp01(bestScore), true
 }
 
-// RecordInquirySelection persists only the numeric selection boundary. The
-// actual action remains owned by the action/embodiment layer.
-func (k *KnowledgeBase) RecordInquirySelection(candidate InquiryCandidate, score float64, now time.Time) {
-	if k == nil {
-		return
-	}
-	if now.IsZero() {
-		now = time.Now().UTC()
-	}
-	k.mu.Lock()
-	defer k.mu.Unlock()
-	k.BrainState.InquiryState.Sequence++
-	k.BrainState.InquiryState.LastUpdated = now.UTC()
-	k.BrainState.InquiryState.Pending = true
-	k.BrainState.InquiryState.SelectedAction = candidate.ActionID
-	k.BrainState.InquiryState.SelectedScore = clamp01(score)
-	k.BrainState.InquiryState.ExpectedInformationGain = clamp01(score)
-}
+// The selected candidate is persisted through KnowledgeBase.RecordInquirySelection
+// in knowledge.go. Keeping persistence there avoids two competing inquiry
+// state writers and preserves the existing sequence/uncertainty fields.
