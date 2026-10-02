@@ -63,6 +63,28 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	}
 
 	vector := observationVector(canonical, modality)
+
+	// A repeated observation can recover its previously learned distributed
+	// population through adapter provenance even after plasticity has moved the
+	// member representations away from the original surface vector. This does
+	// not make the surface form a neural identity: the annotation only points
+	// to an already materialized population, while the population itself
+	// remains the mutable neural substrate.
+	if population, ok := k.populationForSurface(canonical, modality, vector, now); ok {
+		populationIDs := make([]NodeID, 0, len(population.Units))
+		for _, unit := range population.Units {
+			populationIDs = append(populationIDs, unit.NodeID)
+		}
+		if len(populationIDs) > 0 {
+			return GroundedRepresentation{
+				NodeID: populationIDs[0], Population: populationIDs,
+				Similarity: population.Units[0].Activation,
+				Status: GroundingExisting, Source: source, Modality: modality,
+				Token: canonical, Timestamp: now,
+			}, nil
+		}
+	}
+
 	// Surface representations remain modality-specific. A written form,
 	// sound, image, or physical sensor reading may later become linked by
 	// experience, but it must not collapse into one canonical neural unit merely
@@ -162,4 +184,38 @@ func (k *KnowledgeBase) BindGroundedRepresentations(left, right GroundedRepresen
 		evidence.Modality = "cross-modal"
 	}
 	return k.Patterns.LearnTraceWithEvidence(sequence, nil, right.NodeID, 0.5, 0.5, evidence)
+}
+
+
+func (k *KnowledgeBase) populationForSurface(surface, modality string, vector NeuralVector, now time.Time) (ProjectionPopulation, bool) {
+	if k == nil {
+		return ProjectionPopulation{}, false
+	}
+	k.annotationMu.RLock()
+	var ids []NodeID
+	for _, annotation := range k.SurfaceAnnotations {
+		if annotation.Surface == surface && annotation.Modality == modality && len(annotation.Population) > 0 {
+			ids = append([]NodeID(nil), annotation.Population...)
+			break
+		}
+	}
+	k.annotationMu.RUnlock()
+	if len(ids) == 0 {
+		return ProjectionPopulation{}, false
+	}
+
+	population := ProjectionPopulation{Units: make([]PopulationUnit, 0, len(ids))}
+	for _, id := range ids {
+		node := k.Registry.GetByID(id)
+		if node == nil {
+			return ProjectionPopulation{}, false
+		}
+		score := NewNeuralVector(node.Representation).Similarity(vector)
+		node.Activation = clamp01(score)
+		if !now.IsZero() {
+			node.LastActivation = now.UTC()
+		}
+		population.Units = append(population.Units, PopulationUnit{NodeID: id, Activation: clamp01(score)})
+	}
+	return population, true
 }
