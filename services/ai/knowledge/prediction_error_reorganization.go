@@ -33,6 +33,24 @@ func (k *KnowledgeBase) ApplyPredictionErrorRepresentationPlasticity(
 	if !ok || actualVector.Empty() {
 		return
 	}
+	predictedVector, predictedOK := weightedRepresentationVector(k.Registry, predicted)
+	if !predictedOK || predictedVector.Empty() || len(predictedVector.Values) != len(actualVector.Values) {
+		return
+	}
+
+	// Prediction error has a direction as well as a magnitude. The direction
+	// is the learned discrepancy between the predicted distributed state and
+	// the observed distributed state; plasticity follows that error vector.
+	errorVector := make([]float64, len(actualVector.Values))
+	errorMagnitude := 0.0
+	for dimension := range errorVector {
+		delta := actualVector.Values[dimension] - predictedVector.Values[dimension]
+		errorVector[dimension] = delta
+		errorMagnitude += delta * delta
+	}
+	if errorMagnitude <= 1e-12 {
+		return
+	}
 
 	// A large mismatch should produce more reorganization, but remain bounded.
 	rate := learningRate * errorSignal
@@ -57,7 +75,7 @@ func (k *KnowledgeBase) ApplyPredictionErrorRepresentationPlasticity(
 		} else {
 			for dimension, value := range actualVector.Values {
 				population.Prototype[dimension] = clamp(
-					population.Prototype[dimension]+effectiveRate*(value-population.Prototype[dimension]),
+					population.Prototype[dimension]+effectiveRate*errorVector[dimension],
 					-1, 1,
 				)
 			}
@@ -81,7 +99,7 @@ func (k *KnowledgeBase) ApplyPredictionErrorRepresentationPlasticity(
 
 			for dimension, value := range actualVector.Values {
 				node.Representation[dimension] = clamp(
-					node.Representation[dimension]+unitRate*(value-node.Representation[dimension]),
+					node.Representation[dimension]+unitRate*errorVector[dimension],
 					-1, 1,
 				)
 			}
