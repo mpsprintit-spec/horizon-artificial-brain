@@ -40,10 +40,29 @@ func (l *LearningUnit) LearnOutcomeTrace(targets, outcomes []knowledge.NodeID, w
 				continue
 			}
 			l.Kb.ConnectAt(target, outcome, weight, reliability, false, now)
+
+			// Preserve provenance in the canonical Pattern substrate as part of
+			// the same learned transition. The dynamic synapse carries adaptive
+			// predictive strength; the pattern trace retains the evidence that
+			// produced that transition. No parallel inquiry-specific evidence
+			// store is introduced.
+			if l.Kb.Patterns != nil {
+				sequence := []knowledge.PatternStep{
+					{NodeID: target.ID, Position: 0, Activation: 1},
+					{NodeID: outcome.ID, Position: 1, Activation: 1},
+				}
+				l.Kb.Patterns.LearnTraceWithEvidence(
+					sequence,
+					nil,
+					outcome.ID,
+					weight,
+					reliability,
+					evidence,
+				)
+			}
 		}
 	}
 
-	_ = evidence
 }
 
 func clampLearning01(v float64) float64 {
