@@ -1,7 +1,6 @@
 package activation
 
 import (
-	"sort"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -47,10 +46,55 @@ func (e *Engine) PredictOutcomeFromNodes(targets []knowledge.NodeID, now time.Ti
 		confidence[id] = max(confidence[id], 0.5)
 	}
 	state = normalize(state)
-	predicted, predictedConfidence := e.advance(state, confidence, now, cycles)
+	predicted, predictedConfidence := e.advanceHypothetical(state, confidence, now, cycles)
 	predicted, predictedConfidence = e.applyPatternPrediction(predicted, predictedConfidence, state)
 
 	// Keep the representation deterministic for callers that compare snapshots.
 	_ = sortedNodeIDs(predicted)
 	return Prediction{State: cloneState(predicted), Confidence: cloneState(predictedConfidence)}
+}
+
+func (e *Engine) advanceHypothetical(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+	if e == nil || e.Memory == nil {
+		return cloneState(state), cloneState(confidence)
+	}
+	state = cloneState(state)
+	confidence = cloneState(confidence)
+	for i := 0; i < cycles; i++ {
+		next := map[knowledge.NodeID]float64{}
+		nextConfidence := map[knowledge.NodeID]float64{}
+		for _, id := range sortedNodeIDs(state) {
+			n := e.Memory.Registry.GetByID(id)
+			if n == nil {
+				continue
+			}
+			next[id] = n.RestingActivation
+		}
+		for _, id := range sortedNodeIDs(state) {
+			level := state[id]
+			n := e.Memory.Registry.GetByID(id)
+			if n == nil {
+				continue
+			}
+			next[id] += level * (1 - e.Decay)
+			nextConfidence[id] = max(nextConfidence[id], confidence[id])
+			synapses := n.OutboundAll()
+			sort.Slice(synapses, func(i, j int) bool {
+				return synapses[i].TargetID < synapses[j].TargetID
+			})
+			for _, s := range synapses {
+				age := temporalPenalty(now, s.LastActivation)
+				pulse := level * s.Weight * s.Confidence * e.SpreadRate * age
+				if s.Inhibitory {
+					next[s.TargetID] -= pulse * e.Inhibition
+				} else {
+					next[s.TargetID] += pulse
+				}
+				nextConfidence[s.TargetID] = max(nextConfidence[s.TargetID], confidence[id]*s.Confidence*age)
+			}
+		}
+		state = normalize(next)
+		confidence = normalize(nextConfidence)
+	}
+	return state, confidence
 }
