@@ -97,7 +97,7 @@ func (k *KnowledgeBase) ApplyPredictionErrorRepresentationPlasticity(
 				continue
 			}
 
-			for dimension, value := range actualVector.Values {
+			for dimension := range actualVector.Values {
 				node.Representation[dimension] = clamp(
 					node.Representation[dimension]+unitRate*errorVector[dimension],
 					-1, 1,
