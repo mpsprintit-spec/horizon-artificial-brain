@@ -58,8 +58,9 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 	sort.Slice(targets, func(i, j int) bool { return targets[i] < targets[j] })
 
 	prediction := r.activation.PredictOutcomeFromNodes(targets, at, 1)
-	value := normalizedPredictionEntropyExcluding(prediction.State, targetSet)
-	return clamp01(uncertainty * value), true, nil
+	uncertaintyOfOutcome := normalizedPredictionEntropyExcluding(prediction.State, targetSet)
+	informationValue := uncertainty * (1 - uncertaintyOfOutcome)
+	return clamp01(informationValue), true, nil
 }
 
 func normalizedPredictionEntropy(state map[knowledge.NodeID]float64) float64 {
