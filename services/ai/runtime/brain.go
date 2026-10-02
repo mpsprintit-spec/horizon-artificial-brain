@@ -314,16 +314,25 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 	policy := r.brain.BrainState.LearningPolicyState
 
 	for i := range candidates {
-		factor := 1.0
+		// Prefer information value predicted by Horizon's learned internal
+		// action/outcome model. Before an action has a learned model, retain
+		// uncertainty as the neutral fallback rather than inventing a semantic
+		// question or action-specific information constant.
+		if value, modeled, err := r.PredictInquiryInformationValue(candidates[i].Action, uncertainty, at); err == nil && modeled {
+			candidates[i].ExpectedInformationGain = value
+		} else {
+			candidates[i].ExpectedInformationGain = uncertainty
+		}
+
+		candidates[i].PriorExperience = r.InquiryPriorExperience(candidates[i].Action, candidates[i].PriorExperience)
 		switch candidates[i].Action {
 		case InquiryReobserve, InquiryFocus:
-			factor += 0.40 * clamp01(policy.RepeatObservationBias)
+			candidates[i].PriorExperience = clamp01(candidates[i].PriorExperience + 0.20*clamp01(policy.RepeatObservationBias))
 		case InquiryChangeView, InquiryImitate, InquirySafeManipulation:
-			factor += 0.40 * clamp01(policy.ExplorationBias)
+			candidates[i].PriorExperience = clamp01(candidates[i].PriorExperience + 0.20*clamp01(policy.ExplorationBias))
 		case InquiryWait:
-			factor += 0.30 * clamp01(policy.DeferConclusionBias)
+			candidates[i].PriorExperience = clamp01(candidates[i].PriorExperience + 0.20*clamp01(policy.DeferConclusionBias))
 		}
-		candidates[i].ExpectedInformationGain = clamp01(candidates[i].ExpectedInformationGain * factor)
 	}
 
 	agenda, err := BuildInquiryAgenda(BrainIdentity, r.LastSequence(), at, candidates, DefaultInquiryPolicy())
