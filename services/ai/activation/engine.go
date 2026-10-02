@@ -86,8 +86,8 @@ func (e *Engine) ActivateWith(req Request) Result {
 		predictionError=stateDifference(previousPrediction,result.Activations)
 		e.ApplyPredictionErrorPlasticity(previousPrediction,result.Activations,predictionError,req.Now)
 		e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction,result.Activations,predictionError,0.20,req.Now)
-		e.Memory.UpdateInformationDynamics(previousPrediction,result.Activations,predictionError,req.Now)
 	}
+	e.Memory.UpdateInformationDynamics(previousPrediction,result.Activations,predictionError,req.Now)
 	nextPrediction, nextPredictionConfidence := e.advance(result.Activations,result.Confidence,req.Now,req.Cycles)
 	nextPrediction, nextPredictionConfidence = e.applyPatternPrediction(nextPrediction, nextPredictionConfidence, result.Activations)
 	e.mu.Lock()
