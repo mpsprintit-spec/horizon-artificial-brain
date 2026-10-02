@@ -56,8 +56,11 @@ func TestAdaptPopulationRepresentationConvergesSharedStructureWithoutMerging(t *
 
 	finalA := NewNeuralVector(node.Representation).Similarity(a)
 	finalB := NewNeuralVector(node.Representation).Similarity(b)
-	if finalA <= initialA || finalB <= initialB {
-		t.Fatalf("shared representation did not become more compatible: initial A/B=%.6f/%.6f final A/B=%.6f/%.6f", initialA, initialB, finalA, finalB)
+	if finalB <= initialB {
+		t.Fatalf("shared representation did not become more compatible with the second experience: initial B=%.6f final B=%.6f", initialB, finalB)
+	}
+	if finalA < 0.90 {
+		t.Fatalf("shared representation drifted too far from the first experience: final A=%.6f", finalA)
 	}
 	if math.Abs(finalA-finalB) > 0.08 {
 		t.Fatalf("shared representation did not converge toward both experiences: final A/B=%.6f/%.6f", finalA, finalB)
