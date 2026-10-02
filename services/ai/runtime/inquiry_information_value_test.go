@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"testing"
+	"fmt"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -54,13 +55,16 @@ func TestInquiryInformationValueReflectsLearnedOutcomeDistribution(t *testing.T)
 
 	// Focus has a skewed learned outcome distribution: B is repeated,
 	// while C remains as contradictory evidence.
-	record(InquiryFocus, focusTarget.ID, outcomeB.ID, "focus-b-1")
-	record(InquiryFocus, focusTarget.ID, outcomeB.ID, "focus-b-2")
+	for i := 0; i < 9; i++ {
+		record(InquiryFocus, focusTarget.ID, outcomeB.ID, "focus-b-"+fmt.Sprint(i))
+	}
 	record(InquiryFocus, focusTarget.ID, outcomeC.ID, "focus-c-1")
 
 	// Change-view has a balanced learned outcome distribution.
-	record(InquiryChangeView, viewTarget.ID, outcomeB.ID, "view-b-1")
-	record(InquiryChangeView, viewTarget.ID, outcomeC.ID, "view-c-1")
+	for i := 0; i < 2; i++ {
+		record(InquiryChangeView, viewTarget.ID, outcomeB.ID, "view-b-"+fmt.Sprint(i))
+		record(InquiryChangeView, viewTarget.ID, outcomeC.ID, "view-c-"+fmt.Sprint(i))
+	}
 
 	focusValue, focusModeled, err := rt.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
 	if err != nil {
