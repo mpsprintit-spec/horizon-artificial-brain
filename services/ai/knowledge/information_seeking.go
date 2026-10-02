@@ -2,7 +2,6 @@ package knowledge
 
 import (
 	"sort"
-	"time"
 )
 
 // InquiryCandidate is a substrate-level candidate for acquiring experience.
