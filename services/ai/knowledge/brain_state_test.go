@@ -52,7 +52,7 @@ func TestBrainStatePersistsBootstrapAndLearningState(t *testing.T) {
 
 func TestInquiryInformationExperiencePersistsAcrossCanonicalSaveLoad(t *testing.T) {
 	now := time.Date(2026, 10, 3, 15, 0, 0, 0, time.UTC)
-	brain := NewBrain()
+	brain := knowledge.NewBrain()
 	brain.RecordInquiryInformationExperience("focus", 0.8, 0.9, now)
 	beforeYield, beforeReliability, beforeSamples, learned := brain.InquiryInformationExperience("focus")
 	if !learned {
@@ -62,7 +62,7 @@ func TestInquiryInformationExperiencePersistsAcrossCanonicalSaveLoad(t *testing.
 	if err := brain.Save(path); err != nil {
 		t.Fatal(err)
 	}
-	restored := NewBrain()
+	restored := knowledge.NewBrain()
 	if err := restored.Load(path); err != nil {
 		t.Fatal(err)
 	}
