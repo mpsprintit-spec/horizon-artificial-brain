@@ -89,12 +89,12 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 		return 0, true, nil
 	}
 
-	uncertaintyOfOutcome := normalizedPredictionEntropy(prediction.State, outcomeSet)
+	uncertaintyOfOutcome := normalizedPredictionEntropyAllowed(prediction.State, outcomeSet)
 	informationValue := uncertainty * uncertaintyOfOutcome
 	return clamp01(informationValue), true, nil
 }
 
-func normalizedPredictionEntropy(state map[knowledge.NodeID]float64, allowed map[knowledge.NodeID]struct{}) float64 {
+func normalizedPredictionEntropyAllowed(state map[knowledge.NodeID]float64, allowed map[knowledge.NodeID]struct{}) float64 {
 	if len(allowed) < 2 {
 		return 0
 	}
