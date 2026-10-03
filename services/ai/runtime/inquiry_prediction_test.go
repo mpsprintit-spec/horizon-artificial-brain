@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/project-horizon/horizon-core/services/ai/activation"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
@@ -122,3 +123,58 @@ func TestPlanInquiryUsesModeledInformationValue(t *testing.T) {
 	}
 }
 
+
+
+func TestInquiryInformationValueIgnoresUnrelatedRecurrentActivity(t *testing.T) {
+	now := time.Date(2026, 9, 30, 12, 10, 0, 0, time.UTC)
+	brain := knowledge.NewBrain()
+	rt := NewBrainRuntime(brain)
+
+	target := brain.Store("target")
+	outcomeA := brain.Store("outcome-a")
+	outcomeB := brain.Store("outcome-b")
+	unrelated := brain.Store("unrelated")
+
+	if err := rt.RegisterActionBinding(ActionBinding{
+		RequestID: "inquiry-3-focus",
+		BrainIdentity: BrainIdentity,
+		Intent: "inquiry:focus",
+		TargetNodeIDs: []knowledge.NodeID{target.ID},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, outcome := range []knowledge.NodeID{outcomeA.ID, outcomeB.ID} {
+		if _, err := rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+			Action: InquiryFocus,
+			Valence: 0.8,
+			InformationGain: 0.6,
+			PredictionError: 0.2,
+			Reliability: 0.9,
+			TargetNodeIDs: []knowledge.NodeID{target.ID},
+			OutcomeNodeIDs: []knowledge.NodeID{outcome},
+			CausalLink: "inquiry:unrelated-activity",
+		}, now); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	before, modeled, err := rt.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
+	if err != nil || !modeled {
+		t.Fatalf("expected modeled inquiry value before unrelated activity, value=%v modeled=%v err=%v", before, modeled, err)
+	}
+
+	rt.activation.ActivateWith(activation.Request{
+		StimulusNodeIDs: []knowledge.NodeID{unrelated.ID},
+		Cycles:          1,
+		Now:             now,
+	})
+
+	after, modeled, err := rt.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
+	if err != nil || !modeled {
+		t.Fatalf("expected modeled inquiry value after unrelated activity, value=%v modeled=%v err=%v", after, modeled, err)
+	}
+	if after != before {
+		t.Fatalf("unrelated recurrent activity changed action information value: before=%v after=%v", before, after)
+	}
+}
