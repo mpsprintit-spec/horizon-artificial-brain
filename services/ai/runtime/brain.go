@@ -315,10 +315,14 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 
 	for i := range candidates {
 		// Information value comes from the learned internal action/outcome
-		// model. If no model exists yet, keep the value at zero: uncertainty
-		// alone does not imply that a particular action will provide useful
-		// information. This prevents curiosity from being encoded as a fixed
-		// action preference.
+		// model. If the action has no learned model yet, leave its value at
+		// zero: uncertainty alone does not imply that the action will provide
+		// useful information. No action-specific curiosity constant is used.
+		if value, modeled, err := r.PredictInquiryInformationValue(candidates[i].Action, uncertainty, at); err == nil && modeled {
+			candidates[i].ExpectedInformationGain = value
+		} else {
+			candidates[i].ExpectedInformationGain = 0
+		}
 
 		candidates[i].PriorExperience = r.InquiryPriorExperience(candidates[i].Action, candidates[i].PriorExperience)
 		switch candidates[i].Action {
