@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -258,5 +259,85 @@ func TestPlanInquiryChangesWithLearnedInformationYield(t *testing.T) {
 	high := build(0.95)
 	if high <= low {
 		t.Fatalf("learned information yield did not affect planned information value: low=%v high=%v", low, high)
+	}
+}
+
+
+func TestInquiryInformationExperienceSurvivesRestartAndContinuesLearning(t *testing.T) {
+	now := time.Date(2026, 10, 3, 16, 0, 0, 0, time.UTC)
+	brain := knowledge.NewBrain()
+	rt := NewBrainRuntime(brain)
+
+	target := brain.Store("target")
+	outcomeA := brain.Store("outcome-a")
+	outcomeB := brain.Store("outcome-b")
+
+	register := func(runtime *BrainRuntime) {
+		if err := runtime.RegisterActionBinding(ActionBinding{
+			RequestID: "inquiry-restart-focus",
+			BrainIdentity: BrainIdentity,
+			Intent: "inquiry:focus",
+			TargetNodeIDs: []knowledge.NodeID{target.ID},
+		}); err != nil {
+			t.Fatal(err)
+		}
+	}
+	register(rt)
+
+	for _, outcome := range []knowledge.NodeID{outcomeA.ID, outcomeB.ID} {
+		if _, err := rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+			Action:          InquiryFocus,
+			InformationGain: 0.8,
+			Reliability:     1,
+			TargetNodeIDs:   []knowledge.NodeID{target.ID},
+			OutcomeNodeIDs:  []knowledge.NodeID{outcome},
+			CausalLink:      "inquiry:restart",
+		}, now); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	before, modeled, err := rt.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
+	if err != nil || !modeled || before <= 0 {
+		t.Fatalf("expected learned pre-restart inquiry value, value=%v modeled=%v err=%v", before, modeled, err)
+	}
+
+	path := filepath.Join(t.TempDir(), "brain_memory.json")
+	if err := brain.Save(path); err != nil {
+		t.Fatal(err)
+	}
+
+	restored := knowledge.NewBrain()
+	if err := restored.Load(path); err != nil {
+		t.Fatal(err)
+	}
+	restoredRT := NewBrainRuntime(restored)
+	register(restoredRT)
+
+	after, modeled, err := restoredRT.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
+	if err != nil || !modeled {
+		t.Fatalf("expected modeled inquiry value after restart, value=%v modeled=%v err=%v", after, modeled, err)
+	}
+	if after != before {
+		t.Fatalf("inquiry information value changed across restart: before=%v after=%v", before, after)
+	}
+
+	if _, err := restoredRT.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+		Action:          InquiryFocus,
+		InformationGain: 0.1,
+		Reliability:     1,
+		TargetNodeIDs:   []knowledge.NodeID{target.ID},
+		OutcomeNodeIDs:  []knowledge.NodeID{outcomeA.ID},
+		CausalLink:      "inquiry:restart-followup",
+	}, now.Add(time.Minute)); err != nil {
+		t.Fatal(err)
+	}
+
+	next, modeled, err := restoredRT.PredictInquiryInformationValue(InquiryFocus, 0.8, now.Add(time.Minute))
+	if err != nil || !modeled {
+		t.Fatalf("expected inquiry model to remain active after new experience, value=%v modeled=%v err=%v", next, modeled, err)
+	}
+	if next >= before {
+		t.Fatalf("new low-information outcome did not reduce learned information yield: before=%v next=%v", before, next)
 	}
 }
