@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func TestBuildInquiryAgendaSelectsInformationSeekingCandidate(t *testing.T) {
+func TestBuildInquiryAgendaDoesNotInventInformationValue(t *testing.T) {
 	at := time.Date(2026, 9, 20, 5, 0, 0, 0, time.UTC)
 	candidates := DefaultInquiryCandidates(.9)
 	agenda, err := BuildInquiryAgenda(BrainIdentity, 7, at, candidates, DefaultInquiryPolicy())
@@ -18,8 +18,11 @@ func TestBuildInquiryAgendaSelectsInformationSeekingCandidate(t *testing.T) {
 	if agenda.Selected.Action == InquiryVerbalQuestion {
 		t.Fatal("verbal question became the default selection")
 	}
-	if agenda.Selected.Action != InquiryFocus {
-		t.Fatalf("selected action = %q, want focus under the deterministic default policy", agenda.Selected.Action)
+	if agenda.Selected.Action != InquiryWait {
+		t.Fatalf("selected action = %q, want wait when no learned information value exists", agenda.Selected.Action)
+	}
+	if agenda.Selected.InformationValue != 0 {
+		t.Fatalf("selected information value = %v, want 0 without a learned action/outcome model", agenda.Selected.InformationValue)
 	}
 	if len(agenda.Evaluations) != len(candidates) {
 		t.Fatalf("evaluations = %d, want %d", len(agenda.Evaluations), len(candidates))
