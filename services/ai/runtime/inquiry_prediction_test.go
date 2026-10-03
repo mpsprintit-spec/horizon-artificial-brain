@@ -63,3 +63,62 @@ func TestInquiryPredictionUsesLearnedActionTargetsWithoutExecution(t *testing.T)
 		}
 	}
 }
+
+func TestPlanInquiryUsesModeledInformationValue(t *testing.T) {
+	now := time.Date(2026, 9, 30, 12, 5, 0, 0, time.UTC)
+	brain := knowledge.NewBrain()
+	rt := NewBrainRuntime(brain)
+
+	target := brain.Store("target")
+	outcomeA := brain.Store("outcome-a")
+	outcomeB := brain.Store("outcome-b")
+
+	if err := rt.RegisterActionBinding(ActionBinding{
+		RequestID: "inquiry-2-focus",
+		BrainIdentity: BrainIdentity,
+		Intent: "inquiry:focus",
+		TargetNodeIDs: []knowledge.NodeID{target.ID},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, outcome := range []knowledge.NodeID{outcomeA.ID, outcomeB.ID} {
+		if _, err := rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+			Action: InquiryFocus,
+			Valence: 0.8,
+			InformationGain: 0.6,
+			PredictionError: 0.2,
+			Reliability: 0.9,
+			TargetNodeIDs: []knowledge.NodeID{target.ID},
+			OutcomeNodeIDs: []knowledge.NodeID{outcome},
+			CausalLink: "inquiry:branch",
+		}, now); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	agenda, err := rt.PlanInquiry(0.8, now)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var focusValue float64
+	var focusModeled bool
+	for _, evaluation := range agenda.Evaluations {
+		if evaluation.Action == InquiryFocus {
+			focusValue = evaluation.InformationValue
+			focusModeled = true
+			break
+		}
+	}
+	if !focusModeled {
+		t.Fatal("expected focus candidate in inquiry agenda")
+	}
+	if focusValue <= 0 {
+		t.Fatalf("expected PlanInquiry to use learned non-deterministic outcome value, got %v", focusValue)
+	}
+	if focusValue > 1 {
+		t.Fatalf("expected bounded modeled information value, got %v", focusValue)
+	}
+}
+
