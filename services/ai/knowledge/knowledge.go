@@ -500,6 +500,46 @@ func (k *KnowledgeBase) RecordInquirySelection(sequence uint64, action string, u
 
 // RecordInquiryOutcome closes the inquiry trajectory and adapts the persisted
 // learning strategy from observed information gain and prediction error.
+// RecordInquiryInformationExperience learns how much information a specific
+// action has actually produced in prior experience. The trace is purely numeric
+// and persisted with the canonical BrainState; it does not assign semantic value
+// to the action and does not create a question or curiosity label.
+func (k *KnowledgeBase) RecordInquiryInformationExperience(action string, informationGain, reliability float64, now time.Time) {
+	if k == nil || action == "" { return }
+	if now.IsZero() { now = time.Now().UTC() }
+	informationGain = clamp01(informationGain)
+	reliability = clamp01(reliability)
+	k.mu.Lock()
+	defer k.mu.Unlock()
+	if k.BrainState.PredictionState == nil { k.BrainState.PredictionState = map[string]float64{} }
+	prefix := "inquiry_info:" + action
+	samples := k.BrainState.PredictionState[prefix+":samples"]
+	if samples < 0 { samples = 0 }
+	alpha := 1.0 / (samples + 1.0)
+	if alpha > 0.25 { alpha = 0.25 }
+	previous := clamp01(k.BrainState.PredictionState[prefix+":ema"])
+	reliabilityWeight := 0.25 + 0.75*reliability
+	alpha *= reliabilityWeight
+	if alpha > 0.25 { alpha = 0.25 }
+	next := previous + alpha*(informationGain-previous)
+	k.BrainState.PredictionState[prefix+":ema"] = clamp01(next)
+	k.BrainState.PredictionState[prefix+":reliability"] = reliability
+	k.BrainState.PredictionState[prefix+":samples"] = samples + reliabilityWeight
+	k.BrainState.PredictionState[prefix+":last_update_unix"] = float64(now.UnixNano())
+}
+
+// InquiryInformationExperience returns the learned empirical information yield
+// for an action. Samples are weighted by observation reliability.
+func (k *KnowledgeBase) InquiryInformationExperience(action string) (yield, reliability float64, samples float64, learned bool) {
+	if k == nil || action == "" { return 0, 0, 0, false }
+	k.mu.RLock()
+	defer k.mu.RUnlock()
+	prefix := "inquiry_info:" + action
+	samples = k.BrainState.PredictionState[prefix+":samples"]
+	if samples <= 0 { return 0, 0, 0, false }
+	return clamp01(k.BrainState.PredictionState[prefix+":ema"]), clamp01(k.BrainState.PredictionState[prefix+":reliability"]), samples, true
+}
+
 func (k *KnowledgeBase) RecordInquiryOutcome(observedInformationGain, predictionError float64, now time.Time) {
 	if k == nil { return }
 	if now.IsZero() { now = time.Now().UTC() }
