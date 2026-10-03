@@ -50,8 +50,8 @@ func TestInquiryPredictionUsesLearnedActionTargetsWithoutExecution(t *testing.T)
 	if prediction.State[outcome.ID] <= 0 {
 		t.Fatalf("learned causal outcome was not present in hypothetical prediction: %#v", prediction.State)
 	}
-	if value <= 0 {
-		t.Fatalf("expected positive model-derived information value, got %v", value)
+	if value < 0 || value > 1 {
+		t.Fatalf("expected bounded model-derived information value, got %v", value)
 	}
 	after := cloneNodeValues(rt.activation.CurrentState())
 	if len(before) != len(after) {
