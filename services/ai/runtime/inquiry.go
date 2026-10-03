@@ -142,18 +142,21 @@ func BuildInquiryAgendaFromCognition(interpretation CognitiveInterpretation, at 
 	return agenda, nil
 }
 
-func DefaultInquiryCandidates(uncertainty float64) []InquiryCandidate {
-	u := clamp01(uncertainty)
+func DefaultInquiryCandidates(_ float64) []InquiryCandidate {
+	// Information value is deliberately not assigned here. It must come from
+	// the current internal action/outcome model. A missing model is represented
+	// as zero information value rather than an action-specific curiosity
+	// constant. These fields describe affordance/cost constraints, not meaning.
 	return []InquiryCandidate{
-		{ID:"reobserve", Action:InquiryReobserve, ExpectedInformationGain:u*.65, Cost:.10, Reversibility:1, SocialFit:.95, PriorExperience:.50},
-		{ID:"change-view", Action:InquiryChangeView, ExpectedInformationGain:u*.65, Cost:.20, Reversibility:1, SocialFit:.90, PriorExperience:.50},
-		{ID:"focus", Action:InquiryFocus, ExpectedInformationGain:u*.75, Cost:.10, Reversibility:1, SocialFit:1, PriorExperience:.50},
-		{ID:"point", Action:InquiryPoint, ExpectedInformationGain:u*.45, Cost:.15, Reversibility:1, SocialFit:.85, PriorExperience:.30},
-		{ID:"vocalize", Action:InquiryVocalize, ExpectedInformationGain:u*.35, Cost:.25, Reversibility:1, SocialFit:.70, PriorExperience:.30},
-		{ID:"gesture", Action:InquiryGesture, ExpectedInformationGain:u*.40, Cost:.15, Reversibility:1, SocialFit:.85, PriorExperience:.35},
-		{ID:"wait", Action:InquiryWait, ExpectedInformationGain:u*.25, Cost:.05, Reversibility:1, SocialFit:.95, PriorExperience:.50},
-		{ID:"imitate", Action:InquiryImitate, ExpectedInformationGain:u*.55, Cost:.35, Reversibility:.80, SocialFit:.65, PriorExperience:.30},
-		{ID:"safe-manipulation", Action:InquirySafeManipulation, ExpectedInformationGain:u*.70, Cost:.55, Reversibility:.65, SocialFit:.55, PriorExperience:.25, RequiresAuthorization:true},
-		{ID:"verbal-question", Action:InquiryVerbalQuestion, ExpectedInformationGain:u*.65, Cost:.30, Reversibility:1, SocialFit:.80, PriorExperience:.35},
+		{ID:"reobserve", Action:InquiryReobserve, Cost:.10, Reversibility:1, SocialFit:.95},
+		{ID:"change-view", Action:InquiryChangeView, Cost:.20, Reversibility:1, SocialFit:.90},
+		{ID:"focus", Action:InquiryFocus, Cost:.10, Reversibility:1, SocialFit:1},
+		{ID:"point", Action:InquiryPoint, Cost:.15, Reversibility:1, SocialFit:.85},
+		{ID:"vocalize", Action:InquiryVocalize, Cost:.25, Reversibility:1, SocialFit:.70},
+		{ID:"gesture", Action:InquiryGesture, Cost:.15, Reversibility:1, SocialFit:.85},
+		{ID:"wait", Action:InquiryWait, Cost:.05, Reversibility:1, SocialFit:.95},
+		{ID:"imitate", Action:InquiryImitate, Cost:.35, Reversibility:.80, SocialFit:.65},
+		{ID:"safe-manipulation", Action:InquirySafeManipulation, Cost:.55, Reversibility:.65, SocialFit:.55, RequiresAuthorization:true},
+		{ID:"verbal-question", Action:InquiryVerbalQuestion, Cost:.30, Reversibility:1, SocialFit:.80},
 	}
 }
