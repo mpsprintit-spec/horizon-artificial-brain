@@ -339,3 +339,84 @@ func TestInquiryOutcomeUsesCapturedPredictionAfterInterveningCognitiveState(t *t
 	if interpretation.State.PredictionError != expected { t.Fatalf("outcome did not use captured prediction: got=%v want=%v", interpretation.State.PredictionError, expected) }
 	if interpretation.State.PredictionError <= 0 { t.Fatal("expected non-zero prediction error from unexpected outcome") }
 }
+
+
+func TestInquiryOutcomeFeedsObservedInformationIntoFutureInquiryValue(t *testing.T) {
+	now := time.Date(2026, 10, 3, 17, 0, 0, 0, time.UTC)
+	brain := knowledge.NewBrain()
+	target := brain.Store("target")
+	runtime := NewBrainRuntime(brain)
+	orch := NewCognitiveOrchestrator(runtime)
+	requestID := "inquiry-40-focus"
+
+	if err := runtime.RegisterActionBinding(ActionBinding{
+		RequestID: requestID,
+		BrainIdentity: BrainIdentity,
+		Intent: "inquiry:focus",
+		TargetNodeIDs: []knowledge.NodeID{target.ID},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	preAction, err := runtime.CognitiveProcess(Event{
+		ID:        "pre-action-40",
+		Stimulus:  []string{"target"},
+		Cycles:    1,
+		Timestamp: now,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	before, modeled, err := runtime.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
+	if err != nil || !modeled {
+		t.Fatalf("expected action model to be structurally modeled, value=%v modeled=%v err=%v", before, modeled, err)
+	}
+	if before != 0 {
+		t.Fatalf("expected no empirical information yield before an inquiry outcome, got %v", before)
+	}
+
+	execution := InquiryExecution{
+		Proposal: InquiryProposal{
+			BrainIdentity: BrainIdentity,
+			Sequence:     40,
+			CandidateID:  "focus",
+			Action:       InquiryFocus,
+			Reversibility: true,
+		},
+		Request: ExecutionRequest{
+			RequestID:     requestID,
+			BrainIdentity: BrainIdentity,
+			Expiry:        now.Add(time.Minute),
+			authorized:    true,
+		},
+		Prediction:          preAction.Prediction,
+		PredictionCapturedAt: now,
+	}
+
+	if _, _, _, err := orch.ProcessInquiryOutcome(InquiryResult{
+		Execution: execution,
+		Event: Event{
+			ID:        requestID,
+			Timestamp: now.Add(time.Second),
+		},
+		Observation: ObservationInput{
+			Source:   "camera",
+			Modality: "vision",
+			Tokens:   []string{"observed-outcome"},
+		},
+		Success:        true,
+		Reliability:    1,
+		InformationGain: 0.8,
+	}, now.Add(time.Second)); err != nil {
+		t.Fatal(err)
+	}
+
+	after, modeled, err := runtime.PredictInquiryInformationValue(InquiryFocus, 0.8, now.Add(2*time.Second))
+	if err != nil || !modeled {
+		t.Fatalf("expected learned inquiry value after canonical outcome, value=%v modeled=%v err=%v", after, modeled, err)
+	}
+	if after <= before {
+		t.Fatalf("canonical inquiry outcome did not feed observed information into future inquiry value: before=%v after=%v", before, after)
+	}
+}
