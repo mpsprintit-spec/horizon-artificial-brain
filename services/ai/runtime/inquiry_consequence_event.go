@@ -24,6 +24,9 @@ func (r *BrainRuntime) RecordInquiryConsequenceEvent(event InquiryConsequenceEve
 	event.InformationGain = clamp01(event.InformationGain)
 	event.PredictionError = clamp01(event.PredictionError)
 	event.Reliability = clamp01(event.Reliability)
+	if r.brain != nil {
+		r.brain.RecordInquiryInformationExperience(string(event.Action), event.InformationGain, event.Reliability, at)
+	}
 	event.TargetNodeIDs = append([]knowledge.NodeID(nil), event.TargetNodeIDs...)
 	event.OutcomeNodeIDs = append([]knowledge.NodeID(nil), event.OutcomeNodeIDs...)
 	r.mu.Lock(); defer r.mu.Unlock()
