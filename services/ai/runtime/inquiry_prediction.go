@@ -17,7 +17,12 @@ import (
 // populations are injected into the existing activation predictor, which then
 // applies the existing learned temporal/pattern prediction. The resulting
 // distributed state is converted into a bounded entropy-like uncertainty
-// measure. No semantic question is generated.
+// measure. Information value is higher when the learned action has a
+// differentiated outcome distribution: a predictable single outcome leaves
+// less uncertainty to resolve, while multiple plausible outcomes create more
+// opportunity for observation to reduce uncertainty. This is an
+// uncertainty-weighted proxy for expected information gain, not a Bayesian
+// posterior calculation. No semantic question is generated.
 func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, uncertainty float64, at time.Time) (float64, bool, error) {
 	if r == nil || r.activation == nil {
 		return 0, false, errors.New("brain runtime is not initialized")
@@ -59,7 +64,7 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 
 	prediction := r.activation.PredictOutcomeFromNodes(targets, at, 1)
 	uncertaintyOfOutcome := normalizedPredictionEntropyExcluding(prediction.State, targetSet)
-	informationValue := uncertainty * (1 - uncertaintyOfOutcome)
+	informationValue := uncertainty * uncertaintyOfOutcome
 	return clamp01(informationValue), true, nil
 }
 
