@@ -89,7 +89,29 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 		return 0, true, nil
 	}
 
-	uncertaintyOfOutcome := normalizedPredictionEntropyAllowed(prediction.State, outcomeSet)
+	// Use the learned target -> outcome channel statistics for the outcome
+	// distribution. Recurrent activation determines reachability above; the
+	// empirical channel frequency/weight determines how strongly each outcome
+	// is represented by prior experience.
+	channelState := make(map[knowledge.NodeID]float64)
+	for targetID := range targetSet {
+		target := r.brain.Registry.GetByID(targetID)
+		if target == nil { continue }
+		for _, synapse := range target.OutboundAll() {
+			if synapse == nil || synapse.Inhibitory { continue }
+			if prediction.State[synapse.TargetID] <= 0 { continue }
+			strength := synapse.Weight
+			if strength <= 0 { strength = synapse.Dynamic.Weight }
+			frequency := float64(synapse.Frequency)
+			if frequency <= 0 { frequency = float64(synapse.Dynamic.Frequency) }
+			confidence := synapse.Confidence
+			if confidence <= 0 { confidence = synapse.Dynamic.Confidence }
+			if frequency <= 0 { frequency = 1 }
+			if confidence <= 0 { confidence = 1 }
+			channelState[synapse.TargetID] += clamp01(strength) * frequency * clamp01(confidence)
+		}
+	}
+	uncertaintyOfOutcome := normalizedStateEntropy(channelState)
 	yield, reliability, _, learned := r.brain.InquiryInformationExperience(string(action))
 	if !learned {
 		return 0, true, nil
