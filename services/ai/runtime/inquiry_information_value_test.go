@@ -77,7 +77,7 @@ func TestInquiryInformationValueReflectsLearnedOutcomeDistribution(t *testing.T)
 	if !focusModeled || !viewModeled {
 		t.Fatalf("expected both learned action models: focus=%v view=%v", focusModeled, viewModeled)
 	}
-	if focusValue <= viewValue {
-		t.Fatalf("expected the more concentrated learned outcome distribution to have greater modeled information value: focus=%v view=%v", focusValue, viewValue)
+	if viewValue <= focusValue {
+		t.Fatalf("expected the more differentiated learned outcome distribution to have greater modeled information value: focus=%v view=%v", focusValue, viewValue)
 	}
 }
