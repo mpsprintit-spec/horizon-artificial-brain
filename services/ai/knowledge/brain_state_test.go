@@ -2,9 +2,8 @@ package knowledge_test
 
 import (
 	"path/filepath"
-	"time"
-	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
@@ -48,7 +47,6 @@ func TestBrainStatePersistsBootstrapAndLearningState(t *testing.T) {
 		t.Fatalf("curiosity state was not restored: %+v", restored.BrainState.CuriosityState)
 	}
 }
-
 
 func TestInquiryInformationExperiencePersistsAcrossCanonicalSaveLoad(t *testing.T) {
 	now := time.Date(2026, 10, 3, 15, 0, 0, 0, time.UTC)
