@@ -121,6 +121,25 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 	return clamp01(informationValue), true, nil
 }
 
+func normalizedStateEntropy(state map[knowledge.NodeID]float64) float64 {
+	positive := make([]float64, 0, len(state))
+	for _, value := range state {
+		if value > 0 { positive = append(positive, value) }
+	}
+	if len(positive) < 2 { return 0 }
+	total := 0.0
+	for _, value := range positive { total += value }
+	if total <= 0 { return 0 }
+	entropy := 0.0
+	for _, value := range positive {
+		p := value / total
+		entropy -= p * math.Log(p)
+	}
+	normalizer := math.Log(float64(len(positive)))
+	if normalizer <= 0 { return 0 }
+	return clamp01(entropy / normalizer)
+}
+
 func normalizedPredictionEntropyAllowed(state map[knowledge.NodeID]float64, allowed map[knowledge.NodeID]struct{}) float64 {
 	if len(allowed) < 2 {
 		return 0
