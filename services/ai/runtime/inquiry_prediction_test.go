@@ -223,3 +223,37 @@ func TestInquiryInformationValueLearnsObservedInformationYield(t *testing.T) {
 		t.Fatalf("learned information yield did not affect prediction: low=%v high=%v", low, high)
 	}
 }
+
+func TestPlanInquiryChangesWithLearnedInformationYield(t *testing.T) {
+	now := time.Date(2026, 9, 30, 12, 20, 0, 0, time.UTC)
+	build := func(gain float64) InquiryAction {
+		brain := knowledge.NewBrain()
+		rt := NewBrainRuntime(brain)
+		target := brain.Store("target")
+		a := brain.Store("outcome-a")
+		b := brain.Store("outcome-b")
+		if err := rt.RegisterActionBinding(ActionBinding{
+			RequestID: "inquiry-plan-yield",
+			BrainIdentity: BrainIdentity,
+			Intent: "inquiry:focus",
+			TargetNodeIDs: []knowledge.NodeID{target.ID},
+		}); err != nil { t.Fatal(err) }
+		for _, outcome := range []knowledge.NodeID{a.ID, b.ID} {
+			if _, err := rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+				Action: InquiryFocus, InformationGain: gain, Reliability: 1,
+				TargetNodeIDs: []knowledge.NodeID{target.ID},
+				OutcomeNodeIDs: []knowledge.NodeID{outcome},
+				CausalLink: "inquiry:plan-yield",
+			}, now); err != nil { t.Fatal(err) }
+		}
+		agenda, err := rt.PlanInquiry(0.8, now)
+		if err != nil { t.Fatal(err) }
+		if agenda.Selected == nil { t.Fatal("expected selected inquiry action") }
+		return agenda.Selected.Action
+	}
+	low := build(0.05)
+	high := build(0.95)
+	if low == high {
+		t.Fatalf("learned information yield did not affect selected inquiry action: low=%q high=%q", low, high)
+	}
+}
