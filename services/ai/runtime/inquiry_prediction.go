@@ -164,37 +164,3 @@ func normalizedPredictionEntropyExcluding(state map[knowledge.NodeID]float64, ex
 	return clamp01(entropy / normalizer)
 }
 
-func normalizedPredictionEntropyExcluding(state map[knowledge.NodeID]float64, excluded map[knowledge.NodeID]struct{}) float64 {
-	if len(state) < 2 {
-		return 0
-	}
-
-	total := 0.0
-	outcomeCount := 0
-	for id, value := range state {
-		if _, skip := excluded[id]; skip {
-			continue
-		}
-		if value > 0 {
-			total += value
-			outcomeCount++
-		}
-	}
-	if total <= 0 || outcomeCount < 2 {
-		return 0
-	}
-
-	entropy := 0.0
-	for id, value := range state {
-		if _, skip := excluded[id]; skip || value <= 0 {
-			continue
-		}
-		p := value / total
-		entropy -= p * math.Log(p)
-	}
-	normalizer := math.Log(float64(outcomeCount))
-	if normalizer <= 0 {
-		return 0
-	}
-	return clamp01(entropy / normalizer)
-}
