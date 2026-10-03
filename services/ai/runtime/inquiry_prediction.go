@@ -97,6 +97,7 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 	actionYield := yield * (0.25 + 0.75*reliability)
 	informationValue := uncertainty * uncertaintyOfOutcome * actionYield
 	return clamp01(informationValue), true, nil
+}
 
 func normalizedPredictionEntropyAllowed(state map[knowledge.NodeID]float64, allowed map[knowledge.NodeID]struct{}) float64 {
 	if len(allowed) < 2 {
