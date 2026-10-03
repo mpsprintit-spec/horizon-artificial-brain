@@ -178,3 +178,48 @@ func TestInquiryInformationValueIgnoresUnrelatedRecurrentActivity(t *testing.T) 
 		t.Fatalf("unrelated recurrent activity changed action information value: before=%v after=%v", before, after)
 	}
 }
+
+
+func TestInquiryInformationValueLearnsObservedInformationYield(t *testing.T) {
+	now := time.Date(2026, 9, 30, 12, 15, 0, 0, time.UTC)
+
+	build := func(gain float64) float64 {
+		brain := knowledge.NewBrain()
+		rt := NewBrainRuntime(brain)
+		target := brain.Store("target")
+		outcomeA := brain.Store("outcome-a")
+		outcomeB := brain.Store("outcome-b")
+
+		if err := rt.RegisterActionBinding(ActionBinding{
+			RequestID: "inquiry-yield-focus",
+			BrainIdentity: BrainIdentity,
+			Intent: "inquiry:focus",
+			TargetNodeIDs: []knowledge.NodeID{target.ID},
+		}); err != nil {
+			t.Fatal(err)
+		}
+		for _, outcome := range []knowledge.NodeID{outcomeA.ID, outcomeB.ID} {
+			if _, err := rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{
+				Action: InquiryFocus,
+				InformationGain: gain,
+				Reliability: 1,
+				TargetNodeIDs: []knowledge.NodeID{target.ID},
+				OutcomeNodeIDs: []knowledge.NodeID{outcome},
+				CausalLink: "inquiry:yield",
+			}, now); err != nil {
+				t.Fatal(err)
+			}
+		}
+		value, modeled, err := rt.PredictInquiryInformationValue(InquiryFocus, 0.8, now)
+		if err != nil || !modeled {
+			t.Fatalf("expected modeled value, value=%v modeled=%v err=%v", value, modeled, err)
+		}
+		return value
+	}
+
+	low := build(0.1)
+	high := build(0.9)
+	if high <= low {
+		t.Fatalf("learned information yield did not affect prediction: low=%v high=%v", low, high)
+	}
+}
