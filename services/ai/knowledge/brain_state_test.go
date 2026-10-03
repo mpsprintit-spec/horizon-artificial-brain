@@ -2,6 +2,8 @@ package knowledge_test
 
 import (
 	"path/filepath"
+	"time"
+	"path/filepath"
 	"testing"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -44,5 +46,31 @@ func TestBrainStatePersistsBootstrapAndLearningState(t *testing.T) {
 	}
 	if restored.BrainState.CuriosityState["pressure"] != 0.65 {
 		t.Fatalf("curiosity state was not restored: %+v", restored.BrainState.CuriosityState)
+	}
+}
+
+
+func TestInquiryInformationExperiencePersistsAcrossCanonicalSaveLoad(t *testing.T) {
+	now := time.Date(2026, 10, 3, 15, 0, 0, 0, time.UTC)
+	brain := NewBrain()
+	brain.RecordInquiryInformationExperience("focus", 0.8, 0.9, now)
+	beforeYield, beforeReliability, beforeSamples, learned := brain.InquiryInformationExperience("focus")
+	if !learned {
+		t.Fatal("expected inquiry information experience to be learned")
+	}
+	path := filepath.Join(t.TempDir(), "brain_memory.json")
+	if err := brain.Save(path); err != nil {
+		t.Fatal(err)
+	}
+	restored := NewBrain()
+	if err := restored.Load(path); err != nil {
+		t.Fatal(err)
+	}
+	afterYield, afterReliability, afterSamples, restoredLearned := restored.InquiryInformationExperience("focus")
+	if !restoredLearned {
+		t.Fatal("inquiry information experience was not persisted")
+	}
+	if beforeYield != afterYield || beforeReliability != afterReliability || beforeSamples != afterSamples {
+		t.Fatalf("inquiry information experience changed across save/load: before=(%v,%v,%v) after=(%v,%v,%v)", beforeYield, beforeReliability, beforeSamples, afterYield, afterReliability, afterSamples)
 	}
 }
