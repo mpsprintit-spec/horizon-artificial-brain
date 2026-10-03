@@ -113,6 +113,23 @@ func (l *LearningUnit) LearnOutcomeTrace(targetNodeIDs, outcomeNodeIDs []knowled
 	// A distributed outcome is a population, not a single result node. Learn
 	// one causal trace for each outcome member so prediction can reconstruct
 	// the full population rather than only the final member of the sequence.
+	for _, targetID := range targetNodeIDs {
+		target := l.Kb.Registry.GetByID(targetID)
+		if target == nil {
+			continue
+		}
+		for _, outcomeID := range outcomeNodeIDs {
+			outcome := l.Kb.Registry.GetByID(outcomeID)
+			if outcome == nil {
+				continue
+			}
+			// Preserve the learned action -> outcome relation in the canonical
+			// dynamic substrate as well as the pattern substrate. Repetition
+			// reinforces the same channel; contradictory outcomes remain as
+			// separate outbound channels and therefore remain representable.
+			l.Kb.ConnectAt(target, outcome, weight, confidence, false, now)
+		}
+	}
 	for _, outcomeID := range outcomeNodeIDs {
 		pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, outcomeID, weight, confidence, evidence)
 		if pattern != nil {
