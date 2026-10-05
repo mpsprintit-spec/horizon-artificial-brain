@@ -357,7 +357,12 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 	}
 	uncertainty = clamp01(uncertainty)
 	candidates := DefaultInquiryCandidates(uncertainty)
+
+	// Learning policy is canonical Brain state. Snapshot it under the Brain
+	// read lock so continuous cognition cannot race a concurrent policy update.
+	r.brain.RLock()
 	policy := r.brain.BrainState.LearningPolicyState
+	r.brain.RUnlock()
 
 	for i := range candidates {
 		// Information value comes from the learned internal action/outcome
