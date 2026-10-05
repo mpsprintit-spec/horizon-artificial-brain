@@ -240,18 +240,18 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	if r == nil || r.brain == nil || now.IsZero() {
 		return nil
 	}
+
+	// Curiosity reads canonical neural state as a snapshot. The write-back is
+	// performed under the same Brain mutation boundary used by learning,
+	// activation, and memory dynamics, so the continuous service can coexist
+	// with external observations without racing on BrainState.
+	r.brain.RLock()
 	predictionError := clamp01(r.brain.BrainState.PredictionState["last_error"])
 	policy := r.brain.BrainState.LearningPolicyState
-	pressure := clamp01(policy.CuriosityPressure)
-	if pressure <= 0 {
-		pressure = 0.65
-	}
-	noveltySensitivity := clamp01(policy.NoveltySensitivity)
-	uncertaintySensitivity := clamp01(policy.UncertaintySensitivity)
 
 	type candidate struct {
-		node *knowledge.ConceptNode
-		score float64
+		nodeID knowledge.NodeID
+		score  float64
 	}
 	candidates := make([]candidate, 0)
 	for _, node := range r.brain.Registry.Nodes() {
@@ -260,39 +260,42 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		}
 		usage := 1.0 / (1.0 + float64(maxInt64(node.Frequency, 0)))
 		underActivation := clamp01(1.0 - node.Activation)
-		novelty := clamp01(usage * noveltySensitivity)
-		uncertainty := clamp01((0.5 * underActivation) + (0.5 * predictionError)) * uncertaintySensitivity
-		score := pressure * clamp01(novelty+uncertainty)
+		novelty := clamp01(usage * clamp01(policy.NoveltySensitivity))
+		uncertainty := clamp01((0.5*underActivation)+(0.5*predictionError)) * clamp01(policy.UncertaintySensitivity)
+		score := clamp01(policy.CuriosityPressure) * clamp01(novelty+uncertainty)
 		if score <= 0.05 {
 			continue
 		}
-		candidates = append(candidates, candidate{node: node, score: score})
+		candidates = append(candidates, candidate{nodeID: node.ID, score: score})
 	}
+	r.brain.RUnlock()
+
 	if len(candidates) == 0 {
 		return nil
 	}
 	sort.SliceStable(candidates, func(i, j int) bool {
 		if candidates[i].score == candidates[j].score {
-			return candidates[i].node.ID < candidates[j].node.ID
+			return candidates[i].nodeID < candidates[j].nodeID
 		}
 		return candidates[i].score > candidates[j].score
 	})
+
 	boost := clamp01(candidates[0].score * 0.30)
 	if boost <= 0 {
 		return nil
 	}
-	r.brain.BrainState.CuriosityState["drive"] = candidates[0].score
-	r.brain.BrainState.CuriosityState["target_node"] = float64(candidates[0].node.ID)
-	r.brain.BrainState.CuriosityState["last_update_unix"] = float64(now.UnixNano())
 
-	// Return the endogenous context to the single thought transition. This
-	// avoids a hidden activation pass that would replace the recurrent state
-	// before cognition has a chance to process the curiosity signal.
-	return map[knowledge.NodeID]float64{
-		candidates[0].node.ID: boost,
+	r.brain.Lock()
+	if r.brain.BrainState.CuriosityState == nil {
+		r.brain.BrainState.CuriosityState = map[string]float64{}
 	}
-}
+	r.brain.BrainState.CuriosityState["drive"] = boost
+	r.brain.BrainState.CuriosityState["candidate_node"] = float64(candidates[0].nodeID)
+	r.brain.BrainState.CuriosityState["updated_unix"] = float64(now.UnixNano())
+	r.brain.Unlock()
 
+	return map[knowledge.NodeID]float64{candidates[0].nodeID: boost}
+}
 func maxInt64(value int64, floor int64) int64 {
 	if value < floor {
 		return floor
