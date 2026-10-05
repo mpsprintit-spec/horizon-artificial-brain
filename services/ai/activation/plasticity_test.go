@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/memory"
 )
 
 func TestPredictionErrorPlasticityAdaptsExistingConnection(t *testing.T) {
