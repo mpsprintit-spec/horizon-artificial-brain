@@ -233,6 +233,7 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 		RankedNodeIDs: rankedNodeIDs(thought.RankedNodes),
 		Activations: cloneNodeValues(thought.Activations),
 		Confidence: cloneNodeValues(thought.Confidence),
+		Resonance: thought.Resonance,
 		PredictionError: thought.PredictionError,
 		Prediction: thought.Prediction,
 	}
