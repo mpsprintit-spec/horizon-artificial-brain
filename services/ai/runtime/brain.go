@@ -333,7 +333,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		r.brain.BrainState.CuriosityState = map[string]float64{}
 	}
 	r.brain.BrainState.CuriosityState["drive"] = boost
-	r.brain.BrainState.CuriosityState["candidate_node"] = float64(candidates[0].nodeID)
+	r.brain.BrainState.CuriosityState["target_node"] = float64(candidates[0].nodeID)
 	r.brain.BrainState.CuriosityState["updated_unix"] = float64(now.UnixNano())
 	r.brain.Unlock()
 
