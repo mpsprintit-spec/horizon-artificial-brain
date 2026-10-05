@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	predictionLearningRate = 0.12
-	predictionMinWeight    = 0.05
-	predictionMaxWeight    = 0.95
+	predictionLearningRate  = 0.12
+	predictionMinWeight     = 0.05
+	predictionMaxWeight     = 0.95
 	consequenceLearningRate = 0.08
 )
 
@@ -37,6 +37,12 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 		now = time.Now().UTC()
 	}
 	errorSignal = clamp01(errorSignal)
+
+	// Canonical brain mutation boundary. Memory optimization, checkpointing,
+	// activation and all plasticity paths must serialize against the same
+	// KnowledgeBase lock when they mutate canonical synapse state.
+	e.Memory.Lock()
+	defer e.Memory.Unlock()
 
 	for _, source := range e.Memory.Registry.Nodes() {
 		for _, synapse := range source.OutboundAll() {
@@ -81,7 +87,6 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 	e.Memory.Patterns.ReconsolidateFromState(predicted, actual, errorSignal)
 }
 
-
 // ApplyConsequencePlasticity reinforces or weakens already-eligible neural
 // connections from the observed consequence of an inquiry. Information gain
 // controls how strongly the consequence is retained; it never changes the
@@ -93,7 +98,17 @@ func (e *Engine) ApplyConsequencePlasticity(valence, informationGain float64, no
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
-	if valence < -1 { valence = -1 } else if valence > 1 { valence = 1 }
+
+	// Consequence learning mutates the same canonical synapse state as
+	// prediction plasticity and memory optimization.
+	e.Memory.Lock()
+	defer e.Memory.Unlock()
+
+	if valence < -1 {
+		valence = -1
+	} else if valence > 1 {
+		valence = 1
+	}
 	informationGain = clamp01(informationGain)
 	gain := 0.5 + 0.5*informationGain
 
