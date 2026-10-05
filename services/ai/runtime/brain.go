@@ -169,16 +169,24 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 }
 
 func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
-func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) { return r.ThinkAt(cycles, time.Time{}) }
+func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) {
+	return r.ThinkAt(cycles, time.Time{})
+}
+
 func (r *BrainRuntime) ThinkAt(cycles int, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	return r.thinkAtWithContext(cycles, nil, timestamp)
 }
+
 func (r *BrainRuntime) thinkAtWithContext(cycles int, context map[knowledge.NodeID]float64, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil {
 		return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized")
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.thinkAtWithContextLocked(cycles, context, timestamp)
+}
+
+func (r *BrainRuntime) thinkAtWithContextLocked(cycles int, context map[knowledge.NodeID]float64, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	now := timestamp
 	if now.IsZero() {
 		now = r.nowLocked()
@@ -200,14 +208,21 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	if r == nil || r.brain == nil {
 		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
 	}
-	now := r.now()
+	// Autonomous cognition is one serialized runtime transaction. This keeps
+	// external observations, learning, and the continuous service from
+	// interleaving at the runtime boundary while the canonical Brain lock
+	// protects the underlying neural substrate.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	now := r.nowLocked()
 	// Autonomous cognition needs an endogenous drive when no external event is
 	// present. The drive is deterministic: it prefers underused neural units
 	// and increases with persistent uncertainty/curiosity. It is not random
 	// stimulation and it does not assign semantic meaning to any node.
 	curiosityContext := r.applyCuriosityDrive(now)
 
-	thought, sequence, err := r.thinkAtWithContext(cycles, curiosityContext, now)
+	thought, sequence, err := r.thinkAtWithContextLocked(cycles, curiosityContext, now)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
@@ -218,16 +233,13 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 		RankedNodeIDs: rankedNodeIDs(thought.RankedNodes),
 		Activations: cloneNodeValues(thought.Activations),
 		Confidence: cloneNodeValues(thought.Confidence),
-		Resonance: thought.Resonance,
 		PredictionError: thought.PredictionError,
 		Prediction: thought.Prediction,
 	}
 	r.brain.RecordLearningSignal(output.PredictionError, now)
 	r.brain.ApplyMemoryDynamics(now)
-	r.mu.Lock()
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()
-	r.mu.Unlock()
 	return output, nil
 }
 
