@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/config"
@@ -45,6 +48,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	service := runtime.NewContinuousService(horizon.Runtime, cfg.CognitiveInterval, 1)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	logger.Info(
 		"Horizon brain ready",
 		"service", cfg.ServiceName,
@@ -55,7 +62,25 @@ func main() {
 		"resonance", output.Resonance,
 		"prediction_error", output.PredictionError,
 		"stimulus_count", len(stimulus),
+		"cognitive_interval", cfg.CognitiveInterval,
 	)
+
+	if err := service.Run(ctx, func(output runtime.CognitiveOutput, err error) {
+		if err != nil {
+			logger.Error("continuous cognition cycle failed", "error", err)
+			return
+		}
+		logger.Info(
+			"Horizon cognitive cycle",
+			"sequence", output.Sequence,
+			"resonance", output.Resonance,
+			"prediction_error", output.PredictionError,
+			"active_nodes", len(output.RankedNodeIDs),
+		)
+	}); err != nil && err != context.Canceled {
+		logger.Error("continuous brain service stopped unexpectedly", "error", err)
+		os.Exit(1)
+	}
 }
 
 // signalStimulus is an input adapter only. It preserves signal provenance at
