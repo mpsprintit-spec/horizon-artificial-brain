@@ -54,3 +54,49 @@ func TestPulseUsesCanonicalCognitiveOrchestrator(t *testing.T) {
 		t.Fatal("Pulse produced no neural interpretation")
 	}
 }
+
+
+type multiPerception struct {
+	signals []perception.PerceptionSignal
+}
+
+func (p multiPerception) Perceive(string) ([]perception.PerceptionSignal, error) {
+	return append([]perception.PerceptionSignal(nil), p.signals...), nil
+}
+
+func TestPulseSignalsPreservesEachModality(t *testing.T) {
+	at := time.Unix(100, 0).UTC()
+	h := NewHorizonEngine()
+	h.Perception = multiPerception{signals: []perception.PerceptionSignal{
+		{
+			Kind:       perception.PerceptionUserInput,
+			Source:     "microphone",
+			Modality:   "audio",
+			Tokens:     []string{"suara"},
+			Confidence: 0.9,
+			ObservedAt: at,
+		},
+		{
+			Kind:       perception.PerceptionWebSearch,
+			Source:     "camera",
+			Modality:   "vision",
+			Tokens:     []string{"objek"},
+			Confidence: 0.8,
+			ObservedAt: at.Add(time.Millisecond),
+		},
+	}}
+
+	results, err := h.PulseSignals(h.Perception.(multiPerception).signals)
+	if err != nil {
+		t.Fatalf("PulseSignals: %v", err)
+	}
+	if len(results) != 2 {
+		t.Fatalf("result count = %d, want 2", len(results))
+	}
+	if results[0].Observation.Modality != "audio" {
+		t.Fatalf("first modality = %q, want audio", results[0].Observation.Modality)
+	}
+	if results[1].Observation.Modality != "vision" {
+		t.Fatalf("second modality = %q, want vision", results[1].Observation.Modality)
+	}
+}
