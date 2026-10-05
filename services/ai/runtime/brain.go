@@ -203,7 +203,37 @@ func (r *BrainRuntime) thinkAtWithContextLocked(cycles int, context map[knowledg
 	return thought, r.seq, nil
 }
 type CognitiveOutput struct { BrainIdentity string; Sequence uint64; Timestamp time.Time; RankedNodeIDs []knowledge.NodeID; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; Resonance float64; PredictionError float64; Prediction activation.Prediction; StateDelta CognitiveStateDelta }
-func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) { if r == nil { return CognitiveOutput{}, errors.New("brain runtime is not initialized") }; if event.Timestamp.IsZero() { r.mu.Lock(); event.Timestamp = r.nowLocked(); r.mu.Unlock() }; result, sequence, err := r.Process(event); if err != nil { return CognitiveOutput{}, err }; output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result); output.Prediction = r.activation.PredictionSnapshot(); r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp); r.brain.ApplyMemoryDynamics(event.Timestamp); r.mu.Lock(); output.StateDelta = output.State().Diff(r.lastCognitiveState); r.lastCognitiveState = output.State(); r.mu.Unlock(); return output, nil }
+func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
+	if r == nil {
+		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
+	}
+	if event.Timestamp.IsZero() {
+		r.mu.Lock()
+		event.Timestamp = r.nowLocked()
+		r.mu.Unlock()
+	}
+
+	result, sequence, err := r.Process(event)
+	if err != nil {
+		return CognitiveOutput{}, err
+	}
+
+	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
+	output.Prediction = r.activation.PredictionSnapshot()
+
+	// Serialize the post-process learning transaction with autonomous cognition.
+	// Process itself is already serialized internally; this second boundary
+	// prevents the continuous service from interleaving between inference and
+	// the numeric learning/memory update that closes the same observation.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
+	r.brain.ApplyMemoryDynamics(event.Timestamp)
+	output.StateDelta = output.State().Diff(r.lastCognitiveState)
+	r.lastCognitiveState = output.State()
+	return output, nil
+}
+
 func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	if r == nil || r.brain == nil {
 		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
