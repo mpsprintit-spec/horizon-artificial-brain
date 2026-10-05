@@ -67,7 +67,7 @@ func (p multiPerception) Perceive(string) ([]perception.PerceptionSignal, error)
 func TestPulseSignalsPreservesEachModality(t *testing.T) {
 	at := time.Unix(100, 0).UTC()
 	h := NewHorizonEngine()
-	h.Perception = multiPerception{signals: []perception.PerceptionSignal{
+	signals := []perception.PerceptionSignal{
 		{
 			Kind:       perception.PerceptionUserInput,
 			Source:     "microphone",
@@ -84,9 +84,10 @@ func TestPulseSignalsPreservesEachModality(t *testing.T) {
 			Confidence: 0.8,
 			ObservedAt: at.Add(time.Millisecond),
 		},
-	}}
+	}
+	h.Perception = multiPerception{signals: signals}
 
-	results, err := h.PulseSignals(h.Perception.(multiPerception).signals)
+	results, err := h.PulseSignals(signals)
 	if err != nil {
 		t.Fatalf("PulseSignals: %v", err)
 	}
