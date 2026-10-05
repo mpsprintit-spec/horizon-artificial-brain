@@ -14,6 +14,7 @@ const (
 	defaultEnvironment = "development"
 	defaultPort        = 8080
 	defaultTimeout     = 1500 * time.Millisecond
+	defaultCognitiveInterval = time.Second
 )
 
 // Config contains runtime settings for the Horizon AI Cluster service.
@@ -22,6 +23,7 @@ type Config struct {
 	Environment     string
 	Port            int
 	DecisionTimeout time.Duration
+	CognitiveInterval time.Duration
 }
 
 // Load reads configuration from environment variables and applies secure defaults.
@@ -31,6 +33,7 @@ func Load() (Config, error) {
 		Environment:     valueOrDefault("HORIZON_ENV", defaultEnvironment),
 		Port:            defaultPort,
 		DecisionTimeout: defaultTimeout,
+		CognitiveInterval: defaultCognitiveInterval,
 	}
 
 	if raw := strings.TrimSpace(os.Getenv("HORIZON_AI_PORT")); raw != "" {
@@ -47,6 +50,14 @@ func Load() (Config, error) {
 			return Config{}, fmt.Errorf("invalid HORIZON_AI_DECISION_TIMEOUT: %q", raw)
 		}
 		cfg.DecisionTimeout = timeout
+	}
+
+	if raw := strings.TrimSpace(os.Getenv("HORIZON_AI_COGNITIVE_INTERVAL")); raw != "" {
+		interval, err := time.ParseDuration(raw)
+		if err != nil || interval <= 0 {
+			return Config{}, fmt.Errorf("invalid HORIZON_AI_COGNITIVE_INTERVAL: %q", raw)
+		}
+		cfg.CognitiveInterval = interval
 	}
 
 	if err := cfg.Validate(); err != nil {
@@ -68,6 +79,9 @@ func (c Config) Validate() error {
 	}
 	if c.DecisionTimeout <= 0 {
 		return errors.New("decision timeout must be positive")
+	}
+	if c.CognitiveInterval <= 0 {
+		return errors.New("cognitive interval must be positive")
 	}
 	return nil
 }
