@@ -392,7 +392,7 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 			candidates[i].ExpectedInformationGain = 0
 		}
 
-		candidates[i].PriorExperience = r.InquiryPriorExperience(candidates[i].Action, candidates[i].PriorExperience)
+		candidates[i].PriorExperience = r.inquiryPriorExperienceLocked(candidates[i].Action, candidates[i].PriorExperience)
 		switch candidates[i].Action {
 		case InquiryReobserve, InquiryFocus:
 			candidates[i].PriorExperience = clamp01(candidates[i].PriorExperience + 0.20*clamp01(policy.RepeatObservationBias))
