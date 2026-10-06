@@ -360,8 +360,16 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 	if r == nil || r.brain == nil {
 		return InquiryAgenda{}, errors.New("brain runtime is not initialized")
 	}
+
+	// Planning is one runtime transaction. The selected sequence, action
+	// bindings, learned inquiry model, and persisted selection must come from
+	// the same runtime snapshot; an autonomous cognition cycle must not
+	// interleave between those steps.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if at.IsZero() {
-		at = r.now()
+		at = r.nowLocked()
 	}
 	uncertainty = clamp01(uncertainty)
 	candidates := DefaultInquiryCandidates(uncertainty)
@@ -377,7 +385,8 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 		// model. If the action has no learned model yet, leave its value at
 		// zero: uncertainty alone does not imply that the action will provide
 		// useful information. No action-specific curiosity constant is used.
-		if value, modeled, err := r.PredictInquiryInformationValue(candidates[i].Action, uncertainty, at); err == nil && modeled {
+		targetSet := r.inquiryTargetSetLocked(candidates[i].Action)
+		if value, modeled, err := r.predictInquiryInformationValueWithTargets(targetSet, uncertainty, at); err == nil && modeled {
 			candidates[i].ExpectedInformationGain = value
 		} else {
 			candidates[i].ExpectedInformationGain = 0
@@ -394,7 +403,7 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 		}
 	}
 
-	agenda, err := BuildInquiryAgenda(BrainIdentity, r.LastSequence(), at, candidates, DefaultInquiryPolicy())
+	agenda, err := BuildInquiryAgenda(BrainIdentity, r.seq, at, candidates, DefaultInquiryPolicy())
 	if err != nil {
 		return InquiryAgenda{}, err
 	}
@@ -419,8 +428,15 @@ func (r *BrainRuntime) CompleteInquiry(observedInformationGain, predictionError 
 	if r == nil || r.brain == nil {
 		return errors.New("brain runtime is not initialized")
 	}
+
+	// Completion is serialized with inquiry planning and autonomous cognition.
+	// The observation outcome therefore updates the same runtime transaction
+	// boundary that owns the pending inquiry trajectory.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if at.IsZero() {
-		at = r.now()
+		at = r.nowLocked()
 	}
 	r.brain.RecordInquiryOutcome(observedInformationGain, predictionError, at)
 	return nil
