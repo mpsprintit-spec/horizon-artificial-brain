@@ -120,7 +120,12 @@ func (r *BrainRuntime) now() time.Time { if r == nil { return time.Now().UTC() }
 func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); r.eventLog = log }
 func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil { return activation.Result{}, 0, errors.New("brain runtime is not initialized") }
-	r.mu.Lock(); defer r.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.processLocked(event)
+}
+
+func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, error) {
 	if event.Timestamp.IsZero() { event.Timestamp = r.nowLocked() }
 	nextSeq := r.seq + 1
 	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
