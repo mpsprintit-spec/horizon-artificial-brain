@@ -218,20 +218,19 @@ func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
 		r.mu.Unlock()
 	}
 
-	result, sequence, err := r.Process(event)
+	// Keep inference, prediction capture, learning, memory dynamics, and state
+	// delta calculation in one runtime transaction. A second cognition cycle
+	// must not interleave between activation and its prediction snapshot.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	result, sequence, err := r.processLocked(event)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
 
 	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
 	output.Prediction = r.activation.PredictionSnapshot()
-
-	// Serialize the post-process learning transaction with autonomous cognition.
-	// Process itself is already serialized internally; this second boundary
-	// prevents the continuous service from interleaving between inference and
-	// the numeric learning/memory update that closes the same observation.
-	r.mu.Lock()
-	defer r.mu.Unlock()
 	r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
 	r.brain.ApplyMemoryDynamics(event.Timestamp)
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
