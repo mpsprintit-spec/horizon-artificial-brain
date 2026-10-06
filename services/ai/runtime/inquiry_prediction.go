@@ -35,10 +35,15 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 		at = r.now()
 	}
 
+	r.mu.Lock()
+	targetSet := r.inquiryTargetSetLocked(action)
+	r.mu.Unlock()
+	return r.predictInquiryInformationValueWithTargets(targetSet, uncertainty, at)
+}
+
+func (r *BrainRuntime) inquiryTargetSetLocked(action InquiryAction) map[knowledge.NodeID]struct{} {
 	targetSet := make(map[knowledge.NodeID]struct{})
 	intent := "inquiry:" + string(action)
-
-	r.mu.Lock()
 	for _, binding := range r.actions {
 		if binding.Intent != intent {
 			continue
@@ -50,8 +55,10 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 			targetSet[synapse.TargetNodeID] = struct{}{}
 		}
 	}
-	r.mu.Unlock()
+	return targetSet
+}
 
+func (r *BrainRuntime) predictInquiryInformationValueWithTargets(targetSet map[knowledge.NodeID]struct{}, uncertainty float64, at time.Time) (float64, bool, error) {
 	if len(targetSet) == 0 {
 		return uncertainty, false, nil
 	}
