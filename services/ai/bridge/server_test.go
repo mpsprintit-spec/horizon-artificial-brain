@@ -60,8 +60,14 @@ func TestBridgeObservationPersistsAndReplaysFromRuntime(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	defer log.Close()
 	rt.SetEventLog(log)
-	server, err := New(rt, Config{EventLogPath: logPath, BrainMemoryPath: memoryPath})
+	server, err := New(rt, Config{EventLogPath: logPath, BrainMemoryPath: memoryPath, RuntimeCommit: "integration"})
 	if err != nil { t.Fatal(err) }
+
+	before, err := rt.MonitorSnapshot()
+	if err != nil { t.Fatal(err) }
+	if before.Counts.NeuralUnits == 0 { t.Fatal("runtime snapshot has no neural units") }
+	if len(before.NeuralUnits) != before.Counts.NeuralUnits { t.Fatalf("neural unit count mismatch: %d != %d", len(before.NeuralUnits), before.Counts.NeuralUnits) }
+	if len(before.Synapses) != before.Counts.Synapses { t.Fatalf("synapse count mismatch: %d != %d", len(before.Synapses), before.Counts.Synapses) }
 
 	body := strings.NewReader(`{"schema_version":1,"brain_identity":"horizon-primary-brain","event_id":"browser-vision-1","timestamp":"2026-10-07T14:00:00Z","modality":"vision","source":"github-pages-camera","provenance":{"source":"github-pages-camera","modality":"vision","adapter":"github-pages-browser","synthetic":false},"payload":{"encoding":"application/octet-stream","data":"AQID"}}`)
 	req := httptest.NewRequest(http.MethodPost, "/v1/observations", body)
@@ -70,6 +76,17 @@ func TestBridgeObservationPersistsAndReplaysFromRuntime(t *testing.T) {
 	server.Handler().ServeHTTP(res, req)
 	if res.Code != http.StatusAccepted { t.Fatalf("observation status=%d body=%s", res.Code, res.Body.String()) }
 	if _, err := os.Stat(memoryPath); err != nil { t.Fatalf("brain memory missing: %v", err) }
+	memory, err := os.ReadFile(memoryPath)
+	if err != nil { t.Fatal(err) }
+	for _, marker := range []string{`"neural_units"`, `"synapses"`, `"populations"`} {
+		if !strings.Contains(string(memory), marker) { t.Fatalf("brain memory missing canonical field %s", marker) }
+	}
+	after, err := rt.MonitorSnapshot()
+	if err != nil { t.Fatal(err) }
+	if after.StateRevision <= before.StateRevision { t.Fatalf("observation did not advance canonical revision: before=%d after=%d", before.StateRevision, after.StateRevision) }
+	if after.CanonicalStateHash == before.CanonicalStateHash { t.Fatal("observation did not change canonical brain hash") }
+	if len(after.NeuralUnits) != after.Counts.NeuralUnits || len(after.Synapses) != after.Counts.Synapses { t.Fatal("snapshot counts do not describe actual canonical graph") }
+	if after.Counts.NeuralUnits == 0 { t.Fatal("canonical graph has no neural units after observation") }
 
 	logged, err := runtime.ReadEventLog(logPath)
 	if err != nil { t.Fatal(err) }
