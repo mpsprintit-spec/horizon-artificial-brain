@@ -69,6 +69,11 @@ func (r *BrainRuntime) predictInquiryInformationValueWithTargets(action InquiryA
 	}
 	sort.Slice(targets, func(i, j int) bool { return targets[i] < targets[j] })
 
+	// Snapshot the learned information yield before taking the Brain read lock.
+	// InquiryInformationExperience acquires the same RWMutex internally; calling it
+	// while this read lock is held can deadlock when a writer is waiting.
+	yield, reliability, _, learned := r.brain.InquiryInformationExperience(string(action))
+
 	r.brain.RLock()
 	defer r.brain.RUnlock()
 	prediction := r.activation.PredictOutcomeFromNodes(targets, at, 1)
@@ -121,7 +126,6 @@ func (r *BrainRuntime) predictInquiryInformationValueWithTargets(action InquiryA
 		}
 	}
 	uncertaintyOfOutcome := normalizedStateEntropy(channelState)
-	yield, reliability, _, learned := r.brain.InquiryInformationExperience(string(action))
 	if !learned {
 		return 0, true, nil
 	}
