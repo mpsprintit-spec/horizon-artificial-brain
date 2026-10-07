@@ -70,6 +70,7 @@ func (r *BrainRuntime) predictInquiryInformationValueWithTargets(targetSet map[k
 	sort.Slice(targets, func(i, j int) bool { return targets[i] < targets[j] })
 
 	r.brain.RLock()
+	defer r.brain.RUnlock()
 	prediction := r.activation.PredictOutcomeFromNodes(targets, at, 1)
 
 	// Restrict the outcome distribution to neural units that are actually
@@ -119,7 +120,6 @@ func (r *BrainRuntime) predictInquiryInformationValueWithTargets(targetSet map[k
 			channelState[synapse.TargetID] += clamp01(strength) * frequency * clamp01(confidence)
 		}
 	}
-	r.brain.RUnlock()
 	uncertaintyOfOutcome := normalizedStateEntropy(channelState)
 	yield, reliability, _, learned := r.brain.InquiryInformationExperience(string(action))
 	if !learned {
