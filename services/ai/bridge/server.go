@@ -1,7 +1,6 @@
 package bridge
 
 import (
-	"bufio"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
@@ -200,4 +199,3 @@ func afterRevision(r *http.Request) uint64 { value,_:=strconv.ParseUint(r.URL.Qu
 
 func writeJSON(w http.ResponseWriter,status int,value any){w.Header().Set("Content-Type","application/json");w.WriteHeader(status);_=json.NewEncoder(w).Encode(value)}
 func writeError(w http.ResponseWriter,status int,message string){writeJSON(w,status,map[string]any{"error":message})}
-var _ = bufio.ErrInvalidUnreadByte
