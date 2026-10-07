@@ -31,6 +31,9 @@ type MonitorSnapshot struct {
 	Synapses []json.RawMessage `json:"synapses"`
 	TemporalPatterns []json.RawMessage `json:"temporal_patterns"`
 	ExperienceTraces []json.RawMessage `json:"experience_traces"`
+	Episodes []json.RawMessage `json:"episodes"`
+	BootstrapExperiences []json.RawMessage `json:"bootstrap_experiences"`
+	Provenance []json.RawMessage `json:"provenance"`
 	BrainState MonitorBrainState `json:"brain_state"`
 }
 
@@ -57,6 +60,9 @@ type monitorCanonicalBrain struct {
 	Synapses []json.RawMessage `json:"synapses"`
 	TemporalPatterns []json.RawMessage `json:"temporal_patterns"`
 	ExperienceTraces []json.RawMessage `json:"experience_traces"`
+	Episodes []json.RawMessage `json:"episodes"`
+	BootstrapExperiences []json.RawMessage `json:"bootstrap_experiences"`
+	Provenance []json.RawMessage `json:"provenance"`
 	PredictionState map[string]float64 `json:"prediction_state"`
 	ErrorState map[string]float64 `json:"error_state"`
 	MemoryState map[string]float64 `json:"memory_state"`
@@ -104,6 +110,9 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 		Synapses: brain.Synapses,
 		TemporalPatterns: brain.TemporalPatterns,
 		ExperienceTraces: brain.ExperienceTraces,
+		Episodes: brain.Episodes,
+		BootstrapExperiences: brain.BootstrapExperiences,
+		Provenance: brain.Provenance,
 		BrainState: MonitorBrainState{
 			Prediction: cloneMonitorFloatMap(brain.PredictionState),
 			Error: cloneMonitorFloatMap(brain.ErrorState),
