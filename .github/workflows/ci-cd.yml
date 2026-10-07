@@ -16,6 +16,8 @@ jobs:
         run: go mod download
       - name: Validate HC-001 foundation
         run: make validate
+      - name: Build Go runtime
+        run: make build
 
   monitor:
     runs-on: ubuntu-latest
