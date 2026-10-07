@@ -386,7 +386,7 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 		// zero: uncertainty alone does not imply that the action will provide
 		// useful information. No action-specific curiosity constant is used.
 		targetSet := r.inquiryTargetSetLocked(candidates[i].Action)
-		if value, modeled, err := r.predictInquiryInformationValueWithTargets(targetSet, uncertainty, at); err == nil && modeled {
+		if value, modeled, err := r.predictInquiryInformationValueWithTargets(candidates[i].Action, targetSet, uncertainty, at); err == nil && modeled {
 			candidates[i].ExpectedInformationGain = value
 		} else {
 			candidates[i].ExpectedInformationGain = 0
