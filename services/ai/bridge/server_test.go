@@ -12,6 +12,18 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
+func TestBridgeReadEndpointsAreLive(t *testing.T) {
+	server, err := New(runtime.NewBrainRuntime(nil), Config{RuntimeCommit: "integration"})
+	if err != nil { t.Fatal(err) }
+	for _, path := range []string{"/health", "/v1/brain/handshake", "/v1/brain/snapshot", "/v1/brain/events?after=0"} {
+		req := httptest.NewRequest(http.MethodGet, path, nil)
+		res := httptest.NewRecorder()
+		server.Handler().ServeHTTP(res, req)
+		if res.Code != http.StatusOK { t.Fatalf("%s status=%d body=%s", path, res.Code, res.Body.String()) }
+		if !strings.Contains(res.Header().Get("Content-Type"), "application/json") { t.Fatalf("%s did not return JSON", path) }
+	}
+}
+
 func TestSnapshotBridgeServesCanonicalRuntime(t *testing.T) {
 	runtime := runtime.NewBrainRuntime(nil)
 	server, err := New(runtime, Config{AllowedOrigins: []string{"https://example.github.io"}, RuntimeCommit: "test"})
