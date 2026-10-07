@@ -70,6 +70,9 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 		return MonitorSnapshot{}, errors.New("brain runtime is not initialized")
 	}
 
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	data, err := r.brain.CanonicalJSON()
 	if err != nil {
 		return MonitorSnapshot{}, err
@@ -80,10 +83,8 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 	}
 	hash := sha256.Sum256(data)
 
-	r.mu.Lock()
 	sequence := r.seq
 	now := r.nowLocked()
-	r.mu.Unlock()
 
 	return MonitorSnapshot{
 		Type: "brain.snapshot",
