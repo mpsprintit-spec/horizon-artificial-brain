@@ -43,7 +43,10 @@ function binaryToBase64(buffer) { const bytes=new Uint8Array(buffer); let out=""
 function rawPayload(value) { return new TextEncoder().encode(value); }
 async function hashBuffer(buffer) { const hash=await crypto.subtle.digest("SHA-256",buffer); return "sha256:"+Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join(""); }
 function makeEnvelope(modality, source, payload, extra={}) {
-  return {schema_version:1,brain_identity:"horizon-primary-brain",event_id:nextId(modality),session_id:sessionStorage.getItem("horizon.session")||"browser-"+crypto.randomUUID(),timestamp:new Date().toISOString(),modality,source,provenance:{source,modality,capture_device:extra.capture_device||"",adapter:"github-pages-browser",synthetic:Boolean(extra.synthetic)},payload,...extra.payloadMeta};
+  const sessionId=sessionStorage.getItem("horizon.session")||"browser-"+crypto.randomUUID();
+  sessionStorage.setItem("horizon.session",sessionId);
+  const eventId=nextId(modality);
+  return {schema_version:1,brain_identity:"horizon-primary-brain",event_id:eventId,session_id:sessionId,sequence:sessionSequence,timestamp:new Date().toISOString(),modality,source,provenance:{source,modality,capture_device:extra.capture_device||"",adapter:"github-pages-browser",synthetic:Boolean(extra.synthetic)},payload,...extra.payloadMeta};
 }
 async function sendEnvelope(envelope, uiStatus) {
   try { uiStatus.textContent="captured"; const response=await postObservation(envelope); uiStatus.textContent="acknowledged r"+response.state_revision; }
