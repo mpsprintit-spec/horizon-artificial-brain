@@ -30,14 +30,14 @@ func TestContinuousServiceRunsImmediatelyAndStopsOnContextCancellation(t *testin
 				return
 			}
 			outputs <- output
-			if len(outputs) >= 1 {
-				cancel()
-			}
 		})
 	}()
 
 	select {
 	case <-outputs:
+		// Cancel from the test goroutine after observing the output. This avoids
+		// racing the service callback's output send with cancellation.
+		cancel()
 	case <-time.After(2 * time.Second):
 		t.Fatal("continuous service did not execute its initial cognitive cycle")
 	}
