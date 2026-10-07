@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -31,6 +30,20 @@ func main() {
 	// executable. Cluster remains available as a legacy sensor/decision
 	// compatibility component, but it is not invoked as the brain here.
 	horizon := core.NewHorizonEngine()
+	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
+	if brainMemoryPath == "" { brainMemoryPath = "brain_memory.json" }
+	eventLogPath := strings.TrimSpace(os.Getenv("HORIZON_EVENT_LOG_PATH"))
+	if eventLogPath == "" { eventLogPath = "horizon_events.jsonl" }
+	if _, statErr := os.Stat(brainMemoryPath); statErr == nil {
+		if err := horizon.Runtime.LoadBrain(brainMemoryPath); err != nil {
+			logger.Error("failed to load canonical brain memory", "path", brainMemoryPath, "error", err)
+			os.Exit(1)
+		}
+	}
+	eventLog, err := runtime.OpenEventLog(eventLogPath)
+	if err != nil { logger.Error("failed to open brain event log", "path", eventLogPath, "error", err); os.Exit(1) }
+	defer eventLog.Close()
+	horizon.Runtime.SetEventLog(eventLog)
 	signals := bootstrapSignals()
 	for _, signal := range signals {
 		if err := signal.Validate(); err != nil {
@@ -65,6 +78,8 @@ func main() {
 		AllowedOrigins: bridgeOrigins,
 		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
 		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
+		EventLogPath: eventLogPath,
+		BrainMemoryPath: brainMemoryPath,
 	})
 	if err != nil {
 		logger.Error("failed to initialize monitor bridge", "error", err)
@@ -100,6 +115,7 @@ func main() {
 			logger.Error("continuous cognition cycle failed", "error", err)
 			return
 		}
+		if saveErr := horizon.Runtime.SaveBrain(brainMemoryPath); saveErr != nil { logger.Error("brain persistence failed", "error", saveErr) }
 		logger.Info(
 			"Horizon cognitive cycle",
 			"sequence", output.Sequence,
