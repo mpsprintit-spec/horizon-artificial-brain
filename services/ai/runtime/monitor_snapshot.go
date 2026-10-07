@@ -136,7 +136,7 @@ func (r *BrainRuntime) MonitorHandshake(runtimeCommit string) (MonitorHandshake,
 		RuntimeCommit: runtimeCommit,
 		StateRevision: snapshot.StateRevision,
 		CanonicalStateHash: snapshot.CanonicalStateHash,
-		Capabilities: []string{"snapshot", "recurrent_state", "plasticity", "checkpoint", "inquiry", "observation"},
+		Capabilities: []string{"snapshot", "recurrent_state", "plasticity", "checkpoint", "inquiry", "observation", "vision", "audio", "motion", "outcomes", "stream"},
 	}, nil
 }
 
