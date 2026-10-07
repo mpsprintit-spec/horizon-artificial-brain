@@ -4,12 +4,15 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
+	"strings"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/project-horizon/horizon-core/services/ai/bridge"
 	"github.com/project-horizon/horizon-core/services/ai/config"
 	"github.com/project-horizon/horizon-core/services/ai/core"
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
@@ -49,6 +52,33 @@ func main() {
 	}
 
 	service := runtime.NewContinuousService(horizon.Runtime, cfg.CognitiveInterval, 1)
+
+	bridgeAddress := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_ADDRESS"))
+	if bridgeAddress == "" {
+		bridgeAddress = "127.0.0.1:8765"
+	}
+	bridgeOrigins := splitMonitorOrigins(os.Getenv("HORIZON_MONITOR_ORIGINS"))
+	if len(bridgeOrigins) == 0 {
+		bridgeOrigins = []string{"http://localhost:8080"}
+	}
+	monitorBridge, err := bridge.New(horizon.Runtime, bridge.Config{
+		AllowedOrigins: bridgeOrigins,
+		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
+		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
+	})
+	if err != nil {
+		logger.Error("failed to initialize monitor bridge", "error", err)
+		os.Exit(1)
+	}
+	bridgeServer := &http.Server{Addr: bridgeAddress, Handler: monitorBridge.Handler()}
+	bridgeErrors := make(chan error, 1)
+	go func() {
+		logger.Info("Horizon monitor bridge listening", "address", bridgeAddress, "origins", bridgeOrigins)
+		if err := bridgeServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			bridgeErrors <- err
+		}
+	}()
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -81,6 +111,14 @@ func main() {
 		logger.Error("continuous brain service stopped unexpectedly", "error", err)
 		os.Exit(1)
 	}
+	if err := bridgeServer.Shutdown(context.Background()); err != nil {
+		logger.Error("monitor bridge shutdown failed", "error", err)
+	}
+	select {
+	case err := <-bridgeErrors:
+		logger.Error("monitor bridge stopped unexpectedly", "error", err)
+	default:
+	}
 }
 
 // signalStimulus is an input adapter only. It preserves signal provenance at
@@ -106,4 +144,15 @@ func bootstrapSignals() []Signal {
 		{Type: SignalLocation, Source: "bootstrap_gps", Confidence: 0.83, Timestamp: now, Payload: map[string]float64{"accuracy": 0.92}},
 		{Type: SignalUser, Source: "bootstrap_profile", Confidence: 0.77, Timestamp: now, Payload: map[string]float64{"attention": 0.80}},
 	}
+}
+
+func splitMonitorOrigins(value string) []string {
+	parts := strings.Split(value, ",")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if origin := strings.TrimSpace(part); origin != "" {
+			out = append(out, origin)
+		}
+	}
+	return out
 }
