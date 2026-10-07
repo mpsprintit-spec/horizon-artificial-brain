@@ -106,6 +106,17 @@ func (r *BrainRuntime) SaveBrain(path string) error {
 	r.mu.Lock(); defer r.mu.Unlock()
 	return r.brain.Save(path)
 }
+func (r *BrainRuntime) LoadBrain(path string) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
+	r.mu.Lock(); defer r.mu.Unlock()
+	if err := r.brain.Load(path); err != nil { return err }
+	r.seq = 0
+	r.lastCognitiveState = CognitiveState{}
+	r.processedEvents = make(map[string]uint64)
+	return nil
+}
+
 
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
