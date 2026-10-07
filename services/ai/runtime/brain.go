@@ -348,6 +348,12 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	r.brain.ApplyMemoryDynamics(now)
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()
+	if r.telemetry != nil {
+		e := r.telemetryEventLocked(EventTypeThink, now, nil, nil, nil)
+		e.StateDelta = &output.StateDelta
+		e.PredictionError = &output.PredictionError
+		r.telemetry.Publish(e)
+	}
 	return output, nil
 }
 
