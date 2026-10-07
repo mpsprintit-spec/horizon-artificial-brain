@@ -32,9 +32,11 @@ func main() {
 	horizon := core.NewHorizonEngine()
 	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
 	if brainMemoryPath == "" { brainMemoryPath = "brain_memory.json" }
+	loadedBrain := false
 	eventLogPath := strings.TrimSpace(os.Getenv("HORIZON_EVENT_LOG_PATH"))
 	if eventLogPath == "" { eventLogPath = "horizon_events.jsonl" }
 	if _, statErr := os.Stat(brainMemoryPath); statErr == nil {
+		loadedBrain = true
 		if err := horizon.Runtime.LoadBrain(brainMemoryPath); err != nil {
 			logger.Error("failed to load canonical brain memory", "path", brainMemoryPath, "error", err)
 			os.Exit(1)
@@ -44,25 +46,25 @@ func main() {
 	if err != nil { logger.Error("failed to open brain event log", "path", eventLogPath, "error", err); os.Exit(1) }
 	defer eventLog.Close()
 	horizon.Runtime.SetEventLog(eventLog)
-	signals := bootstrapSignals()
-	for _, signal := range signals {
-		if err := signal.Validate(); err != nil {
-			logger.Error("invalid bootstrap signal", "error", err)
-			os.Exit(1)
+	if events, readErr := runtime.ReadEventLog(eventLogPath); readErr == nil && len(events) > 0 {
+		if err := horizon.Runtime.RestoreEventIndex(events); err != nil { logger.Error("failed to restore event index", "error", err); os.Exit(1) }
+	} else if readErr != nil && !os.IsNotExist(readErr) {
+		logger.Error("failed to read brain event log", "error", readErr); os.Exit(1)
+	}
+	var output runtime.CognitiveOutput
+	var bootstrapErr error
+	if !loadedBrain {
+		signals := bootstrapSignals()
+		for _, signal := range signals {
+			if err := signal.Validate(); err != nil { logger.Error("invalid bootstrap signal", "error", err); os.Exit(1) }
 		}
+		stimulus := signalStimulus(signals)
+		output, bootstrapErr = horizon.Runtime.CognitiveProcess(runtime.Event{ID:"bootstrap", Stimulus:stimulus, Cycles:8, Timestamp:time.Now().UTC()})
+		if bootstrapErr == nil { bootstrapErr = horizon.Runtime.SaveBrain(brainMemoryPath) }
+	} else {
+		output = runtime.CognitiveOutput{BrainIdentity: runtime.BrainIdentity, Sequence: horizon.Runtime.LastSequence(), Timestamp: time.Now().UTC()}
 	}
-
-	stimulus := signalStimulus(signals)
-	output, err := horizon.Runtime.CognitiveProcess(runtime.Event{
-		ID:        "bootstrap",
-		Stimulus:  stimulus,
-		Cycles:    8,
-		Timestamp: time.Now().UTC(),
-	})
-	if err != nil {
-		logger.Error("Horizon brain bootstrap failed", "error", err)
-		os.Exit(1)
-	}
+	if bootstrapErr != nil { logger.Error("Horizon brain initialization failed", "error", bootstrapErr); os.Exit(1) }
 
 	service := runtime.NewContinuousService(horizon.Runtime, cfg.CognitiveInterval, 1)
 
