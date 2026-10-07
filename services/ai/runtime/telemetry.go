@@ -156,9 +156,6 @@ func (r *BrainRuntime) ProcessObservationEnvelope(envelope ObservationEnvelope) 
 		DataTokens: normalized.DataTokens,
 	}, nil)
 	if err != nil { return CognitiveInterpretation{}, err }
-	if err := r.LearnObservedTransition(cognitive.State.ActiveNodeIDs, normalized.Timestamp); err != nil {
-		return CognitiveInterpretation{}, err
-	}
 	r.PublishObservationTelemetry(normalized, CognitiveOutput{
 		BrainIdentity: BrainIdentity,
 		Sequence: cognitive.State.Sequence,
