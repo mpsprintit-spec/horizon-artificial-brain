@@ -120,12 +120,12 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 		TemporalPatterns: brain.TemporalPatterns,
 		ExperienceTraces: brain.ExperienceTraces,
 		BrainState: MonitorBrainState{
-			Prediction: cloneFloatMap(brain.PredictionState),
-			Error: cloneFloatMap(brain.ErrorState),
-			Memory: cloneFloatMap(brain.MemoryState),
-			Plasticity: cloneFloatMap(brain.PlasticityState),
-			Curiosity: cloneFloatMap(brain.CuriosityState),
-			SelfModel: cloneFloatMap(brain.SelfModelState),
+			Prediction: cloneMonitorFloatMap(brain.PredictionState),
+			Error: cloneMonitorFloatMap(brain.ErrorState),
+			Memory: cloneMonitorFloatMap(brain.MemoryState),
+			Plasticity: cloneMonitorFloatMap(brain.PlasticityState),
+			Curiosity: cloneMonitorFloatMap(brain.CuriosityState),
+			SelfModel: cloneMonitorFloatMap(brain.SelfModelState),
 		},
 	}, nil
 }
@@ -144,4 +144,12 @@ func (r *BrainRuntime) MonitorHandshake(runtimeCommit string) (MonitorHandshake,
 		CanonicalStateHash: snapshot.CanonicalStateHash,
 		Capabilities: []string{"snapshot", "recurrent_state", "plasticity", "checkpoint", "inquiry", "observation"},
 	}, nil
+}
+
+func cloneMonitorFloatMap(in map[string]float64) map[string]float64 {
+	out := make(map[string]float64, len(in))
+	for key, value := range in {
+		out[key] = value
+	}
+	return out
 }
