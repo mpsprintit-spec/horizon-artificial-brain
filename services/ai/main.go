@@ -76,7 +76,7 @@ func main() {
 	}
 	bridgeOrigins := splitMonitorOrigins(os.Getenv("HORIZON_MONITOR_ORIGINS"))
 	if len(bridgeOrigins) == 0 {
-		bridgeOrigins = []string{"http://localhost:8080"}
+		bridgeOrigins = []string{"https://mpsprintit-spec.github.io", "http://localhost:8080"}
 	}
 	monitorBridge, err := bridge.New(horizon.Runtime, bridge.Config{
 		AllowedOrigins: bridgeOrigins,
