@@ -68,13 +68,14 @@ type BrainRuntime struct {
 	lastObservationAt time.Time
 	inquiryValence map[InquiryAction]float64
 	telemetry *TelemetryHub
+	processedEvents map[string]uint64
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBootstrapBrain() }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256)}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64)}
 }
 func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
 	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
@@ -161,6 +162,9 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 }
 
 func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, error) {
+	if event.ID != "" {
+		if _, exists := r.processedEvents[event.ID]; exists { return activation.Result{}, r.seq, fmt.Errorf("duplicate event ID %q", event.ID) }
+	}
 	if event.Timestamp.IsZero() { event.Timestamp = r.nowLocked() }
 	nextSeq := r.seq + 1
 	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
@@ -173,6 +177,7 @@ func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, er
 		Now: event.Timestamp,
 	})
 	r.seq = nextSeq
+	if event.ID != "" { r.processedEvents[event.ID] = r.seq }
 	if r.telemetry != nil {
 		r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, nil))
 	}
