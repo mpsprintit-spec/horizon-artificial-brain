@@ -1,4 +1,4 @@
-.PHONY: help fmt test validate build
+.PHONY: help fmt test validate build bridge-smoke
 
 help:
 	@echo "Targets: fmt test validate build"
@@ -14,3 +14,6 @@ validate: fmt test
 
 build:
 	go build ./...
+
+bridge-smoke:
+	bash scripts/bridge_smoke.sh
