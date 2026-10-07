@@ -1,4 +1,18 @@
-package runtime
+p
+func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
+	if r == nil { return errors.New("brain runtime is not initialized") }
+	r.mu.Lock(); defer r.mu.Unlock()
+	var expected uint64 = 1
+	if len(events) > 0 { expected = events[0].Sequence }
+	for _, event := range events {
+		if event.Sequence != expected { return fmt.Errorf("event index discontinuity: got %d want %d", event.Sequence, expected) }
+		expected++
+		if event.Type == EventTypeProcess && event.Event != nil && event.Event.ID != "" { r.processedEvents[event.Event.ID] = event.Sequence }
+		if event.Sequence > r.seq { r.seq = event.Sequence }
+	}
+	return nil
+}
+ackage runtime
 
 import (
 	"crypto/sha256"
