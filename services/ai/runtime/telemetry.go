@@ -119,3 +119,56 @@ func (h *TelemetryHub) Publish(event TelemetryEvent) {
 		select { case s.ch <- event: default: h.Unsubscribe(s) }
 	}
 }
+
+func (r *BrainRuntime) ProcessObservationEnvelope(envelope ObservationEnvelope) (CognitiveInterpretation, error) {
+	if r == nil || r.brain == nil {
+		return CognitiveInterpretation{}, errors.New("brain runtime is not initialized")
+	}
+	normalized, err := NormalizeObservationEnvelope(envelope)
+	if err != nil { return CognitiveInterpretation{}, err }
+	tokens := append([]string(nil), normalized.Tokens...)
+	if len(tokens) == 0 {
+		token := normalized.PayloadHash
+		if token == "" {
+			data, _ := json.Marshal(struct{ Modality string `json:"modality"`; Source string `json:"source"`; Payload json.RawMessage `json:"payload"` }{normalized.Modality, normalized.Source, normalized.Payload})
+			sum := sha256.Sum256(data)
+			token = "sha256:" + hex.EncodeToString(sum[:])
+		}
+		tokens = []string{"observation:" + strings.ToLower(normalized.Modality) + ":" + token}
+	}
+	event := Event{
+		ID: normalized.EventID,
+		Stimulus: tokens,
+		Source: normalized.Source,
+		Modality: normalized.Modality,
+		ContextTokens: append([]string(nil), normalized.ContextTokens...),
+		DataTokens: append([]string(nil), normalized.DataTokens...),
+		Cycles: 1,
+		Timestamp: normalized.Timestamp,
+		Observation: &normalized,
+	}
+	orchestrator := NewCognitiveOrchestrator(r)
+	cognitive, _, err := orchestrator.ProcessObservation(event, ObservationInput{
+		Source: normalized.Source,
+		Modality: normalized.Modality,
+		Tokens: tokens,
+		ContextTokens: normalized.ContextTokens,
+		DataTokens: normalized.DataTokens,
+	}, nil)
+	if err != nil { return CognitiveInterpretation{}, err }
+	if err := r.LearnObservedTransition(cognitive.State.ActiveNodeIDs, normalized.Timestamp); err != nil {
+		return CognitiveInterpretation{}, err
+	}
+	r.PublishObservationTelemetry(normalized, CognitiveOutput{
+		BrainIdentity: BrainIdentity,
+		Sequence: cognitive.State.Sequence,
+		Timestamp: cognitive.State.Timestamp,
+		RankedNodeIDs: cognitive.State.ActiveNodeIDs,
+		Activations: cognitive.State.Activations,
+		Confidence: cognitive.State.Confidence,
+		Resonance: cognitive.State.Resonance,
+		PredictionError: cognitive.State.PredictionError,
+		StateDelta: cognitive.ChangeAwareness.StateDelta,
+	})
+	return cognitive, nil
+}
