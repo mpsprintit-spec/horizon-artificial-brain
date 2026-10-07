@@ -1,18 +1,4 @@
-p
-func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
-	if r == nil { return errors.New("brain runtime is not initialized") }
-	r.mu.Lock(); defer r.mu.Unlock()
-	var expected uint64 = 1
-	if len(events) > 0 { expected = events[0].Sequence }
-	for _, event := range events {
-		if event.Sequence != expected { return fmt.Errorf("event index discontinuity: got %d want %d", event.Sequence, expected) }
-		expected++
-		if event.Type == EventTypeProcess && event.Event != nil && event.Event.ID != "" { r.processedEvents[event.Event.ID] = event.Sequence }
-		if event.Sequence > r.seq { r.seq = event.Sequence }
-	}
-	return nil
-}
-ackage runtime
+package runtime
 
 import (
 	"crypto/sha256"
@@ -94,43 +80,15 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 }
 func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
 	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
-	data, _ := json.Marshal(payload)
-	eh := sha256.Sum256(data)
-	brain, _ := r.brain.CanonicalJSON()
-	bh := sha256.Sum256(brain)
+	data, _ := json.Marshal(payload); eh := sha256.Sum256(data)
+	brain, _ := r.brain.CanonicalJSON(); bh := sha256.Sum256(brain)
 	return TelemetryEvent{Type:eventType, BrainIdentity:BrainIdentity, StateRevision:r.seq, Timestamp:at.UTC(), EventHash:"sha256:"+hex.EncodeToString(eh[:]), CanonicalStateHash:"sha256:"+hex.EncodeToString(bh[:]), Event:event, Observation:observation, Outcome:outcome}
 }
-
-func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry = NewTelemetryHub(256) }; return r.telemetry }
-
-func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) {
-	if r == nil { return }
-	r.mu.Lock(); defer r.mu.Unlock()
-	if r.telemetry == nil { r.telemetry = NewTelemetryHub(256) }
-	envelope.Sequence = output.Sequence
-	e := r.telemetryEventLocked("observation", output.Timestamp, nil, &envelope, nil)
-	e.StateDelta = &output.StateDelta
-	e.PredictionError = &output.PredictionError
-	r.telemetry.Publish(e)
-}
-
-func (r *BrainRuntime) SaveBrain(path string) error {
-	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
-	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
-	r.mu.Lock(); defer r.mu.Unlock()
-	return r.brain.Save(path)
-}
-func (r *BrainRuntime) LoadBrain(path string) error {
-	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
-	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
-	r.mu.Lock(); defer r.mu.Unlock()
-	if err := r.brain.Load(path); err != nil { return err }
-	r.seq = 0
-	r.lastCognitiveState = CognitiveState{}
-	r.processedEvents = make(map[string]uint64)
-	return nil
-}
-
+func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry=NewTelemetryHub(256) }; return r.telemetry }
+func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry==nil {r.telemetry=NewTelemetryHub(256)}; envelope.Sequence=output.Sequence; e:=r.telemetryEventLocked("observation",output.Timestamp,nil,&envelope,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
+func (r *BrainRuntime) SaveBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); return r.brain.Save(path) }
+func (r *BrainRuntime) LoadBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); if err:=r.brain.Load(path);err!=nil{return err};r.seq=0;r.lastCognitiveState=CognitiveState{};r.processedEvents=make(map[string]uint64);return nil }
+func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error { if r==nil{return errors.New("brain runtime is not initialized")};r.mu.Lock();defer r.mu.Unlock();expected:=uint64(1);for _,event:=range events{if event.Sequence!=expected{return fmt.Errorf("event index discontinuity: got %d want %d",event.Sequence,expected)};expected++;if event.Type==EventTypeProcess&&event.Event!=nil&&event.Event.ID!=""{r.processedEvents[event.Event.ID]=event.Sequence};if event.Sequence>r.seq{r.seq=event.Sequence}};return nil }
 
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
@@ -188,9 +146,7 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 }
 
 func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, error) {
-	if event.ID != "" {
-		if _, exists := r.processedEvents[event.ID]; exists { return activation.Result{}, r.seq, fmt.Errorf("duplicate event ID %q", event.ID) }
-	}
+	if event.ID != "" { if _, exists := r.processedEvents[event.ID]; exists { return activation.Result{}, r.seq, fmt.Errorf("duplicate event ID %q", event.ID) } }
 	if event.Timestamp.IsZero() { event.Timestamp = r.nowLocked() }
 	nextSeq := r.seq + 1
 	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
@@ -204,9 +160,7 @@ func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, er
 	})
 	r.seq = nextSeq
 	if event.ID != "" { r.processedEvents[event.ID] = r.seq }
-	if r.telemetry != nil && event.Observation == nil {
-		r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
-	}
+	if r.telemetry != nil && event.Observation == nil { r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess,event.Timestamp,&event,nil,nil)) }
 	return result, r.seq, nil
 }
 // LearnObservedTransition binds consecutive grounded populations as a
@@ -348,12 +302,7 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	r.brain.ApplyMemoryDynamics(now)
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()
-	if r.telemetry != nil {
-		e := r.telemetryEventLocked(EventTypeThink, now, nil, nil, nil)
-		e.StateDelta = &output.StateDelta
-		e.PredictionError = &output.PredictionError
-		r.telemetry.Publish(e)
-	}
+	if r.telemetry != nil { e:=r.telemetryEventLocked(EventTypeThink,now,nil,nil,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
 	return output, nil
 }
 
