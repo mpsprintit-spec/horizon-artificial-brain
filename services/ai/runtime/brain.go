@@ -1,8 +1,12 @@
 package runtime
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -30,6 +34,7 @@ type Event struct {
 	// the caller captured a prediction before an external action. It prevents
 	// outcome processing from silently substituting a newer recurrent state.
 	PredictionOverride *activation.Prediction
+	Observation *ObservationEnvelope `json:"observation,omitempty"`
 }
 
 type ActionBinding struct {
@@ -62,14 +67,44 @@ type BrainRuntime struct {
 	lastObservationPopulation []knowledge.NodeID
 	lastObservationAt time.Time
 	inquiryValence map[InquiryAction]float64
+	telemetry *TelemetryHub
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBootstrapBrain() }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256)}
 }
+func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
+	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
+	data, _ := json.Marshal(payload)
+	eh := sha256.Sum256(data)
+	brain, _ := r.brain.CanonicalJSON()
+	bh := sha256.Sum256(brain)
+	return TelemetryEvent{Type:eventType, BrainIdentity:BrainIdentity, StateRevision:r.seq, Timestamp:at.UTC(), EventHash:"sha256:"+hex.EncodeToString(eh[:]), CanonicalStateHash:"sha256:"+hex.EncodeToString(bh[:]), Event:event, Observation:observation, Outcome:outcome}
+}
+
+func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry = NewTelemetryHub(256) }; return r.telemetry }
+
+func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) {
+	if r == nil { return }
+	r.mu.Lock(); defer r.mu.Unlock()
+	if r.telemetry == nil { r.telemetry = NewTelemetryHub(256) }
+	envelope.Sequence = output.Sequence
+	e := r.telemetryEventLocked("observation", output.Timestamp, nil, &envelope, nil)
+	e.StateDelta = &output.StateDelta
+	e.PredictionError = &output.PredictionError
+	r.telemetry.Publish(e)
+}
+
+func (r *BrainRuntime) SaveBrain(path string) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
+	r.mu.Lock(); defer r.mu.Unlock()
+	return r.brain.Save(path)
+}
+
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
 
@@ -138,6 +173,9 @@ func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, er
 		Now: event.Timestamp,
 	})
 	r.seq = nextSeq
+	if r.telemetry != nil {
+		r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, nil))
+	}
 	return result, r.seq, nil
 }
 // LearnObservedTransition binds consecutive grounded populations as a
