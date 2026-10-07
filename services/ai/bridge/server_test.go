@@ -1,8 +1,12 @@
 package bridge
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
@@ -45,4 +49,37 @@ func TestSnapshotBridgeRequiresTokenWhenConfigured(t *testing.T) {
 	if res.Code != http.StatusUnauthorized {
 		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
 	}
+}
+
+func TestBridgeObservationPersistsAndReplaysFromRuntime(t *testing.T) {
+	dir := t.TempDir()
+	memoryPath := filepath.Join(dir, "brain_memory.json")
+	logPath := filepath.Join(dir, "events.jsonl")
+	rt := runtime.NewBrainRuntime(nil)
+	log, err := runtime.OpenEventLog(logPath)
+	if err != nil { t.Fatal(err) }
+	defer log.Close()
+	rt.SetEventLog(log)
+	server, err := New(rt, Config{EventLogPath: logPath, BrainMemoryPath: memoryPath})
+	if err != nil { t.Fatal(err) }
+
+	body := strings.NewReader(`{"schema_version":1,"brain_identity":"horizon-primary-brain","event_id":"browser-vision-1","timestamp":"2026-10-07T14:00:00Z","modality":"vision","source":"github-pages-camera","provenance":{"source":"github-pages-camera","modality":"vision","adapter":"github-pages-browser","synthetic":false},"payload":{"encoding":"application/octet-stream","data":"AQID"}}`)
+	req := httptest.NewRequest(http.MethodPost, "/v1/observations", body)
+	req.Header.Set("Content-Type", "application/json")
+	res := httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusAccepted { t.Fatalf("observation status=%d body=%s", res.Code, res.Body.String()) }
+	if _, err := os.Stat(memoryPath); err != nil { t.Fatalf("brain memory missing: %v", err) }
+
+	logged, err := runtime.ReadEventLog(logPath)
+	if err != nil { t.Fatal(err) }
+	if len(logged) == 0 || logged[0].Event == nil || logged[0].Event.ID != "browser-vision-1" { t.Fatalf("observation not present in event log: %+v", logged) }
+
+	req = httptest.NewRequest(http.MethodGet, "/v1/brain/events?after=0", nil)
+	res = httptest.NewRecorder()
+	server.Handler().ServeHTTP(res, req)
+	if res.Code != http.StatusOK { t.Fatalf("events status=%d body=%s", res.Code, res.Body.String()) }
+	var payload struct{ Events []map[string]any `json:"events"` }
+	if err := json.Unmarshal(res.Body.Bytes(), &payload); err != nil { t.Fatal(err) }
+	if len(payload.Events) == 0 { t.Fatal("bridge replay returned no events") }
 }
