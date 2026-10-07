@@ -35,16 +35,16 @@ const BrainIdentity = "horizon-primary-brain"
 const GroundingThreshold = 0.90
 
 type Event struct {
-	ID string
-	Stimulus []string
-	StimulusNodeIDs []knowledge.NodeID
-	Context map[knowledge.NodeID]float64
-	ContextTokens []string
-	DataTokens []string
-	Source string
-	Modality string
-	Cycles int
-	Timestamp time.Time
+	ID string `json:"id"`
+	Stimulus []string `json:"stimulus,omitempty"`
+	StimulusNodeIDs []knowledge.NodeID `json:"stimulus_node_ids,omitempty"`
+	Context map[knowledge.NodeID]float64 `json:"context,omitempty"`
+	ContextTokens []string `json:"context_tokens,omitempty"`
+	DataTokens []string `json:"data_tokens,omitempty"`
+	Source string `json:"source,omitempty"`
+	Modality string `json:"modality,omitempty"`
+	Cycles int `json:"cycles"`
+	Timestamp time.Time `json:"timestamp"`
 	// PredictionOverride is used only at an explicit causal boundary where
 	// the caller captured a prediction before an external action. It prevents
 	// outcome processing from silently substituting a newer recurrent state.
