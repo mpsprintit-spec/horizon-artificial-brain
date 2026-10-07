@@ -32,6 +32,7 @@ export class HorizonStore {
   private listeners = new Set<() => void>();
   private gapValue: { expected: number; received: number } | null = null;
   private revisionValue = 0;
+  private expectedCanonicalHash: string | null = null;
 
   get snapshot(): BrainSnapshot | null { return this.snapshotValue; }
   get events(): readonly TelemetryEvent[] { return this.eventsValue; }
@@ -49,8 +50,14 @@ export class HorizonStore {
   setSnapshot(snapshot: BrainSnapshot): void {
     if (snapshot.type !== "brain.snapshot") throw new Error("invalid brain snapshot type");
     if (!Number.isFinite(snapshot.state_revision)) throw new Error("invalid snapshot revision");
+    if (this.expectedCanonicalHash && snapshot.state_revision === this.revisionValue && snapshot.canonical_state_hash !== this.expectedCanonicalHash) {
+      this.statusValue = "error";
+      this.emit();
+      throw new Error("canonical state hash mismatch");
+    }
     this.snapshotValue = snapshot;
     this.revisionValue = snapshot.state_revision;
+    this.expectedCanonicalHash = null;
     this.gapValue = null;
     this.emit();
   }
@@ -70,6 +77,7 @@ export class HorizonStore {
     }
     this.eventsValue = [...this.eventsValue.slice(-499), event];
     this.revisionValue = revision;
+    if (event.canonical_state_hash) this.expectedCanonicalHash = event.canonical_state_hash;
     if (event.canonical_state_hash && this.snapshotValue && event.state_revision === this.snapshotValue.state_revision && event.canonical_state_hash !== this.snapshotValue.canonical_state_hash) {
       this.statusValue = "error";
       this.emit();
