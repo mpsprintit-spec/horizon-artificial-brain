@@ -5,7 +5,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"errors"
-	"os"
 )
 
 const MonitorSchemaVersion = 1
@@ -71,41 +70,26 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 		return MonitorSnapshot{}, errors.New("brain runtime is not initialized")
 	}
 
-	file, err := os.CreateTemp("", "horizon-monitor-*.json")
+	data, err := r.brain.CanonicalJSON()
 	if err != nil {
 		return MonitorSnapshot{}, err
 	}
-	path := file.Name()
-	if err := file.Close(); err != nil {
-		_ = os.Remove(path)
-		return MonitorSnapshot{}, err
-	}
-	defer os.Remove(path)
-
-	if err := r.Checkpoint(path); err != nil {
-		return MonitorSnapshot{}, err
-	}
-
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return MonitorSnapshot{}, err
-	}
-	var checkpoint BrainSnapshot
-	if err := json.Unmarshal(data, &checkpoint); err != nil {
-		return MonitorSnapshot{}, err
-	}
-
 	var brain monitorCanonicalBrain
-	if err := json.Unmarshal(checkpoint.Brain, &brain); err != nil {
+	if err := json.Unmarshal(data, &brain); err != nil {
 		return MonitorSnapshot{}, err
 	}
-	hash := sha256.Sum256(checkpoint.Brain)
+	hash := sha256.Sum256(data)
+
+	r.mu.Lock()
+	sequence := r.seq
+	now := r.nowLocked()
+	r.mu.Unlock()
 
 	return MonitorSnapshot{
 		Type: "brain.snapshot",
 		BrainIdentity: BrainIdentity,
-		StateRevision: checkpoint.Sequence,
-		CapturedAt: checkpoint.Timestamp.UTC().Format("2006-01-02T15:04:05.000Z07:00"),
+		StateRevision: sequence,
+		CapturedAt: now.Format("2006-01-02T15:04:05.000Z07:00"),
 		CanonicalStateHash: "sha256:" + hex.EncodeToString(hash[:]),
 		Counts: MonitorCounts{
 			NeuralUnits: len(brain.NeuralUnits),
