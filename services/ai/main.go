@@ -53,12 +53,14 @@ func main() {
 	}
 	var output runtime.CognitiveOutput
 	var bootstrapErr error
+	stimulusCount := 0
 	if !loadedBrain {
 		signals := bootstrapSignals()
 		for _, signal := range signals {
 			if err := signal.Validate(); err != nil { logger.Error("invalid bootstrap signal", "error", err); os.Exit(1) }
 		}
 		stimulus := signalStimulus(signals)
+		stimulusCount = len(stimulus)
 		output, bootstrapErr = horizon.Runtime.CognitiveProcess(runtime.Event{ID:"bootstrap", Stimulus:stimulus, Cycles:8, Timestamp:time.Now().UTC()})
 		if bootstrapErr == nil { bootstrapErr = horizon.Runtime.SaveBrain(brainMemoryPath) }
 	} else {
@@ -108,7 +110,7 @@ func main() {
 		"sequence", output.Sequence,
 		"resonance", output.Resonance,
 		"prediction_error", output.PredictionError,
-		"stimulus_count", len(stimulus),
+		"stimulus_count", stimulusCount,
 		"cognitive_interval", cfg.CognitiveInterval,
 	)
 
