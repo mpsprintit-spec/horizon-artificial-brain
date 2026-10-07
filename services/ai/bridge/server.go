@@ -1,6 +1,7 @@
 package bridge
 
 import (
+	"bufio"
 	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
@@ -131,12 +132,43 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	if events, err := s.readEvents(after); err == nil {
 		for _, event := range events { if err:=writeWebSocketJSON(rw.Writer,event); err!=nil{return} }
 	}
+	var writeMu sync.Mutex
+	writeJSONFrame := func(value any) error {
+		writeMu.Lock()
+		defer writeMu.Unlock()
+		return writeWebSocketJSON(rw.Writer, value)
+	}
+	readDone := make(chan struct{})
+	go func() {
+		defer close(readDone)
+		for {
+			opcode, payload, err := readWebSocketFrame(rw.Reader)
+			if err != nil { return }
+			switch opcode {
+			case 0x8: // close
+				writeMu.Lock()
+				_ = writeWebSocketFrame(rw.Writer, 0x8, payload)
+				_ = rw.Flush()
+				writeMu.Unlock()
+				return
+			case 0x9: // ping
+				writeMu.Lock()
+				_ = writeWebSocketFrame(rw.Writer, 0xA, payload)
+				_ = rw.Flush()
+				writeMu.Unlock()
+			}
+		}
+	}()
 	for {
-		event, ok := <-sub.C()
-		if !ok { return }
-		if event.StateRevision <= after { continue }
-		if err:=writeWebSocketJSON(rw.Writer,event); err!=nil{return}
-		after=event.StateRevision
+		select {
+		case <-readDone:
+			return
+		case event, ok := <-sub.C():
+			if !ok { return }
+			if event.StateRevision <= after { continue }
+			if err:=writeJSONFrame(event); err!=nil{return}
+			after=event.StateRevision
+		}
 	}
 }
 
@@ -196,6 +228,49 @@ func (s *Server) withCORS(next http.Handler) http.Handler {
 func originAllowed(origin string,allowed []string) bool { if origin=="" {return true}; for _,v:=range allowed{if strings.TrimSpace(v)==origin{return true}};return false }
 func websocketRequested(r *http.Request) bool { return strings.EqualFold(r.Header.Get("Connection"),"Upgrade")&&strings.EqualFold(r.Header.Get("Upgrade"),"websocket")&&r.Header.Get("Sec-WebSocket-Key")!="" }
 func websocketAccept(key string) string { sum:=sha1.Sum([]byte(key+"258EAFA5-E914-47DA-95CA-C5AB0DC85B11"));return base64.StdEncoding.EncodeToString(sum[:]) }
+func readWebSocketFrame(r *bufio.Reader) (byte, []byte, error) {
+	first, err := r.ReadByte()
+	if err != nil { return 0, nil, err }
+	second, err := r.ReadByte()
+	if err != nil { return 0, nil, err }
+	opcode := first & 0x0F
+	masked := second&0x80 != 0
+	length := int64(second & 0x7F)
+	if length == 126 {
+		var b [2]byte
+		if _, err := io.ReadFull(r, b[:]); err != nil { return 0, nil, err }
+		length = int64(b[0])<<8 | int64(b[1])
+	} else if length == 127 {
+		var b [8]byte
+		if _, err := io.ReadFull(r, b[:]); err != nil { return 0, nil, err }
+		for _, v := range b { if length > (1<<56)-1 { return 0, nil, errors.New("websocket frame too large") }; length = (length << 8) | int64(v) }
+	}
+	if length > 4<<20 { return 0, nil, errors.New("websocket frame too large") }
+	var mask [4]byte
+	if masked { if _, err := io.ReadFull(r, mask[:]); err != nil { return 0, nil, err } }
+	payload := make([]byte, int(length))
+	if _, err := io.ReadFull(r, payload); err != nil { return 0, nil, err }
+	if masked { for i := range payload { payload[i] ^= mask[i%4] } }
+	return opcode, payload, nil
+}
+
+func writeWebSocketFrame(w io.Writer, opcode byte, payload []byte) error {
+	n := len(payload)
+	frame := make([]byte, 0, n+10)
+	frame = append(frame, 0x80|(opcode&0x0F))
+	switch {
+	case n < 126:
+		frame = append(frame, byte(n))
+	case n <= 65535:
+		frame = append(frame, 126, byte(n>>8), byte(n))
+	default:
+		frame = append(frame, 127, 0, 0, 0, 0, byte(uint64(n)>>24), byte(uint64(n)>>16), byte(uint64(n)>>8), byte(uint64(n)))
+	}
+	frame = append(frame, payload...)
+	_, err := w.Write(frame)
+	return err
+}
+
 func writeWebSocketJSON(w io.Writer,v any) error { data,err:=json.Marshal(v);if err!=nil{return err}; n:=len(data); frame:=make([]byte,0,n+10);frame=append(frame,0x81);switch{case n<126:frame=append(frame,byte(n));case n<=65535:frame=append(frame,126,byte(n>>8),byte(n));default:frame=append(frame,127,0,0,0,0,byte(uint64(n)>>24),byte(uint64(n)>>16),byte(uint64(n)>>8),byte(uint64(n)))};frame=append(frame,data...);_,err=w.Write(frame);return err}
 func afterRevision(r *http.Request) uint64 { value,_:=strconv.ParseUint(r.URL.Query().Get("after"),10,64);return value }
 
