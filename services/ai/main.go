@@ -90,10 +90,22 @@ func main() {
 		os.Exit(1)
 	}
 	bridgeServer := &http.Server{Addr: bridgeAddress, Handler: monitorBridge.Handler()}
+	bridgeTLSCert := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TLS_CERT"))
+	bridgeTLSKey := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TLS_KEY"))
+	if (bridgeTLSCert == "") != (bridgeTLSKey == "") {
+		logger.Error("Horizon bridge TLS requires both HORIZON_BRIDGE_TLS_CERT and HORIZON_BRIDGE_TLS_KEY")
+		os.Exit(1)
+	}
 	bridgeErrors := make(chan error, 1)
 	go func() {
-		logger.Info("Horizon monitor bridge listening", "address", bridgeAddress, "origins", bridgeOrigins)
-		if err := bridgeServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logger.Info("Horizon monitor bridge listening", "address", bridgeAddress, "origins", bridgeOrigins, "tls", bridgeTLSCert != "")
+		var err error
+		if bridgeTLSCert != "" {
+			err = bridgeServer.ListenAndServeTLS(bridgeTLSCert, bridgeTLSKey)
+		} else {
+			err = bridgeServer.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
 			bridgeErrors <- err
 		}
 	}()
