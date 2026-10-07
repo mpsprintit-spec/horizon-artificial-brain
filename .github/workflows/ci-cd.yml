@@ -16,3 +16,24 @@ jobs:
         run: go mod download
       - name: Validate HC-001 foundation
         run: make validate
+
+  monitor:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/monitor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@22
+          version: 10
+          install: false
+      - name: Install monitor dependencies
+        run: pnpm install --no-frozen-lockfile
+      - name: Typecheck
+        run: pnpm check
+      - name: Test
+        run: pnpm test
+      - name: Build
+        run: pnpm build
