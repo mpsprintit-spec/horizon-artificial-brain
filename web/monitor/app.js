@@ -32,6 +32,9 @@ async function get(path) {
   const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
 }
 async function postObservation(envelope) {
+  const payloadBytes=rawPayload(JSON.stringify(envelope.payload??null));
+  envelope.payload_hash=await hashBuffer(payloadBytes);
+  envelope.payload_bytes=payloadBytes.byteLength;
   const response=await fetch(baseUrl()+"/v1/observations",{method:"POST",headers:{"Content-Type":"application/json",...authHeaders()},body:JSON.stringify(envelope)});
   const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
 }
