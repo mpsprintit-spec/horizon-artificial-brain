@@ -60,14 +60,164 @@ function render() {
   renderGraph(s); renderEvents(); renderInspectableState(s);
 }
 function renderGraph(s) {
-  const svg=$("brainGraph"); while(svg.firstChild)svg.removeChild(svg.firstChild);
-  const units=s.neural_units||[], synapses=s.synapses||[], populations=s.populations||[]; const pos=new Map(),cx=500,cy=325,rad=Math.min(270,Math.max(80,280-Math.min(units.length,200)*.35));
-  units.forEach((u,i)=>{const a=units.length?2*Math.PI*i/units.length:0;pos.set(Number(u.id),{x:cx+rad*Math.cos(a),y:cy+rad*Math.sin(a)});});
-  const active=new Set(); const latestEvent=store.events[store.events.length-1]; const latestDelta=latestEvent?.state_delta||latestEvent?.StateDelta||{}; for(const id of latestDelta.added_node_ids||latestDelta.AddedNodeIDs||[])active.add(Number(id)); for(const id of Object.keys(latestDelta.activation_delta||latestDelta.ActivationDelta||{}))active.add(Number(id)); const plasticityEvent=Boolean(latestEvent&&Object.keys(latestEvent.plasticity||{}).length);
-  for(const p of populations){const ids=(p.units||[]).map(x=>Number(x.node_id)),ps=ids.map(id=>pos.get(id)).filter(Boolean);if(!ps.length)continue;const avg=ps.reduce((a,b)=>({x:a.x+b.x,y:a.y+b.y}),{x:0,y:0});avg.x/=ps.length;avg.y/=ps.length;const ring=document.createElementNS("http://www.w3.org/2000/svg","circle");ring.setAttribute("cx",avg.x);ring.setAttribute("cy",avg.y);ring.setAttribute("r",String(Math.min(120,35+ps.length*5)));ring.classList.add("population");svg.appendChild(ring);}
-  for(const e of synapses){const a=pos.get(Number(e.source_id)),b=pos.get(Number(e.target_id));if(!a||!b)continue;const line=document.createElementNS("http://www.w3.org/2000/svg","line");line.setAttribute("x1",a.x);line.setAttribute("y1",a.y);line.setAttribute("x2",b.x);line.setAttribute("y2",b.y);line.setAttribute("stroke-width",String(Math.max(1,Math.min(8,Math.abs(Number(e.weight||0))*6))));line.classList.add("edge");if(e.inhibitory)line.classList.add("inhibitory");if(plasticityEvent)line.classList.add("plasticity");line.addEventListener("click",()=>inspect(e,"synapse"));svg.appendChild(line);}
-  for(const u of units){const id=Number(u.id),p=pos.get(id);if(!p)continue;const c=document.createElementNS("http://www.w3.org/2000/svg","circle"),activation=Number(u.activation||0);c.setAttribute("cx",p.x);c.setAttribute("cy",p.y);c.setAttribute("r",String(3+Math.min(10,Math.abs(activation)*10)));c.setAttribute("fill","hsl("+Math.max(0,Math.min(120,120-activation*120))+" 65% 55%)");c.classList.add("node");if(active.has(id))c.classList.add("pulse");if(selected===id)c.classList.add("selected");c.addEventListener("click",()=>inspect(u,"neural_unit"));svg.appendChild(c);}
-  $("graphState").textContent=store.events.length?"last runtime event r"+store.events[store.events.length-1].state_revision:"no runtime event";
+  const svg=$("brainGraph");
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+
+  const NS="http://www.w3.org/2000/svg";
+  const units=s.neural_units||[], synapses=s.synapses||[], populations=s.populations||[];
+  const W=1000,H=650, pos=new Map(), populationByUnit=new Map();
+
+  // Visual shell: human-brain silhouette. It is presentation geometry only;
+  // canonical neurons and synapses below still come exclusively from BrainRuntime.
+  const shell=document.createElementNS(NS,"g");
+  shell.classList.add("brain-shell");
+
+  const left=document.createElementNS(NS,"path");
+  left.setAttribute("d","M487 105 C430 55 330 52 235 78 C140 104 77 178 66 274 C54 374 92 470 172 523 C226 559 302 565 359 542 C404 525 445 494 487 454 Z");
+  left.classList.add("brain-hemisphere");
+  shell.appendChild(left);
+
+  const right=document.createElementNS(NS,"path");
+  right.setAttribute("d","M513 105 C570 55 670 52 765 78 C860 104 923 178 934 274 C946 374 908 470 828 523 C774 559 698 565 641 542 C596 525 555 494 513 454 Z");
+  right.classList.add("brain-hemisphere");
+  shell.appendChild(right);
+
+  const fissure=document.createElementNS(NS,"path");
+  fissure.setAttribute("d","M500 103 C482 180 493 242 500 305 C507 370 518 421 500 468");
+  fissure.classList.add("brain-fissure");
+  shell.appendChild(fissure);
+
+  const cerebellum=document.createElementNS(NS,"path");
+  cerebellum.setAttribute("d","M650 486 C700 455 785 462 826 506 C852 533 849 578 812 600 C756 632 676 610 647 570 C633 551 632 514 650 486 Z");
+  cerebellum.classList.add("brain-cerebellum");
+  shell.appendChild(cerebellum);
+
+  const brainstem=document.createElementNS(NS,"path");
+  brainstem.setAttribute("d","M613 515 C604 548 604 581 622 617 C632 637 651 639 661 623 C673 604 667 568 650 526");
+  brainstem.classList.add("brain-stem");
+  shell.appendChild(brainstem);
+  svg.appendChild(shell);
+
+  // Assign each actual unit to its actual population membership.
+  populations.forEach((p,pi)=>{
+    for(const member of (p.units||[])){
+      const id=Number(member.node_id??member.id);
+      if(Number.isFinite(id) && !populationByUnit.has(id)) populationByUnit.set(id,pi);
+    }
+  });
+
+  const populationCenters=new Map();
+  const slotsPerSide=Math.max(1,Math.ceil(populations.length/2));
+  const cols=Math.min(6,Math.max(3,Math.ceil(Math.sqrt(slotsPerSide))));
+  const rows=Math.ceil(slotsPerSide/cols);
+
+  function slotCenter(pi){
+    const side=pi%2===0?-1:1;
+    const slot=Math.floor(pi/2);
+    const col=slot%cols;
+    const row=Math.floor(slot/cols);
+    const x=500+side*(88+col*58);
+    const y=130+row*(Math.min(330,rows>1?330/(rows-1):0));
+    return {x,y};
+  }
+
+  populations.forEach((p,pi)=>populationCenters.set(pi,slotCenter(pi)));
+
+  function brainClamp(x,y){
+    const dx=(x-500)/425, dy=(y-315)/245;
+    const d=dx*dx+dy*dy;
+    if(d<=0.88)return {x,y};
+    const k=Math.sqrt(0.88/d);
+    return {x:500+(x-500)*k,y:315+(y-315)*k};
+  }
+
+  // Place members in compact deterministic clusters around their real population.
+  const membersByPopulation=new Map();
+  units.forEach(u=>{
+    const id=Number(u.id);
+    const pi=populationByUnit.get(id);
+    if(pi!==undefined){
+      if(!membersByPopulation.has(pi))membersByPopulation.set(pi,[]);
+      membersByPopulation.get(pi).push(u);
+    }
+  });
+
+  for(const [pi,members] of membersByPopulation){
+    const center=populationCenters.get(pi);
+    const radius=Math.min(38,12+Math.sqrt(members.length)*4.2);
+    members.forEach((u,i)=>{
+      const angle=i*2.399963229728653;
+      const r=radius*Math.sqrt((i+1)/members.length);
+      const p=brainClamp(center.x+Math.cos(angle)*r,center.y+Math.sin(angle)*r);
+      pos.set(Number(u.id),p);
+    });
+  }
+
+  // Units without population membership remain real units; give them a deterministic
+  // interior position rather than inventing a synthetic connection or node.
+  const orphaned=units.filter(u=>!pos.has(Number(u.id)));
+  orphaned.forEach((u,i)=>{
+    const angle=i*2.399963229728653;
+    const r=55+Math.sqrt(i)*7;
+    pos.set(Number(u.id),brainClamp(500+Math.cos(angle)*Math.min(350,r),315+Math.sin(angle)*Math.min(205,r)));
+  });
+
+  const active=new Set();
+  const latestEvent=store.events[store.events.length-1];
+  const latestDelta=latestEvent?.state_delta||latestEvent?.StateDelta||{};
+  for(const id of latestDelta.added_node_ids||latestDelta.AddedNodeIDs||[])active.add(Number(id));
+  for(const id of Object.keys(latestDelta.activation_delta||latestDelta.ActivationDelta||{}))active.add(Number(id));
+  const plasticityEvent=Boolean(latestEvent&&Object.keys(latestEvent.plasticity||{}).length);
+
+  // Population boundaries follow actual membership positions.
+  for(const [pi,members] of membersByPopulation){
+    const ps=members.map(u=>pos.get(Number(u.id))).filter(Boolean);
+    if(!ps.length)continue;
+    const center=ps.reduce((a,b)=>({x:a.x+b.x,y:a.y+b.y}),{x:0,y:0});
+    center.x/=ps.length; center.y/=ps.length;
+    const radius=Math.min(62,Math.max(18,Math.sqrt(ps.length)*6+10));
+    const ring=document.createElementNS(NS,"circle");
+    ring.setAttribute("cx",center.x); ring.setAttribute("cy",center.y); ring.setAttribute("r",radius);
+    ring.classList.add("population");
+    svg.appendChild(ring);
+  }
+
+  // Every rendered edge is an actual canonical synapse.
+  for(const e of synapses){
+    const a=pos.get(Number(e.source_id)),b=pos.get(Number(e.target_id));
+    if(!a||!b)continue;
+    const line=document.createElementNS(NS,"line");
+    const weight=Number(e.weight||0);
+    line.setAttribute("x1",a.x); line.setAttribute("y1",a.y);
+    line.setAttribute("x2",b.x); line.setAttribute("y2",b.y);
+    line.setAttribute("stroke-width",String(Math.max(.6,Math.min(6,.7+Math.abs(weight)*4))));
+    line.classList.add("edge");
+    if(e.inhibitory)line.classList.add("inhibitory");
+    if(active.has(Number(e.source_id))||active.has(Number(e.target_id)))line.classList.add("edge-active");
+    if(plasticityEvent)line.classList.add("plasticity");
+    line.addEventListener("click",()=>inspect(e,"synapse"));
+    svg.appendChild(line);
+  }
+
+  // Actual neurons are drawn last so the relationship network stays readable.
+  for(const u of units){
+    const id=Number(u.id),p=pos.get(id);
+    if(!p)continue;
+    const c=document.createElementNS(NS,"circle");
+    const activation=Number(u.activation||0);
+    c.setAttribute("cx",p.x); c.setAttribute("cy",p.y);
+    c.setAttribute("r",String(2.5+Math.min(8,Math.abs(activation)*8)));
+    c.setAttribute("fill","hsl("+Math.max(0,Math.min(120,120-activation*120))+" 72% 58%)");
+    c.classList.add("node");
+    if(active.has(id))c.classList.add("pulse");
+    if(selected===id)c.classList.add("selected");
+    c.addEventListener("click",()=>inspect(u,"neural_unit"));
+    svg.appendChild(c);
+  }
+
+  $("graphState").textContent=store.events.length
+    ? "brain-shaped canonical graph · last runtime event r"+store.events[store.events.length-1].state_revision
+    : "brain-shaped canonical graph · no runtime event";
 }
 function inspect(entity,type){selected=Number(entity.id||entity.node_id||entity.source_id||0);$("inspector").textContent=JSON.stringify({type,entity},null,2);render();}
 function renderEvents(){const root=$("events");root.textContent="";for(const e of [...store.events].reverse()){const div=document.createElement("div");div.className="event"+(Object.keys(e.plasticity||{}).length?" plasticity-event":"");div.textContent=String(e.type)+" revision="+String(e.state_revision)+" timestamp="+String(e.timestamp)+" hash="+String(e.event_hash||"unavailable");root.appendChild(div);}}
