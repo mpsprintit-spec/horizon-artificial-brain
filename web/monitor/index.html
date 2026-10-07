@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Horizon Brain Monitor</title>
+<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<header>
+  <div>
+    <h1>HORIZON BRAIN MONITOR</h1>
+    <p id="source">No runtime connection</p>
+  </div>
+  <span id="status" class="status disconnected">DISCONNECTED</span>
+</header>
+
+<section class="connection panel">
+  <label>Bridge URL <input id="bridgeUrl" placeholder="https://your-bridge.example"></label>
+  <label>Session token <input id="token" type="password" placeholder="optional"></label>
+  <button id="connect">CONNECT</button>
+</section>
+
+<section class="metrics">
+  <article><span>Brain</span><strong id="brainIdentity">—</strong></article>
+  <article><span>Revision</span><strong id="revision">—</strong></article>
+  <article><span>State hash</span><strong id="hash">—</strong></article>
+  <article><span>Captured</span><strong id="captured">—</strong></article>
+  <article><span>Units</span><strong id="units">—</strong></article>
+  <article><span>Populations</span><strong id="populations">—</strong></article>
+  <article><span>Synapses</span><strong id="synapses">—</strong></article>
+</section>
+
+<main>
+  <section class="panel graph-panel">
+    <div class="panel-title">
+      <h2>Whole Brain</h2>
+      <span id="graphNote">No snapshot</span>
+    </div>
+    <svg id="brainGraph" viewBox="0 0 1000 620" role="img" aria-label="Canonical Horizon neural graph"></svg>
+  </section>
+
+  <aside class="panel inspector">
+    <div class="panel-title"><h2>Selected Entity</h2></div>
+    <pre id="inspector">Select a neural unit.</pre>
+  </aside>
+
+  <section class="panel state-panel">
+    <div class="panel-title"><h2>Canonical Brain State</h2></div>
+    <div class="state-grid">
+      <pre id="prediction"></pre>
+      <pre id="error"></pre>
+      <pre id="memory"></pre>
+      <pre id="plasticity"></pre>
+      <pre id="curiosity"></pre>
+      <pre id="selfModel"></pre>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <span id="lastUpdate">No runtime event loaded.</span>
+  <span>Production connector: runtime data only. No demo graph.</span>
+</footer>
+<script src="./app.js"></script>
+</body>
+</html>
