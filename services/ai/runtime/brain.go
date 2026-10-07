@@ -314,7 +314,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		novelty := clamp01(usage * clamp01(policy.NoveltySensitivity))
 		uncertainty := clamp01((0.5*underActivation)+(0.5*predictionError)) * clamp01(policy.UncertaintySensitivity)
 		score := clamp01(policy.CuriosityPressure) * clamp01(novelty+uncertainty)
-		if score <= 0.05 {
+		if score <= 0 {
 			continue
 		}
 		candidates = append(candidates, candidate{nodeID: node.ID, score: score})
