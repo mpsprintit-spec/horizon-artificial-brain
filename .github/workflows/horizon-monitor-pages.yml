@@ -1,0 +1,45 @@
+name: Horizon Brain Visual Monitor Pages
+
+on:
+  push:
+    branches: [fix/canonical-brain-mutation-lock]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: horizon-monitor-pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web/monitor
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/setup@v3
+        with:
+          runtime: node@22
+          version: 10
+          install: false
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm build
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/monitor/dist
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
