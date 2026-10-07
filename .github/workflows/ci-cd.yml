@@ -18,6 +18,8 @@ jobs:
         run: make validate
       - name: Build Go runtime
         run: make build
+      - name: Live Bridge integration smoke
+        run: make bridge-smoke
 
   monitor:
     runs-on: ubuntu-latest
