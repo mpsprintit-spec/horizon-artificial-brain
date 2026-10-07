@@ -140,3 +140,15 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 	if state.PredictionState == nil { state.PredictionState = map[string]float64{} }; for key, value := range raw.ErrorState { state.PredictionState["error_"+key] = value }
 	return nodes, raw.TemporalPatterns, raw.Populations, state, nil
 }
+
+// CanonicalJSON exposes the exact deterministic neural substrate encoding used
+// for canonical persistence and monitor snapshots. The returned bytes are a
+// read-only copy; callers cannot mutate the live Brain through this API.
+func (k *KnowledgeBase) CanonicalJSON() ([]byte, error) {
+	if k == nil {
+		return nil, ErrNilBrain
+	}
+	k.RLock()
+	defer k.RUnlock()
+	return marshalCanonicalBrain(k)
+}
