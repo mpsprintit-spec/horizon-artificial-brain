@@ -38,7 +38,7 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 	r.mu.Lock()
 	targetSet := r.inquiryTargetSetLocked(action)
 	r.mu.Unlock()
-	return r.predictInquiryInformationValueWithTargets(targetSet, uncertainty, at)
+	return r.predictInquiryInformationValueWithTargets(action, targetSet, uncertainty, at)
 }
 
 func (r *BrainRuntime) inquiryTargetSetLocked(action InquiryAction) map[knowledge.NodeID]struct{} {
@@ -58,7 +58,7 @@ func (r *BrainRuntime) inquiryTargetSetLocked(action InquiryAction) map[knowledg
 	return targetSet
 }
 
-func (r *BrainRuntime) predictInquiryInformationValueWithTargets(targetSet map[knowledge.NodeID]struct{}, uncertainty float64, at time.Time) (float64, bool, error) {
+func (r *BrainRuntime) predictInquiryInformationValueWithTargets(action InquiryAction, targetSet map[knowledge.NodeID]struct{}, uncertainty float64, at time.Time) (float64, bool, error) {
 	if len(targetSet) == 0 {
 		return uncertainty, false, nil
 	}
