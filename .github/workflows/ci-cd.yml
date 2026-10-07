@@ -27,7 +27,7 @@ jobs:
       - uses: pnpm/setup@v3
         with:
           runtime: node@22
-          version: 10
+          version: 11
           install: false
       - name: Install monitor dependencies
         run: pnpm install --no-frozen-lockfile
