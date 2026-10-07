@@ -2,6 +2,7 @@ package bridge
 
 import (
 	"crypto/sha1"
+	"crypto/sha256"
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
@@ -102,8 +103,8 @@ func (s *Server) readEvents(after uint64) ([]replayEvent,error) {
 	for _, e := range logged {
 		if e.Sequence <= after { continue }
 		payload,_ := json.Marshal(e)
-		hash:=sha1.Sum(payload)
-		item:=replayEvent{Type:e.Type,BrainIdentity:e.BrainIdentity,StateRevision:e.Sequence,Timestamp:e.Timestamp,EventHash:"sha1:"+hex.EncodeToString(hash[:]),Event:e.Event,Outcome:e.Outcome}
+		hash:=sha256.Sum256(payload)
+		item:=replayEvent{Type:e.Type,BrainIdentity:e.BrainIdentity,StateRevision:e.Sequence,Timestamp:e.Timestamp,EventHash:"sha256:"+hex.EncodeToString(hash[:]),Event:e.Event,Outcome:e.Outcome}
 		out=append(out,item)
 	}
 	return out,nil
