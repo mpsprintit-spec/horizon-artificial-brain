@@ -33,15 +33,25 @@ test("production monitor has no demo snapshot or random-number path", () => {
   ]) assert.ok(app.includes(required), "missing production monitor path: "+required);
 });
 
-test("canonical hash mismatches are rejected", () => {
+test("canonical hash is checked when a live event is resynced", () => {
   const store = new HorizonStore();
   store.setSnapshot({
     type:"brain.snapshot", brain_identity:"horizon-primary-brain", state_revision:4,
     captured_at:"", canonical_state_hash:"sha256:expected", counts:{}, neural_units:[],
     populations:[], synapses:[], temporal_patterns:[], experience_traces:[], brain_state:{}
   });
-  assert.throws(() => store.applyEvent({
+  assert.equal(store.applyEvent({
     type:"process",brain_identity:"horizon-primary-brain",state_revision:5,
-    timestamp:"",canonical_state_hash:"sha256:other"
+    timestamp:"",canonical_state_hash:"sha256:event-state"
+  }), "applied");
+  assert.throws(() => store.setSnapshot({
+    type:"brain.snapshot", brain_identity:"horizon-primary-brain", state_revision:5,
+    captured_at:"", canonical_state_hash:"sha256:wrong", counts:{}, neural_units:[],
+    populations:[], synapses:[], temporal_patterns:[], experience_traces:[], brain_state:{}
   }), /canonical state hash mismatch/);
+  store.setSnapshot({
+    type:"brain.snapshot", brain_identity:"horizon-primary-brain", state_revision:5,
+    captured_at:"", canonical_state_hash:"sha256:event-state", counts:{}, neural_units:[],
+    populations:[], synapses:[], temporal_patterns:[], experience_traces:[], brain_state:{}
+  });
 });
