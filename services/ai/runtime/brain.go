@@ -204,8 +204,8 @@ func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, er
 	})
 	r.seq = nextSeq
 	if event.ID != "" { r.processedEvents[event.ID] = r.seq }
-	if r.telemetry != nil {
-		r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, nil))
+	if r.telemetry != nil && event.Observation == nil {
+		r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
 	}
 	return result, r.seq, nil
 }
