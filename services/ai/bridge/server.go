@@ -166,7 +166,9 @@ func (s *Server) outcomes(w http.ResponseWriter, r *http.Request) {
 func (s *Server) withAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter,r *http.Request) {
 		if s.cfg.Token=="" || r.URL.Path=="/health" { next.ServeHTTP(w,r); return }
-		if r.Header.Get("Authorization")!="Bearer "+s.cfg.Token { writeError(w,http.StatusUnauthorized,"missing or invalid bridge token"); return }
+	auth := r.Header.Get("Authorization")
+		if auth == "" && r.URL.Path == "/v1/brain/stream" { if token := r.URL.Query().Get("token"); token != "" { auth = "Bearer " + token } }
+		if auth!="Bearer "+s.cfg.Token { writeError(w,http.StatusUnauthorized,"missing or invalid bridge token"); return }
 		next.ServeHTTP(w,r)
 	})
 }
