@@ -31,12 +31,13 @@ export class HorizonStore {
   private statusValue: BridgeStatus = "disconnected";
   private listeners = new Set<() => void>();
   private gapValue: { expected: number; received: number } | null = null;
+  private revisionValue = 0;
 
   get snapshot(): BrainSnapshot | null { return this.snapshotValue; }
   get events(): readonly TelemetryEvent[] { return this.eventsValue; }
   get status(): BridgeStatus { return this.statusValue; }
   get gap(): { expected: number; received: number } | null { return this.gapValue; }
-  get revision(): number { return this.snapshotValue?.state_revision ?? 0; }
+  get revision(): number { return this.revisionValue; }
 
   subscribe(listener: () => void): () => void {
     this.listeners.add(listener);
@@ -49,6 +50,7 @@ export class HorizonStore {
     if (snapshot.type !== "brain.snapshot") throw new Error("invalid brain snapshot type");
     if (!Number.isFinite(snapshot.state_revision)) throw new Error("invalid snapshot revision");
     this.snapshotValue = snapshot;
+    this.revisionValue = snapshot.state_revision;
     this.gapValue = null;
     this.emit();
   }
@@ -67,6 +69,7 @@ export class HorizonStore {
       return "gap";
     }
     this.eventsValue = [...this.eventsValue.slice(-499), event];
+    this.revisionValue = revision;
     if (event.canonical_state_hash && this.snapshotValue && event.state_revision === this.snapshotValue.state_revision && event.canonical_state_hash !== this.snapshotValue.canonical_state_hash) {
       this.statusValue = "error";
       this.emit();
