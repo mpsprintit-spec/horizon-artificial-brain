@@ -292,6 +292,16 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		return nil
 	}
 
+	// Every autonomous cycle records a curiosity heartbeat even when the
+	// current policy produces no actionable candidate. This separates the
+	// existence of an autonomous cognition cycle from the optional drive/target.
+	r.brain.Lock()
+	if r.brain.BrainState.CuriosityState == nil {
+		r.brain.BrainState.CuriosityState = map[string]float64{}
+	}
+	r.brain.BrainState.CuriosityState["last_update_unix"] = float64(now.UnixNano())
+	r.brain.Unlock()
+
 	// Curiosity reads canonical neural state as a snapshot. The write-back is
 	// performed under the same Brain mutation boundary used by learning,
 	// activation, and memory dynamics, so the continuous service can coexist
