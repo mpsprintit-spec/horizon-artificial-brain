@@ -23,6 +23,13 @@ type SymbolExposure struct {
 	Confidence float64 `json:"confidence"`
 }
 
+type VisualExposure struct {
+	Representation []float64 `json:"representation,omitempty"`
+	RelativePosition string `json:"relative_position,omitempty"`
+	SequencePosition int `json:"sequence_position"`
+	Confidence float64 `json:"confidence"`
+}
+
 type DevelopmentalSynapticDelta struct {
 	SourceNodeID NodeID `json:"source_node_id"`
 	TargetNodeID NodeID `json:"target_node_id"`
