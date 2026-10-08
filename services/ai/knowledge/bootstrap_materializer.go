@@ -54,7 +54,7 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 	if len(brain.Registry.Nodes()) > 0 || len(brain.ProjectionPopulations) > 0 ||
 		len(brain.BrainState.BootstrapExperiences) > 0 {
 		if bootstrapMaterialized(brain) {
-			return nil
+			return materializeVisualBootstrap(brain, at)
 		}
 		return errors.New("brain already contains non-bootstrap substrate")
 	}
