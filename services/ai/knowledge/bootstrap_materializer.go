@@ -244,29 +244,6 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 	// not as a lexical dictionary. Each experience binds numeric non-symbolic
 	// state, transition, consequence and modality exposures to prediction,
 	// outcome, error and plasticity so later experience can revise it.
-	// Materialize the communication hypotheses as real substrate pathways.
-	// These links are intentionally weak and plastic: they provide an initial
-	// prior that later prediction error and experience can strengthen, weaken,
-	// contextualize or reorganize.
-	communicationLinks := []struct {
-		source, target NodeID
-		weight, confidence float64
-		inhibitory bool
-	}{
-		{objectState[0], communication[0], 0.18, 0.25, false},
-		{change[0], communication[1], 0.18, 0.25, false},
-		{continuity[0], communication[2], 0.16, 0.25, false},
-		{communication[0], communication[1], 0.22, 0.30, false},
-		{communication[1], communication[2], 0.22, 0.30, false},
-		{communication[2], communication[3], 0.22, 0.30, false},
-		{communication[3], prediction[0], 0.16, 0.25, false},
-		{prediction[0], social[0], 0.14, 0.22, false},
-		{errorPool[0], prediction[0], 0.12, 0.22, true},
-		{prediction[0], errorPool[0], 0.16, 0.25, false},
-	}
-	for _, link := range communicationLinks {
-		connectBootstrapAt(brain.Registry.GetByID(link.source), brain.Registry.GetByID(link.target), link.weight, link.confidence, link.inhibitory, at)
-	}
 	brain.BrainState.DevelopmentalExperiences = append(brain.BrainState.DevelopmentalExperiences,
 		buildCommunicationDevelopmentalExperiences(brain, pools, at)...
 	)
@@ -296,6 +273,30 @@ func buildCommunicationDevelopmentalExperiences(brain *Brain, pools [][]NodeID, 
 	if brain == nil || len(pools) < len(BootstrapNetworkDomains) { return nil }
 	communication, objectState, change, continuity := pools[19], pools[8], pools[1], pools[2]
 	timePool, prediction, errorPool, social := pools[6], pools[9], pools[10], pools[17]
+	// Materialize the communication hypotheses as real substrate pathways.
+	// These links are intentionally weak and plastic: they provide an initial
+	// prior that later prediction error and experience can strengthen, weaken,
+	// contextualize or reorganize.
+	communicationLinks := []struct {
+		source, target NodeID
+		weight, confidence float64
+		inhibitory bool
+	}{
+		{objectState[0], communication[0], 0.18, 0.25, false},
+		{change[0], communication[1], 0.18, 0.25, false},
+		{continuity[0], communication[2], 0.16, 0.25, false},
+		{communication[0], communication[1], 0.22, 0.30, false},
+		{communication[1], communication[2], 0.22, 0.30, false},
+		{communication[2], communication[3], 0.22, 0.30, false},
+		{communication[3], prediction[0], 0.16, 0.25, false},
+		{prediction[0], social[0], 0.14, 0.22, false},
+		{errorPool[0], prediction[0], 0.12, 0.22, true},
+		{prediction[0], errorPool[0], 0.16, 0.25, false},
+	}
+	for _, link := range communicationLinks {
+		connectBootstrapAt(brain.Registry.GetByID(link.source), brain.Registry.GetByID(link.target), link.weight, link.confidence, link.inhibitory, at)
+	}
+
 	makeFrame := func(pool []NodeID, confidence float64) DevelopmentalStateFrame {
 		frame := DevelopmentalStateFrame{ActiveUnits: append([]NodeID(nil), pool...), Confidence: confidence}
 		if len(pool) > 0 { frame.ActivePopulations = []NodeID{pool[0]} }
