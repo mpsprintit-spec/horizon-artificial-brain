@@ -154,6 +154,7 @@ type BrainState struct {
 	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`
 	Episodes []BootstrapExperience `json:"episodes,omitempty"`
 	ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"`
+	DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences,omitempty"`
 }
 
 type KnowledgeBase struct {
