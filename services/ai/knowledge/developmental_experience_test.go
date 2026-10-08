@@ -56,3 +56,26 @@ func TestCommunicationDevelopmentalBootstrapPersistsThroughCanonicalJSON(t *test
 		t.Fatalf("reloaded developmental experiences = %d, want 5", len(loaded.BrainState.DevelopmentalExperiences))
 	}
 }
+
+func TestCommunicationDevelopmentalBootstrapMaterializesNeuralPathways(t *testing.T) {
+	brain := NewBootstrapBrain()
+	pools := brain.ProjectionPopulations
+	if len(pools) < 20 {
+		t.Fatalf("bootstrap populations = %d, want at least 20", len(pools))
+	}
+	links := [][2]NodeID{
+		{pools[8].Units[0].NodeID, pools[19].Units[0].NodeID},
+		{pools[19].Units[0].NodeID, pools[19].Units[1].NodeID},
+		{pools[19].Units[3].NodeID, pools[9].Units[0].NodeID},
+		{pools[10].Units[0].NodeID, pools[9].Units[0].NodeID},
+	}
+	for _, link := range links {
+		source := brain.Registry.GetByID(link[0])
+		if source == nil {
+			t.Fatalf("missing source node %d", link[0])
+		}
+		if len(source.Synapses[link[1]]) == 0 {
+			t.Fatalf("missing communication developmental pathway %d -> %d", link[0], link[1])
+		}
+	}
+}
