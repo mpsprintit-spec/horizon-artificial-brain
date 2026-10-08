@@ -171,7 +171,7 @@ func materializeVisualBootstrap(brain *Brain, at time.Time) error {
 		},
 	}
 	for i, region := range visualBootstrapRegions {
-		experience.VisualExposures = append(experience.VisualExposures, VisualExposure{
+		experience.SymbolExposures = append(experience.SymbolExposures, SymbolExposure{
 			Modality: "vision",
 			Representation: append([]float64(nil), region.representation...),
 			RelativePosition: region.position,
