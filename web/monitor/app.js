@@ -56,171 +56,78 @@ function render() {
   const s=store.snapshot; if(!s)return;
   $("brain").textContent=s.brain_identity||"unavailable"; $("revision").textContent=String(s.state_revision); $("hash").textContent=s.canonical_state_hash||"unavailable";
   $("units").textContent=String(s.counts?.neural_units??"unavailable"); $("populations").textContent=String(s.counts?.populations??"unavailable"); $("synapses").textContent=String(s.counts?.synapses??"unavailable");
-  $("prediction").textContent=JSON.stringify(s.brain_state?.prediction||{},null,2); $("error").textContent=JSON.stringify(s.brain_state?.error||{},null,2); $("memory").textContent=JSON.stringify(s.brain_state?.memory||{},null,2); $("plasticity").textContent=JSON.stringify(s.brain_state?.plasticity||{},null,2); $("curiosity").textContent=JSON.stringify(s.brain_state?.curiosity||{},null,2); $("provenance").textContent=JSON.stringify({provenance:s.provenance||[],episodes:s.episodes||[],bootstrap_experiences:s.bootstrap_experiences||[]},null,2);
+  $("prediction").textContent=JSON.stringify(s.brain_state?.prediction||{},null,2); $("error").textContent=JSON.stringify(s.brain_state?.error||{},null,2); $("memory").textContent=JSON.stringify(s.brain_state?.memory||{},null,2); $("plasticity").textContent=JSON.stringify(s.brain_state?.plasticity||{},null,2); $("curiosity").textContent=JSON.stringify(s.brain_state?.curiosity||{},null,2); $("provenance").textContent=JSON.stringify({provenance:s.provenance||[],episodes:s.episodes||[],bootstrap_experiences:s.bootstrap_experiences||[]},null,2); renderCognitivePanel(s);
   renderGraph(s); renderEvents(); renderInspectableState(s);
 }
+
 function renderGraph(s) {
-  const svg=$("brainGraph");
-  while(svg.firstChild)svg.removeChild(svg.firstChild);
-
-  const NS="http://www.w3.org/2000/svg";
-  const units=s.neural_units||[], synapses=s.synapses||[], populations=s.populations||[];
-  const W=1000,H=650, pos=new Map(), populationByUnit=new Map();
-
-  // Visual shell: human-brain silhouette. It is presentation geometry only;
-  // canonical neurons and synapses below still come exclusively from BrainRuntime.
-  const shell=document.createElementNS(NS,"g");
-  shell.classList.add("brain-shell");
-
-  const left=document.createElementNS(NS,"path");
-  left.setAttribute("d","M487 105 C430 55 330 52 235 78 C140 104 77 178 66 274 C54 374 92 470 172 523 C226 559 302 565 359 542 C404 525 445 494 487 454 Z");
-  left.classList.add("brain-hemisphere");
-  shell.appendChild(left);
-
-  const right=document.createElementNS(NS,"path");
-  right.setAttribute("d","M513 105 C570 55 670 52 765 78 C860 104 923 178 934 274 C946 374 908 470 828 523 C774 559 698 565 641 542 C596 525 555 494 513 454 Z");
-  right.classList.add("brain-hemisphere");
-  shell.appendChild(right);
-
-  const fissure=document.createElementNS(NS,"path");
-  fissure.setAttribute("d","M500 103 C482 180 493 242 500 305 C507 370 518 421 500 468");
-  fissure.classList.add("brain-fissure");
-  shell.appendChild(fissure);
-
-  const cerebellum=document.createElementNS(NS,"path");
-  cerebellum.setAttribute("d","M650 486 C700 455 785 462 826 506 C852 533 849 578 812 600 C756 632 676 610 647 570 C633 551 632 514 650 486 Z");
-  cerebellum.classList.add("brain-cerebellum");
-  shell.appendChild(cerebellum);
-
-  const brainstem=document.createElementNS(NS,"path");
-  brainstem.setAttribute("d","M613 515 C604 548 604 581 622 617 C632 637 651 639 661 623 C673 604 667 568 650 526");
-  brainstem.classList.add("brain-stem");
-  shell.appendChild(brainstem);
-  svg.appendChild(shell);
-
-  // Assign each actual unit to its actual population membership.
-  populations.forEach((p,pi)=>{
-    for(const member of (p.units||[])){
-      const id=Number(member.node_id??member.id);
-      if(Number.isFinite(id) && !populationByUnit.has(id)) populationByUnit.set(id,pi);
-    }
-  });
-
-  const populationCenters=new Map();
-  const slotsPerSide=Math.max(1,Math.ceil(populations.length/2));
-  const cols=Math.min(6,Math.max(3,Math.ceil(Math.sqrt(slotsPerSide))));
-  const rows=Math.ceil(slotsPerSide/cols);
-
-  function slotCenter(pi){
-    const side=pi%2===0?-1:1;
-    const slot=Math.floor(pi/2);
-    const col=slot%cols;
-    const row=Math.floor(slot/cols);
-    const x=500+side*(88+col*58);
-    const y=130+row*(Math.min(330,rows>1?330/(rows-1):0));
-    return {x,y};
-  }
-
-  populations.forEach((p,pi)=>populationCenters.set(pi,slotCenter(pi)));
-
-  function brainClamp(x,y){
-    const dx=(x-500)/425, dy=(y-315)/245;
-    const d=dx*dx+dy*dy;
-    if(d<=0.88)return {x,y};
-    const k=Math.sqrt(0.88/d);
-    return {x:500+(x-500)*k,y:315+(y-315)*k};
-  }
-
-  // Place members in compact deterministic clusters around their real population.
-  const membersByPopulation=new Map();
-  units.forEach(u=>{
-    const id=Number(u.id);
-    const pi=populationByUnit.get(id);
-    if(pi!==undefined){
-      if(!membersByPopulation.has(pi))membersByPopulation.set(pi,[]);
-      membersByPopulation.get(pi).push(u);
-    }
-  });
-
-  for(const [pi,members] of membersByPopulation){
-    const center=populationCenters.get(pi);
-    const radius=Math.min(38,12+Math.sqrt(members.length)*4.2);
-    members.forEach((u,i)=>{
-      const angle=i*2.399963229728653;
-      const r=radius*Math.sqrt((i+1)/members.length);
-      const p=brainClamp(center.x+Math.cos(angle)*r,center.y+Math.sin(angle)*r);
-      pos.set(Number(u.id),p);
-    });
-  }
-
-  // Units without population membership remain real units; give them a deterministic
-  // interior position rather than inventing a synthetic connection or node.
-  const orphaned=units.filter(u=>!pos.has(Number(u.id)));
-  orphaned.forEach((u,i)=>{
-    const angle=i*2.399963229728653;
-    const r=55+Math.sqrt(i)*7;
-    pos.set(Number(u.id),brainClamp(500+Math.cos(angle)*Math.min(350,r),315+Math.sin(angle)*Math.min(205,r)));
-  });
-
-  const active=new Set();
-  const latestEvent=store.events[store.events.length-1];
-  const latestDelta=latestEvent?.state_delta||latestEvent?.StateDelta||{};
-  for(const id of latestDelta.added_node_ids||latestDelta.AddedNodeIDs||[])active.add(Number(id));
-  for(const id of Object.keys(latestDelta.activation_delta||latestDelta.ActivationDelta||{}))active.add(Number(id));
-  const plasticityEvent=Boolean(latestEvent&&Object.keys(latestEvent.plasticity||{}).length);
-
-  // Population boundaries follow actual membership positions.
-  for(const [pi,members] of membersByPopulation){
-    const ps=members.map(u=>pos.get(Number(u.id))).filter(Boolean);
-    if(!ps.length)continue;
-    const center=ps.reduce((a,b)=>({x:a.x+b.x,y:a.y+b.y}),{x:0,y:0});
-    center.x/=ps.length; center.y/=ps.length;
-    const radius=Math.min(62,Math.max(18,Math.sqrt(ps.length)*6+10));
-    const ring=document.createElementNS(NS,"circle");
-    ring.setAttribute("cx",center.x); ring.setAttribute("cy",center.y); ring.setAttribute("r",radius);
-    ring.classList.add("population");
-    svg.appendChild(ring);
-  }
-
-  // Every rendered edge is an actual canonical synapse.
-  for(const e of synapses){
-    const a=pos.get(Number(e.source_id)),b=pos.get(Number(e.target_id));
-    if(!a||!b)continue;
-    const line=document.createElementNS(NS,"line");
-    const weight=Number(e.weight||0);
-    line.setAttribute("x1",a.x); line.setAttribute("y1",a.y);
-    line.setAttribute("x2",b.x); line.setAttribute("y2",b.y);
-    line.setAttribute("stroke-width",String(Math.max(.6,Math.min(6,.7+Math.abs(weight)*4))));
-    line.classList.add("edge");
-    if(e.inhibitory)line.classList.add("inhibitory");
-    if(active.has(Number(e.source_id))||active.has(Number(e.target_id)))line.classList.add("edge-active");
-    if(plasticityEvent)line.classList.add("plasticity");
-    line.addEventListener("click",()=>inspect(e,"synapse"));
-    svg.appendChild(line);
-  }
-
-  // Actual neurons are drawn last so the relationship network stays readable.
-  for(const u of units){
-    const id=Number(u.id),p=pos.get(id);
-    if(!p)continue;
-    const c=document.createElementNS(NS,"circle");
-    const activation=Number(u.activation||0);
-    c.setAttribute("cx",p.x); c.setAttribute("cy",p.y);
-    c.setAttribute("r",String(2.5+Math.min(8,Math.abs(activation)*8)));
-    c.setAttribute("fill","hsl("+Math.max(0,Math.min(120,120-activation*120))+" 72% 58%)");
-    c.classList.add("node");
-    if(active.has(id))c.classList.add("pulse");
-    if(selected===id)c.classList.add("selected");
-    c.addEventListener("click",()=>inspect(u,"neural_unit"));
-    svg.appendChild(c);
-  }
-
-  $("graphState").textContent=store.events.length
-    ? "brain-shaped canonical graph · last runtime event r"+store.events[store.events.length-1].state_revision
-    : "brain-shaped canonical graph · no runtime event";
+  const canvas=$("brainGraph"); if(!canvas)return;
+  if(!brain3D)initBrain3D(canvas);
+  drawBrain3D(s);
 }
+let brain3D=null;
+function initBrain3D(canvas){
+  const gl=canvas.getContext("webgl",{antialias:true,alpha:false})||canvas.getContext("experimental-webgl");
+  if(!gl){$("graphState").textContent="WebGL unavailable";return;}
+  const nodeVS='attribute vec3 p;attribute float size;attribute vec3 color;uniform mat4 mvp;varying vec3 c;void main(){gl_Position=mvp*vec4(p,1.0);gl_PointSize=size;c=color;}';
+  const nodeFS='precision mediump float;varying vec3 c;void main(){vec2 q=gl_PointCoord-vec2(.5);if(dot(q,q)>.25)discard;gl_FragColor=vec4(c,1.0);}';
+  const lineVS='attribute vec3 p;uniform mat4 mvp;void main(){gl_Position=mvp*vec4(p,1.0);}';
+  const lineFS='precision mediump float;uniform float alpha;void main(){gl_FragColor=vec4(.36,.70,.74,alpha);}';
+  const compile=(type,src)=>{const sh=gl.createShader(type);gl.shaderSource(sh,src);gl.compileShader(sh);if(!gl.getShaderParameter(sh,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(sh));return sh;};
+  const program=(vs,fs)=>{const p=gl.createProgram();gl.attachShader(p,compile(gl.VERTEX_SHADER,vs));gl.attachShader(p,compile(gl.FRAGMENT_SHADER,fs));gl.linkProgram(p);if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(p));return p;};
+  brain3D={gl,canvas,nodeProgram:program(nodeVS,nodeFS),lineProgram:program(lineVS,lineFS),yaw:.15,pitch:-.08,zoom:3.2,drag:false,lastX:0,lastY:0,projected:[]};
+  canvas.addEventListener("pointerdown",e=>{brain3D.drag=true;brain3D.lastX=e.clientX;brain3D.lastY=e.clientY;canvas.setPointerCapture(e.pointerId);});
+  canvas.addEventListener("pointermove",e=>{if(!brain3D.drag)return;brain3D.yaw+=(e.clientX-brain3D.lastX)*.008;brain3D.pitch+=(e.clientY-brain3D.lastY)*.008;brain3D.pitch=Math.max(-1.3,Math.min(1.3,brain3D.pitch));brain3D.lastX=e.clientX;brain3D.lastY=e.clientY;if(store.snapshot)drawBrain3D(store.snapshot);});
+  canvas.addEventListener("pointerup",e=>{brain3D.drag=false;canvas.releasePointerCapture(e.pointerId);});
+  canvas.addEventListener("wheel",e=>{e.preventDefault();brain3D.zoom=Math.max(1.5,Math.min(6,brain3D.zoom+e.deltaY*.002));if(store.snapshot)drawBrain3D(store.snapshot);},{passive:false});
+  canvas.addEventListener("click",e=>{
+    if(!brain3D.projected.length)return;
+    const rect=canvas.getBoundingClientRect(),x=(e.clientX-rect.left)*canvas.width/rect.width,y=(rect.bottom-e.clientY)*canvas.height/rect.height;
+    let best=null,dist=18; for(const p of brain3D.projected){const d=Math.hypot(p.x-x,p.y-y);if(d<dist){dist=d;best=p;}}
+    if(best)inspect(best.entity,"neural_unit");
+  });
+}
+function matPerspective(fovy,aspect,near,far){const f=1/Math.tan(fovy/2),nf=1/(near-far);return [f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,2*far*near*nf,0];}
+function matMul(a,b){const o=new Array(16).fill(0);for(let col=0;col<4;col++)for(let row=0;row<4;row++)for(let k=0;k<4;k++)o[col*4+row]+=a[k*4+row]*b[col*4+k];return o;}
+function matRot(yaw,pitch){const cy=Math.cos(yaw),sy=Math.sin(yaw),cp=Math.cos(pitch),sp=Math.sin(pitch);return [cy,sy*sp,-sy*cp,0,0,cp,sp,0,sy,-cy*sp,cy*cp,0,0,0,0,1];}
+function matTranslate(z){return [1,0,0,0,0,1,0,0,0,0,1,0,0,0,z,1];}
+function drawBrain3D(s){
+  if(!brain3D)return;
+  const {gl,canvas}=brain3D,w0=canvas.clientWidth,h0=canvas.clientHeight,dpr=Math.min(2,window.devicePixelRatio||1),w=Math.max(1,Math.floor(w0*dpr)),h=Math.max(1,Math.floor(h0*dpr));
+  if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
+  gl.viewport(0,0,w,h);gl.clearColor(.018,.035,.04,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
+  const mvp=matMul(matPerspective(1,w/h,.1,100),matMul(matTranslate(-brain3D.zoom),matRot(brain3D.yaw,brain3D.pitch)));
+  const units=s.neural_units||[],synapses=s.synapses||[],pops=s.populations||[],byUnit=new Map();
+  pops.forEach((p,pi)=>(p.units||[]).forEach(m=>{const id=Number(m.node_id??m.id);if(Number.isFinite(id)&&!byUnit.has(id))byUnit.set(id,pi);}));
+  const centers=new Map(),pc=Math.max(1,Math.ceil(pops.length/2));
+  pops.forEach((p,pi)=>{const side=pi%2?-1:1,slot=Math.floor(pi/2),u=slot/Math.max(1,pc-1),theta=(slot*2.3999632297)%6.28318,r=.35+.72*Math.sqrt(Math.min(1,u));centers.set(pi,[side*(.18+r*.62*Math.cos(theta)),.48*Math.sin(theta),.34*Math.cos(theta)*side]);});
+  const pos=new Map(),groups=new Map();
+  units.forEach(u=>{const pi=byUnit.get(Number(u.id));if(pi!==undefined){if(!groups.has(pi))groups.set(pi,[]);groups.get(pi).push(u);}});
+  for(const [pi,members] of groups){const c=centers.get(pi)||[0,0,0],rad=Math.min(.22,.06+Math.sqrt(members.length)*.025);members.forEach((u,i)=>{const a=i*2.3999632297,r=rad*Math.sqrt((i+1)/members.length);pos.set(Number(u.id),[c[0]+Math.cos(a)*r,c[1]+Math.sin(a)*r*.72,c[2]+Math.sin(a*1.7)*r*.75]);});}
+  units.filter(u=>!pos.has(Number(u.id))).forEach((u,i)=>{const a=i*2.3999632297,r=.2+Math.sqrt(i)*.015;pos.set(Number(u.id),[Math.cos(a)*Math.min(.9,r),Math.sin(a)*.55*Math.min(.9,r),Math.sin(a*.7)*.35]);});
+  const active=new Set(),ev=store.events[store.events.length-1],delta=ev?.state_delta||ev?.StateDelta||{};
+  for(const id of delta.added_node_ids||delta.AddedNodeIDs||[])active.add(Number(id));
+  for(const id of Object.keys(delta.activation_delta||delta.ActivationDelta||{}))active.add(Number(id));
+  const nodeData=[],projected=[];
+  const project=p=>{const q=[mvp[0]*p[0]+mvp[1]*p[1]+mvp[2]*p[2]+mvp[3],mvp[4]*p[0]+mvp[5]*p[1]+mvp[6]*p[2]+mvp[7],mvp[8]*p[0]+mvp[9]*p[1]+mvp[10]*p[2]+mvp[11],mvp[12]*p[0]+mvp[13]*p[1]+mvp[14]*p[2]+mvp[15]];return q[3]>0?{x:(q[0]/q[3]*.5+.5)*w,y:(q[1]/q[3]*.5+.5)*h}:null;};
+  for(const u of units){const p=pos.get(Number(u.id));if(!p)continue;const a=Math.max(0,Number(u.activation||0)),hot=active.has(Number(u.id));nodeData.push(...p,2.8+a*8+(hot?4:0),hot?1:.25+a*.65,hot?1:.72,.82);const q=project(p);if(q)projected.push({x:q.x,y:q.y,entity:u});}
+  brain3D.projected=projected;
+  const lineData=[];for(const e of synapses){const a=pos.get(Number(e.source_id)),b=pos.get(Number(e.target_id));if(a&&b)lineData.push(...a,...b);}
+  const draw=(program,data,mode,stride,attrs)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);gl.useProgram(program);let off=0;attrs.forEach(a=>{const loc=gl.getAttribLocation(program,a.name);if(loc>=0){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,a.size,gl.FLOAT,false,stride*4,off);}off+=a.size*4;});gl.uniformMatrix4fv(gl.getUniformLocation(program,"mvp"),false,new Float32Array(mvp));gl.drawArrays(mode,0,data.length/stride);gl.deleteBuffer(b);};
+  draw(brain3D.nodeProgram,nodeData,gl.POINTS,7,[{name:"p",size:3},{name:"size",size:1},{name:"color",size:3}]);
+  gl.uniform1f(gl.getUniformLocation(brain3D.lineProgram,"alpha"),.18);draw(brain3D.lineProgram,lineData,gl.LINES,3,[{name:"p",size:3}]);
+  $("graphState").textContent=`3D canonical brain · ${units.length} neurons · ${synapses.length} synapses · drag to rotate · wheel to zoom`;
+}
+
 function inspect(entity,type){selected=Number(entity.id||entity.node_id||entity.source_id||0);$("inspector").textContent=JSON.stringify({type,entity},null,2);render();}
 function renderEvents(){const root=$("events");root.textContent="";for(const e of [...store.events].reverse()){const div=document.createElement("div");div.className="event"+(Object.keys(e.plasticity||{}).length?" plasticity-event":"");div.textContent=String(e.type)+" revision="+String(e.state_revision)+" timestamp="+String(e.timestamp)+" hash="+String(e.event_hash||"unavailable");root.appendChild(div);}}
+
+function renderCognitivePanel(s){
+  const last=store.events[store.events.length-1],obs=last?.observation||last?.Observation;
+  $("ioOutput").textContent=JSON.stringify({runtime_event:last?.type||null,state_revision:s.state_revision,canonical_state_hash:s.canonical_state_hash,observation:obs||null},null,2);
+  const active=(s.neural_units||[]).filter(u=>Number(u.activation||0)>.5).sort((a,b)=>Number(b.activation||0)-Number(a.activation||0)).slice(0,12);
+  $("thoughtState").textContent=JSON.stringify({status:"neural-state view",note:"Kata hanya ditampilkan sebagai pikiran aktual jika runtime mengekspos aktivasi simbolik. Saat ini panel menunjukkan keadaan neural aktif, prediksi, error, dan plasticity.",active_neural_units:active.map(u=>({id:u.id,activation:u.activation})),prediction:s.brain_state?.prediction||{},error:s.brain_state?.error||{},plasticity:s.brain_state?.plasticity||{},communication_bootstrap_words:s.brain_state?.memory?.communication_lexicon_words||0,state_revision:s.state_revision},null,2);
+}
 function renderInspectableState(s){
   const root=$("inspectList"); if(!root)return; root.textContent="";
   const add=(label,value,type)=>{const button=document.createElement("button");button.className="inspectItem";button.textContent=label;button.onclick=()=>{selected=null;$("inspector").textContent=JSON.stringify({type,value},null,2)};root.appendChild(button);};
@@ -246,6 +153,8 @@ async function connect(){if(!baseUrl())return;sessionStorage.setItem("horizon.br
 function disconnect(){if(reconnectTimer)clearTimeout(reconnectTimer);if(socket)socket.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");}
 $("connect").onclick=connect;$("disconnect").onclick=disconnect;store.subscribe(render);
 
+
+$("ioSend").onclick=async()=>{const text=$("ioInput").value.trim();if(!text)return;$("ioStatus").textContent="sending...";try{const payload=rawPayload(text),env=makeEnvelope("text","web-test-input",{raw:text},{synthetic:true,payloadMeta:{payload_hash:await hashBuffer(payload)}}),response=await postObservation(env);$("ioStatus").textContent="accepted revision "+response.state_revision;$("ioInput").value="";await refreshSnapshotForEvent({state_revision:Number(response.state_revision),canonical_state_hash:response.canonical_state_hash});}catch(error){$("ioStatus").textContent="failed: "+error.message;}};
 $("simSend").onclick=async()=>{const text=$("simText").value;if(!text)return;const payload=rawPayload(text);const envelope=makeEnvelope($("simModality").value,"browser-simulator",{raw:text},{synthetic:true,payloadMeta:{payload_hash:await hashBuffer(payload)}});await sendEnvelope(envelope,$("simStatus"));};
 $("cameraStart").onclick=async()=>{try{cameraStream=await navigator.mediaDevices.getUserMedia({video:true});$("video").srcObject=cameraStream;const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");cameraTimer=setInterval(async()=>{canvas.width=$("video").videoWidth||320;canvas.height=$("video").videoHeight||240;ctx.drawImage($("video"),0,0,canvas.width,canvas.height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.65));if(!blob)return;const data=await blob.arrayBuffer();const envelope=makeEnvelope("vision","github-pages-camera",{encoding:"image/jpeg;base64",data:binaryToBase64(data)},{capture_device:"browser-camera",payloadMeta:{payload_hash:await hashBuffer(data)}});sendEnvelope(envelope,$("cameraStatus")).catch(()=>{});},1000);$("cameraStatus").textContent="captured";}catch(error){$("cameraStatus").textContent="failed: "+error.message;}};
 $("cameraStop").onclick=()=>{if(cameraTimer)clearInterval(cameraTimer);if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;$("cameraStatus").textContent="stopped";};
