@@ -240,6 +240,13 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 		// without creating a duplicate bootstrap experience/episode.
 	}
 
+	// Communication is bootstrapped as a revisable developmental trajectory,
+	// not as a lexical dictionary. Each experience binds numeric non-symbolic
+	// state, transition, consequence and modality exposures to prediction,
+	// outcome, error and plasticity so later experience can revise it.
+	brain.BrainState.DevelopmentalExperiences = append(brain.BrainState.DevelopmentalExperiences,
+		buildCommunicationDevelopmentalExperiences(brain, pools, at)...
+	)
 	brain.BrainState.AttentionState["novelty"] = brain.BrainState.LearningPolicyState.NoveltySensitivity
 	brain.BrainState.AttentionState["uncertainty"] = brain.BrainState.LearningPolicyState.UncertaintySensitivity
 	brain.BrainState.AttentionState["bootstrap_domains"] = float64(len(BootstrapNetworkDomains))
@@ -262,6 +269,67 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 	return nil
 }
 
+func buildCommunicationDevelopmentalExperiences(brain *Brain, pools [][]NodeID, at time.Time) []DevelopmentalExperience {
+	if brain == nil || len(pools) < len(BootstrapNetworkDomains) { return nil }
+	communication, objectState, change, continuity := pools[19], pools[8], pools[1], pools[2]
+	timePool, prediction, errorPool, social := pools[6], pools[9], pools[10], pools[17]
+	makeFrame := func(pool []NodeID, confidence float64) DevelopmentalStateFrame {
+		frame := DevelopmentalStateFrame{ActiveUnits: append([]NodeID(nil), pool...), Confidence: confidence}
+		if len(pool) > 0 { frame.ActivePopulations = []NodeID{pool[0]} }
+		var sum []float64
+		count := 0
+		for _, id := range pool {
+			node := brain.Registry.GetByID(id)
+			if node == nil || len(node.Representation) == 0 { continue }
+			if sum == nil { sum = make([]float64, len(node.Representation)) }
+			for i, value := range node.Representation { sum[i] += value }
+			count++
+		}
+		if count > 0 { for i := range sum { sum[i] /= float64(count) }; frame.Representation = sum }
+		return frame
+	}
+	delta := func(before, after []float64) []float64 {
+		if len(before) != len(after) { return nil }
+		out := make([]float64, len(before))
+		for i := range out { out[i] = after[i] - before[i] }
+		return out
+	}
+	symbolVector := func(seed float64) []float64 {
+		v := make([]float64, 8)
+		for i := range v { v[i] = math.Sin(seed+float64(i)*0.47)*0.5 + math.Cos(seed*0.31+float64(i)*0.19)*0.5 }
+		return v
+	}
+	traceTimes := func(start time.Time, count int) []time.Time {
+		out := make([]time.Time, count)
+		for i := range out { out[i] = start.Add(time.Duration(i) * 40 * time.Millisecond) }
+		return out
+	}
+	build := func(id string, before, trans, after []NodeID, modalities []string, seeds []float64, positions []string, confidence float64) DevelopmentalExperience {
+		beforeFrame, afterFrame := makeFrame(before, confidence), makeFrame(after, confidence)
+		prediction, outcome := append([]float64(nil), beforeFrame.Representation...), append([]float64(nil), afterFrame.Representation...)
+		exposures := make([]SymbolExposure, 0, len(modalities))
+		for i, modality := range modalities {
+			position := "during_transition"; if i < len(positions) && positions[i] != "" { position = positions[i] }
+			seed := float64(i + 1); if i < len(seeds) { seed = seeds[i] }
+			exposures = append(exposures, SymbolExposure{Modality: modality, Representation: symbolVector(seed), RelativePosition: position, SequencePosition: i, Confidence: confidence})
+		}
+		active := append([]NodeID(nil), before...); active = append(active, trans...); active = append(active, after...)
+		return DevelopmentalExperience{
+			ID: id, BeforeState: beforeFrame,
+			Transition: DevelopmentalTransition{ChangeRepresentation: delta(beforeFrame.Representation, afterFrame.Representation), TemporalDeltasNanos: []int64{0, int64(40*time.Millisecond), int64(80*time.Millisecond), int64(120*time.Millisecond)}, Confidence: confidence},
+			AfterState: afterFrame, SymbolExposures: exposures,
+			LearningTrace: DevelopmentalLearningTrace{ActiveUnits: active, ActivePopulations: []NodeID{communication[0], trans[0], after[0]}, TemporalTrace: traceTimes(at, 4), Prediction: prediction, Outcome: outcome, PredictionError: 1 - confidence, RepresentationDelta: delta(prediction, outcome), SynapticDeltas: []DevelopmentalSynapticDelta{{SourceNodeID: trans[0], TargetNodeID: after[0], Delta: 0.04}}, Plasticity: 0.65, Confidence: confidence},
+			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
+		}
+	}
+	return []DevelopmentalExperience{
+		build("bootstrap-communication-state-symbol", objectState, change, continuity, []string{"audio", "text"}, []float64{1.13, 2.17}, []string{"before_transition", "after_outcome"}, 0.20),
+		build("bootstrap-communication-letter-composition", communication, timePool, communication, []string{"text", "text", "text"}, []float64{3.11, 3.73, 4.29}, []string{"before_transition", "during_transition", "after_outcome"}, 0.20),
+		build("bootstrap-communication-word-composition", communication, change, communication, []string{"text", "text"}, []float64{5.17, 5.83}, []string{"during_transition", "after_outcome"}, 0.20),
+		build("bootstrap-communication-sentence-information", communication, prediction, social, []string{"text", "audio"}, []float64{6.19, 6.71}, []string{"before_transition", "after_outcome"}, 0.20),
+		build("bootstrap-communication-feedback-revision", prediction, errorPool, social, []string{"text", "audio", "gesture"}, []float64{7.13, 7.67, 8.23}, []string{"before_transition", "during_transition", "after_outcome"}, 0.15),
+	}
+}
 func NewBootstrapBrain() *Brain {
 	brain := NewBrain()
 	_ = MaterializeBootstrap(brain, time.Time{})
