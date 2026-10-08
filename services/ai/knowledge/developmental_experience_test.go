@@ -9,8 +9,8 @@ import (
 
 func TestCommunicationDevelopmentalBootstrapIsRevisable(t *testing.T) {
 	brain := NewBootstrapBrain()
-	if got := len(brain.BrainState.DevelopmentalExperiences); got != 6 {
-		t.Fatalf("developmental experiences = %d, want 6", got)
+	if got := len(brain.BrainState.DevelopmentalExperiences); got != 7 {
+		t.Fatalf("developmental experiences = %d, want 7", got)
 	}
 	for _, experience := range brain.BrainState.DevelopmentalExperiences {
 		if experience.Provenance.Status != "initial_hypothesis" || experience.Provenance.DirectExperience {
@@ -53,13 +53,13 @@ func TestCommunicationDevelopmentalBootstrapPersistsThroughCanonicalJSON(t *test
 		DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences"`
 	}
 	if err := json.Unmarshal(raw, &persisted); err != nil { t.Fatal(err) }
-	if len(persisted.DevelopmentalExperiences) != 6 {
-		t.Fatalf("persisted developmental experiences = %d, want 6", len(persisted.DevelopmentalExperiences))
+	if len(persisted.DevelopmentalExperiences) != 7 {
+		t.Fatalf("persisted developmental experiences = %d, want 7", len(persisted.DevelopmentalExperiences))
 	}
 	loaded := NewBrain()
 	if err := loaded.Load(path); err != nil { t.Fatal(err) }
-	if len(loaded.BrainState.DevelopmentalExperiences) != 6 {
-		t.Fatalf("reloaded developmental experiences = %d, want 6", len(loaded.BrainState.DevelopmentalExperiences))
+	if len(loaded.BrainState.DevelopmentalExperiences) != 7 {
+		t.Fatalf("reloaded developmental experiences = %d, want 7", len(loaded.BrainState.DevelopmentalExperiences))
 	}
 }
 
@@ -106,7 +106,7 @@ func TestVisualFaceBootstrapMaterializesRevisablePerceptualState(t *testing.T) {
 		t.Fatalf("visual source hash = %q, want %q", visual.Provenance.SourceHash, visualBootstrapSourceHash)
 	}
 	if len(visual.VisualExposures) != 6 {
-		t.Fatalf("visual exposures = %d, want 6", len(visual.VisualExposures))
+		t.Fatalf("visual exposures = %d, want 7", len(visual.VisualExposures))
 	}
 	if len(brain.ProjectionPopulations) != 21 || brain.ProjectionPopulations[20].Domain != "visual_form" {
 		t.Fatalf("visual population missing: %d populations", len(brain.ProjectionPopulations))
@@ -122,5 +122,48 @@ func TestVisualFaceBootstrapMaterializesRevisablePerceptualState(t *testing.T) {
 	}
 	if len(brain.Registry.GetByID(123).Synapses[19]) == 0 {
 		t.Fatal("visual -> identity continuity pathway missing")
+	}
+}
+
+
+func TestCommunicationLexiconBootstrapContainsConcreteWords(t *testing.T) {
+	brain := NewBootstrapBrain()
+	var lexicon *DevelopmentalExperience
+	for i := range brain.BrainState.DevelopmentalExperiences {
+		if brain.BrainState.DevelopmentalExperiences[i].ID == "bootstrap-communication-lexicon" {
+			lexicon = &brain.BrainState.DevelopmentalExperiences[i]
+			break
+		}
+	}
+	if lexicon == nil {
+		t.Fatal("communication lexicon bootstrap missing")
+	}
+	if len(lexicon.SymbolExposures) < 40 {
+		t.Fatalf("communication words = %d, want at least 40", len(lexicon.SymbolExposures))
+	}
+	required := map[string]bool{
+		"saya": false, "kamu": false, "ini": false, "itu": false,
+		"apa": false, "siapa": false, "ya": false, "tidak": false,
+		"mau": false, "tolong": false, "maaf": false, "halo": false,
+		"terima kasih": false, "karena": false, "untuk": false,
+	}
+	for _, exposure := range lexicon.SymbolExposures {
+		if exposure.Symbol != "" {
+			if _, ok := required[exposure.Symbol]; ok {
+				required[exposure.Symbol] = true
+			}
+		}
+		if exposure.Modality != "text" || len(exposure.Representation) == 0 {
+			t.Fatalf("incomplete communication exposure: %+v", exposure)
+		}
+	}
+	for word, found := range required {
+		if !found {
+			t.Fatalf("required communication word %q missing", word)
+		}
+	}
+	if lexicon.Provenance.Origin != "human_provided_communication_bootstrap" ||
+		lexicon.Provenance.DirectExperience {
+		t.Fatalf("communication lexicon provenance invalid: %+v", lexicon.Provenance)
 	}
 }
