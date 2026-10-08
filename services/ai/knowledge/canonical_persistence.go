@@ -49,6 +49,7 @@ type canonicalBrainFile struct {
 	Episodes []BootstrapExperience `json:"episodes"`
 	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences"`
 	ExperienceTraces []ExperienceTrace `json:"experience_traces"`
+	DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences"`
 	AttentionState map[string]float64 `json:"attention_state"`
 	PredictionState map[string]float64 `json:"prediction_state"`
 	ErrorState map[string]float64 `json:"error_state"`
@@ -136,7 +137,7 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 	for _, unit := range raw.NeuralUnits { registry[unit.ID] = &ConceptNode{ID: unit.ID, Representation: append([]float64(nil), unit.Representation...), Activation: unit.Activation, RestingActivation: unit.RestingActivation, Threshold: unit.Threshold, Frequency: unit.Frequency, Importance: unit.Importance, Plasticity: unit.Plasticity, UsageHistory: append([]time.Time(nil), unit.UsageHistory...), LastActivation: unit.LastActivation, Synapses: make(map[NodeID]SynapseList)} }
 	for _, item := range raw.Synapses { source := registry[item.SourceID]; if source == nil { continue }; synapse := &Synapse{TargetID: item.TargetID, Kind: item.Kind, Weight: item.Weight, Activation: item.Activation, Frequency: item.Frequency, Confidence: item.Confidence, Inhibitory: item.Inhibitory, LastActivation: item.LastActivation, Dynamic: item.Dynamic}; hydrateSynapseDynamicState(synapse); source.Synapses[item.TargetID] = append(source.Synapses[item.TargetID], synapse) }
 	nodes := make([]*ConceptNode, 0, len(registry)); for _, node := range registry { nodes = append(nodes, node) }; sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
-	state := BrainState{AttentionState: raw.AttentionState, CuriosityState: raw.CuriosityState, PredictionState: raw.PredictionState, MemoryState: raw.MemoryState, SelfModelState: raw.SelfModelState, SocialModelState: raw.SocialModelState, ValueState: raw.ValueState, PlasticityState: raw.PlasticityState, LearningPolicyState: raw.LearningPolicyState, InquiryState: raw.InquiryState, BootstrapExperiences: raw.BootstrapExperiences, Episodes: raw.Episodes, ExperienceTraces: raw.ExperienceTraces}
+	state := BrainState{AttentionState: raw.AttentionState, CuriosityState: raw.CuriosityState, PredictionState: raw.PredictionState, MemoryState: raw.MemoryState, SelfModelState: raw.SelfModelState, SocialModelState: raw.SocialModelState, ValueState: raw.ValueState, PlasticityState: raw.PlasticityState, LearningPolicyState: raw.LearningPolicyState, InquiryState: raw.InquiryState, BootstrapExperiences: raw.BootstrapExperiences, Episodes: raw.Episodes, ExperienceTraces: raw.ExperienceTraces, DevelopmentalExperiences: raw.DevelopmentalExperiences}
 	if state.PredictionState == nil { state.PredictionState = map[string]float64{} }; for key, value := range raw.ErrorState { state.PredictionState["error_"+key] = value }
 	return nodes, raw.TemporalPatterns, raw.Populations, state, nil
 }
