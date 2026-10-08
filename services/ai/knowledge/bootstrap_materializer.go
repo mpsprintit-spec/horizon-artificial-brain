@@ -346,14 +346,124 @@ func buildCommunicationDevelopmentalExperiences(brain *Brain, pools [][]NodeID, 
 			Provenance: BootstrapProvenance{Origin: "developmental_bootstrap", DirectExperience: false, Status: "initial_hypothesis"},
 		}
 	}
-	return []DevelopmentalExperience{
+	return append([]DevelopmentalExperience{
 		build("bootstrap-communication-state-symbol", objectState, change, continuity, []string{"audio", "text"}, []float64{1.13, 2.17}, []string{"before_transition", "after_outcome"}, 0.20),
 		build("bootstrap-communication-letter-composition", communication, timePool, communication, []string{"text", "text", "text"}, []float64{3.11, 3.73, 4.29}, []string{"before_transition", "during_transition", "after_outcome"}, 0.20),
 		build("bootstrap-communication-word-composition", communication, change, communication, []string{"text", "text"}, []float64{5.17, 5.83}, []string{"during_transition", "after_outcome"}, 0.20),
 		build("bootstrap-communication-sentence-information", communication, prediction, social, []string{"text", "audio"}, []float64{6.19, 6.71}, []string{"before_transition", "after_outcome"}, 0.20),
 		build("bootstrap-communication-feedback-revision", prediction, errorPool, social, []string{"text", "audio", "gesture"}, []float64{7.13, 7.67, 8.23}, []string{"before_transition", "during_transition", "after_outcome"}, 0.15),
+	}, buildCommunicationLexicalExperience(brain, pools, at))
+}
+func buildCommunicationLexicalExperience(brain *Brain, pools [][]NodeID, at time.Time) DevelopmentalExperience {
+	communication := pools[19]
+	prediction := pools[9]
+	social := pools[17]
+	words := []string{
+		"saya", "aku", "kamu", "anda", "dia",
+		"ini", "itu", "di sini", "di sana",
+		"apa", "siapa", "mana", "kapan", "kenapa", "mengapa", "bagaimana",
+		"ya", "tidak", "bukan", "belum", "sudah",
+		"mau", "ingin", "bisa", "boleh", "tolong",
+		"terima kasih", "maaf", "halo", "hai", "selamat",
+		"ada", "tidak ada", "adalah",
+		"dan", "atau", "tetapi", "karena", "kalau",
+		"untuk", "dengan", "dari", "ke", "di",
+		"yang", "apa kabar", "saya tidak tahu", "saya mengerti",
+	}
+	representation := func(seed float64) []float64 {
+		v := make([]float64, 8)
+		for i := range v {
+			v[i] = math.Sin(seed+float64(i)*0.47)*0.5 + math.Cos(seed*0.31+float64(i)*0.19)*0.5
+		}
+		return v
+	}
+	avg := func(ids []NodeID) []float64 {
+		out := make([]float64, 8)
+		count := 0
+		for _, id := range ids {
+			n := brain.Registry.GetByID(id)
+			if n == nil || len(n.Representation) == 0 {
+				continue
+			}
+			for i := range out {
+				if i < len(n.Representation) {
+					out[i] += n.Representation[i]
+				}
+			}
+			count++
+		}
+		if count > 0 {
+			for i := range out {
+				out[i] /= float64(count)
+			}
+		}
+		return out
+	}
+	base := avg(communication)
+	exposures := make([]SymbolExposure, 0, len(words))
+	for i, word := range words {
+		exposures = append(exposures, SymbolExposure{
+			Symbol: word,
+			Modality: "text",
+			Representation: representation(101.0 + float64(i)*0.37),
+			RelativePosition: "communication_sequence",
+			SequencePosition: i,
+			Confidence: 0.15,
+		})
+		if i < len(communication) {
+			connectBootstrapAt(brain.Registry.GetByID(communication[i]), brain.Registry.GetByID(prediction[i%len(prediction)]), 0.08, 0.15, false, at)
+		}
+		if i < len(social) {
+			connectBootstrapAt(brain.Registry.GetByID(communication[i]), brain.Registry.GetByID(social[i%len(social)]), 0.06, 0.12, false, at)
+		}
+	}
+	trace := make([]time.Time, len(words))
+	for i := range trace {
+		trace[i] = at.Add(time.Duration(i) * 40 * time.Millisecond)
+	}
+	return DevelopmentalExperience{
+		ID: "bootstrap-communication-lexicon",
+		BeforeState: DevelopmentalStateFrame{
+			ActiveUnits: append([]NodeID(nil), communication...),
+			ActivePopulations: []NodeID{communication[0]},
+			Representation: base,
+			Confidence: 0.15,
+		},
+		Transition: DevelopmentalTransition{
+			ChangeRepresentation: make([]float64, len(base)),
+			TemporalDeltasNanos: []int64{0, 40000000, 80000000, 120000000},
+			Confidence: 0.15,
+		},
+		AfterState: DevelopmentalStateFrame{
+			ActiveUnits: append([]NodeID(nil), social...),
+			ActivePopulations: []NodeID{social[0]},
+			Representation: append([]float64(nil), base...),
+			Confidence: 0.15,
+		},
+		SymbolExposures: exposures,
+		LearningTrace: DevelopmentalLearningTrace{
+			ActiveUnits: append(append([]NodeID(nil), communication...), social...),
+			ActivePopulations: []NodeID{communication[0], prediction[0], social[0]},
+			TemporalTrace: trace,
+			Prediction: append([]float64(nil), base...),
+			Outcome: append([]float64(nil), base...),
+			PredictionError: 0.85,
+			RepresentationDelta: make([]float64, len(base)),
+			SynapticDeltas: []DevelopmentalSynapticDelta{
+				{SourceNodeID: communication[0], TargetNodeID: prediction[0], Delta: 0.02},
+				{SourceNodeID: communication[1], TargetNodeID: social[0], Delta: 0.02},
+			},
+			Plasticity: 0.65,
+			Confidence: 0.15,
+		},
+		Provenance: BootstrapProvenance{
+			Origin: "human_provided_communication_bootstrap",
+			DirectExperience: false,
+			Status: "initial_hypothesis",
+		},
 	}
 }
+
 func NewBootstrapBrain() *Brain {
 	brain := NewBrain()
 	_ = MaterializeBootstrap(brain, time.Time{})
