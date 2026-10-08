@@ -26,7 +26,7 @@ func TestCommunicationDevelopmentalBootstrapIsRevisable(t *testing.T) {
 			t.Fatalf("%s lacks numeric transition trace", experience.ID)
 		}
 		if experience.ID == "bootstrap-visual-face-89220a36" {
-			if len(experience.VisualExposures) != 6 || experience.Provenance.Origin != "human_provided_visual_bootstrap" {
+			if len(experience.SymbolExposures) != 6 || experience.Provenance.Origin != "human_provided_visual_bootstrap" {
 				t.Fatalf("%s lacks visual provenance/exposure trace", experience.ID)
 			}
 		} else {
@@ -105,8 +105,8 @@ func TestVisualFaceBootstrapMaterializesRevisablePerceptualState(t *testing.T) {
 	if visual.Provenance.SourceHash != visualBootstrapSourceHash {
 		t.Fatalf("visual source hash = %q, want %q", visual.Provenance.SourceHash, visualBootstrapSourceHash)
 	}
-	if len(visual.VisualExposures) != 6 {
-		t.Fatalf("visual exposures = %d, want 7", len(visual.VisualExposures))
+	if len(visual.SymbolExposures) != 6 {
+		t.Fatalf("visual exposures = %d, want 6", len(visual.SymbolExposures))
 	}
 	if len(brain.ProjectionPopulations) != 21 || brain.ProjectionPopulations[20].Domain != "visual_form" {
 		t.Fatalf("visual population missing: %d populations", len(brain.ProjectionPopulations))
