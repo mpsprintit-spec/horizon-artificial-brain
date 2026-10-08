@@ -4943,6 +4943,25 @@
       }
     },
     {
+      "source_id": 7,
+      "target_id": 116,
+      "weight": 0.18,
+      "activation": 0,
+      "frequency": 1,
+      "confidence": 0.25,
+      "inhibitory": false,
+      "dynamic": {
+        "weight": 0.18,
+        "activation": 0,
+        "eligibility": 1,
+        "confidence": 0.25,
+        "frequency": 1,
+        "last_activation": "2026-01-01T00:00:00Z",
+        "last_modification": "2026-01-01T00:00:00Z",
+        "last_eligibility_update": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
       "source_id": 8,
       "target_id": 1,
       "weight": 0.24,
@@ -5418,6 +5437,25 @@
       }
     },
     {
+      "source_id": 13,
+      "target_id": 117,
+      "weight": 0.16,
+      "activation": 0,
+      "frequency": 1,
+      "confidence": 0.25,
+      "inhibitory": false,
+      "dynamic": {
+        "weight": 0.16,
+        "activation": 0,
+        "eligibility": 1,
+        "confidence": 0.25,
+        "frequency": 1,
+        "last_activation": "2026-01-01T00:00:00Z",
+        "last_modification": "2026-01-01T00:00:00Z",
+        "last_eligibility_update": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
       "source_id": 14,
       "target_id": 7,
       "weight": 0.24,
@@ -8268,6 +8306,25 @@
       }
     },
     {
+      "source_id": 49,
+      "target_id": 115,
+      "weight": 0.18,
+      "activation": 0,
+      "frequency": 1,
+      "confidence": 0.25,
+      "inhibitory": false,
+      "dynamic": {
+        "weight": 0.18,
+        "activation": 0,
+        "eligibility": 1,
+        "confidence": 0.25,
+        "frequency": 1,
+        "last_activation": "2026-01-01T00:00:00Z",
+        "last_modification": "2026-01-01T00:00:00Z",
+        "last_eligibility_update": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
       "source_id": 50,
       "target_id": 43,
       "weight": 0.24,
@@ -8736,6 +8793,25 @@
         "activation": 0,
         "eligibility": 1,
         "confidence": 0.6,
+        "frequency": 1,
+        "last_activation": "2026-01-01T00:00:00Z",
+        "last_modification": "2026-01-01T00:00:00Z",
+        "last_eligibility_update": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "source_id": 55,
+      "target_id": 103,
+      "weight": 0.14,
+      "activation": 0,
+      "frequency": 1,
+      "confidence": 0.22,
+      "inhibitory": false,
+      "dynamic": {
+        "weight": 0.14,
+        "activation": 0,
+        "eligibility": 1,
+        "confidence": 0.22,
         "frequency": 1,
         "last_activation": "2026-01-01T00:00:00Z",
         "last_modification": "2026-01-01T00:00:00Z",
@@ -14037,6 +14113,25 @@
         "activation": 0,
         "eligibility": 0.8,
         "confidence": 0.4,
+        "frequency": 1,
+        "last_activation": "2026-01-01T00:00:00Z",
+        "last_modification": "2026-01-01T00:00:00Z",
+        "last_eligibility_update": "2026-01-01T00:00:00Z"
+      }
+    },
+    {
+      "source_id": 118,
+      "target_id": 55,
+      "weight": 0.16,
+      "activation": 0,
+      "frequency": 1,
+      "confidence": 0.25,
+      "inhibitory": false,
+      "dynamic": {
+        "weight": 0.16,
+        "activation": 0,
+        "eligibility": 1,
+        "confidence": 0.25,
         "frequency": 1,
         "last_activation": "2026-01-01T00:00:00Z",
         "last_modification": "2026-01-01T00:00:00Z",
