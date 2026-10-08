@@ -17707,7 +17707,8 @@
     "error_sensitivity": 0.8,
     "bootstrap_prediction_paths": 20,
     "bootstrap_error_paths": 20,
-    "visual_bootstrap_initial_hypothesis": 0.2
+    "visual_bootstrap_initial_hypothesis": 0.2,
+    "communication_lexicon_initial_hypothesis": 0.15
   },
   "error_state": {
     "sensitivity": 0.8
@@ -17718,7 +17719,9 @@
     "bootstrap_temporal_traces": 24,
     "communication_developmental_experiences": 5,
     "visual_bootstrap_experiences": 1,
-    "visual_bootstrap_units": 6
+    "visual_bootstrap_units": 6,
+    "communication_lexicon_words": 48,
+    "communication_bootstrap_experiences": 1
   },
   "curiosity_state": {
     "pressure": 0.65,
@@ -19468,6 +19471,1015 @@
         "direct_experience": false,
         "status": "initial_hypothesis",
         "source_hash": "sha256:89220a3626733c1c31840d30ef7d97a854a24a0d7052523c69b493411e137bfd"
+      }
+    },
+    {
+      "id": "bootstrap-communication-lexicon",
+      "before_state": {
+        "active_units": [
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122
+        ],
+        "active_populations": [
+          115
+        ],
+        "representation": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidence": 0.15
+      },
+      "transition": {
+        "change_representation": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "temporal_deltas_nanos": [
+          0,
+          40000000,
+          80000000,
+          120000000
+        ],
+        "confidence": 0.15
+      },
+      "after_state": {
+        "active_units": [
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122
+        ],
+        "active_populations": [
+          115
+        ],
+        "representation": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "confidence": 0.15
+      },
+      "symbol_exposures": [
+        {
+          "symbol": "saya",
+          "modality": "text",
+          "representation": [
+            0.723210407733044,
+            0.9017282684351358,
+            0.974810768476315,
+            0.9235530181226519,
+            0.7528815376483512,
+            0.4907086416511883,
+            0.18220680499903447,
+            -0.11956709715297731
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 0,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "aku",
+          "modality": "text",
+          "representation": [
+            0.8719801210097324,
+            0.9731226070882021,
+            0.9518856123258166,
+            0.807906580121905,
+            0.5644291843138692,
+            0.26354984293063266,
+            -0.04252616856649219,
+            -0.30233664239061386
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 1,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "kamu",
+          "modality": "text",
+          "representation": [
+            0.9638308819622603,
+            0.9727080596161979,
+            0.8566692792587213,
+            0.6340641975887377,
+            0.3435017736761594,
+            0.03582528992117212,
+            -0.23647571244319723,
+            -0.4301361830955237
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 2,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "anda",
+          "modality": "text",
+          "representation": [
+            0.9858682941543606,
+            0.8987662569221448,
+            0.6990265939144846,
+            0.4213933546355409,
+            0.11485029040394346,
+            -0.1675979339710764,
+            -0.3799355881005818,
+            -0.4925666034010977
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 3,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "dia",
+          "modality": "text",
+          "representation": [
+            0.9338500035203448,
+            0.7587665495257403,
+            0.49656815495163936,
+            0.19389926925211776,
+            -0.09623833075902363,
+            -0.32552489749311275,
+            -0.4602760046621486,
+            -0.4881701831755542
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 4,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "ini",
+          "modality": "text",
+          "representation": [
+            0.8127764355686233,
+            0.5683884238552185,
+            0.27231578374082877,
+            -0.022961299134356183,
+            -0.267289291500193,
+            -0.4232181713951451,
+            -0.4735638115487463,
+            -0.4245360077582399
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 5,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "itu",
+          "modality": "text",
+          "representation": [
+            0.6362408203397774,
+            0.3494423150410108,
+            0.051644189087569375,
+            -0.20565541154188702,
+            -0.3816016892204397,
+            -0.4543052458492365,
+            -0.42500362154875837,
+            -0.31718090733817694
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 6,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "di sini",
+          "modality": "text",
+          "representation": [
+            0.4246261238757211,
+            0.12696965990944795,
+            -0.14108797712062626,
+            -0.3356825624765266,
+            -0.4304241415054404,
+            -0.4215510017128421,
+            -0.3281413590344827,
+            -0.1873585934776134
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 7,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "di sana",
+          "modality": "text",
+          "representation": [
+            0.20239244061790365,
+            -0.07408599887658263,
+            -0.28576256203982364,
+            -0.4019968127537761,
+            -0.41405092916588915,
+            -0.33639186826324446,
+            -0.20293923878978307,
+            -0.05909470826176541
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 8,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "apa",
+          "modality": "text",
+          "representation": [
+            -0.005178620793500843,
+            -0.2321871001279948,
+            -0.3691463899408135,
+            -0.4024156930855659,
+            -0.341691460641696,
+            -0.2172959211214146,
+            -0.07298392238761753,
+            0.044149760529622495
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 9,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "siapa",
+          "modality": "text",
+          "representation": [
+            -0.1753426482770069,
+            -0.33204250116672324,
+            -0.3865988890884847,
+            -0.34382632160349186,
+            -0.23013191718023815,
+            -0.08717208291230844,
+            0.03779310151809562,
+            0.10273399235778607
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 10,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "mana",
+          "modality": "text",
+          "representation": [
+            -0.29090047628282634,
+            -0.36659680474758555,
+            -0.34261284443878387,
+            -0.24116201142863816,
+            -0.10137142661540714,
+            0.029819721861370885,
+            0.10843788489526313,
+            0.10357010288707313
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 11,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "kapan",
+          "modality": "text",
+          "representation": [
+            -0.3424493733819097,
+            -0.33790038451594373,
+            -0.25011623543407463,
+            -0.1152890788732786,
+            0.02044609380443216,
+            0.11162455452804076,
+            0.12388837375086398,
+            0.04196232277490558
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 12,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "kenapa",
+          "modality": "text",
+          "representation": [
+            -0.3295736869535164,
+            -0.2567434707265807,
+            -0.1286308357416811,
+            0.009908927596636752,
+            0.11238797319339305,
+            0.14135924443569986,
+            0.07708527374842072,
+            -0.07769722887198055
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 13,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "mengapa",
+          "modality": "text",
+          "representation": [
+            -0.26081487403320425,
+            -0.14110498280556993,
+            -0.0015380043736651916,
+            0.11085373775868829,
+            0.15592131769817952,
+            0.10967381670998771,
+            -0.030007217708641787,
+            -0.24247113748058838
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 14,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "bagaimana",
+          "modality": "text",
+          "representation": [
+            -0.15242610765635484,
+            -0.013627244734401106,
+            0.10717706005988475,
+            0.1675507406528326,
+            0.13950137027706483,
+            0.016086953785577285,
+            -0.18660982224284212,
+            -0.4325848965428365
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 15,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "ya",
+          "modality": "text",
+          "representation": [
+            -0.026081191062112707,
+            0.10154042330582858,
+            0.17626075368129923,
+            0.16637837713473602,
+            0.06020832564360212,
+            -0.13088617747945125,
+            -0.37453828147892365,
+            -0.6240700870191138
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 16,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "tidak",
+          "modality": "text",
+          "representation": [
+            0.09415093275780928,
+            0.18210082456196067,
+            0.1901535832871563,
+            0.10200991917292235,
+            -0.07578991109424754,
+            -0.3148318576664012,
+            -0.5706249393045735,
+            -0.7919852270808043
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 17,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "bukan",
+          "modality": "text",
+          "representation": [
+            0.18515538062892123,
+            0.2107148845944546,
+            0.14117767186640556,
+            -0.021793495143786534,
+            -0.2540125423813338,
+            -0.5136136226664838,
+            -0.7498245756566139,
+            -0.9137786696939401
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 18,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "belum",
+          "modality": "text",
+          "representation": [
+            0.22798973590428706,
+            0.17743298823778308,
+            0.030652112709958768,
+            -0.1926268518049307,
+            -0.4535741929998871,
+            -0.7023320629037472,
+            -0.8885845234187522,
+            -0.9723385640422223
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 19,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "sudah",
+          "modality": "text",
+          "representation": [
+            0.2105348844224318,
+            0.08112147313239415,
+            -0.13121578709178888,
+            -0.39106303931872255,
+            -0.6499691182589822,
+            -0.8566684955841897,
+            -0.9680231969704707,
+            -0.9583171130211053
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 20,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "mau",
+          "modality": "text",
+          "representation": [
+            0.1292183572729596,
+            -0.07030983887053938,
+            -0.3266495710621409,
+            -0.5932336667575447,
+            -0.8183550349789004,
+            -0.956160305849023,
+            -0.9764869545525796,
+            -0.8714144410522744
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 21,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "ingin",
+          "modality": "text",
+          "representation": [
+            -0.010424157766525,
+            -0.26091084147901333,
+            -0.5326552971360381,
+            -0.7740202578262629,
+            -0.9368925565995015,
+            -0.9869648660703361,
+            -0.9111392176664741,
+            -0.720448061149864
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 22,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "bisa",
+          "modality": "text",
+          "representation": [
+            -0.19442615903952923,
+            -0.4687901817123737,
+            -0.7240882277225555,
+            -0.9104244240204256,
+            -0.9896885558419805,
+            -0.9437380233671271,
+            -0.7783666118744512,
+            -0.5221981596613344
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 23,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "boleh",
+          "modality": "text",
+          "representation": [
+            -0.40221579760385606,
+            -0.6690268257318763,
+            -0.8770200809727512,
+            -0.9846612673583637,
+            -0.9689452488122494,
+            -0.8303728457807321,
+            -0.5929468676989688,
+            -0.2991844754755171
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 24,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "tolong",
+          "modality": "text",
+          "representation": [
+            -0.6093432512949102,
+            -0.8370007604840319,
+            -0.9719515743093924,
+            -0.9865575890528187,
+            -0.8760241580637169,
+            -0.6594984383708562,
+            -0.3760906778451425,
+            -0.07667503188447891
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 25,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "terima kasih",
+          "modality": "text",
+          "representation": [
+            -0.7907416171188801,
+            -0.9516925914628394,
+            -0.9964357996943793,
+            -0.9149304347088032,
+            -0.7212808395914706,
+            -0.4508063240584177,
+            -0.15262198484342945,
+            0.1206691695671698
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 26,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "maaf",
+          "modality": "text",
+          "representation": [
+            -0.9240806099199672,
+            -0.998505880003997,
+            -0.9467575762262956,
+            -0.7777593747323723,
+            -0.5226924929567655,
+            -0.2284304369405119,
+            0.05232233700132982,
+            0.2720602172805477
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 27,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "halo",
+          "modality": "text",
+          "representation": [
+            -0.992759672321269,
+            -0.9712305262004368,
+            -0.8284415569340213,
+            -0.5911290426304643,
+            -0.30346381751979257,
+            -0.017734740363704704,
+            0.21662750453574758,
+            0.36331901486955587
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 28,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "hai",
+          "modality": "text",
+          "representation": [
+            -0.9881357761476736,
+            -0.8728816227929188,
+            -0.65552025058002,
+            -0.37708475752517334,
+            -0.0889346385688721,
+            0.1580574595023267,
+            0.3241200561182496,
+            0.38871141861446823
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 29,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "selamat",
+          "modality": "text",
+          "representation": [
+            -0.9106846426318311,
+            -0.7153002668331772,
+            -0.44866082120613854,
+            -0.1606910338678522,
+            0.09679279274991293,
+            0.28093711550008893,
+            0.3666771564727152,
+            0.3516373644387815
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 30,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "ada",
+          "modality": "text",
+          "representation": [
+            -0.7699383283607845,
+            -0.5175702405545723,
+            -0.23240385218840884,
+            0.03330945984327932,
+            0.2340510946783296,
+            0.3404708733224284,
+            0.3452415388744739,
+            0.26408085713816115
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 31,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "tidak ada",
+          "modality": "text",
+          "representation": [
+            -0.5832075984896116,
+            -0.3034646023985172,
+            -0.03188732245613496,
+            0.18378497355015422,
+            0.3101977583472738,
+            0.3351317272102957,
+            0.26960582675978606,
+            0.14489644395797907
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 32,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "adalah",
+          "modality": "text",
+          "representation": [
+            -0.37326184384349986,
+            -0.09826739255590838,
+            0.13050140768838397,
+            0.2760074037686542,
+            0.32124825939083357,
+            0.2724198698912833,
+            0.15699658338645828,
+            0.01716529337062364
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 33,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "dan",
+          "modality": "text",
+          "representation": [
+            -0.16528025398406873,
+            0.0745998959032731,
+            0.23809317664172824,
+            0.30357157987624117,
+            0.27233226863133786,
+            0.16775850814614307,
+            0.029650921953147086,
+            -0.09502006896538329
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 34,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "atau",
+          "modality": "text",
+          "representation": [
+            0.01651354174150854,
+            0.19669112699885327,
+            0.28212334004172795,
+            0.2691823158696404,
+            0.1769123076168353,
+            0.0423152606958585,
+            -0.08828512223792481,
+            -0.16990599585004734
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 35,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "tetapi",
+          "modality": "text",
+          "representation": [
+            0.15207843848827568,
+            0.25696706011253756,
+            0.26284183677310347,
+            0.18420375329777977,
+            0.054871744532339645,
+            -0.07995480023783336,
+            -0.1741154585666727,
+            -0.1911083119141812
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 36,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "karena",
+          "modality": "text",
+          "representation": [
+            0.22820834904294945,
+            0.25321737425797336,
+            0.18939776144095263,
+            0.06703310112277294,
+            -0.07026790709863151,
+            -0.17564304394159863,
+            -0.20975424651680125,
+            -0.14991195348106523
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 37,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "kalau",
+          "modality": "text",
+          "representation": [
+            0.2402520114835744,
+            0.1922816613545454,
+            0.07851513823998685,
+            -0.059479962018343956,
+            -0.1746225578320676,
+            -0.22514568080125738,
+            -0.18425874423428595,
+            -0.046527330274650225
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 38,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "untuk",
+          "modality": "text",
+          "representation": [
+            0.19266823150991383,
+            0.0890405052985538,
+            -0.04785974660250514,
+            -0.17121776043132936,
+            -0.2372694372890797,
+            -0.21540447263743934,
+            -0.09539077381469202,
+            0.10986764321550857
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 39,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "dengan",
+          "modality": "text",
+          "representation": [
+            0.0983423862178448,
+            -0.035685706879172954,
+            -0.1656198597215338,
+            -0.24615075803028605,
+            -0.24316824133991893,
+            -0.14175766253112193,
+            0.05000559048969477,
+            0.3023064620712731
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 40,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "dari",
+          "modality": "text",
+          "representation": [
+            -0.023242251106843873,
+            -0.15804471013559232,
+            -0.25185222280532366,
+            -0.26740991368357314,
+            -0.185282993731749,
+            -0.00864951137115677,
+            0.23686221195889248,
+            0.5082751619774282
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 41,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "ke",
+          "modality": "text",
+          "representation": [
+            -0.14872974946693993,
+            -0.2544722662615755,
+            -0.2880307359378396,
+            -0.22565823360602055,
+            -0.06561630497576121,
+            0.17089862411824175,
+            0.44386570230054867,
+            0.7027130658727668
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 42,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "di",
+          "modality": "text",
+          "representation": [
+            -0.254143313660954,
+            -0.3049735109615682,
+            -0.2626136838762376,
+            -0.12043938049314473,
+            0.10498503085084049,
+            0.37698503868885014,
+            0.6462898272435913,
+            0.861367619180772
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 43,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "yang",
+          "modality": "text",
+          "representation": [
+            -0.31822232616444535,
+            -0.2959204187000187,
+            -0.17269318109909954,
+            0.03968030412969642,
+            0.3082277970144623,
+            0.5854634669469582,
+            0.8192988408241153,
+            0.9640497387806575
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 44,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "apa kabar",
+          "modality": "text",
+          "representation": [
+            -0.32539177676589615,
+            -0.22198556234396566,
+            -0.02447216333953761,
+            0.23819664114265368,
+            0.5207852162476572,
+            0.7711619309808095,
+            0.9412752258833657,
+            0.9973494359162629
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 45,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "saya tidak tahu",
+          "modality": "text",
+          "representation": [
+            -0.26796097380347633,
+            -0.08694926914457757,
+            0.16749672927913942,
+            0.4528334704918415,
+            0.7173991729525795,
+            0.9112496383556729,
+            0.9967218890769678,
+            0.9564443879843407
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 46,
+          "confidence": 0.15
+        },
+        {
+          "symbol": "saya mengerti",
+          "modality": "text",
+          "representation": [
+            -0.14725275971400453,
+            0.09673020339619343,
+            0.38220839449647215,
+            0.6584972771422709,
+            0.8742526463676892,
+            0.988296762440994,
+            0.9783463225130038,
+            0.8457567616975215
+          ],
+          "relative_position": "communication_sequence",
+          "sequence_position": 47,
+          "confidence": 0.15
+        }
+      ],
+      "learning_trace": {
+        "active_units": [
+          115,
+          116,
+          117,
+          118,
+          119,
+          120,
+          121,
+          122
+        ],
+        "active_populations": [
+          115,
+          116,
+          122
+        ],
+        "temporal_trace": [
+          "2026-01-01T00:00:00.000Z",
+          "2026-01-01T00:00:00.040Z",
+          "2026-01-01T00:00:00.080Z",
+          "2026-01-01T00:00:00.120Z",
+          "2026-01-01T00:00:00.160Z",
+          "2026-01-01T00:00:00.200Z",
+          "2026-01-01T00:00:00.240Z",
+          "2026-01-01T00:00:00.280Z",
+          "2026-01-01T00:00:00.320Z",
+          "2026-01-01T00:00:00.360Z",
+          "2026-01-01T00:00:00.400Z",
+          "2026-01-01T00:00:00.440Z",
+          "2026-01-01T00:00:00.480Z",
+          "2026-01-01T00:00:00.520Z",
+          "2026-01-01T00:00:00.560Z",
+          "2026-01-01T00:00:00.600Z",
+          "2026-01-01T00:00:00.640Z",
+          "2026-01-01T00:00:00.680Z",
+          "2026-01-01T00:00:00.720Z",
+          "2026-01-01T00:00:00.760Z",
+          "2026-01-01T00:00:00.800Z",
+          "2026-01-01T00:00:00.840Z",
+          "2026-01-01T00:00:00.880Z",
+          "2026-01-01T00:00:00.920Z",
+          "2026-01-01T00:00:00.960Z",
+          "2026-01-01T00:00:01.000Z",
+          "2026-01-01T00:00:01.040Z",
+          "2026-01-01T00:00:01.080Z",
+          "2026-01-01T00:00:01.120Z",
+          "2026-01-01T00:00:01.160Z",
+          "2026-01-01T00:00:01.200Z",
+          "2026-01-01T00:00:01.240Z",
+          "2026-01-01T00:00:01.280Z",
+          "2026-01-01T00:00:01.320Z",
+          "2026-01-01T00:00:01.360Z",
+          "2026-01-01T00:00:01.400Z",
+          "2026-01-01T00:00:01.440Z",
+          "2026-01-01T00:00:01.480Z",
+          "2026-01-01T00:00:01.520Z",
+          "2026-01-01T00:00:01.560Z",
+          "2026-01-01T00:00:01.600Z",
+          "2026-01-01T00:00:01.640Z",
+          "2026-01-01T00:00:01.680Z",
+          "2026-01-01T00:00:01.720Z",
+          "2026-01-01T00:00:01.760Z",
+          "2026-01-01T00:00:01.800Z",
+          "2026-01-01T00:00:01.840Z",
+          "2026-01-01T00:00:01.880Z"
+        ],
+        "prediction": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "outcome": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "prediction_error": 0.85,
+        "representation_delta": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "synaptic_deltas": [
+          {
+            "source_node_id": 115,
+            "target_node_id": 116,
+            "delta": 0.02
+          },
+          {
+            "source_node_id": 116,
+            "target_node_id": 122,
+            "delta": 0.02
+          }
+        ],
+        "plasticity": 0.65,
+        "confidence": 0.15
+      },
+      "provenance": {
+        "origin": "human_provided_communication_bootstrap",
+        "direct_experience": false,
+        "status": "initial_hypothesis"
       }
     }
   ]
