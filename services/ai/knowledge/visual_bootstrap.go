@@ -112,6 +112,7 @@ func materializeVisualBootstrap(brain *Brain, at time.Time) error {
 			Origin: "human_provided_visual_bootstrap",
 			DirectExperience: false,
 			Status: "initial_hypothesis",
+			SourceHash: visualBootstrapSourceHash,
 		},
 	})
 
@@ -166,6 +167,7 @@ func materializeVisualBootstrap(brain *Brain, at time.Time) error {
 			Origin: "human_provided_visual_bootstrap",
 			DirectExperience: false,
 			Status: "initial_hypothesis",
+			SourceHash: visualBootstrapSourceHash,
 		},
 	}
 	for i, region := range visualBootstrapRegions {
