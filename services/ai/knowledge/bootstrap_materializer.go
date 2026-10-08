@@ -266,6 +266,9 @@ func MaterializeBootstrap(brain *Brain, at time.Time) error {
 	brain.BrainState.SelfModelState["body_continuity"] = 0.20
 	brain.BrainState.SocialModelState["agent_model_capacity"] = 0.20
 	brain.BrainState.ValueState["consequence_sensitivity"] = 0.20
+	if err := materializeVisualBootstrap(brain, at); err != nil {
+		return err
+	}
 	return nil
 }
 
