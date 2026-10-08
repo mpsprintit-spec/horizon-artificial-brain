@@ -16,6 +16,7 @@ type DevelopmentalTransition struct {
 }
 
 type SymbolExposure struct {
+	Symbol string `json:"symbol,omitempty"`
 	Modality string `json:"modality"`
 	Representation []float64 `json:"representation,omitempty"`
 	RelativePosition string `json:"relative_position,omitempty"`
