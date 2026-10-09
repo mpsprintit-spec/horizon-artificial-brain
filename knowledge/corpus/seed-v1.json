@@ -295,7 +295,7 @@
     {
       "schema_version": "horizon.knowledge-frame.v1",
       "id": "id-physics-free-fall-model",
-      "domain": "biology-and-physical-sciences",
+      "domain": "physical-sciences",
       "subdomain": "classical mechanics",
       "kind": "mechanism",
       "status": "model_synthesized_unverified",
