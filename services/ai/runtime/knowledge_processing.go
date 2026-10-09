@@ -9,19 +9,18 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-// KnowledgeProcessingResult reports the compilation and actual runtime
-// processing of an imported document. It deliberately distinguishes storage
-// from cognition: Compiled is the canonical representation; Outputs are the
-// outputs returned by BrainRuntime for the grounded observations.
+// KnowledgeProcessingResult reports compilation and actual runtime processing.
+// Compilation is the canonical representation; Outputs are per-exposure
+// runtime outputs, preserving the source experience's temporal ordering.
 type KnowledgeProcessingResult struct {
 	Compilation knowledge.KnowledgeCompilation
 	Outputs []CognitiveOutput
 }
 
 // ProcessKnowledgeDocument compiles and imports a source-described document,
-// grounds its exposures through the canonical observation path, and sends
-// grounded node IDs through BrainRuntime. It does not assert that a single
-// pass proves semantic understanding; evidence must be assessed separately.
+// grounds each exposure through the canonical observation path, then processes
+// exposures in sequence through BrainRuntime. This creates observable runtime
+// events and adjacent-observation transitions; it does not prove understanding.
 func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocument, at time.Time) (KnowledgeProcessingResult, error) {
 	if r == nil || r.brain == nil {
 		return KnowledgeProcessingResult{}, errors.New("brain runtime is not initialized")
@@ -41,44 +40,55 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	}
 
 	result := KnowledgeProcessingResult{Compilation: compiled}
-	for i, experience := range compiled.Experiences {
-		nodeIDs := make([]knowledge.NodeID, 0, len(experience.SymbolExposures))
-		seen := make(map[knowledge.NodeID]bool)
-		for _, exposure := range experience.SymbolExposures {
+	step := 0
+	for _, experience := range compiled.Experiences {
+		exposures := append([]knowledge.SymbolExposure(nil), experience.SymbolExposures...)
+		// Compilation already emits before -> changes -> after. Stable sorting
+		// protects this ordering if the canonical compiler later changes.
+		for i := 1; i < len(exposures); i++ {
+			for j := i; j > 0 && exposures[j].SequencePosition < exposures[j-1].SequencePosition; j-- {
+				exposures[j], exposures[j-1] = exposures[j-1], exposures[j]
+			}
+		}
+		for _, exposure := range exposures {
 			surface := strings.TrimSpace(exposure.Symbol)
 			if surface == "" {
 				continue
 			}
-			grounded, err := r.brain.GroundObservationAt(surface, "knowledge-import:"+document.Source, exposure.Modality, GroundingThreshold, at)
+			eventAt := at.Add(time.Duration(step) * time.Nanosecond)
+			step++
+			grounded, err := r.brain.GroundObservationAt(surface, "knowledge-import:"+document.Source, exposure.Modality, GroundingThreshold, eventAt)
 			if err != nil {
 				return result, fmt.Errorf("ground experience %q exposure %d: %w", experience.ID, exposure.SequencePosition, err)
 			}
+			nodeIDs := make([]knowledge.NodeID, 0, len(grounded.Population))
+			seen := make(map[knowledge.NodeID]bool)
 			for _, id := range grounded.Population {
 				if id != 0 && !seen[id] {
 					nodeIDs = append(nodeIDs, id)
 					seen[id] = true
 				}
 			}
+			if len(nodeIDs) == 0 {
+				continue
+			}
+			if err := r.LearnObservedTransition(nodeIDs, eventAt); err != nil {
+				return result, fmt.Errorf("learn transition for experience %q exposure %d: %w", experience.ID, exposure.SequencePosition, err)
+			}
+			eventID := fmt.Sprintf("knowledge-import:%s:%s:%03d", document.ID, experience.ID, exposure.SequencePosition)
+			output, err := r.CognitiveProcess(Event{
+				ID: eventID,
+				StimulusNodeIDs: nodeIDs,
+				Source: "knowledge-import:" + document.Source,
+				Modality: exposure.Modality,
+				Cycles: 1,
+				Timestamp: eventAt,
+			})
+			if err != nil {
+				return result, fmt.Errorf("process experience %q exposure %d: %w", experience.ID, exposure.SequencePosition, err)
+			}
+			result.Outputs = append(result.Outputs, output)
 		}
-		if len(nodeIDs) == 0 {
-			continue
-		}
-		if err := r.LearnObservedTransition(nodeIDs, at); err != nil {
-			return result, fmt.Errorf("learn transition for experience %q: %w", experience.ID, err)
-		}
-		eventID := fmt.Sprintf("knowledge-import:%s:%s", document.ID, experience.ID)
-		output, err := r.CognitiveProcess(Event{
-			ID: eventID,
-			StimulusNodeIDs: nodeIDs,
-			Source: "knowledge-import:" + document.Source,
-			Modality: "knowledge",
-			Cycles: 1,
-			Timestamp: at.Add(time.Duration(i) * time.Nanosecond),
-		})
-		if err != nil {
-			return result, fmt.Errorf("process experience %q: %w", experience.ID, err)
-		}
-		result.Outputs = append(result.Outputs, output)
 	}
 	return result, nil
 }
