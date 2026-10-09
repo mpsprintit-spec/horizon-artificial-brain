@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -56,6 +57,31 @@ func TestProcessKnowledgeDocumentUsesCanonicalRuntime(t *testing.T) {
 	if afterSynapses <= beforeSynapses {
 		t.Fatalf("synapse count did not increase after sequential experience: before=%d after=%d", beforeSynapses, afterSynapses)
 	}
+	// Replay the same ordered surface experience under a new event/document
+	// identity. Existing representations should be reused and at least one
+	// previously established transition should be reinforced, not only added.
+	weightsBeforeRepeat := testSynapseWeights(brain)
+	repeatDoc := doc
+	repeatDoc.ID = "runtime-knowledge-smoke-repeat"
+	repeat, err := runtime.ProcessKnowledgeDocument(repeatDoc, at.Add(time.Second))
+	if err != nil {
+		t.Fatalf("repeat experience: %v", err)
+	}
+	if len(repeat.Outputs) != 3 {
+		t.Fatalf("repeat runtime outputs = %d, want 3", len(repeat.Outputs))
+	}
+	weightsAfterRepeat := testSynapseWeights(brain)
+	changedExistingWeight := false
+	for key, beforeWeight := range weightsBeforeRepeat {
+		if afterWeight, ok := weightsAfterRepeat[key]; ok && afterWeight != beforeWeight {
+			changedExistingWeight = true
+			break
+		}
+	}
+	if !changedExistingWeight {
+		t.Fatal("repeated experience did not change any existing synapse weight")
+	}
+
 	found := false
 	for _, experience := range brain.BrainState.DevelopmentalExperiences {
 		if experience.ID == "state-before" {
@@ -80,4 +106,21 @@ func countTestSynapses(brain *knowledge.Brain) int {
 		count += len(node.OutboundAll())
 	}
 	return count
+}
+
+func testSynapseWeights(brain *knowledge.Brain) map[string]float64 {
+	weights := make(map[string]float64)
+	if brain == nil || brain.Registry == nil {
+		return weights
+	}
+	for _, source := range brain.Registry.Nodes() {
+		for _, synapse := range source.OutboundAll() {
+			if synapse == nil {
+				continue
+			}
+			key := fmt.Sprintf("%d:%d:%t", source.ID, synapse.TargetID, synapse.Inhibitory)
+			weights[key] = synapse.Dynamic.Weight
+		}
+	}
+	return weights
 }
