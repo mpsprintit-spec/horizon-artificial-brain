@@ -29,6 +29,7 @@ func TestProcessKnowledgeDocumentUsesCanonicalRuntime(t *testing.T) {
 			},
 		},
 	}
+	beforeSynapses := countTestSynapses(brain)
 	at := time.Date(2026, 10, 9, 12, 0, 0, 0, time.UTC)
 	result, err := runtime.ProcessKnowledgeDocument(doc, at)
 	if err != nil {
@@ -41,12 +42,19 @@ func TestProcessKnowledgeDocumentUsesCanonicalRuntime(t *testing.T) {
 		t.Fatalf("runtime outputs = %d, want 3 (before/change/after)", len(result.Outputs))
 	}
 	for i, output := range result.Outputs {
+		if len(output.Activations) == 0 {
+			t.Fatalf("runtime output %d has no neural activations", i)
+		}
 		if output.Sequence == 0 {
 			t.Fatalf("runtime output %d has zero sequence", i)
 		}
 		if i > 0 && output.Sequence <= result.Outputs[i-1].Sequence {
 			t.Fatalf("runtime sequences are not increasing: %d then %d", result.Outputs[i-1].Sequence, output.Sequence)
 		}
+	}
+	afterSynapses := countTestSynapses(brain)
+	if afterSynapses <= beforeSynapses {
+		t.Fatalf("synapse count did not increase after sequential experience: before=%d after=%d", beforeSynapses, afterSynapses)
 	}
 	found := false
 	for _, experience := range brain.BrainState.DevelopmentalExperiences {
@@ -61,4 +69,15 @@ func TestProcessKnowledgeDocumentUsesCanonicalRuntime(t *testing.T) {
 	if !found {
 		t.Fatal("compiled experience was not imported into canonical brain state")
 	}
+}
+
+func countTestSynapses(brain *knowledge.Brain) int {
+	if brain == nil || brain.Registry == nil {
+		return 0
+	}
+	count := 0
+	for _, node := range brain.Registry.Nodes() {
+		count += len(node.OutboundAll())
+	}
+	return count
 }
