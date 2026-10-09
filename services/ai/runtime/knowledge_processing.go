@@ -42,6 +42,17 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	result := KnowledgeProcessingResult{Compilation: compiled}
 	step := 0
 	for _, experience := range compiled.Experiences {
+		// Learn the state-level before -> after transition through the existing
+		// numeric population mechanism as well as processing individual surface
+		// exposures below. These vectors are source-derived representations;
+		// this step does not certify the transition as factually true.
+		if len(experience.BeforeState.Representation) > 0 && len(experience.AfterState.Representation) > 0 {
+			beforeState := knowledge.NewNeuralVector(experience.BeforeState.Representation)
+			afterState := knowledge.NewNeuralVector(experience.AfterState.Representation)
+			if err := r.brain.LearnVectorTransition(beforeState, afterState, 0.90, 4, at); err != nil {
+				return result, fmt.Errorf("learn state transition for experience %q: %w", experience.ID, err)
+			}
+		}
 		exposures := append([]knowledge.SymbolExposure(nil), experience.SymbolExposures...)
 		// Compilation already emits before -> changes -> after. Stable sorting
 		// protects this ordering if the canonical compiler later changes.
