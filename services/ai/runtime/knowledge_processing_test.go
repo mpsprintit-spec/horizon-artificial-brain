@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -123,4 +124,39 @@ func testSynapseWeights(brain *knowledge.Brain) map[string]float64 {
 		}
 	}
 	return weights
+}
+
+
+func TestProcessKnowledgeFrameCorpusUsesCanonicalRuntime(t *testing.T) {
+	input := `{
+		"schema_version":"horizon.knowledge-frame.v1",
+		"corpus_id":"runtime-frame-test",
+		"purpose":"runtime integration test",
+		"records":[{
+			"schema_version":"horizon.knowledge-frame.v1",
+			"id":"door-state-transition",
+			"domain":"language",
+			"kind":"lexical_sense",
+			"status":"model_synthesized_unverified",
+			"content":{
+				"summary":"A door changes from closed to open.",
+				"state_model":{
+					"initial_state":["door is closed"],
+					"mechanism_or_transition":["agent moves the door"],
+					"resulting_state":["door is open"]
+				}
+			},
+			"epistemic":{"basis":"model_synthesis","confidence":0.6}
+		}]
+	}`
+	runtime := NewBrainRuntime(knowledge.NewBootstrapBrain())
+	at := time.Date(2026, 10, 9, 12, 0, 0, 0, time.UTC)
+	results, err := runtime.ProcessKnowledgeFrameCorpus(strings.NewReader(input), at)
+	if err != nil { t.Fatal(err) }
+	if len(results) != 1 { t.Fatalf("results=%d, want 1", len(results)) }
+	if len(results[0].Compilation.Experiences) != 1 { t.Fatalf("compiled experiences=%d, want 1", len(results[0].Compilation.Experiences)) }
+	if len(results[0].Outputs) != 3 { t.Fatalf("runtime outputs=%d, want 3", len(results[0].Outputs)) }
+	for i, output := range results[0].Outputs {
+		if len(output.Activations) == 0 { t.Fatalf("output %d has no activations", i) }
+	}
 }
