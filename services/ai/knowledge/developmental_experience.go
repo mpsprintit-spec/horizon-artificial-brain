@@ -1,6 +1,9 @@
 package knowledge
 
-import "time"
+import (
+	"encoding/json"
+	"time"
+)
 
 type DevelopmentalStateFrame struct {
 	ActiveUnits []NodeID `json:"active_units,omitempty"`
@@ -22,6 +25,7 @@ type SymbolExposure struct {
 	RelativePosition string `json:"relative_position,omitempty"`
 	SequencePosition int `json:"sequence_position"`
 	Confidence float64 `json:"confidence"`
+	SemanticFrame json.RawMessage `json:"semantic_frame,omitempty"`
 }
 
 type VisualExposure struct {
