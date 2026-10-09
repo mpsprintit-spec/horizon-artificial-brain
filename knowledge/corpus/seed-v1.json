@@ -1,7 +1,7 @@
 {
   "schema_version": "horizon.knowledge-frame.v1",
   "corpus_id": "horizon-cross-domain-seed-v1",
-  "purpose": "Representation pilot only; not a complete or externally reviewed knowledge base.",
+  "purpose": "Cross-domain pilot corpus for representation and runtime integration. Contains model-synthesized entries marked unverified and formal mathematical entries; not a complete or externally reviewed knowledge base.",
   "records": [
     {
       "schema_version": "horizon.knowledge-frame.v1",
@@ -574,6 +574,623 @@
         "evidence_summary": "General methodological template; should be supplemented by domain-specific research-method standards.",
         "revision_conditions": [
           "Specify discipline-appropriate measurement, statistical, and replication criteria."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-negation-tidak-scope",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and syntax",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Negation with 'tidak' reverses or denies a proposition or predicate, while the exact scope depends on sentence structure and context.",
+        "terms": [
+          "tidak",
+          "negasi",
+          "cakupan negasi"
+        ],
+        "definition": "Negation is a semantic operation that denies a proposition or predicate; it is not a truth claim about the real world by itself.",
+        "lexical": {
+          "surface": "tidak",
+          "lemma": "tidak",
+          "part_of_speech": "negative particle",
+          "sense_id": "tidak.propositional-negation",
+          "examples": [
+            {
+              "text": "Rina tidak membuka pintu.",
+              "interpretation": "The sentence denies that Rina opens the door in the relevant context.",
+              "context": "Predicate negation."
+            },
+            {
+              "text": "Saya tidak mengatakan bahwa dia datang.",
+              "interpretation": "The intended scope can depend on prosody and context; it may deny the saying rather than directly deny the person's arrival.",
+              "context": "Embedded proposition; context-sensitive."
+            }
+          ]
+        },
+        "context_conditions": [
+          "Interpret scope using the predicate, clause structure, prosody when available, and discourse context."
+        ],
+        "constraints": [
+          "Do not infer the opposite proposition as true merely because one proposition is negated."
+        ],
+        "limitations": [
+          "This frame is a working analysis and needs review against Indonesian grammar references and corpus examples."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A proposition or predicate is available for evaluation."
+          ],
+          "trigger_or_conditions": [
+            "The negative marker 'tidak' occurs with a predicate or construction that permits this use."
+          ],
+          "mechanism_or_transition": [
+            "Negation marks the relevant proposition or predicate as denied rather than simply adding a new entity."
+          ],
+          "resulting_state": [
+            "The utterance expresses a negative proposition; the exact scope must be determined from syntax and context."
+          ],
+          "invariants": [
+            "Negation of a proposition must not be treated as equivalent to absence of the proposition from the conversation."
+          ],
+          "unknowns": [
+            "Scope may be ambiguous in complex sentences without sufficient context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Illustrative semantic analysis of common Indonesian negation; scope analysis requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review authoritative Indonesian grammar and corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-yes-no-question-apakah",
+      "domain": "language",
+      "subdomain": "Indonesian syntax and pragmatics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Apakah' commonly marks a polar question that requests confirmation or denial of a proposition; it does not itself supply the answer.",
+        "terms": [
+          "apakah",
+          "pertanyaan polar",
+          "jawaban",
+          "proposisi"
+        ],
+        "definition": "A polar question asks whether a proposition holds, usually allowing affirmative, negative, or qualified responses.",
+        "lexical": {
+          "surface": "apakah",
+          "lemma": "apakah",
+          "part_of_speech": "interrogative marker",
+          "sense_id": "apakah.polar-question",
+          "examples": [
+            {
+              "text": "Apakah pintu itu terbuka?",
+              "interpretation": "Asks whether the door is open.",
+              "context": "Information-seeking question."
+            },
+            {
+              "text": "Apakah kamu bisa membantu?",
+              "interpretation": "Can ask about ability and pragmatically function as a request.",
+              "context": "Context may add an indirect-request reading."
+            }
+          ]
+        },
+        "context_conditions": [
+          "Interpret the proposition, speaker goal, and conversational context together."
+        ],
+        "constraints": [
+          "Do not store an interrogative proposition as an asserted fact."
+        ],
+        "limitations": [
+          "This is a general frame; detailed question syntax and pragmatic categories require reference review."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A proposition is under consideration and the speaker lacks or requests confirmation of its status."
+          ],
+          "trigger_or_conditions": [
+            "A speaker uses an interrogative construction such as 'Apakah P?' in a context where an answer is relevant."
+          ],
+          "mechanism_or_transition": [
+            "The utterance presents P as a question for an addressee to answer, confirm, deny, or qualify."
+          ],
+          "resulting_state": [
+            "The discourse contains an unresolved question until evidence or a response addresses it."
+          ],
+          "temporal_order": [
+            "question is asked",
+            "addressee interprets proposition and context",
+            "answer or clarification may follow"
+          ],
+          "invariants": [
+            "A question is not evidence that its proposition is true."
+          ],
+          "unknowns": [
+            "The expected answer type and pragmatic force can vary with context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.72,
+        "evidence_summary": "Illustrative analysis of common Indonesian question constructions; requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review Indonesian syntax and pragmatic corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "math-direct-proportionality",
+      "domain": "mathematics",
+      "subdomain": "algebra and functions",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Direct proportionality expresses a relation y = kx for a constant k over a specified domain.",
+        "terms": [
+          "proportionality",
+          "variable",
+          "constant",
+          "function"
+        ],
+        "definition": "Direct proportionality is a mathematical relation of the form y = kx, where k is constant.",
+        "equation": "y = kx",
+        "procedure": [
+          "Specify the domain and units of x, y, and k.",
+          "Determine k from valid data or the problem statement.",
+          "Compute y = kx.",
+          "Check units and whether the proportional model is justified."
+        ],
+        "constraints": [
+          "Do not assume direct proportionality merely because two variables increase together."
+        ],
+        "counterexamples": [
+          "A relation y = x + 3 is not directly proportional because y/x is not constant over its domain."
+        ],
+        "state_model": {
+          "initial_state": [
+            "Variables x and y are related and a constant k is specified or to be determined."
+          ],
+          "trigger_or_conditions": [
+            "The model assumes y varies directly with x over the domain being considered."
+          ],
+          "mechanism_or_transition": [
+            "For each admissible x, compute y by multiplying x by k."
+          ],
+          "resulting_state": [
+            "The relation y = kx holds within the model's domain and assumptions."
+          ],
+          "invariants": [
+            "For nonzero x, the ratio y/x equals k."
+          ],
+          "unknowns": [
+            "The physical meaning and units of k depend on the application."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Definition and consequences follow algebraically from y = kx; applicability to real data requires evidence.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "math-probability-complement-rule",
+      "domain": "mathematics",
+      "subdomain": "probability",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "For an event A in a probability space, the probability of its complement is P(not A) = 1 - P(A).",
+        "terms": [
+          "probability",
+          "event",
+          "complement",
+          "sample space"
+        ],
+        "definition": "The complement of A consists of outcomes in the sample space that are not in A.",
+        "equation": "P(Aᶜ) = 1 - P(A)",
+        "procedure": [
+          "Define the event A and sample space.",
+          "Determine or estimate P(A).",
+          "Subtract P(A) from 1 to obtain the complement probability."
+        ],
+        "state_model": {
+          "initial_state": [
+            "An event A and its complement partition the sample space."
+          ],
+          "trigger_or_conditions": [
+            "P is a probability measure and A is an event with a defined complement."
+          ],
+          "mechanism_or_transition": [
+            "Use P(A) + P(A complement) = P(sample space) = 1."
+          ],
+          "resulting_state": [
+            "P(A complement) = 1 - P(A)."
+          ],
+          "invariants": [
+            "Both probabilities lie in [0,1] and sum to 1."
+          ],
+          "unknowns": [
+            "The event probability P(A) may still need to be estimated or derived."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Follows from additivity for disjoint events A and Aᶜ and normalization P(Ω)=1.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "biology-neuron-signal-overview",
+      "domain": "biology-neuroscience",
+      "subdomain": "neurobiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Neurons receive, integrate, and transmit signals through electrical changes and chemical or electrical communication at connections.",
+        "terms": [
+          "neuron",
+          "dendrite",
+          "soma",
+          "axon",
+          "synapse",
+          "signal"
+        ],
+        "entities": [
+          {
+            "id": "neuron",
+            "type": "biological-cell",
+            "label": "neuron"
+          },
+          {
+            "id": "axon",
+            "type": "cell-structure",
+            "label": "axon"
+          },
+          {
+            "id": "synapse",
+            "type": "cell-connection",
+            "label": "synapse"
+          },
+          {
+            "id": "target-cell",
+            "type": "biological-cell",
+            "label": "target cell"
+          }
+        ],
+        "relations": [
+          {
+            "type": "transmits-signal",
+            "from": "neuron",
+            "to": "target-cell",
+            "direction": "neuron activity can influence target-cell activity through a connection",
+            "conditions": [
+              "A functional connection exists"
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "context_conditions": [
+          "Treat this as a high-level overview, not a complete cellular or molecular model."
+        ],
+        "constraints": [
+          "Do not infer a specific neurotransmitter, firing rate, or physiological outcome without system-specific evidence."
+        ],
+        "limitations": [
+          "This model-synthesized frame is not a substitute for a sourced neuroscience entry."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A neuron has a membrane potential and receives inputs from other cells or sensory pathways."
+          ],
+          "trigger_or_conditions": [
+            "Synaptic input or a sensory stimulus changes membrane conductance; whether the neuron generates an action potential depends on its state and input."
+          ],
+          "mechanism_or_transition": [
+            "Inputs are integrated across space and time; if threshold conditions are met, an action potential propagates along the axon; at many synapses, transmitter release affects a target cell."
+          ],
+          "resulting_state": [
+            "The target cell's activity may be increased, decreased, or otherwise modulated, depending on synapse type and context."
+          ],
+          "temporal_order": [
+            "input arrives",
+            "membrane response is integrated",
+            "action potential may occur",
+            "signal reaches terminal",
+            "target cell response follows"
+          ],
+          "invariants": [
+            "Not every input produces an action potential; synaptic effects depend on cell type and connection."
+          ],
+          "unknowns": [
+            "Specific channel dynamics, timing, and synaptic effects require a named neuron type and experimental context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.78,
+        "evidence_summary": "High-level summary of standard neurobiology concepts; requires review against authoritative neuroscience sources.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Attach authoritative or peer-reviewed sources and specify the neuron and synapse type."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "computing-finite-state-machine",
+      "domain": "computing-engineering",
+      "subdomain": "computation theory and software design",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A finite-state machine models a system using a finite set of states and transitions triggered by inputs or events.",
+        "terms": [
+          "state machine",
+          "state",
+          "transition",
+          "event",
+          "guard"
+        ],
+        "definition": "A finite-state machine can be represented by states, an input alphabet, a transition function, an initial state, and optionally accepting states or outputs.",
+        "algorithm": {
+          "inputs": [
+            "Current state",
+            "Input event"
+          ],
+          "outputs": [
+            "Next state and optional output"
+          ],
+          "preconditions": [
+            "The current state and input are valid for the machine definition."
+          ],
+          "steps": [
+            "Read the current state and event.",
+            "Find an applicable transition.",
+            "Apply the transition and record the next state.",
+            "Handle an undefined transition according to an explicit policy."
+          ],
+          "failure_modes": [
+            "Missing transition rules can leave behavior unspecified.",
+            "Incorrect state transitions can violate the intended protocol."
+          ]
+        },
+        "constraints": [
+          "A finite-state machine does not automatically model unbounded memory or every continuous-valued process."
+        ],
+        "cross_references": [
+          "Mathematics: graph theory",
+          "Engineering: control systems",
+          "Empirical reasoning: state-transition testing"
+        ],
+        "state_model": {
+          "initial_state": [
+            "The system is in one of a finite set of defined states."
+          ],
+          "trigger_or_conditions": [
+            "An input or event occurs and a transition rule for the current state is applicable."
+          ],
+          "mechanism_or_transition": [
+            "Evaluate the transition rule and any guard; update the current state and optionally emit an action or output."
+          ],
+          "resulting_state": [
+            "The system enters the next defined state or remains in its current state if no transition applies."
+          ],
+          "temporal_order": [
+            "current state",
+            "input or event",
+            "transition rule evaluation",
+            "next state and output"
+          ],
+          "invariants": [
+            "A transition is valid only if defined by the model; unspecified transitions need an explicit policy."
+          ],
+          "unknowns": [
+            "Concurrency, nondeterminism, timing, and error handling depend on the machine variant."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.85,
+        "evidence_summary": "General computer-science definition and design pattern; concrete implementation claims need an implementation and tests.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against a formal automata reference and test a concrete implementation."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "engineering-closed-loop-control",
+      "domain": "computing-engineering",
+      "subdomain": "control engineering",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A closed-loop controller uses measured output and a target or reference to compute corrective control actions.",
+        "terms": [
+          "feedback",
+          "setpoint",
+          "measurement",
+          "error",
+          "controller",
+          "actuator"
+        ],
+        "entities": [
+          {
+            "id": "reference",
+            "type": "signal",
+            "label": "reference"
+          },
+          {
+            "id": "sensor",
+            "type": "component",
+            "label": "sensor"
+          },
+          {
+            "id": "controller",
+            "type": "component",
+            "label": "controller"
+          },
+          {
+            "id": "plant",
+            "type": "system",
+            "label": "plant"
+          },
+          {
+            "id": "actuator",
+            "type": "component",
+            "label": "actuator"
+          }
+        ],
+        "relations": [
+          {
+            "type": "measures",
+            "from": "sensor",
+            "to": "plant",
+            "direction": "sensor provides a measured output from the plant",
+            "confidence": 0.85
+          },
+          {
+            "type": "controls",
+            "from": "controller",
+            "to": "actuator",
+            "direction": "controller sends a command based on reference and measured output",
+            "confidence": 0.85
+          }
+        ],
+        "equation": "e(t) = r(t) - y(t), for a convention where error is reference minus measured output.",
+        "constraints": [
+          "Specify signal units, error convention, controller law, and plant dynamics before predicting performance."
+        ],
+        "limitations": [
+          "This frame describes a general architecture and does not certify any particular controller as stable."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A plant has a measurable output and a desired reference value."
+          ],
+          "trigger_or_conditions": [
+            "Sensors provide measurements and a controller can compare measured output with the reference."
+          ],
+          "mechanism_or_transition": [
+            "Compute an error signal from reference and measurement; use a control law to select an actuator command."
+          ],
+          "resulting_state": [
+            "The plant output changes in response to the command, disturbance, and plant dynamics."
+          ],
+          "temporal_order": [
+            "reference established",
+            "output measured",
+            "error calculated",
+            "control action applied",
+            "new output measured"
+          ],
+          "invariants": [
+            "Feedback does not guarantee stability, accuracy, or safety without appropriate design and operating conditions."
+          ],
+          "unknowns": [
+            "Stability and performance depend on plant dynamics, controller parameters, sampling, delays, saturation, and disturbances."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.82,
+        "evidence_summary": "General control-engineering pattern; a particular system requires a defined model and stability analysis.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Add a sourced control-system reference and verify with a specified plant model."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "empirical-correlation-not-causation",
+      "domain": "empirical-reasoning",
+      "subdomain": "research methods",
+      "kind": "rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "An observed association between two variables alone does not establish that one variable causes the other.",
+        "terms": [
+          "correlation",
+          "causation",
+          "confounder",
+          "experiment",
+          "inference"
+        ],
+        "definition": "Correlation describes statistical association; causation concerns whether changing one factor produces a change in another under specified conditions.",
+        "procedure": [
+          "Define the variables and target causal question.",
+          "Check temporal order and plausible mechanisms.",
+          "Identify confounders and selection or measurement biases.",
+          "Choose a design that can distinguish competing explanations.",
+          "Report limitations and uncertainty."
+        ],
+        "constraints": [
+          "Do not treat correlation as proof of causation or assume that a randomized experiment is feasible or ethical in every setting."
+        ],
+        "counterexamples": [
+          "A strong association can arise because both variables respond to a third factor."
+        ],
+        "state_model": {
+          "initial_state": [
+            "Measurements show an association between variables X and Y."
+          ],
+          "trigger_or_conditions": [
+            "An analyst considers a causal explanation for an observed association."
+          ],
+          "mechanism_or_transition": [
+            "Assess temporal order, confounding, selection effects, measurement, mechanism, and study design; seek evidence that distinguishes causal hypotheses."
+          ],
+          "resulting_state": [
+            "The association may motivate a causal hypothesis, but causal status remains unresolved unless the evidence supports the inference."
+          ],
+          "invariants": [
+            "Association alone is insufficient to identify a unique causal mechanism."
+          ],
+          "unknowns": [
+            "Unmeasured confounding and bias may remain even after statistical adjustment."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.9,
+        "evidence_summary": "General principle of causal inference; domain-specific methods and assumptions must be stated for each study.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Supplement with discipline-specific causal-inference references and examples."
         ]
       }
     }
