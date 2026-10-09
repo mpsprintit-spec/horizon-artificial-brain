@@ -1,0 +1,581 @@
+{
+  "schema_version": "horizon.knowledge-frame.v1",
+  "corpus_id": "horizon-cross-domain-seed-v1",
+  "purpose": "Representation pilot only; not a complete or externally reviewed knowledge base.",
+  "records": [
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-membuka-physical",
+      "domain": "language",
+      "subdomain": "Indonesian semantics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Sense of 'membuka' meaning to cause a closed physical object or access boundary to become open.",
+        "terms": [
+          "membuka",
+          "buka",
+          "terbuka",
+          "menutup"
+        ],
+        "lexical": {
+          "surface": "membuka",
+          "lemma": "buka",
+          "part_of_speech": "verb",
+          "morphology": [
+            "meN- + buka"
+          ],
+          "sense_id": "membuka.physical-access",
+          "register": [
+            "neutral"
+          ],
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Entity intentionally or causally initiating the opening",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Door, lid, gate, container, or other thing whose state changes",
+              "required": true
+            },
+            {
+              "role": "Instrument",
+              "description": "Optional means used to cause the change",
+              "required": false
+            }
+          ],
+          "presuppositions": [
+            "A relevant boundary or object has an open/closed state distinction."
+          ],
+          "implicatures": [],
+          "examples": [
+            {
+              "text": "Rina membuka pintu.",
+              "interpretation": "Rina causes the door to move from closed or less open to open.",
+              "context": "Physical access boundary."
+            }
+          ]
+        },
+        "entities": [
+          {
+            "id": "agent",
+            "type": "entity-role",
+            "label": "Agent"
+          },
+          {
+            "id": "door",
+            "type": "physical-object",
+            "label": "door"
+          }
+        ],
+        "relations": [
+          {
+            "type": "causes-state-transition",
+            "from": "agent",
+            "to": "door",
+            "direction": "agent causes the door's open-state to change",
+            "conditions": [
+              "An agent or causal force can affect the object."
+            ],
+            "confidence": 0.7
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "The door is closed or less open than the target state."
+          ],
+          "trigger_or_conditions": [
+            "An agent or force acts on the door; the door is movable and not blocked."
+          ],
+          "mechanism_or_transition": [
+            "The door's position or configuration changes."
+          ],
+          "resulting_state": [
+            "The door is open or more open than before."
+          ],
+          "temporal_order": [
+            "action begins",
+            "door state changes",
+            "resulting access changes if the doorway is unobstructed"
+          ],
+          "invariants": [
+            "Opening a door does not guarantee that the space beyond it is safe or accessible."
+          ],
+          "unknowns": [
+            "Exact opening angle and physical mechanism depend on the door and context."
+          ]
+        },
+        "context_conditions": [
+          "Physical object or access boundary context."
+        ],
+        "constraints": [
+          "Do not infer that the door is fully open unless context says so."
+        ],
+        "limitations": [
+          "The lexical sense alone does not determine agent intention or exact final position."
+        ],
+        "cross_references": [
+          "Indonesian morphology: meN- verbs",
+          "Indonesian syntax: transitive clauses",
+          "Knowledge frame: state transitions"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Illustrative lexical-semantic analysis based on general Indonesian usage; requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against an authoritative Indonesian dictionary and corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-membuka-metaphorical",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and pragmatics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Metaphorical or institutional uses of 'membuka' where an event, resource, information, or opportunity becomes available or begins.",
+        "terms": [
+          "membuka rapat",
+          "membuka rekening",
+          "membuka rahasia",
+          "membuka peluang"
+        ],
+        "lexical": {
+          "surface": "membuka",
+          "lemma": "buka",
+          "part_of_speech": "verb",
+          "sense_id": "membuka.metaphorical-or-institutional",
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Person or institution initiating the event or change",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Meeting, account, secret, opportunity, or other context-specific target",
+              "required": true
+            }
+          ],
+          "examples": [
+            {
+              "text": "Ketua membuka rapat.",
+              "interpretation": "The chair initiates the meeting, not a physical opening.",
+              "context": "Institutional event."
+            },
+            {
+              "text": "Ia membuka rekening.",
+              "interpretation": "A financial account is established or activated under a financial institution's process.",
+              "context": "Financial service."
+            },
+            {
+              "text": "Ia membuka rahasia.",
+              "interpretation": "Previously concealed information is disclosed.",
+              "context": "Information access."
+            },
+            {
+              "text": "Keputusan itu membuka peluang.",
+              "interpretation": "The decision creates or makes an opportunity available.",
+              "context": "Abstract possibility."
+            }
+          ]
+        },
+        "relations": [
+          {
+            "type": "polysemy-family",
+            "from": "membuka.physical-access",
+            "to": "membuka.metaphorical-or-institutional",
+            "direction": "related form with context-dependent senses",
+            "confidence": 0.65
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "The meeting has not started, the account is not established, information is concealed, or the opportunity is not available; the exact state depends on the theme."
+          ],
+          "trigger_or_conditions": [
+            "A contextually appropriate initiating, establishing, disclosing, or enabling action occurs."
+          ],
+          "mechanism_or_transition": [
+            "The target's institutional, informational, or possibility status changes."
+          ],
+          "resulting_state": [
+            "The meeting begins, account becomes established, information becomes known, or opportunity becomes available, depending on context."
+          ],
+          "unknowns": [
+            "The target sense cannot be determined from the verb alone when its complement and context are absent."
+          ]
+        },
+        "context_conditions": [
+          "Interpretation depends on the noun phrase, predicate arguments, discourse, and domain."
+        ],
+        "constraints": [
+          "Do not collapse these uses into the physical door-opening sense."
+        ],
+        "limitations": [
+          "The four examples illustrate distinct senses or conventional constructions; fine-grained dictionary sense boundaries require lexical review."
+        ],
+        "cross_references": [
+          "Indonesian pragmatics",
+          "Indonesian syntax",
+          "Knowledge frame: ambiguity"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.65,
+        "evidence_summary": "Illustrative analysis of common Indonesian constructions; sense inventory requires lexicographic review.",
+        "revision_conditions": [
+          "Review dictionary sense divisions and corpus usage."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-linear-equation-example",
+      "domain": "mathematics",
+      "subdomain": "algebra",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Solving a linear equation by applying equivalent operations to both sides.",
+        "terms": [
+          "equation",
+          "variable",
+          "equality",
+          "inverse operation"
+        ],
+        "definition": "For 2x + 3 = 7 over the real numbers, subtracting 3 from both sides gives 2x = 4; dividing both sides by 2 gives x = 2.",
+        "equation": "2x + 3 = 7 ⇒ 2x = 4 ⇒ x = 2",
+        "state_model": {
+          "initial_state": [
+            "Equation 2x + 3 = 7; unknown x belongs to the real numbers."
+          ],
+          "trigger_or_conditions": [
+            "Apply the same valid operation to both sides; divisor must be nonzero."
+          ],
+          "mechanism_or_transition": [
+            "Subtract 3 from both sides, then divide both sides by 2."
+          ],
+          "resulting_state": [
+            "x = 2."
+          ],
+          "invariants": [
+            "Equivalent transformations preserve the solution set under their stated validity conditions."
+          ]
+        },
+        "procedure": [
+          "Subtract 3 from each side.",
+          "Divide each side by 2.",
+          "Substitute x = 2 into the original equation to verify 2(2)+3=7."
+        ],
+        "constraints": [
+          "Division by zero is invalid; not relevant to this equation because the divisor is 2."
+        ],
+        "cross_references": [
+          "Formal logic",
+          "Algebraic equivalence"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Direct algebraic derivation with substitution check.",
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-physics-free-fall-model",
+      "domain": "biology-and-physical-sciences",
+      "subdomain": "classical mechanics",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Idealized near-Earth free-fall model for an object when air resistance is negligible.",
+        "terms": [
+          "position",
+          "time",
+          "gravity",
+          "acceleration"
+        ],
+        "equation": "y(t)=y0+v0*t-(1/2)*g*t^2 when upward is positive and gravitational acceleration is approximately constant.",
+        "state_model": {
+          "initial_state": [
+            "Object has initial vertical position y0 and initial vertical velocity v0."
+          ],
+          "trigger_or_conditions": [
+            "Near Earth's surface; air resistance and other forces are negligible; g is approximately constant; upward coordinate is positive."
+          ],
+          "mechanism_or_transition": [
+            "Vertical acceleration is approximately -g; integrate acceleration to obtain velocity and position."
+          ],
+          "resulting_state": [
+            "Position follows y(t)=y0+v0*t-(1/2)*g*t^2 within model assumptions."
+          ],
+          "temporal_order": [
+            "initial state at t=0",
+            "velocity changes with time",
+            "position changes with time"
+          ],
+          "invariants": [
+            "The equation is conditional on the stated coordinate convention and model assumptions."
+          ],
+          "unknowns": [
+            "Real trajectories may require air resistance, changing gravity, rotation, or contact forces."
+          ]
+        },
+        "constraints": [
+          "Do not use the ideal model when neglected forces materially affect motion."
+        ],
+        "limitations": [
+          "This is a simplified model, not a universal description of every falling object."
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.95,
+        "evidence_summary": "Standard classical-mechanics model; numeric predictions require specified initial conditions and units.",
+        "revision_conditions": [
+          "Compare predictions with measurements and assess neglected forces."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-negative-feedback-homeostasis",
+      "domain": "biology-neuroscience",
+      "subdomain": "physiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Negative feedback is a regulatory pattern in which a response tends to oppose a deviation from a regulated range.",
+        "terms": [
+          "homeostasis",
+          "feedback",
+          "regulated variable",
+          "sensor",
+          "effector"
+        ],
+        "entities": [
+          {
+            "id": "regulated-variable",
+            "type": "state-variable"
+          },
+          {
+            "id": "sensor",
+            "type": "component"
+          },
+          {
+            "id": "controller",
+            "type": "component"
+          },
+          {
+            "id": "effector",
+            "type": "component"
+          }
+        ],
+        "relations": [
+          {
+            "type": "measures",
+            "from": "sensor",
+            "to": "regulated-variable",
+            "direction": "sensor provides information about the variable",
+            "confidence": 0.8
+          },
+          {
+            "type": "modulates",
+            "from": "controller",
+            "to": "effector",
+            "direction": "controller changes effector activity based on regulatory signals",
+            "confidence": 0.8
+          },
+          {
+            "type": "opposes-deviation",
+            "from": "effector",
+            "to": "regulated-variable",
+            "direction": "response tends to reduce deviation under normal operating conditions",
+            "confidence": 0.8
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "A regulated variable deviates from its target or acceptable range."
+          ],
+          "trigger_or_conditions": [
+            "A sensing and regulatory pathway detects or responds to the deviation."
+          ],
+          "mechanism_or_transition": [
+            "Regulatory signals change effector activity in a direction that tends to oppose the deviation."
+          ],
+          "resulting_state": [
+            "The variable tends toward its regulated range, if the system has adequate capacity and the disturbance is manageable."
+          ],
+          "invariants": [
+            "Negative feedback does not guarantee perfect stability or return to a single exact value."
+          ],
+          "unknowns": [
+            "Actual response depends on the specific biological system, delays, gain, and disturbances."
+          ]
+        },
+        "constraints": [
+          "Do not infer a specific organ, hormone, or numerical set point without a system-specific source."
+        ],
+        "limitations": [
+          "This is a general control pattern; concrete physiology requires a named mechanism and evidence."
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General systems-level description; specific biological claims require source-backed entries.",
+        "revision_conditions": [
+          "Attach system-specific authoritative or peer-reviewed references before treating as a researched finding."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-computing-binary-search",
+      "domain": "computing-engineering",
+      "subdomain": "algorithms",
+      "kind": "algorithm",
+      "status": "established",
+      "content": {
+        "summary": "Binary search finds a target in a sorted sequence by repeatedly narrowing the search interval.",
+        "terms": [
+          "sorted sequence",
+          "target",
+          "interval",
+          "comparison"
+        ],
+        "algorithm": {
+          "inputs": [
+            "A sequence sorted according to a consistent ordering",
+            "A target value"
+          ],
+          "outputs": [
+            "An index of a matching target, or a not-found result"
+          ],
+          "preconditions": [
+            "The sequence is sorted under the same ordering used for comparisons."
+          ],
+          "steps": [
+            "Choose the middle index of the current interval.",
+            "Compare the middle element with the target.",
+            "If equal, return the index.",
+            "If the middle element is smaller, continue in the upper half; otherwise continue in the lower half.",
+            "Stop when the interval is empty."
+          ],
+          "complexity": "O(log n) comparisons in the worst case for a random-access sorted array; O(1) auxiliary space for an iterative implementation.",
+          "failure_modes": [
+            "Applying the method to an unsorted sequence can return an incorrect not-found result or miss the target.",
+            "Inconsistent ordering or incorrect interval updates can break correctness."
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "A sorted sequence and target are given; current interval covers all candidate indices."
+          ],
+          "trigger_or_conditions": [
+            "Sequence is sorted and comparison order is consistent."
+          ],
+          "mechanism_or_transition": [
+            "Each comparison discards approximately half the remaining candidates."
+          ],
+          "resulting_state": [
+            "Target index is returned if found; otherwise the empty interval establishes absence under the precondition."
+          ],
+          "invariants": [
+            "If the target exists, it remains within the candidate interval until found."
+          ]
+        },
+        "constraints": [
+          "Correctness depends on the sorted-input precondition."
+        ],
+        "cross_references": [
+          "Mathematics: logarithms",
+          "Formal reasoning: loop invariants"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 0.99,
+        "evidence_summary": "Standard algorithm with a stated sorted-input precondition; complexity assumes random-access indexing.",
+        "revision_conditions": [
+          "Review implementation-specific integer bounds and interval handling."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-hypothesis-template-example",
+      "domain": "empirical-reasoning",
+      "subdomain": "scientific method",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "content": {
+        "summary": "A testable hypothesis links a proposed condition or intervention to a measurable predicted outcome, while preserving alternative explanations.",
+        "definition": "A hypothesis is a provisional claim that can be compared with observations or experiments under specified conditions; a prediction is the expected observation if the hypothesis and auxiliary assumptions hold.",
+        "state_model": {
+          "initial_state": [
+            "A question exists and the current evidence is incomplete."
+          ],
+          "trigger_or_conditions": [
+            "Define measurable variables, conditions, a comparison or baseline, and a procedure capable of producing discriminating evidence."
+          ],
+          "mechanism_or_transition": [
+            "Derive a prediction before observing the outcome; collect data; compare the observed outcome with the prediction; examine error and alternative explanations."
+          ],
+          "resulting_state": [
+            "The evidence may support, weaken, or leave the hypothesis unresolved; a single result does not automatically prove a broad claim."
+          ],
+          "temporal_order": [
+            "question",
+            "hypothesis",
+            "prediction",
+            "measurement",
+            "comparison",
+            "revision or provisional retention"
+          ],
+          "invariants": [
+            "A prediction must be recorded distinctly from the later observation to avoid retrofitting."
+          ],
+          "unknowns": [
+            "Measurement error, confounding variables, sampling limitations, and model assumptions can affect interpretation."
+          ]
+        },
+        "procedure": [
+          "State the hypothesis precisely.",
+          "Specify the conditions and measurable outcome.",
+          "Record the prediction before measurement.",
+          "Collect observations using a reproducible procedure.",
+          "Compare outcome with prediction and quantify relevant uncertainty.",
+          "Revise the hypothesis or design follow-up tests without overstating the result."
+        ],
+        "constraints": [
+          "Do not label a hypothesis as established solely because it is plausible or consistent with one observation."
+        ],
+        "limitations": [
+          "This entry defines a method; it does not assert any particular untested scientific hypothesis is true."
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.9,
+        "evidence_summary": "General methodological template; should be supplemented by domain-specific research-method standards.",
+        "revision_conditions": [
+          "Specify discipline-appropriate measurement, statistical, and replication criteria."
+        ]
+      }
+    }
+  ]
+}
