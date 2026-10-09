@@ -40,6 +40,7 @@ type KnowledgeDatum struct {
 	Modality string `json:"modality"`
 	RelativePosition string `json:"relative_position,omitempty"`
 	Confidence float64 `json:"confidence,omitempty"`
+	SemanticFrame json.RawMessage `json:"semantic_frame,omitempty"`
 }
 
 type KnowledgeCompilation struct {
@@ -88,6 +89,9 @@ func CompileKnowledgeDocument(document KnowledgeDocument, at time.Time) (Knowled
 		plasticity := in.Plasticity
 		if plasticity == 0 { plasticity = 0.1 }
 		exposures := append(append(be, ce...), ae...)
+		for position := range exposures {
+			exposures[position].SequencePosition = position
+		}
 		out.Experiences = append(out.Experiences, DevelopmentalExperience{
 			ID: id,
 			BeforeState: DevelopmentalStateFrame{Representation: averageKnowledgeVectors(before), Confidence: confidence},
@@ -127,6 +131,7 @@ func compileKnowledgeData(data []KnowledgeDatum, position string, fallback float
 	for i, item := range data {
 		value, modality := strings.TrimSpace(item.Value), strings.TrimSpace(item.Modality)
 		if value == "" || modality == "" { return nil, nil, fmt.Errorf("datum %d requires value and modality", i) }
+		if len(item.SemanticFrame) > 0 && !json.Valid(item.SemanticFrame) { return nil, nil, fmt.Errorf("datum %d has invalid semantic_frame JSON", i) }
 		confidence := item.Confidence
 		if confidence == 0 { confidence = fallback }
 		if confidence == 0 { confidence = 0.15 }
@@ -135,7 +140,7 @@ func compileKnowledgeData(data []KnowledgeDatum, position string, fallback float
 		vectors = append(vectors, append([]float64(nil), vector...))
 		relative := strings.TrimSpace(item.RelativePosition)
 		if relative == "" { relative = position }
-		exposures = append(exposures, SymbolExposure{Symbol: value, Modality: modality, Representation: append([]float64(nil), vector...), RelativePosition: relative, SequencePosition: i, Confidence: confidence})
+		exposures = append(exposures, SymbolExposure{Symbol: value, Modality: modality, Representation: append([]float64(nil), vector...), RelativePosition: relative, SequencePosition: i, Confidence: confidence, SemanticFrame: append(json.RawMessage(nil), item.SemanticFrame...)})
 	}
 	return vectors, exposures, nil
 }
