@@ -75,7 +75,7 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 			if err := r.LearnObservedTransition(nodeIDs, eventAt); err != nil {
 				return result, fmt.Errorf("learn transition for experience %q exposure %d: %w", experience.ID, exposure.SequencePosition, err)
 			}
-			eventID := fmt.Sprintf("knowledge-import:%s:%s:%03d", document.ID, experience.ID, exposure.SequencePosition)
+			eventID := fmt.Sprintf("knowledge-import:%s:%s:%03d", document.ID, experience.ID, step-1)
 			output, err := r.CognitiveProcess(Event{
 				ID: eventID,
 				StimulusNodeIDs: nodeIDs,
