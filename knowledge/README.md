@@ -10,6 +10,7 @@ The corpus stores more than labels or isolated facts. When relevant, each entry 
 
 - `language/Indonesian/`: Indonesian lexical, morphological, syntactic, semantic, pragmatic, and discourse knowledge.
 - `mathematics/`: arithmetic, algebra, formal logic, sets, geometry, linear algebra, calculus, probability, statistics, discrete mathematics, and dynamical systems.
+- `physical-sciences/`: physics and other physical-science models, with equations, coordinate conventions, initial conditions, assumptions, and limits of applicability.
 - `biology-neuroscience/`: biological structures, functions, interactions, mechanisms, stimulus-response relationships, and research findings.
 - `computing-engineering/`: algorithms, logic, architecture, information flow, input-output behavior, constraints, and design principles.
 - `empirical-reasoning/`: observations, evidence, hypotheses, predictions, outcomes, prediction errors, confidence, and revision conditions.
@@ -28,6 +29,7 @@ The corpus stores more than labels or isolated facts. When relevant, each entry 
 ## Initial implementation
 
 - `schemas/knowledge-frame-v1.schema.json` defines a source-independent structured frame for concepts, events, conditions, relations, and evidence.
+- `schemas/knowledge-corpus-v1.schema.json` defines the corpus envelope and references the individual-frame schema.
 - `corpus/seed-v1.json` is a small cross-domain pilot covering Indonesian lexical meaning, mathematics, physics, biology, computing, and empirical reasoning. Its model-synthesized entries are explicitly marked unverified and are intended to test representation shape, not serve as a fully reviewed reference work.
 
 ## Relationship to runtime
