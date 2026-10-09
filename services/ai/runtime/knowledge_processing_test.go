@@ -37,11 +37,16 @@ func TestProcessKnowledgeDocumentUsesCanonicalRuntime(t *testing.T) {
 	if len(result.Compilation.Experiences) != 1 {
 		t.Fatalf("compiled experiences = %d, want 1", len(result.Compilation.Experiences))
 	}
-	if len(result.Outputs) != 1 {
-		t.Fatalf("runtime outputs = %d, want 1", len(result.Outputs))
+	if len(result.Outputs) != 3 {
+		t.Fatalf("runtime outputs = %d, want 3 (before/change/after)", len(result.Outputs))
 	}
-	if result.Outputs[0].Sequence == 0 {
-		t.Fatal("runtime did not advance its sequence")
+	for i, output := range result.Outputs {
+		if output.Sequence == 0 {
+			t.Fatalf("runtime output %d has zero sequence", i)
+		}
+		if i > 0 && output.Sequence <= result.Outputs[i-1].Sequence {
+			t.Fatalf("runtime sequences are not increasing: %d then %d", result.Outputs[i-1].Sequence, output.Sequence)
+		}
 	}
 	found := false
 	for _, experience := range brain.BrainState.DevelopmentalExperiences {
