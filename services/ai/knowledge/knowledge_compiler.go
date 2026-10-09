@@ -95,7 +95,7 @@ func CompileKnowledgeDocument(document KnowledgeDocument, at time.Time) (Knowled
 			AfterState: DevelopmentalStateFrame{Representation: averageKnowledgeVectors(after), Confidence: confidence},
 			SymbolExposures: exposures,
 			LearningTrace: DevelopmentalLearningTrace{TemporalTrace: []time.Time{at}, Prediction: append([]float64(nil), in.Prediction...), Outcome: append([]float64(nil), in.Outcome...), PredictionError: in.PredictionError, Plasticity: plasticity, Confidence: confidence},
-			Provenance: BootstrapProvenance{Origin: document.SourceType + ":" + document.Source, DirectExperience: document.DirectExperience, Status: document.Status, SourceHash: hash},
+			Provenance: BootstrapProvenance{Origin: document.SourceType + ":" + document.Source + ":domain=" + document.Domain, DirectExperience: document.DirectExperience, Status: document.Status, SourceHash: hash},
 		})
 	}
 	return out, nil
