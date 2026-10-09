@@ -3,6 +3,7 @@ package runtime
 import (
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 	"time"
 
@@ -102,4 +103,28 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 		}
 	}
 	return result, nil
+}
+
+
+// ProcessKnowledgeFrameCorpus decodes a structured knowledge corpus and sends
+// each record through the canonical runtime pipeline. It returns partial
+// results alongside an error if processing stops partway through the corpus.
+func (r *BrainRuntime) ProcessKnowledgeFrameCorpus(reader io.Reader, at time.Time) ([]KnowledgeProcessingResult, error) {
+	corpus, err := knowledge.DecodeKnowledgeFrameCorpus(reader)
+	if err != nil {
+		return nil, err
+	}
+	documents, err := corpus.KnowledgeDocuments()
+	if err != nil {
+		return nil, err
+	}
+	results := make([]KnowledgeProcessingResult, 0, len(documents))
+	for _, document := range documents {
+		result, err := r.ProcessKnowledgeDocument(document, at)
+		if err != nil {
+			return results, fmt.Errorf("process knowledge frame %q: %w", document.ID, err)
+		}
+		results = append(results, result)
+	}
+	return results, nil
 }
