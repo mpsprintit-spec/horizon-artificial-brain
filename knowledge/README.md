@@ -34,7 +34,13 @@ The corpus stores more than labels or isolated facts. When relevant, each entry 
 
 ## Relationship to runtime
 
-The Go package `services/ai/knowledge` currently compiles `KnowledgeDocument` records into `DevelopmentalExperience` using before/change/after data, numeric representations, symbol exposures, learning traces, and provenance. The frame schema in this directory is a richer knowledge-authoring format. Do not claim that the runtime preserves or learns every field until an explicit adapter maps the frame into canonical runtime structures and tests verify that mapping.
+The Go package `services/ai/knowledge` now has a minimal adapter:
+- `DecodeKnowledgeFrameCorpus` reads the corpus envelope, rejects duplicate IDs and malformed core metadata, and retains each complete record as raw JSON.
+- `KnowledgeDocuments` maps a record's initial state, mechanism/transition, and resulting state into the existing before/change/after input model.
+- `KnowledgeDatum.SemanticFrame` and `SymbolExposure.SemanticFrame` preserve the complete source frame in canonical developmental experience data.
+- `BrainRuntime.ProcessKnowledgeFrameCorpus` passes records through the existing runtime processing path.
+
+Important boundary: the numeric representations are currently generated from the mapped state-summary strings. Preserving a full frame in canonical metadata does not mean the neural substrate has independently interpreted every role, relation, condition, or limitation in that frame. That requires additional structural grounding and behavior-level tests. The adapter's minimum structural checks are not a substitute for full JSON Schema validation or source verification.
 
 ## Growth and review
 
