@@ -97,14 +97,41 @@ function drawBrain3D(s){
   if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;}
   gl.viewport(0,0,w,h);gl.clearColor(.018,.035,.04,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);gl.enable(gl.BLEND);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);
   const mvp=matMul(matPerspective(1,w/h,.1,100),matMul(matTranslate(-brain3D.zoom),matRot(brain3D.yaw,brain3D.pitch)));
-  const units=s.neural_units||[],synapses=s.synapses||[],pops=s.populations||[],byUnit=new Map();
-  pops.forEach((p,pi)=>(p.units||[]).forEach(m=>{const id=Number(m.node_id??m.id);if(Number.isFinite(id)&&!byUnit.has(id))byUnit.set(id,pi);}));
-  const centers=new Map(),pc=Math.max(1,Math.ceil(pops.length/2));
-  pops.forEach((p,pi)=>{const side=pi%2?-1:1,slot=Math.floor(pi/2),u=slot/Math.max(1,pc-1),theta=(slot*2.3999632297)%6.28318,r=.35+.72*Math.sqrt(Math.min(1,u));centers.set(pi,[side*(.18+r*.62*Math.cos(theta)),.48*Math.sin(theta),.34*Math.cos(theta)*side]);});
-  const pos=new Map(),groups=new Map();
-  units.forEach(u=>{const pi=byUnit.get(Number(u.id));if(pi!==undefined){if(!groups.has(pi))groups.set(pi,[]);groups.get(pi).push(u);}});
-  for(const [pi,members] of groups){const c=centers.get(pi)||[0,0,0],rad=Math.min(.22,.06+Math.sqrt(members.length)*.025);members.forEach((u,i)=>{const a=i*2.3999632297,r=rad*Math.sqrt((i+1)/members.length);pos.set(Number(u.id),[c[0]+Math.cos(a)*r,c[1]+Math.sin(a)*r*.72,c[2]+Math.sin(a*1.7)*r*.75]);});}
-  units.filter(u=>!pos.has(Number(u.id))).forEach((u,i)=>{const a=i*2.3999632297,r=.2+Math.sqrt(i)*.015;pos.set(Number(u.id),[Math.cos(a)*Math.min(.9,r),Math.sin(a)*.55*Math.min(.9,r),Math.sin(a*.7)*.35]);});
+  const units=s.neural_units||[],synapses=s.synapses||[];
+  // Build a stable, topology-driven 3D layout rather than arranging populations in spirals.
+  const ids=units.map(u=>Number(u.id)).filter(Number.isFinite), idSet=new Set(ids);
+  const edges=synapses.map(e=>[Number(e.source_id),Number(e.target_id)]).filter(([a,b])=>idSet.has(a)&&idSet.has(b)&&a!==b);
+  const layoutKey=ids.join(",")+"|"+edges.map(e=>e[0]+">"+e[1]).join(",");
+  if(brain3D.layoutKey!==layoutKey){
+    let seed=2166136261;for(let i=0;i<layoutKey.length;i++){seed^=layoutKey.charCodeAt(i);seed=Math.imul(seed,16777619);}
+    const rand=()=>{seed^=seed<<13;seed^=seed>>>17;seed^=seed<<5;return (seed>>>0)/4294967296;};
+    const points=new Map(ids.map(id=>[id,[(rand()-.5)*1.8,(rand()-.5)*1.8,(rand()-.5)*1.8]]));
+    const degree=new Map(ids.map(id=>[id,0]));
+    for(const [a,b] of edges){degree.set(a,(degree.get(a)||0)+1);degree.set(b,(degree.get(b)||0)+1);}
+    const iterations=28, repulsion=.0018, spring=.012, target=.16;
+    for(let it=0;it<iterations;it++){
+      const forces=new Map(ids.map(id=>[id,[0,0,0]])),cool=.9*(1-it/iterations)+.1;
+      // Repel nodes to prevent overlap; use softened inverse-square forces.
+      for(let i=0;i<ids.length;i++)for(let j=i+1;j<ids.length;j++){
+        const a=points.get(ids[i]),b=points.get(ids[j]),dx=a[0]-b[0],dy=a[1]-b[1],dz=a[2]-b[2];
+        const d2=dx*dx+dy*dy+dz*dz+.012, f=repulsion/d2;
+        const fa=forces.get(ids[i]),fb=forces.get(ids[j]);
+        fa[0]+=dx*f;fa[1]+=dy*f;fa[2]+=dz*f;fb[0]-=dx*f;fb[1]-=dy*f;fb[2]-=dz*f;
+      }
+      // Connected neurons attract each other, with stronger pull for higher-degree nodes.
+      for(const [aId,bId] of edges){
+        const a=points.get(aId),b=points.get(bId),dx=b[0]-a[0],dy=b[1]-a[1],dz=b[2]-a[2],d=Math.sqrt(dx*dx+dy*dy+dz*dz)+1e-6;
+        const f=(d-target)*spring,fa=forces.get(aId),fb=forces.get(bId);
+        fa[0]+=dx/d*f;fa[1]+=dy/d*f;fa[2]+=dz/d*f;fb[0]-=dx/d*f;fb[1]-=dy/d*f;fb[2]-=dz/d*f;
+      }
+      for(const id of ids){const p=points.get(id),f=forces.get(id),mag=Math.sqrt(f[0]*f[0]+f[1]*f[1]+f[2]*f[2])+1e-6,step=Math.min(.035,.035/mag)*cool;p[0]+=f[0]*step;p[1]+=f[1]*step;p[2]+=f[2]*step;}
+    }
+    // Normalize the organic layout into the camera volume without imposing a shape.
+    const vals=[...points.values()],maxAbs=Math.max(.01,...vals.flatMap(p=>p.map(Math.abs)));
+    for(const p of vals)for(let k=0;k<3;k++)p[k]=p[k]/maxAbs*.92;
+    brain3D.layoutKey=layoutKey;brain3D.layoutPositions=points;
+  }
+  const pos=brain3D.layoutPositions||new Map();
   const active=new Set(),ev=store.events[store.events.length-1],delta=ev?.state_delta||ev?.StateDelta||{};
   for(const id of delta.added_node_ids||delta.AddedNodeIDs||[])active.add(Number(id));
   for(const id of Object.keys(delta.activation_delta||delta.ActivationDelta||{}))active.add(Number(id));
