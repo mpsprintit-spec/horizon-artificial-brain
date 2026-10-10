@@ -4,7 +4,6 @@ on:
   push:
     branches: [main]
     paths:
-      - 'web/monitor/**'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -24,10 +23,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout monitor source
         uses: actions/checkout@v4
+        with:
+          ref: fix/canonical-brain-mutation-lock
       - name: Setup Pages
         uses: actions/configure-pages@v5
+      - name: Verify monitor source
+        run: test -f web/monitor/index.html && test -f web/monitor/app.js
       - name: Upload monitor site
         uses: actions/upload-pages-artifact@v3
         with:
