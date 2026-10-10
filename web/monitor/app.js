@@ -113,10 +113,11 @@ function drawBrain3D(s){
   for(const u of units){const p=pos.get(Number(u.id));if(!p)continue;const a=Math.max(0,Number(u.activation||0)),hot=active.has(Number(u.id));nodeData.push(...p,2.8+a*8+(hot?4:0),hot?1:.25+a*.65,hot?1:.72,.82);const q=project(p);if(q)projected.push({x:q.x,y:q.y,entity:u});}
   brain3D.projected=projected;
   const lineData=[];for(const e of synapses){const a=pos.get(Number(e.source_id)),b=pos.get(Number(e.target_id));if(a&&b)lineData.push(...a,...b);}
-  const draw=(program,data,mode,stride,attrs)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);gl.useProgram(program);let off=0;attrs.forEach(a=>{const loc=gl.getAttribLocation(program,a.name);if(loc>=0){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,a.size,gl.FLOAT,false,stride*4,off);}off+=a.size*4;});gl.uniformMatrix4fv(gl.getUniformLocation(program,"mvp"),false,new Float32Array(mvp));gl.drawArrays(mode,0,data.length/stride);gl.deleteBuffer(b);};
+  const draw=(program,data,mode,stride,attrs)=>{const b=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(data),gl.DYNAMIC_DRAW);gl.useProgram(program);if(program===brain3D.lineProgram){gl.uniform1f(gl.getUniformLocation(program,"alpha"),.72);}let off=0;attrs.forEach(a=>{const loc=gl.getAttribLocation(program,a.name);if(loc>=0){gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,a.size,gl.FLOAT,false,stride*4,off);}off+=a.size*4;});gl.uniformMatrix4fv(gl.getUniformLocation(program,"mvp"),false,new Float32Array(mvp));gl.drawArrays(mode,0,data.length/stride);gl.deleteBuffer(b);};
   draw(brain3D.nodeProgram,nodeData,gl.POINTS,7,[{name:"p",size:3},{name:"size",size:1},{name:"color",size:3}]);
-  gl.uniform1f(gl.getUniformLocation(brain3D.lineProgram,"alpha"),.18);draw(brain3D.lineProgram,lineData,gl.LINES,3,[{name:"p",size:3}]);
-  $("graphState").textContent=`3D canonical brain · ${units.length} neurons · ${synapses.length} synapses · drag to rotate · wheel to zoom`;
+  draw(brain3D.lineProgram,lineData,gl.LINES,3,[{name:"p",size:3}]);
+  const renderedConnections=lineData.length/6;
+  $("graphState").textContent=`3D canonical brain · ${units.length} neurons · ${synapses.length} synapses · ${renderedConnections} rendered connections · drag to rotate · wheel to zoom`;
 }
 
 function inspect(entity,type){selected=Number(entity.id||entity.node_id||entity.source_id||0);$("inspector").textContent=JSON.stringify({type,entity},null,2);render();}
