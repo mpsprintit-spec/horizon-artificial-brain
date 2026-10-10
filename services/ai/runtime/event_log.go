@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -72,15 +73,26 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 	defer file.Close()
 	var events []LoggedEvent
 	var expected uint64 = 1
+	var previousLine []byte
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
+		line := append([]byte(nil), scanner.Bytes()...)
 		var event LoggedEvent
-		if err := json.Unmarshal(scanner.Bytes(), &event); err != nil { return nil, fmt.Errorf("decode event log: %w", err) }
+		if err := json.Unmarshal(line, &event); err != nil { return nil, fmt.Errorf("decode event log: %w", err) }
 		if event.SchemaVersion != EventLogSchemaVersion { return nil, fmt.Errorf("unsupported event log schema version %d", event.SchemaVersion) }
 		if event.BrainIdentity != BrainIdentity { return nil, fmt.Errorf("event belongs to brain %q", event.BrainIdentity) }
-		if event.Sequence != expected { return nil, fmt.Errorf("event sequence discontinuity: got %d want %d", event.Sequence, expected) }
+		if event.Sequence != expected {
+			// A byte-identical repeated line is a harmless duplicate append, not
+			// a missing event. Ignore only that exact adjacent duplicate; never
+			// skip sequence gaps or conflicting events with the same sequence.
+			if event.Sequence+1 == expected && bytes.Equal(line, previousLine) {
+				continue
+			}
+			return nil, fmt.Errorf("event sequence discontinuity: got %d want %d", event.Sequence, expected)
+		}
 		expected++
 		events = append(events, event)
+		previousLine = line
 	}
 	if err := scanner.Err(); err != nil { return nil, fmt.Errorf("read event log: %w", err) }
 	return events, nil
