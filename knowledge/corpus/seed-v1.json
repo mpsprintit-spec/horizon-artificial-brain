@@ -2486,6 +2486,767 @@
           "Anchor quantitative methods to authoritative metrology guidance when expanding this topic."
         ]
       }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-memindahkan-causative",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics and event structure",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Memindahkan describes causing an entity to change location; the source, destination, moved entity, and means may be expressed or left implicit.",
+        "terms": [
+          "memindahkan",
+          "pindah",
+          "dipindahkan",
+          "perpindahan"
+        ],
+        "lexical": {
+          "surface": "memindahkan",
+          "lemma": "pindah",
+          "part_of_speech": "verb",
+          "morphology": [
+            "meN- + pindah + -kan"
+          ],
+          "sense_id": "memindahkan.caused-location-change",
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Entity causing or arranging the relocation",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Entity whose location changes",
+              "required": true
+            },
+            {
+              "role": "Source",
+              "description": "Starting location, optionally expressed",
+              "required": false
+            },
+            {
+              "role": "Goal",
+              "description": "Destination location, optionally expressed",
+              "required": false
+            }
+          ],
+          "examples": [
+            {
+              "text": "Rina memindahkan kursi ke teras.",
+              "interpretation": "Rina causes the chair to change location, with the terrace as destination.",
+              "context": "Physical relocation."
+            },
+            {
+              "text": "Berkas itu dipindahkan kemarin.",
+              "interpretation": "The file's relocation is foregrounded; the agent is not specified.",
+              "context": "Passive construction."
+            }
+          ]
+        },
+        "entities": [
+          {
+            "id": "agent",
+            "type": "entity-role",
+            "label": "Agent"
+          },
+          {
+            "id": "theme",
+            "type": "entity-role",
+            "label": "Moved entity"
+          },
+          {
+            "id": "source",
+            "type": "location-role",
+            "label": "Source location"
+          },
+          {
+            "id": "goal",
+            "type": "location-role",
+            "label": "Destination"
+          }
+        ],
+        "relations": [
+          {
+            "type": "causes-location-transition",
+            "from": "agent",
+            "to": "theme",
+            "direction": "Agent causes Theme location to change",
+            "conditions": [
+              "A relocation action occurs and the entity can be moved."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Theme occupies source location, if known."
+          ],
+          "trigger_or_conditions": [
+            "A relocation action is possible; constraints such as attachment or obstruction permit movement."
+          ],
+          "mechanism_or_transition": [
+            "Theme's location changes from source to destination."
+          ],
+          "resulting_state": [
+            "Theme occupies a new location if relocation succeeds."
+          ],
+          "invariants": [
+            "The verb alone does not identify the exact source, destination, route, or success unless context supplies them."
+          ],
+          "unknowns": [
+            "The agent, source, destination, and means may be omitted or inferred only from context."
+          ]
+        },
+        "context_conditions": [
+          "Interpretation depends on arguments and discourse context."
+        ],
+        "constraints": [
+          "Do not infer a specific destination when none is stated or recoverable from context."
+        ],
+        "limitations": [
+          "This frame models a common physical sense; figurative uses require separate frames."
+        ],
+        "cross_references": [
+          "Indonesian passive di- construction",
+          "State-transition representation"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Illustrative analysis of a common Indonesian construction; requires review against authoritative lexical sources and corpus data.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review dictionary entries and attested corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-kalau-conditional-scope",
+      "domain": "language",
+      "subdomain": "Indonesian syntax and semantics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Kalau commonly introduces a condition or supposition; the relation between the condition and result depends on the full clause and context.",
+        "terms": [
+          "kalau",
+          "jika",
+          "apabila",
+          "syarat",
+          "konsekuensi"
+        ],
+        "definition": "In a conditional construction, one clause presents a condition and another presents a result, expectation, or consequence associated with that condition.",
+        "entities": [
+          {
+            "id": "condition",
+            "type": "proposition",
+            "label": "Condition clause"
+          },
+          {
+            "id": "result",
+            "type": "proposition",
+            "label": "Result clause"
+          }
+        ],
+        "relations": [
+          {
+            "type": "conditions",
+            "from": "condition",
+            "to": "result",
+            "direction": "The result is presented as dependent on or relevant under the condition",
+            "conditions": [
+              "The utterance is used conditionally rather than in another discourse function."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Truth or satisfaction of the condition may be unknown."
+          ],
+          "trigger_or_conditions": [
+            "A speaker presents a possible, expected, general, or counterfactual condition."
+          ],
+          "mechanism_or_transition": [
+            "The listener evaluates the result relative to the condition and the utterance's context."
+          ],
+          "resulting_state": [
+            "The conditional relation is represented without automatically asserting that the condition is true."
+          ],
+          "unknowns": [
+            "Factuality, likelihood, and counterfactual force depend on tense/aspect, wording, and context."
+          ]
+        },
+        "lexical": {
+          "surface": "kalau",
+          "lemma": "kalau",
+          "part_of_speech": "conjunction",
+          "sense_id": "kalau.conditional",
+          "examples": [
+            {
+              "text": "Kalau hujan, kami tinggal di rumah.",
+              "interpretation": "Staying at home is presented as conditional on rain.",
+              "context": "Everyday conditional."
+            },
+            {
+              "text": "Kalau dia sudah datang, beri tahu saya.",
+              "interpretation": "The instruction applies if the arrival condition is satisfied.",
+              "context": "Conditional instruction."
+            }
+          ]
+        },
+        "constraints": [
+          "Do not infer that the condition has occurred merely because it is mentioned."
+        ],
+        "limitations": [
+          "This frame covers common conditional uses, not every discourse use of kalau."
+        ],
+        "cross_references": [
+          "Formal implication",
+          "Indonesian clause structure"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "General linguistic analysis; construction inventory and usage distribution require corpus review.",
+        "revision_conditions": [
+          "Review authoritative grammar and examples from a balanced Indonesian corpus."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-modal-harus-mungkin-boleh",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and pragmatics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Modal expressions such as harus, mungkin, and boleh convey different kinds of necessity, possibility, or permission; they do not have interchangeable meanings.",
+        "terms": [
+          "harus",
+          "mungkin",
+          "boleh",
+          "wajib",
+          "dapat"
+        ],
+        "definition": "Modal expressions qualify a proposition or action with meanings such as obligation/necessity, epistemic possibility, ability, or permission.",
+        "lexical": {
+          "surface": "harus / mungkin / boleh",
+          "lemma": "modal expressions",
+          "part_of_speech": "modal",
+          "sense_id": "indonesian.modality.contrast",
+          "examples": [
+            {
+              "text": "Kamu harus berhenti.",
+              "interpretation": "The action is presented as required or strongly necessary.",
+              "context": "Obligation."
+            },
+            {
+              "text": "Mungkin dia sudah pulang.",
+              "interpretation": "The proposition that the person has gone home is presented as possible, not certain.",
+              "context": "Epistemic possibility."
+            },
+            {
+              "text": "Kamu boleh masuk.",
+              "interpretation": "Permission to enter is granted or indicated.",
+              "context": "Permission."
+            }
+          ]
+        },
+        "relations": [
+          {
+            "type": "modal-qualifies-proposition",
+            "from": "modal-expression",
+            "to": "proposition",
+            "direction": "Modal expression changes the force or status of the proposition without itself proving it true",
+            "conditions": [
+              "The modal's sense is resolved in context."
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "A proposition or possible action is under consideration."
+          ],
+          "trigger_or_conditions": [
+            "A modal expression is interpreted in its grammatical and social context."
+          ],
+          "mechanism_or_transition": [
+            "The modal marks obligation, possibility, permission, or another modality."
+          ],
+          "resulting_state": [
+            "The proposition is understood with a qualified status rather than as an unmodalized assertion."
+          ],
+          "unknowns": [
+            "Strength and social force may depend on speaker, relationship, and situation."
+          ]
+        },
+        "context_conditions": [
+          "Modal meaning depends on syntax, discourse, and social context."
+        ],
+        "constraints": [
+          "Do not treat 'harus', 'mungkin', and 'boleh' as synonyms."
+        ],
+        "cross_references": [
+          "Negation scope",
+          "Speech acts",
+          "Uncertainty representation"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.75,
+        "evidence_summary": "Illustrative contrast among common Indonesian modal expressions; detailed classification requires linguistic review.",
+        "revision_conditions": [
+          "Review Indonesian grammar and corpus usage, including context-sensitive readings."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indirect-request-can-you",
+      "domain": "language",
+      "subdomain": "Indonesian pragmatics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A question about ability can function as an indirect request when context makes a desired action salient.",
+        "terms": [
+          "bisa",
+          "tolong",
+          "permintaan tidak langsung",
+          "tindak tutur"
+        ],
+        "definition": "The grammatical form of an utterance and its communicative function may differ; an ability question can pragmatically request an action.",
+        "lexical": {
+          "surface": "Bisa ...?",
+          "lemma": "bisa",
+          "part_of_speech": "modal verb in question construction",
+          "sense_id": "bisa.ability-question-indirect-request",
+          "examples": [
+            {
+              "text": "Bisa tutup pintunya?",
+              "interpretation": "Literally asks about ability; in an ordinary request context it can politely ask the listener to close the door.",
+              "context": "Indirect request.",
+              "alternative_readings": [
+                "A literal question about physical ability, if that is the salient topic."
+              ]
+            },
+            {
+              "text": "Apakah kamu bisa berenang?",
+              "interpretation": "Usually asks about swimming ability, not a request to swim.",
+              "context": "Ability question."
+            }
+          ]
+        },
+        "entities": [
+          {
+            "id": "speaker",
+            "type": "discourse-role",
+            "label": "Speaker"
+          },
+          {
+            "id": "listener",
+            "type": "discourse-role",
+            "label": "Listener"
+          },
+          {
+            "id": "requested-action",
+            "type": "action",
+            "label": "Potential requested action"
+          }
+        ],
+        "relations": [
+          {
+            "type": "utterance-may-request-action",
+            "from": "speaker",
+            "to": "requested-action",
+            "direction": "Speaker may use an ability question to request listener action",
+            "conditions": [
+              "A relevant action is possible and conversational context supports a request interpretation."
+            ],
+            "confidence": 0.7
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Listener has not necessarily performed the action."
+          ],
+          "trigger_or_conditions": [
+            "An ability-form question occurs in a context where the action would be useful or expected."
+          ],
+          "mechanism_or_transition": [
+            "Listener infers a possible request from wording, context, and social conventions."
+          ],
+          "resulting_state": [
+            "Listener may comply, refuse, clarify, or answer literally."
+          ],
+          "unknowns": [
+            "The intended force is not guaranteed by the wording alone."
+          ]
+        },
+        "constraints": [
+          "Do not always classify every 'bisa ...?' question as a request."
+        ],
+        "limitations": [
+          "Politeness and intent vary by context and relationship."
+        ],
+        "cross_references": [
+          "Speech-act theory",
+          "Contextual ambiguity",
+          "Question forms"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Pragmatic illustration; actual interpretation depends on discourse context.",
+        "revision_conditions": [
+          "Review attested conversational examples across formal and informal contexts."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "math-vector-addition-state-change",
+      "domain": "mathematics",
+      "subdomain": "linear algebra and state representation",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Vector addition combines corresponding components when vectors share a compatible space and coordinate convention.",
+        "terms": [
+          "vector",
+          "component",
+          "coordinate system",
+          "vector addition"
+        ],
+        "definition": "For vectors a and b in the same n-dimensional vector space, (a+b)_i = a_i + b_i for each component i.",
+        "equation": "a + b = (a_1+b_1, ..., a_n+b_n)",
+        "state_model": {
+          "initial_state": [
+            "Two vectors are represented in the same compatible vector space and coordinate convention."
+          ],
+          "trigger_or_conditions": [
+            "Both vectors have the same dimension and compatible component meanings."
+          ],
+          "mechanism_or_transition": [
+            "Add corresponding components."
+          ],
+          "resulting_state": [
+            "A resultant vector represents the component-wise sum."
+          ],
+          "invariants": [
+            "Dimension and component interpretation are preserved."
+          ],
+          "unknowns": [
+            "The physical or semantic meaning of the resultant depends on what the vector components represent."
+          ]
+        },
+        "procedure": [
+          "Check that dimensions and coordinate conventions match.",
+          "Add corresponding components.",
+          "Retain units and interpretation where applicable."
+        ],
+        "constraints": [
+          "Do not add vectors with incompatible dimensions or silently mismatched component meanings."
+        ],
+        "limitations": [
+          "A vector operation alone does not establish that its result is physically meaningful."
+        ],
+        "cross_references": [
+          "Dimensional analysis",
+          "State representation",
+          "Linear transformations"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Definition of component-wise vector addition in a common vector space.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "biology-sensory-adaptation",
+      "domain": "biology-neuroscience",
+      "subdomain": "sensory physiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Sensory adaptation is a change in responsiveness during sustained or repeated stimulation; its magnitude and mechanism depend on the sensory system and stimulus.",
+        "terms": [
+          "sensory adaptation",
+          "receptor",
+          "stimulus intensity",
+          "response"
+        ],
+        "entities": [
+          {
+            "id": "stimulus",
+            "type": "input",
+            "label": "Stimulus"
+          },
+          {
+            "id": "receptor",
+            "type": "biological-structure",
+            "label": "Sensory receptor"
+          },
+          {
+            "id": "response",
+            "type": "measured-output",
+            "label": "Response"
+          }
+        ],
+        "relations": [
+          {
+            "type": "elicits",
+            "from": "stimulus",
+            "to": "response",
+            "direction": "Stimulus can elicit a sensory response",
+            "conditions": [
+              "Stimulus is within the system's sensitivity range."
+            ],
+            "confidence": 0.8
+          },
+          {
+            "type": "modulates-over-time",
+            "from": "stimulus",
+            "to": "response",
+            "direction": "Sustained or repeated stimulation may alter response magnitude over time",
+            "conditions": [
+              "Adaptation occurs in the specific sensory pathway under the given stimulus conditions."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Sensory system has a baseline response profile."
+          ],
+          "trigger_or_conditions": [
+            "A stimulus is sustained or repeated."
+          ],
+          "mechanism_or_transition": [
+            "Receptor and downstream neural processes change responsiveness over time, with mechanism varying by system."
+          ],
+          "resulting_state": [
+            "Response magnitude or sensitivity may differ from the initial response."
+          ],
+          "unknowns": [
+            "Direction, time course, and recovery vary across sensory modalities and stimulus conditions."
+          ]
+        },
+        "constraints": [
+          "Do not generalize one receptor's adaptation time course to all sensory systems."
+        ],
+        "limitations": [
+          "This is a high-level pattern, not a detailed mechanism for every receptor type."
+        ],
+        "cross_references": [
+          "Stimulus-response models",
+          "Neural signaling",
+          "Homeostasis"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General physiological concept; specific mechanisms should be linked to reviewed sources before scientific use.",
+        "revision_conditions": [
+          "Add modality-specific evidence and peer-reviewed sources."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "computing-queue-fifo",
+      "domain": "computing-engineering",
+      "subdomain": "data structures",
+      "kind": "definition",
+      "status": "established",
+      "content": {
+        "summary": "A queue is an abstract data type that typically removes items in first-in, first-out order.",
+        "terms": [
+          "queue",
+          "FIFO",
+          "enqueue",
+          "dequeue",
+          "front",
+          "back"
+        ],
+        "definition": "For a FIFO queue, among items still present, the item inserted earliest is the next one removed.",
+        "entities": [
+          {
+            "id": "queue",
+            "type": "data-structure",
+            "label": "Queue"
+          },
+          {
+            "id": "item",
+            "type": "data",
+            "label": "Queue item"
+          }
+        ],
+        "relations": [
+          {
+            "type": "orders-removal",
+            "from": "queue",
+            "to": "item",
+            "direction": "Removal order follows insertion order for items still present",
+            "conditions": [
+              "The queue follows FIFO semantics and operations succeed."
+            ],
+            "confidence": 1
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Queue contains an ordered sequence of zero or more items."
+          ],
+          "trigger_or_conditions": [
+            "An enqueue or dequeue operation is requested."
+          ],
+          "mechanism_or_transition": [
+            "Enqueue appends an item; dequeue removes the earliest item still present."
+          ],
+          "resulting_state": [
+            "The queue's sequence reflects the operation and FIFO rule."
+          ],
+          "invariants": [
+            "A successful dequeue removes the oldest remaining item."
+          ],
+          "unknowns": [
+            "Runtime complexity depends on the implementation."
+          ]
+        },
+        "procedure": [
+          "Enqueue inserts at the back.",
+          "Dequeue removes from the front if nonempty.",
+          "Check the empty-queue condition before dequeue."
+        ],
+        "constraints": [
+          "Do not assume all implementations have identical time complexity."
+        ],
+        "limitations": [
+          "Priority queues use a different removal rule and are not ordinary FIFO queues."
+        ],
+        "cross_references": [
+          "Abstract data types",
+          "Algorithmic complexity",
+          "State invariants"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Definition of FIFO queue behavior.",
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "empirical-confounding-variable",
+      "domain": "empirical-reasoning",
+      "subdomain": "causal inference and study design",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A confounding variable is a factor associated with both an exposure and an outcome that can distort an estimate of their causal relationship.",
+        "terms": [
+          "confounder",
+          "exposure",
+          "outcome",
+          "causal inference",
+          "alternative explanation"
+        ],
+        "entities": [
+          {
+            "id": "exposure",
+            "type": "variable",
+            "label": "Exposure or candidate cause"
+          },
+          {
+            "id": "outcome",
+            "type": "variable",
+            "label": "Outcome"
+          },
+          {
+            "id": "confounder",
+            "type": "variable",
+            "label": "Potential confounder"
+          }
+        ],
+        "relations": [
+          {
+            "type": "associated-with",
+            "from": "confounder",
+            "to": "exposure",
+            "direction": "Potential confounder is associated with exposure in the studied data-generating process",
+            "conditions": [
+              "Association exists in the target context."
+            ],
+            "confidence": 0.8
+          },
+          {
+            "type": "associated-with",
+            "from": "confounder",
+            "to": "outcome",
+            "direction": "Potential confounder is associated with outcome independently of the causal pathway under study",
+            "conditions": [
+              "The causal structure supports confounding rather than mediation or collider bias."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "An observed association between exposure and outcome has been identified."
+          ],
+          "trigger_or_conditions": [
+            "A plausible third variable may influence exposure assignment and outcome."
+          ],
+          "mechanism_or_transition": [
+            "The third variable creates or distorts an observed association unless appropriately handled."
+          ],
+          "resulting_state": [
+            "The causal estimate may be biased if confounding is not addressed."
+          ],
+          "unknowns": [
+            "Whether a variable is a confounder depends on causal structure and study design."
+          ]
+        },
+        "constraints": [
+          "Association with two variables alone is not sufficient to identify a confounder; causal structure matters."
+        ],
+        "limitations": [
+          "Adjustment can introduce bias if the wrong variables are controlled, such as certain colliders."
+        ],
+        "cross_references": [
+          "Correlation is not causation",
+          "Controlled comparison",
+          "Hypothesis testing"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General causal-inference concept; classification of variables requires a defensible causal model.",
+        "revision_conditions": [
+          "Link to reviewed causal-inference references and worked examples."
+        ]
+      }
     }
   ]
 }
