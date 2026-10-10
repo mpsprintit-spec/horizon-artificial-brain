@@ -1,7 +1,7 @@
 {
   "schema_version": "horizon.knowledge-frame.v1",
   "corpus_id": "horizon-cross-domain-seed-v1",
-  "purpose": "Cross-domain pilot corpus for representation and runtime integration. Contains model-synthesized entries marked unverified and formal mathematical entries; not a complete or externally reviewed knowledge base.",
+  "purpose": "Cross-domain pilot corpus for structured knowledge representation and runtime integration. Includes Indonesian lexical and discourse frames, mathematics, physical sciences, biology and neuroscience, computing and engineering, and empirical reasoning. Model-synthesized entries are explicitly unverified; formal mathematics entries state assumptions and derivations. This is not a complete or externally reviewed knowledge base.",
   "records": [
     {
       "schema_version": "horizon.knowledge-frame.v1",
@@ -1191,6 +1191,651 @@
         "source_urls": [],
         "revision_conditions": [
           "Supplement with discipline-specific causal-inference references and examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-passive-di",
+      "domain": "language",
+      "subdomain": "Indonesian morphology and syntax",
+      "kind": "construction",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Passive construction with di- commonly foregrounds the affected participant; agent expression and discourse focus vary by construction and context.",
+        "terms": [
+          "di-",
+          "kalimat pasif",
+          "pelaku",
+          "sasaran"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A transitive event is described with an affected participant as the clause topic or grammatical subject."
+          ],
+          "trigger_or_conditions": [
+            "The predicate permits the relevant passive construction; context determines whether the agent is expressed."
+          ],
+          "mechanism_or_transition": [
+            "The di- form presents the event from the affected participant's perspective; an agent may be omitted or introduced, commonly with oleh."
+          ],
+          "resulting_state": [
+            "The affected participant is foregrounded, and the event is asserted or described."
+          ],
+          "invariants": [
+            "Passive form does not imply that the agent is unknown; omission alone does not prove the agent is irrelevant."
+          ],
+          "unknowns": [
+            "Some verbs and colloquial constructions have additional restrictions not captured by this general frame."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-bisa-ambiguity",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics",
+      "kind": "lexical_ambiguity",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "The form 'bisa' may mean ability or possibility, and in some contexts may refer to poison; context and syntax constrain interpretation.",
+        "terms": [
+          "bisa",
+          "mampu",
+          "dapat",
+          "racun"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A sentence contains the surface form 'bisa' without enough context to uniquely select a sense."
+          ],
+          "trigger_or_conditions": [
+            "Neighboring words, argument structure, topic, and situation provide disambiguating evidence."
+          ],
+          "mechanism_or_transition": [
+            "Candidate senses are generated and ranked against contextual constraints rather than collapsed into one fixed meaning."
+          ],
+          "resulting_state": [
+            "A context-supported interpretation is selected if evidence is sufficient; otherwise ambiguity is retained."
+          ],
+          "invariants": [
+            "Do not infer that all candidate senses are equally likely in every context."
+          ],
+          "unknowns": [
+            "The exact sense distribution depends on usage and domain."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-why-question",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and pragmatics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Mengapa' commonly requests an explanation or reason for a proposition, event, or state.",
+        "terms": [
+          "mengapa",
+          "kenapa",
+          "alasan",
+          "sebab"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A speaker presents an event or proposition whose cause or justification is not supplied."
+          ],
+          "trigger_or_conditions": [
+            "The addressee can access relevant causal, explanatory, or intentional information."
+          ],
+          "mechanism_or_transition": [
+            "The question establishes an information gap concerning a reason; the requested answer type depends on the target and context."
+          ],
+          "resulting_state": [
+            "A response may provide a cause, motive, justification, or acknowledge that the reason is unknown."
+          ],
+          "invariants": [
+            "A reason requested by a question is not thereby established as known or true."
+          ],
+          "unknowns": [
+            "The question may be rhetorical or challenge an assumption depending on prosody and discourse."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-pronoun-reference",
+      "domain": "language",
+      "subdomain": "Indonesian discourse and reference",
+      "kind": "discourse_relation",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Pronouns and omitted arguments can refer to entities introduced earlier; reference resolution uses grammatical, semantic, and discourse constraints.",
+        "terms": [
+          "ia",
+          "dia",
+          "mereka",
+          "-nya",
+          "zero anaphora",
+          "rujukan"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A text contains a pronoun or an omitted argument with one or more possible antecedents."
+          ],
+          "trigger_or_conditions": [
+            "Candidate antecedents are available in the current or preceding discourse."
+          ],
+          "mechanism_or_transition": [
+            "Candidate referents are constrained by grammatical role, number, animacy when relevant, semantic compatibility, and discourse salience."
+          ],
+          "resulting_state": [
+            "A referent is resolved when evidence is sufficient; otherwise multiple candidates remain possible."
+          ],
+          "invariants": [
+            "Surface proximity alone does not guarantee the correct antecedent."
+          ],
+          "unknowns": [
+            "Some pronouns are gender-neutral and omitted subjects can be highly context-dependent."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-ratio-unit-conversion",
+      "domain": "mathematics",
+      "subdomain": "arithmetic and dimensional analysis",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Equivalent ratios preserve relative scale; unit conversion multiplies by a conversion factor equal to one in the chosen units.",
+        "terms": [
+          "ratio",
+          "proportion",
+          "unit",
+          "conversion factor"
+        ],
+        "definition": "For example, 1 m = 100 cm, so 2.5 m × (100 cm / 1 m) = 250 cm.",
+        "procedure": [
+          "Write the desired target unit in the numerator of the conversion factor.",
+          "Cancel the original unit algebraically.",
+          "Compute and retain appropriate significant figures."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A quantity is expressed in a known unit and a conversion relation is known."
+          ],
+          "trigger_or_conditions": [
+            "The conversion factor is valid for the units and quantities involved."
+          ],
+          "mechanism_or_transition": [
+            "Multiply the numerical value by a factor whose numerator and denominator are equivalent quantities in different units; cancel units algebraically."
+          ],
+          "resulting_state": [
+            "The same physical quantity is represented in the target unit."
+          ],
+          "invariants": [
+            "Units must be tracked; a numerically plausible answer can still be dimensionally invalid."
+          ],
+          "unknowns": [
+            "Conversion factors and rounding conventions depend on the measurement context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_derivation",
+        "confidence": 1,
+        "evidence_summary": "Direct derivation or mechanically checkable rule; verify implementation against stated assumptions.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-vector-state",
+      "domain": "mathematics",
+      "subdomain": "linear algebra and state representation",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A vector represents an ordered set of components in a specified space and coordinate convention; component meaning depends on the representation contract.",
+        "terms": [
+          "vector",
+          "component",
+          "dimension",
+          "coordinate",
+          "state"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A system state is represented by an ordered list of numerical components."
+          ],
+          "trigger_or_conditions": [
+            "Dimension, component order, units, and coordinate convention are defined."
+          ],
+          "mechanism_or_transition": [
+            "Vector operations transform components according to explicit mathematical rules; interpretation uses the declared mapping."
+          ],
+          "resulting_state": [
+            "A new vector or derived quantity is obtained while preserving the agreed dimension and component semantics."
+          ],
+          "invariants": [
+            "Equal-length vectors are not semantically comparable unless their component meanings and coordinate conventions align."
+          ],
+          "unknowns": [
+            "A vector by itself does not specify what its components mean."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-boolean-implication",
+      "domain": "mathematics",
+      "subdomain": "logic",
+      "kind": "formal_rule",
+      "status": "established",
+      "content": {
+        "summary": "Material implication P → Q is false only when P is true and Q is false; it does not assert that P causes Q.",
+        "terms": [
+          "proposition",
+          "implication",
+          "truth value",
+          "if-then"
+        ],
+        "truth_table": [
+          {
+            "P": false,
+            "Q": false,
+            "P_implies_Q": true
+          },
+          {
+            "P": false,
+            "Q": true,
+            "P_implies_Q": true
+          },
+          {
+            "P": true,
+            "Q": false,
+            "P_implies_Q": false
+          },
+          {
+            "P": true,
+            "Q": true,
+            "P_implies_Q": true
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Two propositions P and Q have assigned truth values."
+          ],
+          "trigger_or_conditions": [
+            "Classical two-valued propositional logic is assumed."
+          ],
+          "mechanism_or_transition": [
+            "Evaluate P → Q as equivalent to not P or Q."
+          ],
+          "resulting_state": [
+            "The implication is true except in the case P=true and Q=false."
+          ],
+          "invariants": [
+            "Logical implication alone does not establish causal mechanism or temporal order."
+          ],
+          "unknowns": [
+            "Other logics may use different semantics."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_derivation",
+        "confidence": 1,
+        "evidence_summary": "Direct derivation or mechanically checkable rule; verify implementation against stated assumptions.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-reflex-arc",
+      "domain": "biology-neuroscience",
+      "subdomain": "neurobiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A simple reflex arc links a stimulus to sensory input, neural processing, motor output, and a response; actual circuits vary by reflex.",
+        "terms": [
+          "stimulus",
+          "receptor",
+          "sensory neuron",
+          "spinal cord",
+          "motor neuron",
+          "response"
+        ],
+        "state_model": {
+          "initial_state": [
+            "An organism has a functioning sensory pathway and an effector capable of responding."
+          ],
+          "trigger_or_conditions": [
+            "A stimulus activates suitable receptors and the relevant neural circuit is intact."
+          ],
+          "mechanism_or_transition": [
+            "Sensory signals travel to central neural circuits, are processed, and motor signals activate an effector."
+          ],
+          "resulting_state": [
+            "A measurable response occurs with timing and magnitude determined by the stimulus and circuit."
+          ],
+          "invariants": [
+            "A reflex response does not imply that every processing stage occurs only in the spinal cord; circuits differ."
+          ],
+          "unknowns": [
+            "The exact pathway and latency depend on the reflex, organism, and experimental conditions."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-stimulus-response-adaptation",
+      "domain": "biology-neuroscience",
+      "subdomain": "physiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Biological responses depend on stimulus properties, receptor sensitivity, internal state, and adaptation; repeated stimulation can change response magnitude.",
+        "terms": [
+          "stimulus",
+          "receptor",
+          "response",
+          "adaptation",
+          "threshold"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A biological system has a measurable baseline state and a response pathway."
+          ],
+          "trigger_or_conditions": [
+            "A stimulus exceeds a relevant threshold and the pathway is responsive."
+          ],
+          "mechanism_or_transition": [
+            "Stimulus energy or chemical input is transduced into signals; downstream processes produce a response that may adapt with repetition."
+          ],
+          "resulting_state": [
+            "Response magnitude or timing changes according to stimulus and system state."
+          ],
+          "invariants": [
+            "Adaptation is not universal for every receptor or stimulus and does not mean the stimulus ceased to exist."
+          ],
+          "unknowns": [
+            "Mechanism and time course are system-specific."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-computing-data-structure-invariant",
+      "domain": "computing-engineering",
+      "subdomain": "data structures",
+      "kind": "design_rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A data structure organizes data under invariants that operations are expected to preserve.",
+        "terms": [
+          "data structure",
+          "invariant",
+          "operation",
+          "precondition",
+          "postcondition"
+        ],
+        "state_model": {
+          "initial_state": [
+            "Data is stored in a structure with a defined representation and allowed operations."
+          ],
+          "trigger_or_conditions": [
+            "Each operation's preconditions and representation invariants are specified."
+          ],
+          "mechanism_or_transition": [
+            "An operation reads or mutates the structure and must preserve its invariant when its preconditions hold."
+          ],
+          "resulting_state": [
+            "The resulting structure remains valid and its postconditions hold, or the operation reports failure."
+          ],
+          "invariants": [
+            "A passing example test does not prove an invariant for all inputs."
+          ],
+          "unknowns": [
+            "Complexity and failure behavior depend on the chosen structure and operation."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-computing-algorithm-complexity",
+      "domain": "computing-engineering",
+      "subdomain": "algorithms",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Algorithmic complexity describes resource growth as a function of input size under a stated cost model.",
+        "terms": [
+          "algorithm",
+          "input size",
+          "time complexity",
+          "space complexity",
+          "asymptotic"
+        ],
+        "state_model": {
+          "initial_state": [
+            "An algorithm processes inputs whose size can be measured."
+          ],
+          "trigger_or_conditions": [
+            "The cost model and input-size measure are defined."
+          ],
+          "mechanism_or_transition": [
+            "Count or bound relevant operations and memory as input size grows."
+          ],
+          "resulting_state": [
+            "A complexity bound such as O(n), O(log n), or O(n²) describes asymptotic growth under stated assumptions."
+          ],
+          "invariants": [
+            "Big-O is an upper-bound notation and does not by itself provide exact runtime or practical performance."
+          ],
+          "unknowns": [
+            "Hardware, constants, data distribution, and implementation affect observed performance."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-controlled-comparison",
+      "domain": "empirical-reasoning",
+      "subdomain": "experimental design",
+      "kind": "method",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A controlled comparison estimates the effect of an intervention by comparing outcomes under conditions designed to limit alternative explanations.",
+        "terms": [
+          "intervention",
+          "control group",
+          "outcome measure",
+          "confounder",
+          "randomization"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A research question identifies an intervention and a measurable outcome."
+          ],
+          "trigger_or_conditions": [
+            "Groups or conditions are comparable; relevant confounders are controlled, measured, or addressed by design."
+          ],
+          "mechanism_or_transition": [
+            "Apply the intervention according to protocol, measure outcomes consistently, and compare groups using a suitable analysis."
+          ],
+          "resulting_state": [
+            "The result estimates an effect with uncertainty under the design's assumptions."
+          ],
+          "invariants": [
+            "A controlled design does not eliminate every source of bias; conclusions must match the design."
+          ],
+          "unknowns": [
+            "Generalization depends on sampling, measurement validity, adherence, and external conditions."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-prediction-error-update",
+      "domain": "empirical-reasoning",
+      "subdomain": "prediction and model evaluation",
+      "kind": "learning_rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Prediction error compares a model's prediction with an observed outcome using an explicitly defined comparison rule.",
+        "terms": [
+          "prediction",
+          "observation",
+          "residual",
+          "prediction error",
+          "model update"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A prediction and a corresponding observed outcome are available in compatible representations."
+          ],
+          "trigger_or_conditions": [
+            "Prediction and observation refer to the same target, time window, units, and measurement process."
+          ],
+          "mechanism_or_transition": [
+            "Compute a defined error such as observed minus predicted; inspect its size, direction, uncertainty, and possible measurement issues."
+          ],
+          "resulting_state": [
+            "The model may be revised or recalibrated if the error is informative and the update rule is justified."
+          ],
+          "invariants": [
+            "A nonzero error does not identify its cause; model misspecification, noise, and measurement error are alternatives."
+          ],
+          "unknowns": [
+            "Error metrics and update methods depend on task and data properties."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
         ]
       }
     }
