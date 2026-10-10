@@ -1199,7 +1199,7 @@
       "id": "id-language-indonesian-passive-di",
       "domain": "language",
       "subdomain": "Indonesian morphology and syntax",
-      "kind": "construction",
+      "kind": "interaction_pattern",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "Passive construction with di- commonly foregrounds the affected participant; agent expression and discourse focus vary by construction and context.",
@@ -1246,7 +1246,7 @@
       "id": "id-language-indonesian-bisa-ambiguity",
       "domain": "language",
       "subdomain": "Indonesian lexical semantics",
-      "kind": "lexical_ambiguity",
+      "kind": "lexical_sense",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "The form 'bisa' may mean ability or possibility, and in some contexts may refer to poison; context and syntax constrain interpretation.",
@@ -1340,7 +1340,7 @@
       "id": "id-language-indonesian-pronoun-reference",
       "domain": "language",
       "subdomain": "Indonesian discourse and reference",
-      "kind": "discourse_relation",
+      "kind": "interaction_pattern",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "Pronouns and omitted arguments can refer to entities introduced earlier; reference resolution uses grammatical, semantic, and discourse constraints.",
@@ -1427,7 +1427,7 @@
         }
       },
       "epistemic": {
-        "basis": "formal_derivation",
+        "basis": "formal_proof",
         "confidence": 1,
         "evidence_summary": "Direct derivation or mechanically checkable rule; verify implementation against stated assumptions.",
         "source_ids": [],
@@ -1488,7 +1488,7 @@
       "id": "id-math-boolean-implication",
       "domain": "mathematics",
       "subdomain": "logic",
-      "kind": "formal_rule",
+      "kind": "rule",
       "status": "established",
       "content": {
         "summary": "Material implication P → Q is false only when P is true and Q is false; it does not assert that P causes Q.",
@@ -1497,28 +1497,6 @@
           "implication",
           "truth value",
           "if-then"
-        ],
-        "truth_table": [
-          {
-            "P": false,
-            "Q": false,
-            "P_implies_Q": true
-          },
-          {
-            "P": false,
-            "Q": true,
-            "P_implies_Q": true
-          },
-          {
-            "P": true,
-            "Q": false,
-            "P_implies_Q": false
-          },
-          {
-            "P": true,
-            "Q": true,
-            "P_implies_Q": true
-          }
         ],
         "state_model": {
           "initial_state": [
@@ -1539,10 +1517,13 @@
           "unknowns": [
             "Other logics may use different semantics."
           ]
-        }
+        },
+        "procedure": [
+          "Truth-table cases: [{\"P\":false,\"Q\":false,\"P_implies_Q\":true},{\"P\":false,\"Q\":true,\"P_implies_Q\":true},{\"P\":true,\"Q\":false,\"P_implies_Q\":false},{\"P\":true,\"Q\":true,\"P_implies_Q\":true}]"
+        ]
       },
       "epistemic": {
-        "basis": "formal_derivation",
+        "basis": "formal_proof",
         "confidence": 1,
         "evidence_summary": "Direct derivation or mechanically checkable rule; verify implementation against stated assumptions.",
         "source_ids": [],
@@ -1652,7 +1633,7 @@
       "id": "id-computing-data-structure-invariant",
       "domain": "computing-engineering",
       "subdomain": "data structures",
-      "kind": "design_rule",
+      "kind": "rule",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "A data structure organizes data under invariants that operations are expected to preserve.",
@@ -1748,7 +1729,7 @@
       "id": "id-empirical-controlled-comparison",
       "domain": "empirical-reasoning",
       "subdomain": "experimental design",
-      "kind": "method",
+      "kind": "procedure",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "A controlled comparison estimates the effect of an intervention by comparing outcomes under conditions designed to limit alternative explanations.",
@@ -1796,7 +1777,7 @@
       "id": "id-empirical-prediction-error-update",
       "domain": "empirical-reasoning",
       "subdomain": "prediction and model evaluation",
-      "kind": "learning_rule",
+      "kind": "rule",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "Prediction error compares a model's prediction with an observed outcome using an explicitly defined comparison rule.",
@@ -2129,7 +2110,7 @@
       "id": "id-language-id-karena-causal-link",
       "domain": "language",
       "subdomain": "Indonesian syntax, semantics and discourse",
-      "kind": "relation",
+      "kind": "rule",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "'Karena' introduces a reason or cause relation, but the relation may be causal, explanatory, or justificatory depending on the connected clauses and context.",
@@ -2209,7 +2190,7 @@
       "id": "id-math-function-composition",
       "domain": "mathematics",
       "subdomain": "functions and algebra",
-      "kind": "formal_rule",
+      "kind": "rule",
       "status": "established",
       "content": {
         "summary": "Function composition applies one function to the output of another, with domain and codomain compatibility required.",
@@ -2258,7 +2239,7 @@
         ]
       },
       "epistemic": {
-        "basis": "formal_definition",
+        "basis": "formal_proof",
         "confidence": 1,
         "evidence_summary": "Standard definition; mechanically checkable under stated domain conditions.",
         "source_ids": [],
@@ -2271,7 +2252,7 @@
       "id": "id-math-conditional-probability",
       "domain": "mathematics",
       "subdomain": "probability",
-      "kind": "formal_rule",
+      "kind": "rule",
       "status": "established",
       "content": {
         "summary": "Conditional probability measures the probability of A when B is known to have occurred, provided P(B)>0.",
@@ -2317,7 +2298,7 @@
         ]
       },
       "epistemic": {
-        "basis": "formal_definition",
+        "basis": "formal_proof",
         "confidence": 1,
         "evidence_summary": "Standard probability definition with explicit nonzero denominator condition.",
         "source_ids": [],
@@ -2426,7 +2407,7 @@
       "id": "id-empirical-measurement-uncertainty",
       "domain": "empirical-reasoning",
       "subdomain": "measurement and metrology",
-      "kind": "method",
+      "kind": "procedure",
       "status": "model_synthesized_unverified",
       "content": {
         "summary": "A measurement result should be interpreted with its measurement procedure, units, resolution, calibration, and uncertainty rather than as an exact value without conditions.",
