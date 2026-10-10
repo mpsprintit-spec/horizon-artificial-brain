@@ -30,7 +30,7 @@ The corpus stores more than labels or isolated facts. When relevant, each entry 
 
 - `schemas/knowledge-frame-v1.schema.json` defines a source-independent structured frame for concepts, events, conditions, relations, and evidence.
 - `schemas/knowledge-corpus-v1.schema.json` defines the corpus envelope and references the individual-frame schema.
-- `corpus/seed-v1.json` is a 15-record cross-domain pilot covering Indonesian lexical meaning and interaction patterns, mathematics, physics, biology/neuroscience, computing/engineering, and empirical reasoning. It includes state models, conditions, relations, constraints, examples, procedures, and epistemic status where relevant. Model-synthesized entries are explicitly marked unverified; formal mathematical entries are marked as formal derivations. The corpus is intended to test representation and runtime integration, not to serve as a complete or externally reviewed reference work.
+- `corpus/seed-v1.json` is a 44-record cross-domain pilot covering Indonesian lexical meaning and interaction patterns, mathematics, physics, biology/neuroscience, computing/engineering, and empirical reasoning. The current batch adds richer Indonesian event structure, conditionals, modality, indirect requests, vector operations, sensory adaptation, FIFO queues, and confounding variables. Records include state models, conditions, relations, constraints, examples, procedures, and epistemic status where relevant. Model-synthesized entries are explicitly marked unverified; formal mathematical entries are marked as formal derivations. The corpus is intended to test representation and runtime integration, not to serve as a complete or externally reviewed reference work.
 
 ## Relationship to runtime
 
