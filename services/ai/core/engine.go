@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -54,38 +55,60 @@ func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, er
 	if err != nil {
 		return runtime.CognitiveInterpretation{}, err
 	}
-	if len(signals) == 0 {
-		return runtime.CognitiveInterpretation{}, errors.New("perception produced no signals")
-	}
-	if len(signals) > 1 {
-		return runtime.CognitiveInterpretation{}, errors.New("pulse requires exactly one perception signal")
-	}
-
-	signal := signals[0]
-	observedAt := signal.ObservedAt
-	if observedAt.IsZero() {
-		observedAt = time.Now().UTC()
-	}
-
-	event := runtime.Event{
-		ID:        "pulse-" + observedAt.Format("20060102T150405.000000000Z0700"),
-		Stimulus:  append([]string(nil), signal.Tokens...),
-		Source:    signal.Source,
-		Modality:  "text",
-		Cycles:    1,
-		Timestamp: observedAt,
-	}
-	observation := runtime.ObservationInput{
-		Source:   signal.Source,
-		Modality: "text",
-		Tokens:   append([]string(nil), signal.Tokens...),
-	}
-
-	interpretation, _, err := h.Orchestrator.ProcessObservation(event, observation, nil)
+	interpretations, err := h.PulseSignals(signals)
 	if err != nil {
 		return runtime.CognitiveInterpretation{}, err
 	}
-	return interpretation, nil
+	if len(interpretations) == 0 {
+		return runtime.CognitiveInterpretation{}, errors.New("perception produced no signals")
+	}
+	return interpretations[len(interpretations)-1], nil
+}
+
+// PulseSignals feeds every perception signal through the canonical
+// observation boundary. Each signal retains its own source, timestamp and
+// modality, so multimodal input is not collapsed into text before grounding.
+// The returned interpretations are ordered exactly as the input signals.
+func (h *HorizonEngine) PulseSignals(signals []perception.PerceptionSignal) ([]runtime.CognitiveInterpretation, error) {
+	if h == nil || h.Orchestrator == nil || h.Runtime == nil {
+		return nil, errors.New("horizon cognitive pipeline is unavailable")
+	}
+	if len(signals) == 0 {
+		return nil, errors.New("perception produced no signals")
+	}
+
+	interpretations := make([]runtime.CognitiveInterpretation, 0, len(signals))
+	for index, signal := range signals {
+		observedAt := signal.ObservedAt
+		if observedAt.IsZero() {
+			observedAt = time.Now().UTC()
+		}
+		modality := strings.TrimSpace(signal.Modality)
+		if modality == "" {
+			modality = "perception"
+		}
+
+		event := runtime.Event{
+			ID:        fmt.Sprintf("pulse-%s-%d", observedAt.Format("20060102T150405.000000000Z0700"), index),
+			Stimulus:  append([]string(nil), signal.Tokens...),
+			Source:    signal.Source,
+			Modality:  modality,
+			Cycles:    1,
+			Timestamp: observedAt,
+		}
+		observation := runtime.ObservationInput{
+			Source:   signal.Source,
+			Modality: modality,
+			Tokens:   append([]string(nil), signal.Tokens...),
+		}
+
+		interpretation, _, err := h.Orchestrator.ProcessObservation(event, observation, nil)
+		if err != nil {
+			return nil, err
+		}
+		interpretations = append(interpretations, interpretation)
+	}
+	return interpretations, nil
 }
 
 func NewHorizonEngine() *HorizonEngine {

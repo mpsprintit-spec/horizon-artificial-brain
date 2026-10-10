@@ -1,0 +1,462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://project-horizon.invalid/schemas/knowledge-frame-v1.schema.json",
+  "title": "Horizon Knowledge Frame v1",
+  "description": "A reviewable, domain-neutral frame that preserves semantic roles, state transitions, context, constraints, and epistemic provenance. This authoring schema is not itself a runtime importer.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "id",
+    "domain",
+    "kind",
+    "content",
+    "epistemic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "horizon.knowledge-frame.v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "domain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subdomain": {
+      "type": "string"
+    },
+    "kind": {
+      "enum": [
+        "lexical_sense",
+        "definition",
+        "fact",
+        "rule",
+        "mechanism",
+        "procedure",
+        "observation",
+        "hypothesis",
+        "mathematical_relation",
+        "algorithm",
+        "interaction_pattern"
+      ]
+    },
+    "status": {
+      "enum": [
+        "established",
+        "source_claim",
+        "model_synthesized_unverified",
+        "hypothesis",
+        "disputed",
+        "needs_review"
+      ],
+      "default": "needs_review"
+    },
+    "content": {
+      "type": "object",
+      "required": [
+        "summary"
+      ],
+      "properties": {
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        },
+        "terms": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "definition": {
+          "type": "string"
+        },
+        "lexical": {
+          "type": "object",
+          "properties": {
+            "surface": {
+              "type": "string"
+            },
+            "lemma": {
+              "type": "string"
+            },
+            "part_of_speech": {
+              "type": "string"
+            },
+            "morphology": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "sense_id": {
+              "type": "string"
+            },
+            "register": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "argument_roles": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/role"
+              }
+            },
+            "presuppositions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "implicatures": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "examples": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/example"
+              }
+            }
+          }
+        },
+        "entities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/entity"
+          }
+        },
+        "relations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/relation"
+          }
+        },
+        "state_model": {
+          "$ref": "#/$defs/state_model"
+        },
+        "procedure": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "equation": {
+          "type": "string"
+        },
+        "algorithm": {
+          "type": "object",
+          "properties": {
+            "inputs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "outputs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "preconditions": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "complexity": {
+              "type": "string"
+            },
+            "failure_modes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "context_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "constraints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "counterexamples": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "cross_references": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "epistemic": {
+      "type": "object",
+      "required": [
+        "basis",
+        "confidence"
+      ],
+      "properties": {
+        "basis": {
+          "enum": [
+            "direct_observation",
+            "experiment",
+            "peer_reviewed_research",
+            "authoritative_reference",
+            "formal_proof",
+            "reproducible_computation",
+            "source_claim",
+            "model_synthesis",
+            "unknown"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "evidence_summary": {
+          "type": "string"
+        },
+        "source_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "observed_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "prediction": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "outcome": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "prediction_error": {
+          "type": "number",
+          "minimum": 0
+        },
+        "revision_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "$defs": {
+    "role": {
+      "type": "object",
+      "required": [
+        "role",
+        "description"
+      ],
+      "properties": {
+        "role": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "entity_ref": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "example": {
+      "type": "object",
+      "required": [
+        "text",
+        "interpretation"
+      ],
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "interpretation": {
+          "type": "string"
+        },
+        "context": {
+          "type": "string"
+        },
+        "alternative_readings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "entity": {
+      "type": "object",
+      "required": [
+        "id",
+        "type"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "object",
+          "additionalProperties": {
+            "type": [
+              "string",
+              "number",
+              "boolean",
+              "null"
+            ]
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "relation": {
+      "type": "object",
+      "required": [
+        "type",
+        "from",
+        "to"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "from": {
+          "type": "string"
+        },
+        "to": {
+          "type": "string"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "state_model": {
+      "type": "object",
+      "properties": {
+        "initial_state": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "trigger_or_conditions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "mechanism_or_transition": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "resulting_state": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "temporal_order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "invariants": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "unknowns": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,8 +1,13 @@
 package runtime
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,20 +21,21 @@ const BrainIdentity = "horizon-primary-brain"
 const GroundingThreshold = 0.90
 
 type Event struct {
-	ID string
-	Stimulus []string
-	StimulusNodeIDs []knowledge.NodeID
-	Context map[knowledge.NodeID]float64
-	ContextTokens []string
-	DataTokens []string
-	Source string
-	Modality string
-	Cycles int
-	Timestamp time.Time
+	ID string `json:"id"`
+	Stimulus []string `json:"stimulus,omitempty"`
+	StimulusNodeIDs []knowledge.NodeID `json:"stimulus_node_ids,omitempty"`
+	Context map[knowledge.NodeID]float64 `json:"context,omitempty"`
+	ContextTokens []string `json:"context_tokens,omitempty"`
+	DataTokens []string `json:"data_tokens,omitempty"`
+	Source string `json:"source,omitempty"`
+	Modality string `json:"modality,omitempty"`
+	Cycles int `json:"cycles"`
+	Timestamp time.Time `json:"timestamp"`
 	// PredictionOverride is used only at an explicit causal boundary where
 	// the caller captured a prediction before an external action. It prevents
 	// outcome processing from silently substituting a newer recurrent state.
 	PredictionOverride *activation.Prediction
+	Observation *ObservationEnvelope `json:"observation,omitempty"`
 }
 
 type ActionBinding struct {
@@ -62,14 +68,31 @@ type BrainRuntime struct {
 	lastObservationPopulation []knowledge.NodeID
 	lastObservationAt time.Time
 	inquiryValence map[InquiryAction]float64
+	telemetry *TelemetryHub
+	processedEvents map[string]uint64
 }
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBootstrapBrain() }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64)}
 }
+func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
+	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
+	data, _ := json.Marshal(payload); eh := sha256.Sum256(data)
+	brain, _ := r.brain.CanonicalJSON(); bh := sha256.Sum256(brain)
+	r.brain.RLock()
+	plasticity := cloneMonitorFloatMap(r.brain.BrainState.PlasticityState)
+	r.brain.RUnlock()
+	return TelemetryEvent{Type:eventType, BrainIdentity:BrainIdentity, StateRevision:r.seq, Timestamp:at.UTC(), EventHash:"sha256:"+hex.EncodeToString(eh[:]), CanonicalStateHash:"sha256:"+hex.EncodeToString(bh[:]), Event:event, Observation:observation, Outcome:outcome, Plasticity:plasticity}
+}
+func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry=NewTelemetryHub(256) }; return r.telemetry }
+func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry==nil {r.telemetry=NewTelemetryHub(256)}; envelope.Sequence=output.Sequence; e:=r.telemetryEventLocked("observation",output.Timestamp,nil,&envelope,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
+func (r *BrainRuntime) SaveBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); return r.brain.Save(path) }
+func (r *BrainRuntime) LoadBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); if err:=r.brain.Load(path);err!=nil{return err};r.seq=0;r.lastCognitiveState=CognitiveState{};r.processedEvents=make(map[string]uint64);return nil }
+func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error { if r==nil{return errors.New("brain runtime is not initialized")};r.mu.Lock();defer r.mu.Unlock();expected:=uint64(1);for _,event:=range events{if event.Sequence!=expected{return fmt.Errorf("event index discontinuity: got %d want %d",event.Sequence,expected)};expected++;if event.Type==EventTypeProcess&&event.Event!=nil&&event.Event.ID!=""{r.processedEvents[event.Event.ID]=event.Sequence};if event.Sequence>r.seq{r.seq=event.Sequence}};return nil }
+
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
 
@@ -120,7 +143,13 @@ func (r *BrainRuntime) now() time.Time { if r == nil { return time.Now().UTC() }
 func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); r.eventLog = log }
 func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil { return activation.Result{}, 0, errors.New("brain runtime is not initialized") }
-	r.mu.Lock(); defer r.mu.Unlock()
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.processLocked(event)
+}
+
+func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, error) {
+	if event.ID != "" { if _, exists := r.processedEvents[event.ID]; exists { return activation.Result{}, r.seq, fmt.Errorf("duplicate event ID %q", event.ID) } }
 	if event.Timestamp.IsZero() { event.Timestamp = r.nowLocked() }
 	nextSeq := r.seq + 1
 	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
@@ -133,6 +162,8 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 		Now: event.Timestamp,
 	})
 	r.seq = nextSeq
+	if event.ID != "" { r.processedEvents[event.ID] = r.seq }
+	if r.telemetry != nil && event.Observation == nil { r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess,event.Timestamp,&event,nil,nil)) }
 	return result, r.seq, nil
 }
 // LearnObservedTransition binds consecutive grounded populations as a
@@ -148,37 +179,49 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if len(current) == 0 {
 		r.lastObservationPopulation = nil
 		r.lastObservationAt = time.Time{}
-		r.mu.Unlock()
 		return nil
 	}
 
 	previous := append([]knowledge.NodeID(nil), r.lastObservationPopulation...)
 	previousAt := r.lastObservationAt
-	r.lastObservationPopulation = append([]knowledge.NodeID(nil), current...)
+	currentCopy := append([]knowledge.NodeID(nil), current...)
+	r.lastObservationPopulation = currentCopy
 	r.lastObservationAt = now
-	r.mu.Unlock()
 
 	if len(previous) == 0 {
 		return nil
 	}
 
-	return r.brain.ReinforceTransitionPopulation(previous, current, previousAt, now, 0.25)
+	// Keep the observation transition atomic with its runtime predecessor
+	// snapshot. The canonical Brain mutation remains protected by the Brain
+	// mutation boundary inside ReinforceTransitionPopulation.
+	return r.brain.ReinforceTransitionPopulation(previous, currentCopy, previousAt, now, 0.25)
 }
 
 func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
-func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) { return r.ThinkAt(cycles, time.Time{}) }
+func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) {
+	return r.ThinkAt(cycles, time.Time{})
+}
+
 func (r *BrainRuntime) ThinkAt(cycles int, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	return r.thinkAtWithContext(cycles, nil, timestamp)
 }
+
 func (r *BrainRuntime) thinkAtWithContext(cycles int, context map[knowledge.NodeID]float64, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil {
 		return activation.ThoughtResult{}, 0, errors.New("brain runtime is not initialized")
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.thinkAtWithContextLocked(cycles, context, timestamp)
+}
+
+func (r *BrainRuntime) thinkAtWithContextLocked(cycles int, context map[knowledge.NodeID]float64, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
 	now := timestamp
 	if now.IsZero() {
 		now = r.nowLocked()
@@ -195,19 +238,55 @@ func (r *BrainRuntime) thinkAtWithContext(cycles int, context map[knowledge.Node
 	return thought, r.seq, nil
 }
 type CognitiveOutput struct { BrainIdentity string; Sequence uint64; Timestamp time.Time; RankedNodeIDs []knowledge.NodeID; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; Resonance float64; PredictionError float64; Prediction activation.Prediction; StateDelta CognitiveStateDelta }
-func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) { if r == nil { return CognitiveOutput{}, errors.New("brain runtime is not initialized") }; if event.Timestamp.IsZero() { r.mu.Lock(); event.Timestamp = r.nowLocked(); r.mu.Unlock() }; result, sequence, err := r.Process(event); if err != nil { return CognitiveOutput{}, err }; output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result); output.Prediction = r.activation.PredictionSnapshot(); r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp); r.brain.ApplyMemoryDynamics(event.Timestamp); r.mu.Lock(); output.StateDelta = output.State().Diff(r.lastCognitiveState); r.lastCognitiveState = output.State(); r.mu.Unlock(); return output, nil }
+func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
+	if r == nil {
+		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
+	}
+	if event.Timestamp.IsZero() {
+		r.mu.Lock()
+		event.Timestamp = r.nowLocked()
+		r.mu.Unlock()
+	}
+
+	// Keep inference, prediction capture, learning, memory dynamics, and state
+	// delta calculation in one runtime transaction. A second cognition cycle
+	// must not interleave between activation and its prediction snapshot.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	result, sequence, err := r.processLocked(event)
+	if err != nil {
+		return CognitiveOutput{}, err
+	}
+
+	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
+	output.Prediction = r.activation.PredictionSnapshot()
+	r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
+	r.brain.ApplyMemoryDynamics(event.Timestamp)
+	output.StateDelta = output.State().Diff(r.lastCognitiveState)
+	r.lastCognitiveState = output.State()
+	return output, nil
+}
+
 func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	if r == nil || r.brain == nil {
 		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
 	}
-	now := r.now()
+	// Autonomous cognition is one serialized runtime transaction. This keeps
+	// external observations, learning, and the continuous service from
+	// interleaving at the runtime boundary while the canonical Brain lock
+	// protects the underlying neural substrate.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	now := r.nowLocked()
 	// Autonomous cognition needs an endogenous drive when no external event is
 	// present. The drive is deterministic: it prefers underused neural units
 	// and increases with persistent uncertainty/curiosity. It is not random
 	// stimulation and it does not assign semantic meaning to any node.
 	curiosityContext := r.applyCuriosityDrive(now)
 
-	thought, sequence, err := r.thinkAtWithContext(cycles, curiosityContext, now)
+	thought, sequence, err := r.thinkAtWithContextLocked(cycles, curiosityContext, now)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
@@ -224,10 +303,9 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	}
 	r.brain.RecordLearningSignal(output.PredictionError, now)
 	r.brain.ApplyMemoryDynamics(now)
-	r.mu.Lock()
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()
-	r.mu.Unlock()
+	if r.telemetry != nil { e:=r.telemetryEventLocked(EventTypeThink,now,nil,nil,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
 	return output, nil
 }
 
@@ -240,18 +318,28 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	if r == nil || r.brain == nil || now.IsZero() {
 		return nil
 	}
+
+	// Every autonomous cycle records a curiosity heartbeat even when the
+	// current policy produces no actionable candidate. This separates the
+	// existence of an autonomous cognition cycle from the optional drive/target.
+	r.brain.Lock()
+	if r.brain.BrainState.CuriosityState == nil {
+		r.brain.BrainState.CuriosityState = map[string]float64{}
+	}
+	r.brain.BrainState.CuriosityState["last_update_unix"] = float64(now.UnixNano())
+	r.brain.Unlock()
+
+	// Curiosity reads canonical neural state as a snapshot. The write-back is
+	// performed under the same Brain mutation boundary used by learning,
+	// activation, and memory dynamics, so the continuous service can coexist
+	// with external observations without racing on BrainState.
+	r.brain.RLock()
 	predictionError := clamp01(r.brain.BrainState.PredictionState["last_error"])
 	policy := r.brain.BrainState.LearningPolicyState
-	pressure := clamp01(policy.CuriosityPressure)
-	if pressure <= 0 {
-		pressure = 0.65
-	}
-	noveltySensitivity := clamp01(policy.NoveltySensitivity)
-	uncertaintySensitivity := clamp01(policy.UncertaintySensitivity)
 
 	type candidate struct {
-		node *knowledge.ConceptNode
-		score float64
+		nodeID knowledge.NodeID
+		score  float64
 	}
 	candidates := make([]candidate, 0)
 	for _, node := range r.brain.Registry.Nodes() {
@@ -260,39 +348,42 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		}
 		usage := 1.0 / (1.0 + float64(maxInt64(node.Frequency, 0)))
 		underActivation := clamp01(1.0 - node.Activation)
-		novelty := clamp01(usage * noveltySensitivity)
-		uncertainty := clamp01((0.5 * underActivation) + (0.5 * predictionError)) * uncertaintySensitivity
-		score := pressure * clamp01(novelty+uncertainty)
-		if score <= 0.05 {
+		novelty := clamp01(usage * clamp01(policy.NoveltySensitivity))
+		uncertainty := clamp01((0.5*underActivation)+(0.5*predictionError)) * clamp01(policy.UncertaintySensitivity)
+		score := clamp01(policy.CuriosityPressure) * clamp01(novelty+uncertainty)
+		if score <= 0 {
 			continue
 		}
-		candidates = append(candidates, candidate{node: node, score: score})
+		candidates = append(candidates, candidate{nodeID: node.ID, score: score})
 	}
+	r.brain.RUnlock()
+
 	if len(candidates) == 0 {
 		return nil
 	}
 	sort.SliceStable(candidates, func(i, j int) bool {
 		if candidates[i].score == candidates[j].score {
-			return candidates[i].node.ID < candidates[j].node.ID
+			return candidates[i].nodeID < candidates[j].nodeID
 		}
 		return candidates[i].score > candidates[j].score
 	})
+
 	boost := clamp01(candidates[0].score * 0.30)
 	if boost <= 0 {
 		return nil
 	}
-	r.brain.BrainState.CuriosityState["drive"] = candidates[0].score
-	r.brain.BrainState.CuriosityState["target_node"] = float64(candidates[0].node.ID)
-	r.brain.BrainState.CuriosityState["last_update_unix"] = float64(now.UnixNano())
 
-	// Return the endogenous context to the single thought transition. This
-	// avoids a hidden activation pass that would replace the recurrent state
-	// before cognition has a chance to process the curiosity signal.
-	return map[knowledge.NodeID]float64{
-		candidates[0].node.ID: boost,
+	r.brain.Lock()
+	if r.brain.BrainState.CuriosityState == nil {
+		r.brain.BrainState.CuriosityState = map[string]float64{}
 	}
-}
+	r.brain.BrainState.CuriosityState["drive"] = boost
+	r.brain.BrainState.CuriosityState["target_node"] = float64(candidates[0].nodeID)
+	r.brain.BrainState.CuriosityState["updated_unix"] = float64(now.UnixNano())
+	r.brain.Unlock()
 
+	return map[knowledge.NodeID]float64{candidates[0].nodeID: boost}
+}
 func maxInt64(value int64, floor int64) int64 {
 	if value < floor {
 		return floor
@@ -306,25 +397,39 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 	if r == nil || r.brain == nil {
 		return InquiryAgenda{}, errors.New("brain runtime is not initialized")
 	}
+
+	// Planning is one runtime transaction. The selected sequence, action
+	// bindings, learned inquiry model, and persisted selection must come from
+	// the same runtime snapshot; an autonomous cognition cycle must not
+	// interleave between those steps.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if at.IsZero() {
-		at = r.now()
+		at = r.nowLocked()
 	}
 	uncertainty = clamp01(uncertainty)
 	candidates := DefaultInquiryCandidates(uncertainty)
+
+	// Learning policy is canonical Brain state. Snapshot it under the Brain
+	// read lock so continuous cognition cannot race a concurrent policy update.
+	r.brain.RLock()
 	policy := r.brain.BrainState.LearningPolicyState
+	r.brain.RUnlock()
 
 	for i := range candidates {
 		// Information value comes from the learned internal action/outcome
 		// model. If the action has no learned model yet, leave its value at
 		// zero: uncertainty alone does not imply that the action will provide
 		// useful information. No action-specific curiosity constant is used.
-		if value, modeled, err := r.PredictInquiryInformationValue(candidates[i].Action, uncertainty, at); err == nil && modeled {
+		targetSet := r.inquiryTargetSetLocked(candidates[i].Action)
+		if value, modeled, err := r.predictInquiryInformationValueWithTargets(candidates[i].Action, targetSet, uncertainty, at); err == nil && modeled {
 			candidates[i].ExpectedInformationGain = value
 		} else {
 			candidates[i].ExpectedInformationGain = 0
 		}
 
-		candidates[i].PriorExperience = r.InquiryPriorExperience(candidates[i].Action, candidates[i].PriorExperience)
+		candidates[i].PriorExperience = r.inquiryPriorExperienceLocked(candidates[i].Action, candidates[i].PriorExperience)
 		switch candidates[i].Action {
 		case InquiryReobserve, InquiryFocus:
 			candidates[i].PriorExperience = clamp01(candidates[i].PriorExperience + 0.20*clamp01(policy.RepeatObservationBias))
@@ -335,7 +440,7 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 		}
 	}
 
-	agenda, err := BuildInquiryAgenda(BrainIdentity, r.LastSequence(), at, candidates, DefaultInquiryPolicy())
+	agenda, err := BuildInquiryAgenda(BrainIdentity, r.seq, at, candidates, DefaultInquiryPolicy())
 	if err != nil {
 		return InquiryAgenda{}, err
 	}
@@ -360,8 +465,15 @@ func (r *BrainRuntime) CompleteInquiry(observedInformationGain, predictionError 
 	if r == nil || r.brain == nil {
 		return errors.New("brain runtime is not initialized")
 	}
+
+	// Completion is serialized with inquiry planning and autonomous cognition.
+	// The observation outcome therefore updates the same runtime transaction
+	// boundary that owns the pending inquiry trajectory.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	if at.IsZero() {
-		at = r.now()
+		at = r.nowLocked()
 	}
 	r.brain.RecordInquiryOutcome(observedInformationGain, predictionError, at)
 	return nil

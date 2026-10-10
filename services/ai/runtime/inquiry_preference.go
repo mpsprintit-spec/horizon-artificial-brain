@@ -20,6 +20,14 @@ func (r *BrainRuntime) InquiryPriorExperience(action InquiryAction, baseline flo
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.inquiryPriorExperienceLocked(action, baseline)
+}
+
+func (r *BrainRuntime) inquiryPriorExperienceLocked(action InquiryAction, baseline float64) float64 {
+	baseline = clamp01(baseline)
+	if r == nil || action == "" {
+		return baseline
+	}
 	valence := r.inquiryValence[action]
 	return clamp01(baseline + 0.25*valence)
 }

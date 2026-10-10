@@ -1,0 +1,3233 @@
+{
+  "schema_version": "horizon.knowledge-frame.v1",
+  "corpus_id": "horizon-cross-domain-seed-v1",
+  "purpose": "Cross-domain pilot corpus for structured knowledge representation and runtime integration. Includes Indonesian lexical, aspectual, causal, and discourse frames; mathematics; physical sciences; biology and neuroscience; computing and engineering; and empirical reasoning. Model-synthesized entries are explicitly unverified; formal mathematics entries state assumptions and derivations. This is not a complete or externally reviewed knowledge base.",
+  "records": [
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-membuka-physical",
+      "domain": "language",
+      "subdomain": "Indonesian semantics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Sense of 'membuka' meaning to cause a closed physical object or access boundary to become open.",
+        "terms": [
+          "membuka",
+          "buka",
+          "terbuka",
+          "menutup"
+        ],
+        "lexical": {
+          "surface": "membuka",
+          "lemma": "buka",
+          "part_of_speech": "verb",
+          "morphology": [
+            "meN- + buka"
+          ],
+          "sense_id": "membuka.physical-access",
+          "register": [
+            "neutral"
+          ],
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Entity intentionally or causally initiating the opening",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Door, lid, gate, container, or other thing whose state changes",
+              "required": true
+            },
+            {
+              "role": "Instrument",
+              "description": "Optional means used to cause the change",
+              "required": false
+            }
+          ],
+          "presuppositions": [
+            "A relevant boundary or object has an open/closed state distinction."
+          ],
+          "implicatures": [],
+          "examples": [
+            {
+              "text": "Rina membuka pintu.",
+              "interpretation": "Rina causes the door to move from closed or less open to open.",
+              "context": "Physical access boundary."
+            }
+          ]
+        },
+        "entities": [
+          {
+            "id": "agent",
+            "type": "entity-role",
+            "label": "Agent"
+          },
+          {
+            "id": "door",
+            "type": "physical-object",
+            "label": "door"
+          }
+        ],
+        "relations": [
+          {
+            "type": "causes-state-transition",
+            "from": "agent",
+            "to": "door",
+            "direction": "agent causes the door's open-state to change",
+            "conditions": [
+              "An agent or causal force can affect the object."
+            ],
+            "confidence": 0.7
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "The door is closed or less open than the target state."
+          ],
+          "trigger_or_conditions": [
+            "An agent or force acts on the door; the door is movable and not blocked."
+          ],
+          "mechanism_or_transition": [
+            "The door's position or configuration changes."
+          ],
+          "resulting_state": [
+            "The door is open or more open than before."
+          ],
+          "temporal_order": [
+            "action begins",
+            "door state changes",
+            "resulting access changes if the doorway is unobstructed"
+          ],
+          "invariants": [
+            "Opening a door does not guarantee that the space beyond it is safe or accessible."
+          ],
+          "unknowns": [
+            "Exact opening angle and physical mechanism depend on the door and context."
+          ]
+        },
+        "context_conditions": [
+          "Physical object or access boundary context."
+        ],
+        "constraints": [
+          "Do not infer that the door is fully open unless context says so."
+        ],
+        "limitations": [
+          "The lexical sense alone does not determine agent intention or exact final position."
+        ],
+        "cross_references": [
+          "Indonesian morphology: meN- verbs",
+          "Indonesian syntax: transitive clauses",
+          "Knowledge frame: state transitions"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Illustrative lexical-semantic analysis based on general Indonesian usage; requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against an authoritative Indonesian dictionary and corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-membuka-metaphorical",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and pragmatics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Metaphorical or institutional uses of 'membuka' where an event, resource, information, or opportunity becomes available or begins.",
+        "terms": [
+          "membuka rapat",
+          "membuka rekening",
+          "membuka rahasia",
+          "membuka peluang"
+        ],
+        "lexical": {
+          "surface": "membuka",
+          "lemma": "buka",
+          "part_of_speech": "verb",
+          "sense_id": "membuka.metaphorical-or-institutional",
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Person or institution initiating the event or change",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Meeting, account, secret, opportunity, or other context-specific target",
+              "required": true
+            }
+          ],
+          "examples": [
+            {
+              "text": "Ketua membuka rapat.",
+              "interpretation": "The chair initiates the meeting, not a physical opening.",
+              "context": "Institutional event."
+            },
+            {
+              "text": "Ia membuka rekening.",
+              "interpretation": "A financial account is established or activated under a financial institution's process.",
+              "context": "Financial service."
+            },
+            {
+              "text": "Ia membuka rahasia.",
+              "interpretation": "Previously concealed information is disclosed.",
+              "context": "Information access."
+            },
+            {
+              "text": "Keputusan itu membuka peluang.",
+              "interpretation": "The decision creates or makes an opportunity available.",
+              "context": "Abstract possibility."
+            }
+          ]
+        },
+        "relations": [
+          {
+            "type": "polysemy-family",
+            "from": "membuka.physical-access",
+            "to": "membuka.metaphorical-or-institutional",
+            "direction": "related form with context-dependent senses",
+            "confidence": 0.65
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "The meeting has not started, the account is not established, information is concealed, or the opportunity is not available; the exact state depends on the theme."
+          ],
+          "trigger_or_conditions": [
+            "A contextually appropriate initiating, establishing, disclosing, or enabling action occurs."
+          ],
+          "mechanism_or_transition": [
+            "The target's institutional, informational, or possibility status changes."
+          ],
+          "resulting_state": [
+            "The meeting begins, account becomes established, information becomes known, or opportunity becomes available, depending on context."
+          ],
+          "unknowns": [
+            "The target sense cannot be determined from the verb alone when its complement and context are absent."
+          ]
+        },
+        "context_conditions": [
+          "Interpretation depends on the noun phrase, predicate arguments, discourse, and domain."
+        ],
+        "constraints": [
+          "Do not collapse these uses into the physical door-opening sense."
+        ],
+        "limitations": [
+          "The four examples illustrate distinct senses or conventional constructions; fine-grained dictionary sense boundaries require lexical review."
+        ],
+        "cross_references": [
+          "Indonesian pragmatics",
+          "Indonesian syntax",
+          "Knowledge frame: ambiguity"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.65,
+        "evidence_summary": "Illustrative analysis of common Indonesian constructions; sense inventory requires lexicographic review.",
+        "revision_conditions": [
+          "Review dictionary sense divisions and corpus usage."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-linear-equation-example",
+      "domain": "mathematics",
+      "subdomain": "algebra",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Solving a linear equation by applying equivalent operations to both sides.",
+        "terms": [
+          "equation",
+          "variable",
+          "equality",
+          "inverse operation"
+        ],
+        "definition": "For 2x + 3 = 7 over the real numbers, subtracting 3 from both sides gives 2x = 4; dividing both sides by 2 gives x = 2.",
+        "equation": "2x + 3 = 7 ⇒ 2x = 4 ⇒ x = 2",
+        "state_model": {
+          "initial_state": [
+            "Equation 2x + 3 = 7; unknown x belongs to the real numbers."
+          ],
+          "trigger_or_conditions": [
+            "Apply the same valid operation to both sides; divisor must be nonzero."
+          ],
+          "mechanism_or_transition": [
+            "Subtract 3 from both sides, then divide both sides by 2."
+          ],
+          "resulting_state": [
+            "x = 2."
+          ],
+          "invariants": [
+            "Equivalent transformations preserve the solution set under their stated validity conditions."
+          ]
+        },
+        "procedure": [
+          "Subtract 3 from each side.",
+          "Divide each side by 2.",
+          "Substitute x = 2 into the original equation to verify 2(2)+3=7."
+        ],
+        "constraints": [
+          "Division by zero is invalid; not relevant to this equation because the divisor is 2."
+        ],
+        "cross_references": [
+          "Formal logic",
+          "Algebraic equivalence"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Direct algebraic derivation with substitution check.",
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-physics-free-fall-model",
+      "domain": "physical-sciences",
+      "subdomain": "classical mechanics",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Idealized near-Earth free-fall model for an object when air resistance is negligible.",
+        "terms": [
+          "position",
+          "time",
+          "gravity",
+          "acceleration"
+        ],
+        "equation": "y(t)=y0+v0*t-(1/2)*g*t^2 when upward is positive and gravitational acceleration is approximately constant.",
+        "state_model": {
+          "initial_state": [
+            "Object has initial vertical position y0 and initial vertical velocity v0."
+          ],
+          "trigger_or_conditions": [
+            "Near Earth's surface; air resistance and other forces are negligible; g is approximately constant; upward coordinate is positive."
+          ],
+          "mechanism_or_transition": [
+            "Vertical acceleration is approximately -g; integrate acceleration to obtain velocity and position."
+          ],
+          "resulting_state": [
+            "Position follows y(t)=y0+v0*t-(1/2)*g*t^2 within model assumptions."
+          ],
+          "temporal_order": [
+            "initial state at t=0",
+            "velocity changes with time",
+            "position changes with time"
+          ],
+          "invariants": [
+            "The equation is conditional on the stated coordinate convention and model assumptions."
+          ],
+          "unknowns": [
+            "Real trajectories may require air resistance, changing gravity, rotation, or contact forces."
+          ]
+        },
+        "constraints": [
+          "Do not use the ideal model when neglected forces materially affect motion."
+        ],
+        "limitations": [
+          "This is a simplified model, not a universal description of every falling object."
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.95,
+        "evidence_summary": "Standard classical-mechanics model; numeric predictions require specified initial conditions and units.",
+        "revision_conditions": [
+          "Compare predictions with measurements and assess neglected forces."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-negative-feedback-homeostasis",
+      "domain": "biology-neuroscience",
+      "subdomain": "physiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Negative feedback is a regulatory pattern in which a response tends to oppose a deviation from a regulated range.",
+        "terms": [
+          "homeostasis",
+          "feedback",
+          "regulated variable",
+          "sensor",
+          "effector"
+        ],
+        "entities": [
+          {
+            "id": "regulated-variable",
+            "type": "state-variable"
+          },
+          {
+            "id": "sensor",
+            "type": "component"
+          },
+          {
+            "id": "controller",
+            "type": "component"
+          },
+          {
+            "id": "effector",
+            "type": "component"
+          }
+        ],
+        "relations": [
+          {
+            "type": "measures",
+            "from": "sensor",
+            "to": "regulated-variable",
+            "direction": "sensor provides information about the variable",
+            "confidence": 0.8
+          },
+          {
+            "type": "modulates",
+            "from": "controller",
+            "to": "effector",
+            "direction": "controller changes effector activity based on regulatory signals",
+            "confidence": 0.8
+          },
+          {
+            "type": "opposes-deviation",
+            "from": "effector",
+            "to": "regulated-variable",
+            "direction": "response tends to reduce deviation under normal operating conditions",
+            "confidence": 0.8
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "A regulated variable deviates from its target or acceptable range."
+          ],
+          "trigger_or_conditions": [
+            "A sensing and regulatory pathway detects or responds to the deviation."
+          ],
+          "mechanism_or_transition": [
+            "Regulatory signals change effector activity in a direction that tends to oppose the deviation."
+          ],
+          "resulting_state": [
+            "The variable tends toward its regulated range, if the system has adequate capacity and the disturbance is manageable."
+          ],
+          "invariants": [
+            "Negative feedback does not guarantee perfect stability or return to a single exact value."
+          ],
+          "unknowns": [
+            "Actual response depends on the specific biological system, delays, gain, and disturbances."
+          ]
+        },
+        "constraints": [
+          "Do not infer a specific organ, hormone, or numerical set point without a system-specific source."
+        ],
+        "limitations": [
+          "This is a general control pattern; concrete physiology requires a named mechanism and evidence."
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General systems-level description; specific biological claims require source-backed entries.",
+        "revision_conditions": [
+          "Attach system-specific authoritative or peer-reviewed references before treating as a researched finding."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-computing-binary-search",
+      "domain": "computing-engineering",
+      "subdomain": "algorithms",
+      "kind": "algorithm",
+      "status": "established",
+      "content": {
+        "summary": "Binary search finds a target in a sorted sequence by repeatedly narrowing the search interval.",
+        "terms": [
+          "sorted sequence",
+          "target",
+          "interval",
+          "comparison"
+        ],
+        "algorithm": {
+          "inputs": [
+            "A sequence sorted according to a consistent ordering",
+            "A target value"
+          ],
+          "outputs": [
+            "An index of a matching target, or a not-found result"
+          ],
+          "preconditions": [
+            "The sequence is sorted under the same ordering used for comparisons."
+          ],
+          "steps": [
+            "Choose the middle index of the current interval.",
+            "Compare the middle element with the target.",
+            "If equal, return the index.",
+            "If the middle element is smaller, continue in the upper half; otherwise continue in the lower half.",
+            "Stop when the interval is empty."
+          ],
+          "complexity": "O(log n) comparisons in the worst case for a random-access sorted array; O(1) auxiliary space for an iterative implementation.",
+          "failure_modes": [
+            "Applying the method to an unsorted sequence can return an incorrect not-found result or miss the target.",
+            "Inconsistent ordering or incorrect interval updates can break correctness."
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "A sorted sequence and target are given; current interval covers all candidate indices."
+          ],
+          "trigger_or_conditions": [
+            "Sequence is sorted and comparison order is consistent."
+          ],
+          "mechanism_or_transition": [
+            "Each comparison discards approximately half the remaining candidates."
+          ],
+          "resulting_state": [
+            "Target index is returned if found; otherwise the empty interval establishes absence under the precondition."
+          ],
+          "invariants": [
+            "If the target exists, it remains within the candidate interval until found."
+          ]
+        },
+        "constraints": [
+          "Correctness depends on the sorted-input precondition."
+        ],
+        "cross_references": [
+          "Mathematics: logarithms",
+          "Formal reasoning: loop invariants"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 0.99,
+        "evidence_summary": "Standard algorithm with a stated sorted-input precondition; complexity assumes random-access indexing.",
+        "revision_conditions": [
+          "Review implementation-specific integer bounds and interval handling."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-hypothesis-template-example",
+      "domain": "empirical-reasoning",
+      "subdomain": "scientific method",
+      "kind": "hypothesis",
+      "status": "hypothesis",
+      "content": {
+        "summary": "A testable hypothesis links a proposed condition or intervention to a measurable predicted outcome, while preserving alternative explanations.",
+        "definition": "A hypothesis is a provisional claim that can be compared with observations or experiments under specified conditions; a prediction is the expected observation if the hypothesis and auxiliary assumptions hold.",
+        "state_model": {
+          "initial_state": [
+            "A question exists and the current evidence is incomplete."
+          ],
+          "trigger_or_conditions": [
+            "Define measurable variables, conditions, a comparison or baseline, and a procedure capable of producing discriminating evidence."
+          ],
+          "mechanism_or_transition": [
+            "Derive a prediction before observing the outcome; collect data; compare the observed outcome with the prediction; examine error and alternative explanations."
+          ],
+          "resulting_state": [
+            "The evidence may support, weaken, or leave the hypothesis unresolved; a single result does not automatically prove a broad claim."
+          ],
+          "temporal_order": [
+            "question",
+            "hypothesis",
+            "prediction",
+            "measurement",
+            "comparison",
+            "revision or provisional retention"
+          ],
+          "invariants": [
+            "A prediction must be recorded distinctly from the later observation to avoid retrofitting."
+          ],
+          "unknowns": [
+            "Measurement error, confounding variables, sampling limitations, and model assumptions can affect interpretation."
+          ]
+        },
+        "procedure": [
+          "State the hypothesis precisely.",
+          "Specify the conditions and measurable outcome.",
+          "Record the prediction before measurement.",
+          "Collect observations using a reproducible procedure.",
+          "Compare outcome with prediction and quantify relevant uncertainty.",
+          "Revise the hypothesis or design follow-up tests without overstating the result."
+        ],
+        "constraints": [
+          "Do not label a hypothesis as established solely because it is plausible or consistent with one observation."
+        ],
+        "limitations": [
+          "This entry defines a method; it does not assert any particular untested scientific hypothesis is true."
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.9,
+        "evidence_summary": "General methodological template; should be supplemented by domain-specific research-method standards.",
+        "revision_conditions": [
+          "Specify discipline-appropriate measurement, statistical, and replication criteria."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-negation-tidak-scope",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and syntax",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Negation with 'tidak' reverses or denies a proposition or predicate, while the exact scope depends on sentence structure and context.",
+        "terms": [
+          "tidak",
+          "negasi",
+          "cakupan negasi"
+        ],
+        "definition": "Negation is a semantic operation that denies a proposition or predicate; it is not a truth claim about the real world by itself.",
+        "lexical": {
+          "surface": "tidak",
+          "lemma": "tidak",
+          "part_of_speech": "negative particle",
+          "sense_id": "tidak.propositional-negation",
+          "examples": [
+            {
+              "text": "Rina tidak membuka pintu.",
+              "interpretation": "The sentence denies that Rina opens the door in the relevant context.",
+              "context": "Predicate negation."
+            },
+            {
+              "text": "Saya tidak mengatakan bahwa dia datang.",
+              "interpretation": "The intended scope can depend on prosody and context; it may deny the saying rather than directly deny the person's arrival.",
+              "context": "Embedded proposition; context-sensitive."
+            }
+          ]
+        },
+        "context_conditions": [
+          "Interpret scope using the predicate, clause structure, prosody when available, and discourse context."
+        ],
+        "constraints": [
+          "Do not infer the opposite proposition as true merely because one proposition is negated."
+        ],
+        "limitations": [
+          "This frame is a working analysis and needs review against Indonesian grammar references and corpus examples."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A proposition or predicate is available for evaluation."
+          ],
+          "trigger_or_conditions": [
+            "The negative marker 'tidak' occurs with a predicate or construction that permits this use."
+          ],
+          "mechanism_or_transition": [
+            "Negation marks the relevant proposition or predicate as denied rather than simply adding a new entity."
+          ],
+          "resulting_state": [
+            "The utterance expresses a negative proposition; the exact scope must be determined from syntax and context."
+          ],
+          "invariants": [
+            "Negation of a proposition must not be treated as equivalent to absence of the proposition from the conversation."
+          ],
+          "unknowns": [
+            "Scope may be ambiguous in complex sentences without sufficient context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Illustrative semantic analysis of common Indonesian negation; scope analysis requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review authoritative Indonesian grammar and corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-yes-no-question-apakah",
+      "domain": "language",
+      "subdomain": "Indonesian syntax and pragmatics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Apakah' commonly marks a polar question that requests confirmation or denial of a proposition; it does not itself supply the answer.",
+        "terms": [
+          "apakah",
+          "pertanyaan polar",
+          "jawaban",
+          "proposisi"
+        ],
+        "definition": "A polar question asks whether a proposition holds, usually allowing affirmative, negative, or qualified responses.",
+        "lexical": {
+          "surface": "apakah",
+          "lemma": "apakah",
+          "part_of_speech": "interrogative marker",
+          "sense_id": "apakah.polar-question",
+          "examples": [
+            {
+              "text": "Apakah pintu itu terbuka?",
+              "interpretation": "Asks whether the door is open.",
+              "context": "Information-seeking question."
+            },
+            {
+              "text": "Apakah kamu bisa membantu?",
+              "interpretation": "Can ask about ability and pragmatically function as a request.",
+              "context": "Context may add an indirect-request reading."
+            }
+          ]
+        },
+        "context_conditions": [
+          "Interpret the proposition, speaker goal, and conversational context together."
+        ],
+        "constraints": [
+          "Do not store an interrogative proposition as an asserted fact."
+        ],
+        "limitations": [
+          "This is a general frame; detailed question syntax and pragmatic categories require reference review."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A proposition is under consideration and the speaker lacks or requests confirmation of its status."
+          ],
+          "trigger_or_conditions": [
+            "A speaker uses an interrogative construction such as 'Apakah P?' in a context where an answer is relevant."
+          ],
+          "mechanism_or_transition": [
+            "The utterance presents P as a question for an addressee to answer, confirm, deny, or qualify."
+          ],
+          "resulting_state": [
+            "The discourse contains an unresolved question until evidence or a response addresses it."
+          ],
+          "temporal_order": [
+            "question is asked",
+            "addressee interprets proposition and context",
+            "answer or clarification may follow"
+          ],
+          "invariants": [
+            "A question is not evidence that its proposition is true."
+          ],
+          "unknowns": [
+            "The expected answer type and pragmatic force can vary with context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.72,
+        "evidence_summary": "Illustrative analysis of common Indonesian question constructions; requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review Indonesian syntax and pragmatic corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "math-direct-proportionality",
+      "domain": "mathematics",
+      "subdomain": "algebra and functions",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Direct proportionality expresses a relation y = kx for a constant k over a specified domain.",
+        "terms": [
+          "proportionality",
+          "variable",
+          "constant",
+          "function"
+        ],
+        "definition": "Direct proportionality is a mathematical relation of the form y = kx, where k is constant.",
+        "equation": "y = kx",
+        "procedure": [
+          "Specify the domain and units of x, y, and k.",
+          "Determine k from valid data or the problem statement.",
+          "Compute y = kx.",
+          "Check units and whether the proportional model is justified."
+        ],
+        "constraints": [
+          "Do not assume direct proportionality merely because two variables increase together."
+        ],
+        "counterexamples": [
+          "A relation y = x + 3 is not directly proportional because y/x is not constant over its domain."
+        ],
+        "state_model": {
+          "initial_state": [
+            "Variables x and y are related and a constant k is specified or to be determined."
+          ],
+          "trigger_or_conditions": [
+            "The model assumes y varies directly with x over the domain being considered."
+          ],
+          "mechanism_or_transition": [
+            "For each admissible x, compute y by multiplying x by k."
+          ],
+          "resulting_state": [
+            "The relation y = kx holds within the model's domain and assumptions."
+          ],
+          "invariants": [
+            "For nonzero x, the ratio y/x equals k."
+          ],
+          "unknowns": [
+            "The physical meaning and units of k depend on the application."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Definition and consequences follow algebraically from y = kx; applicability to real data requires evidence.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "math-probability-complement-rule",
+      "domain": "mathematics",
+      "subdomain": "probability",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "For an event A in a probability space, the probability of its complement is P(not A) = 1 - P(A).",
+        "terms": [
+          "probability",
+          "event",
+          "complement",
+          "sample space"
+        ],
+        "definition": "The complement of A consists of outcomes in the sample space that are not in A.",
+        "equation": "P(Aᶜ) = 1 - P(A)",
+        "procedure": [
+          "Define the event A and sample space.",
+          "Determine or estimate P(A).",
+          "Subtract P(A) from 1 to obtain the complement probability."
+        ],
+        "state_model": {
+          "initial_state": [
+            "An event A and its complement partition the sample space."
+          ],
+          "trigger_or_conditions": [
+            "P is a probability measure and A is an event with a defined complement."
+          ],
+          "mechanism_or_transition": [
+            "Use P(A) + P(A complement) = P(sample space) = 1."
+          ],
+          "resulting_state": [
+            "P(A complement) = 1 - P(A)."
+          ],
+          "invariants": [
+            "Both probabilities lie in [0,1] and sum to 1."
+          ],
+          "unknowns": [
+            "The event probability P(A) may still need to be estimated or derived."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Follows from additivity for disjoint events A and Aᶜ and normalization P(Ω)=1.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "biology-neuron-signal-overview",
+      "domain": "biology-neuroscience",
+      "subdomain": "neurobiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Neurons receive, integrate, and transmit signals through electrical changes and chemical or electrical communication at connections.",
+        "terms": [
+          "neuron",
+          "dendrite",
+          "soma",
+          "axon",
+          "synapse",
+          "signal"
+        ],
+        "entities": [
+          {
+            "id": "neuron",
+            "type": "biological-cell",
+            "label": "neuron"
+          },
+          {
+            "id": "axon",
+            "type": "cell-structure",
+            "label": "axon"
+          },
+          {
+            "id": "synapse",
+            "type": "cell-connection",
+            "label": "synapse"
+          },
+          {
+            "id": "target-cell",
+            "type": "biological-cell",
+            "label": "target cell"
+          }
+        ],
+        "relations": [
+          {
+            "type": "transmits-signal",
+            "from": "neuron",
+            "to": "target-cell",
+            "direction": "neuron activity can influence target-cell activity through a connection",
+            "conditions": [
+              "A functional connection exists"
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "context_conditions": [
+          "Treat this as a high-level overview, not a complete cellular or molecular model."
+        ],
+        "constraints": [
+          "Do not infer a specific neurotransmitter, firing rate, or physiological outcome without system-specific evidence."
+        ],
+        "limitations": [
+          "This model-synthesized frame is not a substitute for a sourced neuroscience entry."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A neuron has a membrane potential and receives inputs from other cells or sensory pathways."
+          ],
+          "trigger_or_conditions": [
+            "Synaptic input or a sensory stimulus changes membrane conductance; whether the neuron generates an action potential depends on its state and input."
+          ],
+          "mechanism_or_transition": [
+            "Inputs are integrated across space and time; if threshold conditions are met, an action potential propagates along the axon; at many synapses, transmitter release affects a target cell."
+          ],
+          "resulting_state": [
+            "The target cell's activity may be increased, decreased, or otherwise modulated, depending on synapse type and context."
+          ],
+          "temporal_order": [
+            "input arrives",
+            "membrane response is integrated",
+            "action potential may occur",
+            "signal reaches terminal",
+            "target cell response follows"
+          ],
+          "invariants": [
+            "Not every input produces an action potential; synaptic effects depend on cell type and connection."
+          ],
+          "unknowns": [
+            "Specific channel dynamics, timing, and synaptic effects require a named neuron type and experimental context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.78,
+        "evidence_summary": "High-level summary of standard neurobiology concepts; requires review against authoritative neuroscience sources.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Attach authoritative or peer-reviewed sources and specify the neuron and synapse type."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "computing-finite-state-machine",
+      "domain": "computing-engineering",
+      "subdomain": "computation theory and software design",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A finite-state machine models a system using a finite set of states and transitions triggered by inputs or events.",
+        "terms": [
+          "state machine",
+          "state",
+          "transition",
+          "event",
+          "guard"
+        ],
+        "definition": "A finite-state machine can be represented by states, an input alphabet, a transition function, an initial state, and optionally accepting states or outputs.",
+        "algorithm": {
+          "inputs": [
+            "Current state",
+            "Input event"
+          ],
+          "outputs": [
+            "Next state and optional output"
+          ],
+          "preconditions": [
+            "The current state and input are valid for the machine definition."
+          ],
+          "steps": [
+            "Read the current state and event.",
+            "Find an applicable transition.",
+            "Apply the transition and record the next state.",
+            "Handle an undefined transition according to an explicit policy."
+          ],
+          "failure_modes": [
+            "Missing transition rules can leave behavior unspecified.",
+            "Incorrect state transitions can violate the intended protocol."
+          ]
+        },
+        "constraints": [
+          "A finite-state machine does not automatically model unbounded memory or every continuous-valued process."
+        ],
+        "cross_references": [
+          "Mathematics: graph theory",
+          "Engineering: control systems",
+          "Empirical reasoning: state-transition testing"
+        ],
+        "state_model": {
+          "initial_state": [
+            "The system is in one of a finite set of defined states."
+          ],
+          "trigger_or_conditions": [
+            "An input or event occurs and a transition rule for the current state is applicable."
+          ],
+          "mechanism_or_transition": [
+            "Evaluate the transition rule and any guard; update the current state and optionally emit an action or output."
+          ],
+          "resulting_state": [
+            "The system enters the next defined state or remains in its current state if no transition applies."
+          ],
+          "temporal_order": [
+            "current state",
+            "input or event",
+            "transition rule evaluation",
+            "next state and output"
+          ],
+          "invariants": [
+            "A transition is valid only if defined by the model; unspecified transitions need an explicit policy."
+          ],
+          "unknowns": [
+            "Concurrency, nondeterminism, timing, and error handling depend on the machine variant."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.85,
+        "evidence_summary": "General computer-science definition and design pattern; concrete implementation claims need an implementation and tests.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against a formal automata reference and test a concrete implementation."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "engineering-closed-loop-control",
+      "domain": "computing-engineering",
+      "subdomain": "control engineering",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A closed-loop controller uses measured output and a target or reference to compute corrective control actions.",
+        "terms": [
+          "feedback",
+          "setpoint",
+          "measurement",
+          "error",
+          "controller",
+          "actuator"
+        ],
+        "entities": [
+          {
+            "id": "reference",
+            "type": "signal",
+            "label": "reference"
+          },
+          {
+            "id": "sensor",
+            "type": "component",
+            "label": "sensor"
+          },
+          {
+            "id": "controller",
+            "type": "component",
+            "label": "controller"
+          },
+          {
+            "id": "plant",
+            "type": "system",
+            "label": "plant"
+          },
+          {
+            "id": "actuator",
+            "type": "component",
+            "label": "actuator"
+          }
+        ],
+        "relations": [
+          {
+            "type": "measures",
+            "from": "sensor",
+            "to": "plant",
+            "direction": "sensor provides a measured output from the plant",
+            "confidence": 0.85
+          },
+          {
+            "type": "controls",
+            "from": "controller",
+            "to": "actuator",
+            "direction": "controller sends a command based on reference and measured output",
+            "confidence": 0.85
+          }
+        ],
+        "equation": "e(t) = r(t) - y(t), for a convention where error is reference minus measured output.",
+        "constraints": [
+          "Specify signal units, error convention, controller law, and plant dynamics before predicting performance."
+        ],
+        "limitations": [
+          "This frame describes a general architecture and does not certify any particular controller as stable."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A plant has a measurable output and a desired reference value."
+          ],
+          "trigger_or_conditions": [
+            "Sensors provide measurements and a controller can compare measured output with the reference."
+          ],
+          "mechanism_or_transition": [
+            "Compute an error signal from reference and measurement; use a control law to select an actuator command."
+          ],
+          "resulting_state": [
+            "The plant output changes in response to the command, disturbance, and plant dynamics."
+          ],
+          "temporal_order": [
+            "reference established",
+            "output measured",
+            "error calculated",
+            "control action applied",
+            "new output measured"
+          ],
+          "invariants": [
+            "Feedback does not guarantee stability, accuracy, or safety without appropriate design and operating conditions."
+          ],
+          "unknowns": [
+            "Stability and performance depend on plant dynamics, controller parameters, sampling, delays, saturation, and disturbances."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.82,
+        "evidence_summary": "General control-engineering pattern; a particular system requires a defined model and stability analysis.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Add a sourced control-system reference and verify with a specified plant model."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "empirical-correlation-not-causation",
+      "domain": "empirical-reasoning",
+      "subdomain": "research methods",
+      "kind": "rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "An observed association between two variables alone does not establish that one variable causes the other.",
+        "terms": [
+          "correlation",
+          "causation",
+          "confounder",
+          "experiment",
+          "inference"
+        ],
+        "definition": "Correlation describes statistical association; causation concerns whether changing one factor produces a change in another under specified conditions.",
+        "procedure": [
+          "Define the variables and target causal question.",
+          "Check temporal order and plausible mechanisms.",
+          "Identify confounders and selection or measurement biases.",
+          "Choose a design that can distinguish competing explanations.",
+          "Report limitations and uncertainty."
+        ],
+        "constraints": [
+          "Do not treat correlation as proof of causation or assume that a randomized experiment is feasible or ethical in every setting."
+        ],
+        "counterexamples": [
+          "A strong association can arise because both variables respond to a third factor."
+        ],
+        "state_model": {
+          "initial_state": [
+            "Measurements show an association between variables X and Y."
+          ],
+          "trigger_or_conditions": [
+            "An analyst considers a causal explanation for an observed association."
+          ],
+          "mechanism_or_transition": [
+            "Assess temporal order, confounding, selection effects, measurement, mechanism, and study design; seek evidence that distinguishes causal hypotheses."
+          ],
+          "resulting_state": [
+            "The association may motivate a causal hypothesis, but causal status remains unresolved unless the evidence supports the inference."
+          ],
+          "invariants": [
+            "Association alone is insufficient to identify a unique causal mechanism."
+          ],
+          "unknowns": [
+            "Unmeasured confounding and bias may remain even after statistical adjustment."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.9,
+        "evidence_summary": "General principle of causal inference; domain-specific methods and assumptions must be stated for each study.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Supplement with discipline-specific causal-inference references and examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-passive-di",
+      "domain": "language",
+      "subdomain": "Indonesian morphology and syntax",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Passive construction with di- commonly foregrounds the affected participant; agent expression and discourse focus vary by construction and context.",
+        "terms": [
+          "di-",
+          "kalimat pasif",
+          "pelaku",
+          "sasaran"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A transitive event is described with an affected participant as the clause topic or grammatical subject."
+          ],
+          "trigger_or_conditions": [
+            "The predicate permits the relevant passive construction; context determines whether the agent is expressed."
+          ],
+          "mechanism_or_transition": [
+            "The di- form presents the event from the affected participant's perspective; an agent may be omitted or introduced, commonly with oleh."
+          ],
+          "resulting_state": [
+            "The affected participant is foregrounded, and the event is asserted or described."
+          ],
+          "invariants": [
+            "Passive form does not imply that the agent is unknown; omission alone does not prove the agent is irrelevant."
+          ],
+          "unknowns": [
+            "Some verbs and colloquial constructions have additional restrictions not captured by this general frame."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-bisa-ambiguity",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "The form 'bisa' may mean ability or possibility, and in some contexts may refer to poison; context and syntax constrain interpretation.",
+        "terms": [
+          "bisa",
+          "mampu",
+          "dapat",
+          "racun"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A sentence contains the surface form 'bisa' without enough context to uniquely select a sense."
+          ],
+          "trigger_or_conditions": [
+            "Neighboring words, argument structure, topic, and situation provide disambiguating evidence."
+          ],
+          "mechanism_or_transition": [
+            "Candidate senses are generated and ranked against contextual constraints rather than collapsed into one fixed meaning."
+          ],
+          "resulting_state": [
+            "A context-supported interpretation is selected if evidence is sufficient; otherwise ambiguity is retained."
+          ],
+          "invariants": [
+            "Do not infer that all candidate senses are equally likely in every context."
+          ],
+          "unknowns": [
+            "The exact sense distribution depends on usage and domain."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-why-question",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and pragmatics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Mengapa' commonly requests an explanation or reason for a proposition, event, or state.",
+        "terms": [
+          "mengapa",
+          "kenapa",
+          "alasan",
+          "sebab"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A speaker presents an event or proposition whose cause or justification is not supplied."
+          ],
+          "trigger_or_conditions": [
+            "The addressee can access relevant causal, explanatory, or intentional information."
+          ],
+          "mechanism_or_transition": [
+            "The question establishes an information gap concerning a reason; the requested answer type depends on the target and context."
+          ],
+          "resulting_state": [
+            "A response may provide a cause, motive, justification, or acknowledge that the reason is unknown."
+          ],
+          "invariants": [
+            "A reason requested by a question is not thereby established as known or true."
+          ],
+          "unknowns": [
+            "The question may be rhetorical or challenge an assumption depending on prosody and discourse."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-pronoun-reference",
+      "domain": "language",
+      "subdomain": "Indonesian discourse and reference",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Pronouns and omitted arguments can refer to entities introduced earlier; reference resolution uses grammatical, semantic, and discourse constraints.",
+        "terms": [
+          "ia",
+          "dia",
+          "mereka",
+          "-nya",
+          "zero anaphora",
+          "rujukan"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A text contains a pronoun or an omitted argument with one or more possible antecedents."
+          ],
+          "trigger_or_conditions": [
+            "Candidate antecedents are available in the current or preceding discourse."
+          ],
+          "mechanism_or_transition": [
+            "Candidate referents are constrained by grammatical role, number, animacy when relevant, semantic compatibility, and discourse salience."
+          ],
+          "resulting_state": [
+            "A referent is resolved when evidence is sufficient; otherwise multiple candidates remain possible."
+          ],
+          "invariants": [
+            "Surface proximity alone does not guarantee the correct antecedent."
+          ],
+          "unknowns": [
+            "Some pronouns are gender-neutral and omitted subjects can be highly context-dependent."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-ratio-unit-conversion",
+      "domain": "mathematics",
+      "subdomain": "arithmetic and dimensional analysis",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Equivalent ratios preserve relative scale; unit conversion multiplies by a conversion factor equal to one in the chosen units.",
+        "terms": [
+          "ratio",
+          "proportion",
+          "unit",
+          "conversion factor"
+        ],
+        "definition": "For example, 1 m = 100 cm, so 2.5 m × (100 cm / 1 m) = 250 cm.",
+        "procedure": [
+          "Write the desired target unit in the numerator of the conversion factor.",
+          "Cancel the original unit algebraically.",
+          "Compute and retain appropriate significant figures."
+        ],
+        "state_model": {
+          "initial_state": [
+            "A quantity is expressed in a known unit and a conversion relation is known."
+          ],
+          "trigger_or_conditions": [
+            "The conversion factor is valid for the units and quantities involved."
+          ],
+          "mechanism_or_transition": [
+            "Multiply the numerical value by a factor whose numerator and denominator are equivalent quantities in different units; cancel units algebraically."
+          ],
+          "resulting_state": [
+            "The same physical quantity is represented in the target unit."
+          ],
+          "invariants": [
+            "Units must be tracked; a numerically plausible answer can still be dimensionally invalid."
+          ],
+          "unknowns": [
+            "Conversion factors and rounding conventions depend on the measurement context."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Direct derivation or mechanically checkable rule; verify implementation against stated assumptions.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-vector-state",
+      "domain": "mathematics",
+      "subdomain": "linear algebra and state representation",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A vector represents an ordered set of components in a specified space and coordinate convention; component meaning depends on the representation contract.",
+        "terms": [
+          "vector",
+          "component",
+          "dimension",
+          "coordinate",
+          "state"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A system state is represented by an ordered list of numerical components."
+          ],
+          "trigger_or_conditions": [
+            "Dimension, component order, units, and coordinate convention are defined."
+          ],
+          "mechanism_or_transition": [
+            "Vector operations transform components according to explicit mathematical rules; interpretation uses the declared mapping."
+          ],
+          "resulting_state": [
+            "A new vector or derived quantity is obtained while preserving the agreed dimension and component semantics."
+          ],
+          "invariants": [
+            "Equal-length vectors are not semantically comparable unless their component meanings and coordinate conventions align."
+          ],
+          "unknowns": [
+            "A vector by itself does not specify what its components mean."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-boolean-implication",
+      "domain": "mathematics",
+      "subdomain": "logic",
+      "kind": "rule",
+      "status": "established",
+      "content": {
+        "summary": "Material implication P → Q is false only when P is true and Q is false; it does not assert that P causes Q.",
+        "terms": [
+          "proposition",
+          "implication",
+          "truth value",
+          "if-then"
+        ],
+        "state_model": {
+          "initial_state": [
+            "Two propositions P and Q have assigned truth values."
+          ],
+          "trigger_or_conditions": [
+            "Classical two-valued propositional logic is assumed."
+          ],
+          "mechanism_or_transition": [
+            "Evaluate P → Q as equivalent to not P or Q."
+          ],
+          "resulting_state": [
+            "The implication is true except in the case P=true and Q=false."
+          ],
+          "invariants": [
+            "Logical implication alone does not establish causal mechanism or temporal order."
+          ],
+          "unknowns": [
+            "Other logics may use different semantics."
+          ]
+        },
+        "procedure": [
+          "Truth-table cases: [{\"P\":false,\"Q\":false,\"P_implies_Q\":true},{\"P\":false,\"Q\":true,\"P_implies_Q\":true},{\"P\":true,\"Q\":false,\"P_implies_Q\":false},{\"P\":true,\"Q\":true,\"P_implies_Q\":true}]"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Direct derivation or mechanically checkable rule; verify implementation against stated assumptions.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-reflex-arc",
+      "domain": "biology-neuroscience",
+      "subdomain": "neurobiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A simple reflex arc links a stimulus to sensory input, neural processing, motor output, and a response; actual circuits vary by reflex.",
+        "terms": [
+          "stimulus",
+          "receptor",
+          "sensory neuron",
+          "spinal cord",
+          "motor neuron",
+          "response"
+        ],
+        "state_model": {
+          "initial_state": [
+            "An organism has a functioning sensory pathway and an effector capable of responding."
+          ],
+          "trigger_or_conditions": [
+            "A stimulus activates suitable receptors and the relevant neural circuit is intact."
+          ],
+          "mechanism_or_transition": [
+            "Sensory signals travel to central neural circuits, are processed, and motor signals activate an effector."
+          ],
+          "resulting_state": [
+            "A measurable response occurs with timing and magnitude determined by the stimulus and circuit."
+          ],
+          "invariants": [
+            "A reflex response does not imply that every processing stage occurs only in the spinal cord; circuits differ."
+          ],
+          "unknowns": [
+            "The exact pathway and latency depend on the reflex, organism, and experimental conditions."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-stimulus-response-adaptation",
+      "domain": "biology-neuroscience",
+      "subdomain": "physiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Biological responses depend on stimulus properties, receptor sensitivity, internal state, and adaptation; repeated stimulation can change response magnitude.",
+        "terms": [
+          "stimulus",
+          "receptor",
+          "response",
+          "adaptation",
+          "threshold"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A biological system has a measurable baseline state and a response pathway."
+          ],
+          "trigger_or_conditions": [
+            "A stimulus exceeds a relevant threshold and the pathway is responsive."
+          ],
+          "mechanism_or_transition": [
+            "Stimulus energy or chemical input is transduced into signals; downstream processes produce a response that may adapt with repetition."
+          ],
+          "resulting_state": [
+            "Response magnitude or timing changes according to stimulus and system state."
+          ],
+          "invariants": [
+            "Adaptation is not universal for every receptor or stimulus and does not mean the stimulus ceased to exist."
+          ],
+          "unknowns": [
+            "Mechanism and time course are system-specific."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-computing-data-structure-invariant",
+      "domain": "computing-engineering",
+      "subdomain": "data structures",
+      "kind": "rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A data structure organizes data under invariants that operations are expected to preserve.",
+        "terms": [
+          "data structure",
+          "invariant",
+          "operation",
+          "precondition",
+          "postcondition"
+        ],
+        "state_model": {
+          "initial_state": [
+            "Data is stored in a structure with a defined representation and allowed operations."
+          ],
+          "trigger_or_conditions": [
+            "Each operation's preconditions and representation invariants are specified."
+          ],
+          "mechanism_or_transition": [
+            "An operation reads or mutates the structure and must preserve its invariant when its preconditions hold."
+          ],
+          "resulting_state": [
+            "The resulting structure remains valid and its postconditions hold, or the operation reports failure."
+          ],
+          "invariants": [
+            "A passing example test does not prove an invariant for all inputs."
+          ],
+          "unknowns": [
+            "Complexity and failure behavior depend on the chosen structure and operation."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-computing-algorithm-complexity",
+      "domain": "computing-engineering",
+      "subdomain": "algorithms",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Algorithmic complexity describes resource growth as a function of input size under a stated cost model.",
+        "terms": [
+          "algorithm",
+          "input size",
+          "time complexity",
+          "space complexity",
+          "asymptotic"
+        ],
+        "state_model": {
+          "initial_state": [
+            "An algorithm processes inputs whose size can be measured."
+          ],
+          "trigger_or_conditions": [
+            "The cost model and input-size measure are defined."
+          ],
+          "mechanism_or_transition": [
+            "Count or bound relevant operations and memory as input size grows."
+          ],
+          "resulting_state": [
+            "A complexity bound such as O(n), O(log n), or O(n²) describes asymptotic growth under stated assumptions."
+          ],
+          "invariants": [
+            "Big-O is an upper-bound notation and does not by itself provide exact runtime or practical performance."
+          ],
+          "unknowns": [
+            "Hardware, constants, data distribution, and implementation affect observed performance."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-controlled-comparison",
+      "domain": "empirical-reasoning",
+      "subdomain": "experimental design",
+      "kind": "procedure",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A controlled comparison estimates the effect of an intervention by comparing outcomes under conditions designed to limit alternative explanations.",
+        "terms": [
+          "intervention",
+          "control group",
+          "outcome measure",
+          "confounder",
+          "randomization"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A research question identifies an intervention and a measurable outcome."
+          ],
+          "trigger_or_conditions": [
+            "Groups or conditions are comparable; relevant confounders are controlled, measured, or addressed by design."
+          ],
+          "mechanism_or_transition": [
+            "Apply the intervention according to protocol, measure outcomes consistently, and compare groups using a suitable analysis."
+          ],
+          "resulting_state": [
+            "The result estimates an effect with uncertainty under the design's assumptions."
+          ],
+          "invariants": [
+            "A controlled design does not eliminate every source of bias; conclusions must match the design."
+          ],
+          "unknowns": [
+            "Generalization depends on sampling, measurement validity, adherence, and external conditions."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-prediction-error-update",
+      "domain": "empirical-reasoning",
+      "subdomain": "prediction and model evaluation",
+      "kind": "rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Prediction error compares a model's prediction with an observed outcome using an explicitly defined comparison rule.",
+        "terms": [
+          "prediction",
+          "observation",
+          "residual",
+          "prediction error",
+          "model update"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A prediction and a corresponding observed outcome are available in compatible representations."
+          ],
+          "trigger_or_conditions": [
+            "Prediction and observation refer to the same target, time window, units, and measurement process."
+          ],
+          "mechanism_or_transition": [
+            "Compute a defined error such as observed minus predicted; inspect its size, direction, uncertainty, and possible measurement issues."
+          ],
+          "resulting_state": [
+            "The model may be revised or recalibrated if the error is informative and the update rule is justified."
+          ],
+          "invariants": [
+            "A nonzero error does not identify its cause; model misspecification, noise, and measurement error are alternatives."
+          ],
+          "unknowns": [
+            "Error metrics and update methods depend on task and data properties."
+          ]
+        }
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Model-synthesized educational frame; requires domain-source review before being treated as authoritative.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-jatuh-physical",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Physical-motion sense of 'jatuh': an entity moves downward under gravity or loses support, with contact and damage not entailed by the verb alone.",
+        "terms": [
+          "jatuh",
+          "terjatuh",
+          "menjatuhkan",
+          "kejatuhan"
+        ],
+        "lexical": {
+          "surface": "jatuh",
+          "lemma": "jatuh",
+          "part_of_speech": "verb",
+          "sense_id": "jatuh.physical-motion",
+          "argument_roles": [
+            {
+              "role": "Theme",
+              "description": "Entity whose position changes downward",
+              "required": true
+            },
+            {
+              "role": "Source",
+              "description": "Optional prior location or support",
+              "required": false
+            },
+            {
+              "role": "Cause",
+              "description": "Optional cause such as loss of support or an external force",
+              "required": false
+            }
+          ],
+          "examples": [
+            {
+              "text": "Gelas itu jatuh dari meja.",
+              "interpretation": "The glass moves from the table to a lower position; breaking is not entailed.",
+              "context": "Physical motion."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "An entity is at a higher position or supported by a surface."
+          ],
+          "trigger_or_conditions": [
+            "Support is lost, the entity is displaced, or a force initiates downward motion."
+          ],
+          "mechanism_or_transition": [
+            "The entity's position changes downward; gravity commonly contributes near Earth's surface."
+          ],
+          "resulting_state": [
+            "The entity occupies a lower position or reaches a lower surface."
+          ],
+          "temporal_order": [
+            "support or position changes",
+            "downward motion occurs",
+            "a later position is reached"
+          ],
+          "invariants": [
+            "Falling does not entail breaking, injury, or reaching the ground."
+          ],
+          "unknowns": [
+            "Exact trajectory, cause, speed, and final condition require context."
+          ]
+        },
+        "context_conditions": [
+          "Physical-motion reading is favored by a concrete moving theme and spatial complement."
+        ],
+        "constraints": [
+          "Do not infer damage or intention from 'jatuh' alone."
+        ],
+        "limitations": [
+          "Other uses such as 'jatuh tempo', 'jatuh cinta', and 'jatuh pada pilihan' require separate contextual senses or constructions."
+        ],
+        "cross_references": [
+          "Indonesian aspect and voice",
+          "state-transition frames"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.75,
+        "evidence_summary": "Illustrative analysis of common Indonesian usage; requires dictionary and corpus review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review sense distinctions against authoritative Indonesian lexical resources and corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-memberi-transfer",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics and event structure",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Memberi' describes an agent causing a recipient to receive or gain access to a theme; actual transfer, acceptance, and continued possession depend on context.",
+        "terms": [
+          "memberi",
+          "pemberian",
+          "penerima",
+          "pemberi",
+          "sesuatu"
+        ],
+        "lexical": {
+          "surface": "memberi",
+          "lemma": "beri",
+          "part_of_speech": "verb",
+          "morphology": [
+            "meN- + beri"
+          ],
+          "sense_id": "memberi.transfer",
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Entity that gives or provides",
+              "required": true
+            },
+            {
+              "role": "Recipient",
+              "description": "Entity intended to receive",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Thing, information, or service provided",
+              "required": true
+            }
+          ],
+          "examples": [
+            {
+              "text": "Rina memberi Budi sebuah buku.",
+              "interpretation": "Rina provides a book to Budi; whether Budi accepts or keeps it is not separately asserted.",
+              "context": "Transfer event."
+            },
+            {
+              "text": "Dokter memberi pasien obat.",
+              "interpretation": "A provider supplies or administers medicine to a patient, depending on context.",
+              "context": "Care context."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "Agent has, controls, or can provide a theme; recipient does not yet have it through this event."
+          ],
+          "trigger_or_conditions": [
+            "Agent provides or offers the theme to a recipient."
+          ],
+          "mechanism_or_transition": [
+            "A transfer, provision, communication, or service event links agent, theme, and recipient."
+          ],
+          "resulting_state": [
+            "Recipient is provided with or offered the theme; exact possession or acceptance depends on construction and context."
+          ],
+          "temporal_order": [
+            "provision begins",
+            "theme or benefit is directed to recipient",
+            "acceptance or resulting possession may follow"
+          ],
+          "invariants": [
+            "Giving does not always mean permanent ownership transfer; information and services can also be given."
+          ],
+          "unknowns": [
+            "Acceptance, completion, and resulting possession may remain unspecified."
+          ]
+        },
+        "context_conditions": [
+          "The theme and domain determine whether the event is physical transfer, information, permission, or service."
+        ],
+        "constraints": [
+          "Do not infer recipient acceptance or permanent ownership unless supported by context."
+        ],
+        "limitations": [
+          "Argument realization varies; some complements may be omitted when recoverable from discourse."
+        ],
+        "cross_references": [
+          "Indonesian transitivity",
+          "semantic roles",
+          "event structure"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.72,
+        "evidence_summary": "General event-semantic analysis; requires lexical and corpus review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review valency patterns and examples in authoritative Indonesian references and corpora."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-belum-temporal-negation",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and aspect",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Belum' commonly marks that a relevant event or state has not occurred or been reached by a contextually relevant time, while often leaving it open whether it will occur later.",
+        "terms": [
+          "belum",
+          "sudah",
+          "tidak",
+          "aspek",
+          "waktu acuan"
+        ],
+        "lexical": {
+          "surface": "belum",
+          "lemma": "belum",
+          "part_of_speech": "aspectual adverb",
+          "sense_id": "belum.not-yet",
+          "examples": [
+            {
+              "text": "Dia belum datang.",
+              "interpretation": "At the relevant reference time, the person has not arrived; future arrival is not guaranteed.",
+              "context": "Temporal status."
+            },
+            {
+              "text": "Pekerjaan itu belum selesai.",
+              "interpretation": "The work is not complete at the reference time; completion may remain expected or possible.",
+              "context": "Event completion."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "A relevant event has not occurred or a target state has not been reached by the reference time."
+          ],
+          "trigger_or_conditions": [
+            "A proposition is evaluated relative to a time or expectation supplied by context."
+          ],
+          "mechanism_or_transition": [
+            "The marker places the event or state before its occurrence or attainment at the reference time."
+          ],
+          "resulting_state": [
+            "The proposition is negative at the reference time, while later occurrence may remain possible."
+          ],
+          "temporal_order": [
+            "reference time is established",
+            "event completion is evaluated",
+            "later outcome remains open unless separately stated"
+          ],
+          "invariants": [
+            "'Belum' does not guarantee that the event will eventually happen."
+          ],
+          "unknowns": [
+            "Expectation and future likelihood depend on discourse context."
+          ]
+        },
+        "context_conditions": [
+          "Interpretation depends on the predicate, reference time, and discourse expectations."
+        ],
+        "constraints": [
+          "Do not equate 'belum' with an unconditional claim that the event will happen later."
+        ],
+        "limitations": [
+          "Aspectual and pragmatic readings can vary across constructions."
+        ],
+        "cross_references": [
+          "Negation",
+          "temporal reference",
+          "Indonesian discourse"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.75,
+        "evidence_summary": "General analysis of common Indonesian usage; requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review aspectual semantics and corpus usage."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-karena-causal-link",
+      "domain": "language",
+      "subdomain": "Indonesian syntax, semantics and discourse",
+      "kind": "rule",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Karena' introduces a reason or cause relation, but the relation may be causal, explanatory, or justificatory depending on the connected clauses and context.",
+        "terms": [
+          "karena",
+          "sebab",
+          "akibat",
+          "alasan",
+          "kausalitas"
+        ],
+        "lexical": {
+          "surface": "karena",
+          "lemma": "karena",
+          "part_of_speech": "conjunction/preposition",
+          "sense_id": "karena.reason-cause",
+          "examples": [
+            {
+              "text": "Jalan basah karena hujan.",
+              "interpretation": "Rain is presented as the cause or explanation of the wet road.",
+              "context": "Physical explanation."
+            },
+            {
+              "text": "Saya pulang karena sudah malam.",
+              "interpretation": "Nighttime is given as the reason for returning home; the relation includes practical reasoning.",
+              "context": "Action justification."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "Two propositions or events are available: a claim or action and a proposed reason."
+          ],
+          "trigger_or_conditions": [
+            "The speaker links the propositions using 'karena'."
+          ],
+          "mechanism_or_transition": [
+            "The second proposition is interpreted as a cause, reason, or explanation for the first, subject to context."
+          ],
+          "resulting_state": [
+            "The discourse contains an asserted or proposed explanatory relation."
+          ],
+          "invariants": [
+            "Use of 'karena' alone does not prove that the proposed cause is objectively correct."
+          ],
+          "unknowns": [
+            "The exact relation may be physical causation, motivation, justification, or explanation."
+          ]
+        },
+        "context_conditions": [
+          "Clause type, event semantics, world knowledge, and speaker intent constrain interpretation."
+        ],
+        "constraints": [
+          "Do not treat every 'karena' relation as experimentally established causation."
+        ],
+        "limitations": [
+          "The connective signals a discourse relation; its truth and causal strength require separate evaluation."
+        ],
+        "cross_references": [
+          "Causation versus correlation",
+          "discourse relations",
+          "empirical evidence"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.78,
+        "evidence_summary": "Illustrative Indonesian discourse analysis; requires corpus and linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review examples across causal, motivational, and justificatory contexts."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-function-composition",
+      "domain": "mathematics",
+      "subdomain": "functions and algebra",
+      "kind": "rule",
+      "status": "established",
+      "content": {
+        "summary": "Function composition applies one function to the output of another, with domain and codomain compatibility required.",
+        "terms": [
+          "function",
+          "domain",
+          "codomain",
+          "composition",
+          "mapping"
+        ],
+        "definition": "For functions f:A→B and g:B→C, the composition g∘f:A→C is defined by (g∘f)(x)=g(f(x)).",
+        "equation": "(g ∘ f)(x) = g(f(x))",
+        "state_model": {
+          "initial_state": [
+            "An input x belongs to the domain of f, and f(x) belongs to the domain of g."
+          ],
+          "trigger_or_conditions": [
+            "The output space of f is compatible with the input domain of g."
+          ],
+          "mechanism_or_transition": [
+            "Evaluate f(x), then use that result as the input to g."
+          ],
+          "resulting_state": [
+            "The composed output g(f(x)) is obtained."
+          ],
+          "invariants": [
+            "In general, g∘f is not equal to f∘g; order matters."
+          ],
+          "unknowns": [
+            "Whether composition is defined depends on the functions' domains and codomains."
+          ]
+        },
+        "procedure": [
+          "Check domain and codomain compatibility.",
+          "Evaluate the inner function f(x).",
+          "Apply g to the resulting value.",
+          "Check the final output lies in the codomain of g."
+        ],
+        "constraints": [
+          "Do not reverse the order: (g∘f)(x) means g(f(x))."
+        ],
+        "cross_references": [
+          "Relations",
+          "algebra",
+          "program composition"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Standard definition; mechanically checkable under stated domain conditions.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-conditional-probability",
+      "domain": "mathematics",
+      "subdomain": "probability",
+      "kind": "rule",
+      "status": "established",
+      "content": {
+        "summary": "Conditional probability measures the probability of A when B is known to have occurred, provided P(B)>0.",
+        "terms": [
+          "conditional probability",
+          "event",
+          "sample space",
+          "intersection",
+          "evidence"
+        ],
+        "definition": "P(A|B)=P(A∩B)/P(B), for events A and B with P(B)>0.",
+        "equation": "P(A | B) = P(A ∩ B) / P(B), when P(B) > 0",
+        "state_model": {
+          "initial_state": [
+            "Events A and B are defined in a probability space, and P(B)>0."
+          ],
+          "trigger_or_conditions": [
+            "Information that B occurred is incorporated."
+          ],
+          "mechanism_or_transition": [
+            "Restrict the reference space to B and compute the proportion of B outcomes that also belong to A."
+          ],
+          "resulting_state": [
+            "A conditional probability P(A|B) is obtained."
+          ],
+          "invariants": [
+            "P(A|B) need not equal P(A); equality requires additional conditions."
+          ],
+          "unknowns": [
+            "A numerical value requires a probability model or data for A, B, and their intersection."
+          ]
+        },
+        "constraints": [
+          "The formula is undefined when P(B)=0 under the elementary definition."
+        ],
+        "limitations": [
+          "Conditional probability alone does not establish causation."
+        ],
+        "cross_references": [
+          "Bayes' theorem",
+          "statistical inference",
+          "causal reasoning"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Standard probability definition with explicit nonzero denominator condition.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-action-potential-overview",
+      "domain": "biology-neuroscience",
+      "subdomain": "neurophysiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A neuronal action potential is a regenerative change in membrane potential involving voltage-dependent ion conductances; details vary by cell type and physiological conditions.",
+        "terms": [
+          "membrane potential",
+          "threshold",
+          "sodium conductance",
+          "potassium conductance",
+          "refractory period",
+          "action potential"
+        ],
+        "entities": [
+          {
+            "id": "membrane",
+            "type": "cell-structure"
+          },
+          {
+            "id": "ion-channels",
+            "type": "molecular-machinery"
+          },
+          {
+            "id": "action-potential",
+            "type": "electrical-event"
+          }
+        ],
+        "relations": [
+          {
+            "type": "changes-conductance",
+            "from": "ion-channels",
+            "to": "membrane",
+            "direction": "voltage-dependent channels alter ionic permeability",
+            "confidence": 0.85
+          },
+          {
+            "type": "propagates-along",
+            "from": "action-potential",
+            "to": "neuronal-membrane",
+            "direction": "regenerative membrane changes propagate under suitable conditions",
+            "confidence": 0.85
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "The neuron has a resting membrane potential and ion gradients maintained by cellular processes."
+          ],
+          "trigger_or_conditions": [
+            "A depolarizing input reaches threshold under the relevant cell conditions."
+          ],
+          "mechanism_or_transition": [
+            "Voltage-dependent conductances change; inward and outward ionic currents produce a rapid membrane-potential excursion and recovery."
+          ],
+          "resulting_state": [
+            "The membrane returns toward its resting regime and may pass through a refractory period."
+          ],
+          "temporal_order": [
+            "membrane depolarizes toward threshold",
+            "regenerative upstroke occurs",
+            "repolarization follows",
+            "refractory properties recover"
+          ],
+          "invariants": [
+            "An action potential is not simply a static stored value; it is a time-dependent electrochemical event."
+          ],
+          "unknowns": [
+            "Channel composition, amplitude, duration, and propagation differ among cell types."
+          ]
+        },
+        "constraints": [
+          "Do not assume all neurons have identical action-potential shapes or channel kinetics."
+        ],
+        "limitations": [
+          "This is a high-level frame, not a complete biophysical model."
+        ],
+        "cross_references": [
+          "Neuronal signaling",
+          "membrane physiology",
+          "dynamic systems"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General neurophysiology summary; should be checked against a current textbook or peer-reviewed review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Add authoritative source references and cell-type-specific details before treating as a researched record."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-measurement-uncertainty",
+      "domain": "empirical-reasoning",
+      "subdomain": "measurement and metrology",
+      "kind": "procedure",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A measurement result should be interpreted with its measurement procedure, units, resolution, calibration, and uncertainty rather than as an exact value without conditions.",
+        "terms": [
+          "measurement",
+          "uncertainty",
+          "resolution",
+          "calibration",
+          "repeatability",
+          "systematic error"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A measurand is defined and an instrument or procedure is selected."
+          ],
+          "trigger_or_conditions": [
+            "The instrument is used under specified conditions with known calibration status and measurement protocol."
+          ],
+          "mechanism_or_transition": [
+            "A reading is produced and interpreted with relevant resolution, repeatability, calibration, and uncertainty information."
+          ],
+          "resulting_state": [
+            "A measurement result is reported with units and appropriate uncertainty or limitations."
+          ],
+          "temporal_order": [
+            "define measurand",
+            "measure under protocol",
+            "evaluate calibration and uncertainty",
+            "report result and limitations"
+          ],
+          "invariants": [
+            "Displayed digits alone do not establish accuracy or precision."
+          ],
+          "unknowns": [
+            "Uncertainty components depend on instrument, procedure, environment, and measurand."
+          ]
+        },
+        "constraints": [
+          "Do not equate precision with accuracy or assume a measurement is exact."
+        ],
+        "limitations": [
+          "Specific uncertainty budgets require a defined measurement and quantitative evidence."
+        ],
+        "cross_references": [
+          "Experimental design",
+          "statistics",
+          "model evaluation"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.85,
+        "evidence_summary": "General metrology principle; detailed uncertainty evaluation requires method-specific references.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Anchor quantitative methods to authoritative metrology guidance when expanding this topic."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indonesian-memindahkan-causative",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics and event structure",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Memindahkan describes causing an entity to change location; the source, destination, moved entity, and means may be expressed or left implicit.",
+        "terms": [
+          "memindahkan",
+          "pindah",
+          "dipindahkan",
+          "perpindahan"
+        ],
+        "lexical": {
+          "surface": "memindahkan",
+          "lemma": "pindah",
+          "part_of_speech": "verb",
+          "morphology": [
+            "meN- + pindah + -kan"
+          ],
+          "sense_id": "memindahkan.caused-location-change",
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Entity causing or arranging the relocation",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Entity whose location changes",
+              "required": true
+            },
+            {
+              "role": "Source",
+              "description": "Starting location, optionally expressed",
+              "required": false
+            },
+            {
+              "role": "Goal",
+              "description": "Destination location, optionally expressed",
+              "required": false
+            }
+          ],
+          "examples": [
+            {
+              "text": "Rina memindahkan kursi ke teras.",
+              "interpretation": "Rina causes the chair to change location, with the terrace as destination.",
+              "context": "Physical relocation."
+            },
+            {
+              "text": "Berkas itu dipindahkan kemarin.",
+              "interpretation": "The file's relocation is foregrounded; the agent is not specified.",
+              "context": "Passive construction."
+            }
+          ]
+        },
+        "entities": [
+          {
+            "id": "agent",
+            "type": "entity-role",
+            "label": "Agent"
+          },
+          {
+            "id": "theme",
+            "type": "entity-role",
+            "label": "Moved entity"
+          },
+          {
+            "id": "source",
+            "type": "location-role",
+            "label": "Source location"
+          },
+          {
+            "id": "goal",
+            "type": "location-role",
+            "label": "Destination"
+          }
+        ],
+        "relations": [
+          {
+            "type": "causes-location-transition",
+            "from": "agent",
+            "to": "theme",
+            "direction": "Agent causes Theme location to change",
+            "conditions": [
+              "A relocation action occurs and the entity can be moved."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Theme occupies source location, if known."
+          ],
+          "trigger_or_conditions": [
+            "A relocation action is possible; constraints such as attachment or obstruction permit movement."
+          ],
+          "mechanism_or_transition": [
+            "Theme's location changes from source to destination."
+          ],
+          "resulting_state": [
+            "Theme occupies a new location if relocation succeeds."
+          ],
+          "invariants": [
+            "The verb alone does not identify the exact source, destination, route, or success unless context supplies them."
+          ],
+          "unknowns": [
+            "The agent, source, destination, and means may be omitted or inferred only from context."
+          ]
+        },
+        "context_conditions": [
+          "Interpretation depends on arguments and discourse context."
+        ],
+        "constraints": [
+          "Do not infer a specific destination when none is stated or recoverable from context."
+        ],
+        "limitations": [
+          "This frame models a common physical sense; figurative uses require separate frames."
+        ],
+        "cross_references": [
+          "Indonesian passive di- construction",
+          "State-transition representation"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Illustrative analysis of a common Indonesian construction; requires review against authoritative lexical sources and corpus data.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review dictionary entries and attested corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-kalau-conditional-scope",
+      "domain": "language",
+      "subdomain": "Indonesian syntax and semantics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Kalau commonly introduces a condition or supposition; the relation between the condition and result depends on the full clause and context.",
+        "terms": [
+          "kalau",
+          "jika",
+          "apabila",
+          "syarat",
+          "konsekuensi"
+        ],
+        "definition": "In a conditional construction, one clause presents a condition and another presents a result, expectation, or consequence associated with that condition.",
+        "entities": [
+          {
+            "id": "condition",
+            "type": "proposition",
+            "label": "Condition clause"
+          },
+          {
+            "id": "result",
+            "type": "proposition",
+            "label": "Result clause"
+          }
+        ],
+        "relations": [
+          {
+            "type": "conditions",
+            "from": "condition",
+            "to": "result",
+            "direction": "The result is presented as dependent on or relevant under the condition",
+            "conditions": [
+              "The utterance is used conditionally rather than in another discourse function."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Truth or satisfaction of the condition may be unknown."
+          ],
+          "trigger_or_conditions": [
+            "A speaker presents a possible, expected, general, or counterfactual condition."
+          ],
+          "mechanism_or_transition": [
+            "The listener evaluates the result relative to the condition and the utterance's context."
+          ],
+          "resulting_state": [
+            "The conditional relation is represented without automatically asserting that the condition is true."
+          ],
+          "unknowns": [
+            "Factuality, likelihood, and counterfactual force depend on tense/aspect, wording, and context."
+          ]
+        },
+        "lexical": {
+          "surface": "kalau",
+          "lemma": "kalau",
+          "part_of_speech": "conjunction",
+          "sense_id": "kalau.conditional",
+          "examples": [
+            {
+              "text": "Kalau hujan, kami tinggal di rumah.",
+              "interpretation": "Staying at home is presented as conditional on rain.",
+              "context": "Everyday conditional."
+            },
+            {
+              "text": "Kalau dia sudah datang, beri tahu saya.",
+              "interpretation": "The instruction applies if the arrival condition is satisfied.",
+              "context": "Conditional instruction."
+            }
+          ]
+        },
+        "constraints": [
+          "Do not infer that the condition has occurred merely because it is mentioned."
+        ],
+        "limitations": [
+          "This frame covers common conditional uses, not every discourse use of kalau."
+        ],
+        "cross_references": [
+          "Formal implication",
+          "Indonesian clause structure"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "General linguistic analysis; construction inventory and usage distribution require corpus review.",
+        "revision_conditions": [
+          "Review authoritative grammar and examples from a balanced Indonesian corpus."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-modal-harus-mungkin-boleh",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and pragmatics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Modal expressions such as harus, mungkin, and boleh convey different kinds of necessity, possibility, or permission; they do not have interchangeable meanings.",
+        "terms": [
+          "harus",
+          "mungkin",
+          "boleh",
+          "wajib",
+          "dapat"
+        ],
+        "definition": "Modal expressions qualify a proposition or action with meanings such as obligation/necessity, epistemic possibility, ability, or permission.",
+        "lexical": {
+          "surface": "harus / mungkin / boleh",
+          "lemma": "modal expressions",
+          "part_of_speech": "modal",
+          "sense_id": "indonesian.modality.contrast",
+          "examples": [
+            {
+              "text": "Kamu harus berhenti.",
+              "interpretation": "The action is presented as required or strongly necessary.",
+              "context": "Obligation."
+            },
+            {
+              "text": "Mungkin dia sudah pulang.",
+              "interpretation": "The proposition that the person has gone home is presented as possible, not certain.",
+              "context": "Epistemic possibility."
+            },
+            {
+              "text": "Kamu boleh masuk.",
+              "interpretation": "Permission to enter is granted or indicated.",
+              "context": "Permission."
+            }
+          ]
+        },
+        "relations": [
+          {
+            "type": "modal-qualifies-proposition",
+            "from": "modal-expression",
+            "to": "proposition",
+            "direction": "Modal expression changes the force or status of the proposition without itself proving it true",
+            "conditions": [
+              "The modal's sense is resolved in context."
+            ],
+            "confidence": 0.8
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "A proposition or possible action is under consideration."
+          ],
+          "trigger_or_conditions": [
+            "A modal expression is interpreted in its grammatical and social context."
+          ],
+          "mechanism_or_transition": [
+            "The modal marks obligation, possibility, permission, or another modality."
+          ],
+          "resulting_state": [
+            "The proposition is understood with a qualified status rather than as an unmodalized assertion."
+          ],
+          "unknowns": [
+            "Strength and social force may depend on speaker, relationship, and situation."
+          ]
+        },
+        "context_conditions": [
+          "Modal meaning depends on syntax, discourse, and social context."
+        ],
+        "constraints": [
+          "Do not treat 'harus', 'mungkin', and 'boleh' as synonyms."
+        ],
+        "cross_references": [
+          "Negation scope",
+          "Speech acts",
+          "Uncertainty representation"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.75,
+        "evidence_summary": "Illustrative contrast among common Indonesian modal expressions; detailed classification requires linguistic review.",
+        "revision_conditions": [
+          "Review Indonesian grammar and corpus usage, including context-sensitive readings."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-indirect-request-can-you",
+      "domain": "language",
+      "subdomain": "Indonesian pragmatics",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A question about ability can function as an indirect request when context makes a desired action salient.",
+        "terms": [
+          "bisa",
+          "tolong",
+          "permintaan tidak langsung",
+          "tindak tutur"
+        ],
+        "definition": "The grammatical form of an utterance and its communicative function may differ; an ability question can pragmatically request an action.",
+        "lexical": {
+          "surface": "Bisa ...?",
+          "lemma": "bisa",
+          "part_of_speech": "modal verb in question construction",
+          "sense_id": "bisa.ability-question-indirect-request",
+          "examples": [
+            {
+              "text": "Bisa tutup pintunya?",
+              "interpretation": "Literally asks about ability; in an ordinary request context it can politely ask the listener to close the door.",
+              "context": "Indirect request.",
+              "alternative_readings": [
+                "A literal question about physical ability, if that is the salient topic."
+              ]
+            },
+            {
+              "text": "Apakah kamu bisa berenang?",
+              "interpretation": "Usually asks about swimming ability, not a request to swim.",
+              "context": "Ability question."
+            }
+          ]
+        },
+        "entities": [
+          {
+            "id": "speaker",
+            "type": "discourse-role",
+            "label": "Speaker"
+          },
+          {
+            "id": "listener",
+            "type": "discourse-role",
+            "label": "Listener"
+          },
+          {
+            "id": "requested-action",
+            "type": "action",
+            "label": "Potential requested action"
+          }
+        ],
+        "relations": [
+          {
+            "type": "utterance-may-request-action",
+            "from": "speaker",
+            "to": "requested-action",
+            "direction": "Speaker may use an ability question to request listener action",
+            "conditions": [
+              "A relevant action is possible and conversational context supports a request interpretation."
+            ],
+            "confidence": 0.7
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Listener has not necessarily performed the action."
+          ],
+          "trigger_or_conditions": [
+            "An ability-form question occurs in a context where the action would be useful or expected."
+          ],
+          "mechanism_or_transition": [
+            "Listener infers a possible request from wording, context, and social conventions."
+          ],
+          "resulting_state": [
+            "Listener may comply, refuse, clarify, or answer literally."
+          ],
+          "unknowns": [
+            "The intended force is not guaranteed by the wording alone."
+          ]
+        },
+        "constraints": [
+          "Do not always classify every 'bisa ...?' question as a request."
+        ],
+        "limitations": [
+          "Politeness and intent vary by context and relationship."
+        ],
+        "cross_references": [
+          "Speech-act theory",
+          "Contextual ambiguity",
+          "Question forms"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.7,
+        "evidence_summary": "Pragmatic illustration; actual interpretation depends on discourse context.",
+        "revision_conditions": [
+          "Review attested conversational examples across formal and informal contexts."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "math-vector-addition-state-change",
+      "domain": "mathematics",
+      "subdomain": "linear algebra and state representation",
+      "kind": "mathematical_relation",
+      "status": "established",
+      "content": {
+        "summary": "Vector addition combines corresponding components when vectors share a compatible space and coordinate convention.",
+        "terms": [
+          "vector",
+          "component",
+          "coordinate system",
+          "vector addition"
+        ],
+        "definition": "For vectors a and b in the same n-dimensional vector space, (a+b)_i = a_i + b_i for each component i.",
+        "equation": "a + b = (a_1+b_1, ..., a_n+b_n)",
+        "state_model": {
+          "initial_state": [
+            "Two vectors are represented in the same compatible vector space and coordinate convention."
+          ],
+          "trigger_or_conditions": [
+            "Both vectors have the same dimension and compatible component meanings."
+          ],
+          "mechanism_or_transition": [
+            "Add corresponding components."
+          ],
+          "resulting_state": [
+            "A resultant vector represents the component-wise sum."
+          ],
+          "invariants": [
+            "Dimension and component interpretation are preserved."
+          ],
+          "unknowns": [
+            "The physical or semantic meaning of the resultant depends on what the vector components represent."
+          ]
+        },
+        "procedure": [
+          "Check that dimensions and coordinate conventions match.",
+          "Add corresponding components.",
+          "Retain units and interpretation where applicable."
+        ],
+        "constraints": [
+          "Do not add vectors with incompatible dimensions or silently mismatched component meanings."
+        ],
+        "limitations": [
+          "A vector operation alone does not establish that its result is physically meaningful."
+        ],
+        "cross_references": [
+          "Dimensional analysis",
+          "State representation",
+          "Linear transformations"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Definition of component-wise vector addition in a common vector space.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "biology-sensory-adaptation",
+      "domain": "biology-neuroscience",
+      "subdomain": "sensory physiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Sensory adaptation is a change in responsiveness during sustained or repeated stimulation; its magnitude and mechanism depend on the sensory system and stimulus.",
+        "terms": [
+          "sensory adaptation",
+          "receptor",
+          "stimulus intensity",
+          "response"
+        ],
+        "entities": [
+          {
+            "id": "stimulus",
+            "type": "input",
+            "label": "Stimulus"
+          },
+          {
+            "id": "receptor",
+            "type": "biological-structure",
+            "label": "Sensory receptor"
+          },
+          {
+            "id": "response",
+            "type": "measured-output",
+            "label": "Response"
+          }
+        ],
+        "relations": [
+          {
+            "type": "elicits",
+            "from": "stimulus",
+            "to": "response",
+            "direction": "Stimulus can elicit a sensory response",
+            "conditions": [
+              "Stimulus is within the system's sensitivity range."
+            ],
+            "confidence": 0.8
+          },
+          {
+            "type": "modulates-over-time",
+            "from": "stimulus",
+            "to": "response",
+            "direction": "Sustained or repeated stimulation may alter response magnitude over time",
+            "conditions": [
+              "Adaptation occurs in the specific sensory pathway under the given stimulus conditions."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Sensory system has a baseline response profile."
+          ],
+          "trigger_or_conditions": [
+            "A stimulus is sustained or repeated."
+          ],
+          "mechanism_or_transition": [
+            "Receptor and downstream neural processes change responsiveness over time, with mechanism varying by system."
+          ],
+          "resulting_state": [
+            "Response magnitude or sensitivity may differ from the initial response."
+          ],
+          "unknowns": [
+            "Direction, time course, and recovery vary across sensory modalities and stimulus conditions."
+          ]
+        },
+        "constraints": [
+          "Do not generalize one receptor's adaptation time course to all sensory systems."
+        ],
+        "limitations": [
+          "This is a high-level pattern, not a detailed mechanism for every receptor type."
+        ],
+        "cross_references": [
+          "Stimulus-response models",
+          "Neural signaling",
+          "Homeostasis"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General physiological concept; specific mechanisms should be linked to reviewed sources before scientific use.",
+        "revision_conditions": [
+          "Add modality-specific evidence and peer-reviewed sources."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "computing-queue-fifo",
+      "domain": "computing-engineering",
+      "subdomain": "data structures",
+      "kind": "definition",
+      "status": "established",
+      "content": {
+        "summary": "A queue is an abstract data type that typically removes items in first-in, first-out order.",
+        "terms": [
+          "queue",
+          "FIFO",
+          "enqueue",
+          "dequeue",
+          "front",
+          "back"
+        ],
+        "definition": "For a FIFO queue, among items still present, the item inserted earliest is the next one removed.",
+        "entities": [
+          {
+            "id": "queue",
+            "type": "data-structure",
+            "label": "Queue"
+          },
+          {
+            "id": "item",
+            "type": "data",
+            "label": "Queue item"
+          }
+        ],
+        "relations": [
+          {
+            "type": "orders-removal",
+            "from": "queue",
+            "to": "item",
+            "direction": "Removal order follows insertion order for items still present",
+            "conditions": [
+              "The queue follows FIFO semantics and operations succeed."
+            ],
+            "confidence": 1
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "Queue contains an ordered sequence of zero or more items."
+          ],
+          "trigger_or_conditions": [
+            "An enqueue or dequeue operation is requested."
+          ],
+          "mechanism_or_transition": [
+            "Enqueue appends an item; dequeue removes the earliest item still present."
+          ],
+          "resulting_state": [
+            "The queue's sequence reflects the operation and FIFO rule."
+          ],
+          "invariants": [
+            "A successful dequeue removes the oldest remaining item."
+          ],
+          "unknowns": [
+            "Runtime complexity depends on the implementation."
+          ]
+        },
+        "procedure": [
+          "Enqueue inserts at the back.",
+          "Dequeue removes from the front if nonempty.",
+          "Check the empty-queue condition before dequeue."
+        ],
+        "constraints": [
+          "Do not assume all implementations have identical time complexity."
+        ],
+        "limitations": [
+          "Priority queues use a different removal rule and are not ordinary FIFO queues."
+        ],
+        "cross_references": [
+          "Abstract data types",
+          "Algorithmic complexity",
+          "State invariants"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_proof",
+        "confidence": 1,
+        "evidence_summary": "Definition of FIFO queue behavior.",
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "empirical-confounding-variable",
+      "domain": "empirical-reasoning",
+      "subdomain": "causal inference and study design",
+      "kind": "definition",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A confounding variable is a factor associated with both an exposure and an outcome that can distort an estimate of their causal relationship.",
+        "terms": [
+          "confounder",
+          "exposure",
+          "outcome",
+          "causal inference",
+          "alternative explanation"
+        ],
+        "entities": [
+          {
+            "id": "exposure",
+            "type": "variable",
+            "label": "Exposure or candidate cause"
+          },
+          {
+            "id": "outcome",
+            "type": "variable",
+            "label": "Outcome"
+          },
+          {
+            "id": "confounder",
+            "type": "variable",
+            "label": "Potential confounder"
+          }
+        ],
+        "relations": [
+          {
+            "type": "associated-with",
+            "from": "confounder",
+            "to": "exposure",
+            "direction": "Potential confounder is associated with exposure in the studied data-generating process",
+            "conditions": [
+              "Association exists in the target context."
+            ],
+            "confidence": 0.8
+          },
+          {
+            "type": "associated-with",
+            "from": "confounder",
+            "to": "outcome",
+            "direction": "Potential confounder is associated with outcome independently of the causal pathway under study",
+            "conditions": [
+              "The causal structure supports confounding rather than mediation or collider bias."
+            ],
+            "confidence": 0.75
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "An observed association between exposure and outcome has been identified."
+          ],
+          "trigger_or_conditions": [
+            "A plausible third variable may influence exposure assignment and outcome."
+          ],
+          "mechanism_or_transition": [
+            "The third variable creates or distorts an observed association unless appropriately handled."
+          ],
+          "resulting_state": [
+            "The causal estimate may be biased if confounding is not addressed."
+          ],
+          "unknowns": [
+            "Whether a variable is a confounder depends on causal structure and study design."
+          ]
+        },
+        "constraints": [
+          "Association with two variables alone is not sufficient to identify a confounder; causal structure matters."
+        ],
+        "limitations": [
+          "Adjustment can introduce bias if the wrong variables are controlled, such as certain colliders."
+        ],
+        "cross_references": [
+          "Correlation is not causation",
+          "Controlled comparison",
+          "Hypothesis testing"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General causal-inference concept; classification of variables requires a defensible causal model.",
+        "revision_conditions": [
+          "Link to reviewed causal-inference references and worked examples."
+        ]
+      }
+    }
+  ]
+}

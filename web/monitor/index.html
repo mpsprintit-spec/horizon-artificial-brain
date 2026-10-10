@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Horizon Brain Visual Monitor</title><link rel="stylesheet" href="./styles.css"></head>
+<body>
+<header><div><h1>HORIZON BRAIN VISUAL MONITOR</h1><small id="source">No Horizon Bridge connection</small></div><div id="status" class="status disconnected">DISCONNECTED</div></header>
+<section class="toolbar panel">
+<label>Bridge URL<input id="bridge" placeholder="https://bridge.example"></label>
+<label>Token<input id="token" type="password" placeholder="optional"></label>
+<button id="connect">CONNECT</button>
+<button id="disconnect">DISCONNECT</button>
+</section>
+<section class="metrics">
+<div><small>Brain</small><strong id="brain">unavailable</strong></div><div><small>Revision</small><strong id="revision">unavailable</strong></div><div><small>Hash</small><strong id="hash">unavailable</strong></div><div><small>Runtime</small><strong id="commit">unavailable</strong></div><div><small>Units</small><strong id="units">unavailable</strong></div><div><small>Populations</small><strong id="populations">unavailable</strong></div><div><small>Synapses</small><strong id="synapses">unavailable</strong></div>
+</section>
+<main>
+<section class="panel graph"><div class="title"><h2>Whole Brain</h2><span id="graphState">no runtime event</span></div><canvas id="brainGraph" aria-label="3D canonical neural brain"></canvas><div class="graphHint">3D neural substrate · drag to rotate · wheel/pinch to zoom</div></section>
+<aside class="panel inspector"><div class="title"><h2>Inspector</h2></div><div id="inspectList" class="inspectList"></div><pre id="inspector">No entity selected.</pre></aside>
+<section class="panel cognition"><div class="title"><h2>Horizon Input / Output & Internal State</h2><span id="ioStatus">idle</span></div><div class="cognitionGrid"><div><h3>Input → Horizon</h3><textarea id="ioInput" placeholder="Masukkan kalimat untuk dikirim sebagai observation..."></textarea><button id="ioSend">SEND TO HORIZON</button></div><div><h3>Runtime Output / Acknowledgement</h3><pre id="ioOutput">Belum ada input.</pre></div><div><h3>Current Neural State</h3><pre id="thoughtState">Belum terhubung ke runtime.</pre></div></div></section>
+<section class="panel timeline"><div class="title"><h2>Live Runtime Events</h2><span id="streamState">offline</span></div><div id="events"></div></section>
+<section class="panel inputs"><div class="title"><h2>Browser Sensors</h2></div>
+<div class="inputGrid">
+<div><h3>Camera</h3><video id="video" autoplay muted playsinline></video><button id="cameraStart">START CAMERA</button><button id="cameraStop">STOP</button><span id="cameraStatus">idle</span></div>
+<div><h3>Audio</h3><canvas id="wave" width="360" height="80"></canvas><button id="audioStart">START MICROPHONE</button><button id="audioStop">STOP</button><span id="audioStatus">idle</span></div>
+<div><h3>Motion</h3><button id="motionStart">ENABLE MOTION</button><span id="motionStatus">not requested</span><pre id="motionData">unavailable</pre></div>
+<div><h3>Simulator / Text Adapter</h3><textarea id="simText" placeholder="Raw text or JSON payload. This is sent unchanged as an observation surface."></textarea><select id="simModality"><option value="text">text</option><option value="telemetry">telemetry</option><option value="vision">vision</option><option value="audio">audio</option><option value="sensor">sensor</option></select><button id="simSend">SEND SYNTHETIC OBSERVATION</button><span id="simStatus">SYNTHETIC → LIVE HORIZON</span></div>
+</div></section>
+<section class="panel state"><div class="title"><h2>Canonical Brain State</h2></div><div class="stateGrid"><pre id="prediction"></pre><pre id="error"></pre><pre id="memory"></pre><pre id="plasticity"></pre><pre id="curiosity"></pre><pre id="provenance"></pre></div></section>
+</main>
+<footer><span id="last">No runtime event.</span><span>Production view: runtime state only. Demo/fixture input is explicitly labelled.</span></footer>
+<script type="module" src="./app.js"></script>
+</body></html>

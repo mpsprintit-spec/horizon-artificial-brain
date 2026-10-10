@@ -1,0 +1,13 @@
+{
+  "name": "horizon-brain-visual-monitor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "tsc && node --test test/store.test.js",
+    "build": "node scripts/build.mjs"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}

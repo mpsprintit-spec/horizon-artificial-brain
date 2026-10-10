@@ -20,6 +20,9 @@ const (
 type PerceptionSignal struct {
 	Kind       PerceptionKind
 	Source     string
+	// Modality identifies the sensory/input channel at the perception boundary.
+	// It is transport metadata, not semantic identity.
+	Modality   string
 	RawText    string
 	Tokens     []string
 	Confidence float64
@@ -37,6 +40,7 @@ func (UserInputPerception) Perceive(input string) ([]PerceptionSignal, error) {
 	return []PerceptionSignal{{
 		Kind:       PerceptionUserInput,
 		Source:     "user",
+		Modality:   "text",
 		RawText:    text,
 		Tokens:     strings.Fields(strings.ToLower(text)),
 		Confidence: 1,
@@ -51,6 +55,7 @@ func FromWebSearch(source string, tokens []string, confidence float64) Perceptio
 	return PerceptionSignal{
 		Kind:       PerceptionWebSearch,
 		Source:     source,
+		Modality:   "web-search",
 		RawText:    strings.Join(tokens, " "),
 		Tokens:     tokens,
 		Confidence: confidence,

@@ -1,12 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"os"
 	"strings"
+	"os/signal"
+	"syscall"
 	"time"
 
+	"github.com/project-horizon/horizon-core/services/ai/bridge"
 	"github.com/project-horizon/horizon-core/services/ai/config"
 	"github.com/project-horizon/horizon-core/services/ai/core"
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
@@ -25,25 +30,88 @@ func main() {
 	// executable. Cluster remains available as a legacy sensor/decision
 	// compatibility component, but it is not invoked as the brain here.
 	horizon := core.NewHorizonEngine()
-	signals := bootstrapSignals()
-	for _, signal := range signals {
-		if err := signal.Validate(); err != nil {
-			logger.Error("invalid bootstrap signal", "error", err)
+	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
+	if brainMemoryPath == "" { brainMemoryPath = "brain_memory.json" }
+	loadedBrain := false
+	eventLogPath := strings.TrimSpace(os.Getenv("HORIZON_EVENT_LOG_PATH"))
+	if eventLogPath == "" { eventLogPath = "horizon_events.jsonl" }
+	if _, statErr := os.Stat(brainMemoryPath); statErr == nil {
+		loadedBrain = true
+		if err := horizon.Runtime.LoadBrain(brainMemoryPath); err != nil {
+			logger.Error("failed to load canonical brain memory", "path", brainMemoryPath, "error", err)
 			os.Exit(1)
 		}
 	}
+	eventLog, err := runtime.OpenEventLog(eventLogPath)
+	if err != nil { logger.Error("failed to open brain event log", "path", eventLogPath, "error", err); os.Exit(1) }
+	defer eventLog.Close()
+	horizon.Runtime.SetEventLog(eventLog)
+	if events, readErr := runtime.ReadEventLog(eventLogPath); readErr == nil && len(events) > 0 {
+		if err := horizon.Runtime.RestoreEventIndex(events); err != nil { logger.Error("failed to restore event index", "error", err); os.Exit(1) }
+	} else if readErr != nil && !os.IsNotExist(readErr) {
+		logger.Error("failed to read brain event log", "error", readErr); os.Exit(1)
+	}
+	var output runtime.CognitiveOutput
+	var bootstrapErr error
+	stimulusCount := 0
+	if !loadedBrain {
+		signals := bootstrapSignals()
+		for _, signal := range signals {
+			if err := signal.Validate(); err != nil { logger.Error("invalid bootstrap signal", "error", err); os.Exit(1) }
+		}
+		stimulus := signalStimulus(signals)
+		stimulusCount = len(stimulus)
+		output, bootstrapErr = horizon.Runtime.CognitiveProcess(runtime.Event{ID:"bootstrap", Stimulus:stimulus, Cycles:8, Timestamp:time.Now().UTC()})
+		if bootstrapErr == nil { bootstrapErr = horizon.Runtime.SaveBrain(brainMemoryPath) }
+	} else {
+		output = runtime.CognitiveOutput{BrainIdentity: runtime.BrainIdentity, Sequence: horizon.Runtime.LastSequence(), Timestamp: time.Now().UTC()}
+	}
+	if bootstrapErr != nil { logger.Error("Horizon brain initialization failed", "error", bootstrapErr); os.Exit(1) }
 
-	stimulus := signalStimulus(signals)
-	output, err := horizon.Runtime.CognitiveProcess(runtime.Event{
-		ID:        "bootstrap",
-		Stimulus:  stimulus,
-		Cycles:    8,
-		Timestamp: time.Now().UTC(),
+	service := runtime.NewContinuousService(horizon.Runtime, cfg.CognitiveInterval, 1)
+
+	bridgeAddress := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_ADDRESS"))
+	if bridgeAddress == "" {
+		bridgeAddress = "127.0.0.1:8765"
+	}
+	bridgeOrigins := splitMonitorOrigins(os.Getenv("HORIZON_MONITOR_ORIGINS"))
+	if len(bridgeOrigins) == 0 {
+		bridgeOrigins = []string{"https://mpsprintit-spec.github.io", "http://localhost:8080"}
+	}
+	monitorBridge, err := bridge.New(horizon.Runtime, bridge.Config{
+		AllowedOrigins: bridgeOrigins,
+		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
+		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
+		EventLogPath: eventLogPath,
+		BrainMemoryPath: brainMemoryPath,
 	})
 	if err != nil {
-		logger.Error("Horizon brain bootstrap failed", "error", err)
+		logger.Error("failed to initialize monitor bridge", "error", err)
 		os.Exit(1)
 	}
+	bridgeServer := &http.Server{Addr: bridgeAddress, Handler: monitorBridge.Handler()}
+	bridgeTLSCert := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TLS_CERT"))
+	bridgeTLSKey := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TLS_KEY"))
+	if (bridgeTLSCert == "") != (bridgeTLSKey == "") {
+		logger.Error("Horizon bridge TLS requires both HORIZON_BRIDGE_TLS_CERT and HORIZON_BRIDGE_TLS_KEY")
+		os.Exit(1)
+	}
+	bridgeErrors := make(chan error, 1)
+	go func() {
+		logger.Info("Horizon monitor bridge listening", "address", bridgeAddress, "origins", bridgeOrigins, "tls", bridgeTLSCert != "")
+		var err error
+		if bridgeTLSCert != "" {
+			err = bridgeServer.ListenAndServeTLS(bridgeTLSCert, bridgeTLSKey)
+		} else {
+			err = bridgeServer.ListenAndServe()
+		}
+		if err != nil && err != http.ErrServerClosed {
+			bridgeErrors <- err
+		}
+	}()
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
 
 	logger.Info(
 		"Horizon brain ready",
@@ -54,8 +122,35 @@ func main() {
 		"sequence", output.Sequence,
 		"resonance", output.Resonance,
 		"prediction_error", output.PredictionError,
-		"stimulus_count", len(stimulus),
+		"stimulus_count", stimulusCount,
+		"cognitive_interval", cfg.CognitiveInterval,
 	)
+
+	if err := service.Run(ctx, func(output runtime.CognitiveOutput, err error) {
+		if err != nil {
+			logger.Error("continuous cognition cycle failed", "error", err)
+			return
+		}
+		if saveErr := horizon.Runtime.SaveBrain(brainMemoryPath); saveErr != nil { logger.Error("brain persistence failed", "error", saveErr) }
+		logger.Info(
+			"Horizon cognitive cycle",
+			"sequence", output.Sequence,
+			"resonance", output.Resonance,
+			"prediction_error", output.PredictionError,
+			"active_nodes", len(output.RankedNodeIDs),
+		)
+	}); err != nil && err != context.Canceled {
+		logger.Error("continuous brain service stopped unexpectedly", "error", err)
+		os.Exit(1)
+	}
+	if err := bridgeServer.Shutdown(context.Background()); err != nil {
+		logger.Error("monitor bridge shutdown failed", "error", err)
+	}
+	select {
+	case err := <-bridgeErrors:
+		logger.Error("monitor bridge stopped unexpectedly", "error", err)
+	default:
+	}
 }
 
 // signalStimulus is an input adapter only. It preserves signal provenance at
@@ -81,4 +176,15 @@ func bootstrapSignals() []Signal {
 		{Type: SignalLocation, Source: "bootstrap_gps", Confidence: 0.83, Timestamp: now, Payload: map[string]float64{"accuracy": 0.92}},
 		{Type: SignalUser, Source: "bootstrap_profile", Confidence: 0.77, Timestamp: now, Payload: map[string]float64{"attention": 0.80}},
 	}
+}
+
+func splitMonitorOrigins(value string) []string {
+	parts := strings.Split(value, ",")
+	out := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if origin := strings.TrimSpace(part); origin != "" {
+			out = append(out, origin)
+		}
+	}
+	return out
 }

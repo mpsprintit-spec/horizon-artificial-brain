@@ -24,14 +24,14 @@ func (o CognitiveOutput) State() CognitiveState {
 }
 
 type CognitiveStateDelta struct {
-	FromSequence uint64
-	ToSequence uint64
-	AddedNodeIDs []knowledge.NodeID
-	RemovedNodeIDs []knowledge.NodeID
-	ActivationDelta map[knowledge.NodeID]float64
-	ConfidenceDelta map[knowledge.NodeID]float64
-	ResonanceDelta float64
-	PredictionErrorDelta float64
+	FromSequence uint64 `json:"from_sequence"`
+	ToSequence uint64 `json:"to_sequence"`
+	AddedNodeIDs []knowledge.NodeID `json:"added_node_ids"`
+	RemovedNodeIDs []knowledge.NodeID `json:"removed_node_ids"`
+	ActivationDelta map[knowledge.NodeID]float64 `json:"activation_delta"`
+	ConfidenceDelta map[knowledge.NodeID]float64 `json:"confidence_delta"`
+	ResonanceDelta float64 `json:"resonance_delta"`
+	PredictionErrorDelta float64 `json:"prediction_error_delta"`
 }
 
 func cloneCognitiveState(in CognitiveState) CognitiveState {
@@ -143,6 +143,7 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 		}
 	}
 	r.seq = nextSeq
+	if r.telemetry != nil { r.telemetry.Publish(r.telemetryEventLocked(EventTypeOutcome, outcome.ObservedAt, nil, nil, &outcome)) }
 	return r.seq, nil
 }
 
