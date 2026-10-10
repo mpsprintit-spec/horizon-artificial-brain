@@ -1,7 +1,7 @@
 {
   "schema_version": "horizon.knowledge-frame.v1",
   "corpus_id": "horizon-cross-domain-seed-v1",
-  "purpose": "Cross-domain pilot corpus for structured knowledge representation and runtime integration. Includes Indonesian lexical and discourse frames, mathematics, physical sciences, biology and neuroscience, computing and engineering, and empirical reasoning. Model-synthesized entries are explicitly unverified; formal mathematics entries state assumptions and derivations. This is not a complete or externally reviewed knowledge base.",
+  "purpose": "Cross-domain pilot corpus for structured knowledge representation and runtime integration. Includes Indonesian lexical, aspectual, causal, and discourse frames; mathematics; physical sciences; biology and neuroscience; computing and engineering; and empirical reasoning. Model-synthesized entries are explicitly unverified; formal mathematics entries state assumptions and derivations. This is not a complete or externally reviewed knowledge base.",
   "records": [
     {
       "schema_version": "horizon.knowledge-frame.v1",
@@ -1836,6 +1836,654 @@
         "source_urls": [],
         "revision_conditions": [
           "Review against authoritative reference material and test the stated conditions."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-jatuh-physical",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "Physical-motion sense of 'jatuh': an entity moves downward under gravity or loses support, with contact and damage not entailed by the verb alone.",
+        "terms": [
+          "jatuh",
+          "terjatuh",
+          "menjatuhkan",
+          "kejatuhan"
+        ],
+        "lexical": {
+          "surface": "jatuh",
+          "lemma": "jatuh",
+          "part_of_speech": "verb",
+          "sense_id": "jatuh.physical-motion",
+          "argument_roles": [
+            {
+              "role": "Theme",
+              "description": "Entity whose position changes downward",
+              "required": true
+            },
+            {
+              "role": "Source",
+              "description": "Optional prior location or support",
+              "required": false
+            },
+            {
+              "role": "Cause",
+              "description": "Optional cause such as loss of support or an external force",
+              "required": false
+            }
+          ],
+          "examples": [
+            {
+              "text": "Gelas itu jatuh dari meja.",
+              "interpretation": "The glass moves from the table to a lower position; breaking is not entailed.",
+              "context": "Physical motion."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "An entity is at a higher position or supported by a surface."
+          ],
+          "trigger_or_conditions": [
+            "Support is lost, the entity is displaced, or a force initiates downward motion."
+          ],
+          "mechanism_or_transition": [
+            "The entity's position changes downward; gravity commonly contributes near Earth's surface."
+          ],
+          "resulting_state": [
+            "The entity occupies a lower position or reaches a lower surface."
+          ],
+          "temporal_order": [
+            "support or position changes",
+            "downward motion occurs",
+            "a later position is reached"
+          ],
+          "invariants": [
+            "Falling does not entail breaking, injury, or reaching the ground."
+          ],
+          "unknowns": [
+            "Exact trajectory, cause, speed, and final condition require context."
+          ]
+        },
+        "context_conditions": [
+          "Physical-motion reading is favored by a concrete moving theme and spatial complement."
+        ],
+        "constraints": [
+          "Do not infer damage or intention from 'jatuh' alone."
+        ],
+        "limitations": [
+          "Other uses such as 'jatuh tempo', 'jatuh cinta', and 'jatuh pada pilihan' require separate contextual senses or constructions."
+        ],
+        "cross_references": [
+          "Indonesian aspect and voice",
+          "state-transition frames"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.75,
+        "evidence_summary": "Illustrative analysis of common Indonesian usage; requires dictionary and corpus review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review sense distinctions against authoritative Indonesian lexical resources and corpus examples."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-memberi-transfer",
+      "domain": "language",
+      "subdomain": "Indonesian lexical semantics and event structure",
+      "kind": "lexical_sense",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Memberi' describes an agent causing a recipient to receive or gain access to a theme; actual transfer, acceptance, and continued possession depend on context.",
+        "terms": [
+          "memberi",
+          "pemberian",
+          "penerima",
+          "pemberi",
+          "sesuatu"
+        ],
+        "lexical": {
+          "surface": "memberi",
+          "lemma": "beri",
+          "part_of_speech": "verb",
+          "morphology": [
+            "meN- + beri"
+          ],
+          "sense_id": "memberi.transfer",
+          "argument_roles": [
+            {
+              "role": "Agent",
+              "description": "Entity that gives or provides",
+              "required": true
+            },
+            {
+              "role": "Recipient",
+              "description": "Entity intended to receive",
+              "required": true
+            },
+            {
+              "role": "Theme",
+              "description": "Thing, information, or service provided",
+              "required": true
+            }
+          ],
+          "examples": [
+            {
+              "text": "Rina memberi Budi sebuah buku.",
+              "interpretation": "Rina provides a book to Budi; whether Budi accepts or keeps it is not separately asserted.",
+              "context": "Transfer event."
+            },
+            {
+              "text": "Dokter memberi pasien obat.",
+              "interpretation": "A provider supplies or administers medicine to a patient, depending on context.",
+              "context": "Care context."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "Agent has, controls, or can provide a theme; recipient does not yet have it through this event."
+          ],
+          "trigger_or_conditions": [
+            "Agent provides or offers the theme to a recipient."
+          ],
+          "mechanism_or_transition": [
+            "A transfer, provision, communication, or service event links agent, theme, and recipient."
+          ],
+          "resulting_state": [
+            "Recipient is provided with or offered the theme; exact possession or acceptance depends on construction and context."
+          ],
+          "temporal_order": [
+            "provision begins",
+            "theme or benefit is directed to recipient",
+            "acceptance or resulting possession may follow"
+          ],
+          "invariants": [
+            "Giving does not always mean permanent ownership transfer; information and services can also be given."
+          ],
+          "unknowns": [
+            "Acceptance, completion, and resulting possession may remain unspecified."
+          ]
+        },
+        "context_conditions": [
+          "The theme and domain determine whether the event is physical transfer, information, permission, or service."
+        ],
+        "constraints": [
+          "Do not infer recipient acceptance or permanent ownership unless supported by context."
+        ],
+        "limitations": [
+          "Argument realization varies; some complements may be omitted when recoverable from discourse."
+        ],
+        "cross_references": [
+          "Indonesian transitivity",
+          "semantic roles",
+          "event structure"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.72,
+        "evidence_summary": "General event-semantic analysis; requires lexical and corpus review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review valency patterns and examples in authoritative Indonesian references and corpora."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-belum-temporal-negation",
+      "domain": "language",
+      "subdomain": "Indonesian semantics and aspect",
+      "kind": "interaction_pattern",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Belum' commonly marks that a relevant event or state has not occurred or been reached by a contextually relevant time, while often leaving it open whether it will occur later.",
+        "terms": [
+          "belum",
+          "sudah",
+          "tidak",
+          "aspek",
+          "waktu acuan"
+        ],
+        "lexical": {
+          "surface": "belum",
+          "lemma": "belum",
+          "part_of_speech": "aspectual adverb",
+          "sense_id": "belum.not-yet",
+          "examples": [
+            {
+              "text": "Dia belum datang.",
+              "interpretation": "At the relevant reference time, the person has not arrived; future arrival is not guaranteed.",
+              "context": "Temporal status."
+            },
+            {
+              "text": "Pekerjaan itu belum selesai.",
+              "interpretation": "The work is not complete at the reference time; completion may remain expected or possible.",
+              "context": "Event completion."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "A relevant event has not occurred or a target state has not been reached by the reference time."
+          ],
+          "trigger_or_conditions": [
+            "A proposition is evaluated relative to a time or expectation supplied by context."
+          ],
+          "mechanism_or_transition": [
+            "The marker places the event or state before its occurrence or attainment at the reference time."
+          ],
+          "resulting_state": [
+            "The proposition is negative at the reference time, while later occurrence may remain possible."
+          ],
+          "temporal_order": [
+            "reference time is established",
+            "event completion is evaluated",
+            "later outcome remains open unless separately stated"
+          ],
+          "invariants": [
+            "'Belum' does not guarantee that the event will eventually happen."
+          ],
+          "unknowns": [
+            "Expectation and future likelihood depend on discourse context."
+          ]
+        },
+        "context_conditions": [
+          "Interpretation depends on the predicate, reference time, and discourse expectations."
+        ],
+        "constraints": [
+          "Do not equate 'belum' with an unconditional claim that the event will happen later."
+        ],
+        "limitations": [
+          "Aspectual and pragmatic readings can vary across constructions."
+        ],
+        "cross_references": [
+          "Negation",
+          "temporal reference",
+          "Indonesian discourse"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.75,
+        "evidence_summary": "General analysis of common Indonesian usage; requires linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review aspectual semantics and corpus usage."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-language-id-karena-causal-link",
+      "domain": "language",
+      "subdomain": "Indonesian syntax, semantics and discourse",
+      "kind": "relation",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "'Karena' introduces a reason or cause relation, but the relation may be causal, explanatory, or justificatory depending on the connected clauses and context.",
+        "terms": [
+          "karena",
+          "sebab",
+          "akibat",
+          "alasan",
+          "kausalitas"
+        ],
+        "lexical": {
+          "surface": "karena",
+          "lemma": "karena",
+          "part_of_speech": "conjunction/preposition",
+          "sense_id": "karena.reason-cause",
+          "examples": [
+            {
+              "text": "Jalan basah karena hujan.",
+              "interpretation": "Rain is presented as the cause or explanation of the wet road.",
+              "context": "Physical explanation."
+            },
+            {
+              "text": "Saya pulang karena sudah malam.",
+              "interpretation": "Nighttime is given as the reason for returning home; the relation includes practical reasoning.",
+              "context": "Action justification."
+            }
+          ]
+        },
+        "state_model": {
+          "initial_state": [
+            "Two propositions or events are available: a claim or action and a proposed reason."
+          ],
+          "trigger_or_conditions": [
+            "The speaker links the propositions using 'karena'."
+          ],
+          "mechanism_or_transition": [
+            "The second proposition is interpreted as a cause, reason, or explanation for the first, subject to context."
+          ],
+          "resulting_state": [
+            "The discourse contains an asserted or proposed explanatory relation."
+          ],
+          "invariants": [
+            "Use of 'karena' alone does not prove that the proposed cause is objectively correct."
+          ],
+          "unknowns": [
+            "The exact relation may be physical causation, motivation, justification, or explanation."
+          ]
+        },
+        "context_conditions": [
+          "Clause type, event semantics, world knowledge, and speaker intent constrain interpretation."
+        ],
+        "constraints": [
+          "Do not treat every 'karena' relation as experimentally established causation."
+        ],
+        "limitations": [
+          "The connective signals a discourse relation; its truth and causal strength require separate evaluation."
+        ],
+        "cross_references": [
+          "Causation versus correlation",
+          "discourse relations",
+          "empirical evidence"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.78,
+        "evidence_summary": "Illustrative Indonesian discourse analysis; requires corpus and linguistic review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Review examples across causal, motivational, and justificatory contexts."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-function-composition",
+      "domain": "mathematics",
+      "subdomain": "functions and algebra",
+      "kind": "formal_rule",
+      "status": "established",
+      "content": {
+        "summary": "Function composition applies one function to the output of another, with domain and codomain compatibility required.",
+        "terms": [
+          "function",
+          "domain",
+          "codomain",
+          "composition",
+          "mapping"
+        ],
+        "definition": "For functions f:A→B and g:B→C, the composition g∘f:A→C is defined by (g∘f)(x)=g(f(x)).",
+        "equation": "(g ∘ f)(x) = g(f(x))",
+        "state_model": {
+          "initial_state": [
+            "An input x belongs to the domain of f, and f(x) belongs to the domain of g."
+          ],
+          "trigger_or_conditions": [
+            "The output space of f is compatible with the input domain of g."
+          ],
+          "mechanism_or_transition": [
+            "Evaluate f(x), then use that result as the input to g."
+          ],
+          "resulting_state": [
+            "The composed output g(f(x)) is obtained."
+          ],
+          "invariants": [
+            "In general, g∘f is not equal to f∘g; order matters."
+          ],
+          "unknowns": [
+            "Whether composition is defined depends on the functions' domains and codomains."
+          ]
+        },
+        "procedure": [
+          "Check domain and codomain compatibility.",
+          "Evaluate the inner function f(x).",
+          "Apply g to the resulting value.",
+          "Check the final output lies in the codomain of g."
+        ],
+        "constraints": [
+          "Do not reverse the order: (g∘f)(x) means g(f(x))."
+        ],
+        "cross_references": [
+          "Relations",
+          "algebra",
+          "program composition"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_definition",
+        "confidence": 1,
+        "evidence_summary": "Standard definition; mechanically checkable under stated domain conditions.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-math-conditional-probability",
+      "domain": "mathematics",
+      "subdomain": "probability",
+      "kind": "formal_rule",
+      "status": "established",
+      "content": {
+        "summary": "Conditional probability measures the probability of A when B is known to have occurred, provided P(B)>0.",
+        "terms": [
+          "conditional probability",
+          "event",
+          "sample space",
+          "intersection",
+          "evidence"
+        ],
+        "definition": "P(A|B)=P(A∩B)/P(B), for events A and B with P(B)>0.",
+        "equation": "P(A | B) = P(A ∩ B) / P(B), when P(B) > 0",
+        "state_model": {
+          "initial_state": [
+            "Events A and B are defined in a probability space, and P(B)>0."
+          ],
+          "trigger_or_conditions": [
+            "Information that B occurred is incorporated."
+          ],
+          "mechanism_or_transition": [
+            "Restrict the reference space to B and compute the proportion of B outcomes that also belong to A."
+          ],
+          "resulting_state": [
+            "A conditional probability P(A|B) is obtained."
+          ],
+          "invariants": [
+            "P(A|B) need not equal P(A); equality requires additional conditions."
+          ],
+          "unknowns": [
+            "A numerical value requires a probability model or data for A, B, and their intersection."
+          ]
+        },
+        "constraints": [
+          "The formula is undefined when P(B)=0 under the elementary definition."
+        ],
+        "limitations": [
+          "Conditional probability alone does not establish causation."
+        ],
+        "cross_references": [
+          "Bayes' theorem",
+          "statistical inference",
+          "causal reasoning"
+        ]
+      },
+      "epistemic": {
+        "basis": "formal_definition",
+        "confidence": 1,
+        "evidence_summary": "Standard probability definition with explicit nonzero denominator condition.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": []
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-biology-action-potential-overview",
+      "domain": "biology-neuroscience",
+      "subdomain": "neurophysiology",
+      "kind": "mechanism",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A neuronal action potential is a regenerative change in membrane potential involving voltage-dependent ion conductances; details vary by cell type and physiological conditions.",
+        "terms": [
+          "membrane potential",
+          "threshold",
+          "sodium conductance",
+          "potassium conductance",
+          "refractory period",
+          "action potential"
+        ],
+        "entities": [
+          {
+            "id": "membrane",
+            "type": "cell-structure"
+          },
+          {
+            "id": "ion-channels",
+            "type": "molecular-machinery"
+          },
+          {
+            "id": "action-potential",
+            "type": "electrical-event"
+          }
+        ],
+        "relations": [
+          {
+            "type": "changes-conductance",
+            "from": "ion-channels",
+            "to": "membrane",
+            "direction": "voltage-dependent channels alter ionic permeability",
+            "confidence": 0.85
+          },
+          {
+            "type": "propagates-along",
+            "from": "action-potential",
+            "to": "neuronal-membrane",
+            "direction": "regenerative membrane changes propagate under suitable conditions",
+            "confidence": 0.85
+          }
+        ],
+        "state_model": {
+          "initial_state": [
+            "The neuron has a resting membrane potential and ion gradients maintained by cellular processes."
+          ],
+          "trigger_or_conditions": [
+            "A depolarizing input reaches threshold under the relevant cell conditions."
+          ],
+          "mechanism_or_transition": [
+            "Voltage-dependent conductances change; inward and outward ionic currents produce a rapid membrane-potential excursion and recovery."
+          ],
+          "resulting_state": [
+            "The membrane returns toward its resting regime and may pass through a refractory period."
+          ],
+          "temporal_order": [
+            "membrane depolarizes toward threshold",
+            "regenerative upstroke occurs",
+            "repolarization follows",
+            "refractory properties recover"
+          ],
+          "invariants": [
+            "An action potential is not simply a static stored value; it is a time-dependent electrochemical event."
+          ],
+          "unknowns": [
+            "Channel composition, amplitude, duration, and propagation differ among cell types."
+          ]
+        },
+        "constraints": [
+          "Do not assume all neurons have identical action-potential shapes or channel kinetics."
+        ],
+        "limitations": [
+          "This is a high-level frame, not a complete biophysical model."
+        ],
+        "cross_references": [
+          "Neuronal signaling",
+          "membrane physiology",
+          "dynamic systems"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.8,
+        "evidence_summary": "General neurophysiology summary; should be checked against a current textbook or peer-reviewed review.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Add authoritative source references and cell-type-specific details before treating as a researched record."
+        ]
+      }
+    },
+    {
+      "schema_version": "horizon.knowledge-frame.v1",
+      "id": "id-empirical-measurement-uncertainty",
+      "domain": "empirical-reasoning",
+      "subdomain": "measurement and metrology",
+      "kind": "method",
+      "status": "model_synthesized_unverified",
+      "content": {
+        "summary": "A measurement result should be interpreted with its measurement procedure, units, resolution, calibration, and uncertainty rather than as an exact value without conditions.",
+        "terms": [
+          "measurement",
+          "uncertainty",
+          "resolution",
+          "calibration",
+          "repeatability",
+          "systematic error"
+        ],
+        "state_model": {
+          "initial_state": [
+            "A measurand is defined and an instrument or procedure is selected."
+          ],
+          "trigger_or_conditions": [
+            "The instrument is used under specified conditions with known calibration status and measurement protocol."
+          ],
+          "mechanism_or_transition": [
+            "A reading is produced and interpreted with relevant resolution, repeatability, calibration, and uncertainty information."
+          ],
+          "resulting_state": [
+            "A measurement result is reported with units and appropriate uncertainty or limitations."
+          ],
+          "temporal_order": [
+            "define measurand",
+            "measure under protocol",
+            "evaluate calibration and uncertainty",
+            "report result and limitations"
+          ],
+          "invariants": [
+            "Displayed digits alone do not establish accuracy or precision."
+          ],
+          "unknowns": [
+            "Uncertainty components depend on instrument, procedure, environment, and measurand."
+          ]
+        },
+        "constraints": [
+          "Do not equate precision with accuracy or assume a measurement is exact."
+        ],
+        "limitations": [
+          "Specific uncertainty budgets require a defined measurement and quantitative evidence."
+        ],
+        "cross_references": [
+          "Experimental design",
+          "statistics",
+          "model evaluation"
+        ]
+      },
+      "epistemic": {
+        "basis": "model_synthesis",
+        "confidence": 0.85,
+        "evidence_summary": "General metrology principle; detailed uncertainty evaluation requires method-specific references.",
+        "source_ids": [],
+        "source_urls": [],
+        "revision_conditions": [
+          "Anchor quantitative methods to authoritative metrology guidance when expanding this topic."
         ]
       }
     }
