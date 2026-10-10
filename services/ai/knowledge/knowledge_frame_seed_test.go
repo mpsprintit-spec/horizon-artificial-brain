@@ -12,7 +12,7 @@ func TestSeedKnowledgeCorpusCompilesWithFrameMetadata(t *testing.T) {
 	if err != nil { t.Fatal(err) }
 	corpus, err := DecodeKnowledgeFrameCorpus(bytes.NewReader(data))
 	if err != nil { t.Fatal(err) }
-	if len(corpus.Records) != 15 { t.Fatalf("records=%d, want 15", len(corpus.Records)) }
+	if len(corpus.Records) != 27 { t.Fatalf("records=%d, want 27", len(corpus.Records)) }
 	documents, err := corpus.KnowledgeDocuments()
 	if err != nil { t.Fatal(err) }
 	if len(documents) != len(corpus.Records) { t.Fatalf("documents=%d, records=%d", len(documents), len(corpus.Records)) }
