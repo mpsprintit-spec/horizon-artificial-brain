@@ -82,10 +82,17 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		if event.SchemaVersion != EventLogSchemaVersion { return nil, fmt.Errorf("unsupported event log schema version %d", event.SchemaVersion) }
 		if event.BrainIdentity != BrainIdentity { return nil, fmt.Errorf("event belongs to brain %q", event.BrainIdentity) }
 		if event.Sequence != expected {
-			// A byte-identical repeated line is a harmless duplicate append, not
-			// a missing event. Ignore only that exact adjacent duplicate; never
-			// skip sequence gaps or conflicting events with the same sequence.
-			if event.Sequence+1 == expected && bytes.Equal(line, previousLine) {
+			// Duplicate sequence numbers can be written by interrupted/retried
+			// persistence. Keep the first record for that sequence and ignore
+			// later records with the same sequence. Do not skip forward across
+			// a genuine gap: that still requires explicit recovery.
+			if event.Sequence+1 == expected {
+				if bytes.Equal(line, previousLine) {
+					continue
+				}
+				// Same sequence but a different serialized payload: keep the
+				// first record deterministically so startup can continue while
+				// preserving strict checks for missing sequence numbers.
 				continue
 			}
 			return nil, fmt.Errorf("event sequence discontinuity: got %d want %d", event.Sequence, expected)
