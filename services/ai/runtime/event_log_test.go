@@ -160,3 +160,21 @@ func TestReadEventLogRejectsConflictingDuplicateSequence(t *testing.T) {
 		t.Fatal("expected conflicting duplicate sequence to be rejected")
 	}
 }
+
+func TestEventLogRejectsConcurrentWriter(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	first, err := OpenEventLog(path)
+	if err != nil {
+		t.Fatalf("open first writer: %v", err)
+	}
+	defer first.Close()
+
+	second, err := OpenEventLog(path)
+	if err == nil {
+		second.Close()
+		t.Fatal("expected second writer to be rejected while first writer holds lock")
+	}
+	if _, err := first.file.Stat(); err != nil {
+		t.Fatalf("first writer should remain usable: %v", err)
+	}
+}
