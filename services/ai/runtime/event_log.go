@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"syscall"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/learning"
@@ -38,13 +39,28 @@ const (
 type EventLog struct {
 	mu sync.Mutex
 	file *os.File
+	lockFile *os.File
 }
 
 func OpenEventLog(path string) (*EventLog, error) {
-	if path == "" { return nil, errors.New("event log path is empty") }
+	if path == "" {
+		return nil, errors.New("event log path is empty")
+	}
+	lockFile, err := os.OpenFile(path+".writer.lock", os.O_CREATE|os.O_RDWR, 0600)
+	if err != nil {
+		return nil, fmt.Errorf("open event log writer lock: %w", err)
+	}
+	if err := syscall.Flock(int(lockFile.Fd()), syscall.LOCK_EX|syscall.LOCK_NB); err != nil {
+		lockFile.Close()
+		return nil, fmt.Errorf("event log already has another writer: %w", err)
+	}
 	file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0600)
-	if err != nil { return nil, fmt.Errorf("open event log: %w", err) }
-	return &EventLog{file: file}, nil
+	if err != nil {
+		syscall.Flock(int(lockFile.Fd()), syscall.LOCK_UN)
+		lockFile.Close()
+		return nil, fmt.Errorf("open event log: %w", err)
+	}
+	return &EventLog{file: file, lockFile: lockFile}, nil
 }
 
 func (l *EventLog) Append(event LoggedEvent) error {
@@ -61,10 +77,26 @@ func (l *EventLog) Append(event LoggedEvent) error {
 }
 
 func (l *EventLog) Close() error {
-	if l == nil || l.file == nil { return nil }
+	if l == nil {
+		return nil
+	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	return l.file.Close()
+	var closeErr error
+	if l.file != nil {
+		closeErr = l.file.Close()
+		l.file = nil
+	}
+	if l.lockFile != nil {
+		if err := syscall.Flock(int(l.lockFile.Fd()), syscall.LOCK_UN); err != nil && closeErr == nil {
+			closeErr = err
+		}
+		if err := l.lockFile.Close(); err != nil && closeErr == nil {
+			closeErr = err
+		}
+		l.lockFile = nil
+	}
+	return closeErr
 }
 
 func ReadEventLog(path string) ([]LoggedEvent, error) {
