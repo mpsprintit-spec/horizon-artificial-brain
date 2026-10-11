@@ -128,3 +128,26 @@ func TestInquiryConsequencePersistsCausalOutcomeTrace(t *testing.T) {
 		t.Fatal("replay did not reconstruct causal outcome trace")
 	}
 }
+
+
+func TestReadEventLogSkipsDuplicateSequenceRecord(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	data := []byte(
+		`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":1,"type":"think","timestamp":"2026-10-11T00:00:00Z","event":{"cycles":1}}` + "\n" +
+		`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":1,"type":"think","timestamp":"2026-10-11T00:00:01Z","event":{"cycles":2}}` + "\n" +
+		`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":2,"type":"think","timestamp":"2026-10-11T00:00:02Z","event":{"cycles":3}}` + "\n",
+	)
+	if err := os.WriteFile(path, data, 0600); err != nil {
+		t.Fatalf("write log: %v", err)
+	}
+	events, err := ReadEventLog(path)
+	if err != nil {
+		t.Fatalf("read log: %v", err)
+	}
+	if len(events) != 2 || events[0].Sequence != 1 || events[1].Sequence != 2 {
+		t.Fatalf("unexpected recovered event sequence: %+v", events)
+	}
+	if events[0].Event.Cycles != 1 {
+		t.Fatalf("expected first record to win for duplicate sequence, got cycles=%d", events[0].Event.Cycles)
+	}
+}
