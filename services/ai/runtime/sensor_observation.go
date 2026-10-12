@@ -103,7 +103,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 	event := Event{
 		ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
 		Timestamp: sensor.Timestamp.UTC(), Cycles: 1,
-		StimulusNodeIDs: ids,
+		StimulusNodeIDs: ids, SensorObservation: &sensor,
 	}
 	output, err := o.Runtime.CognitiveProcess(event)
 	if err != nil {
