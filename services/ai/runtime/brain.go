@@ -36,6 +36,7 @@ type Event struct {
 	// outcome processing from silently substituting a newer recurrent state.
 	PredictionOverride *activation.Prediction
 	Observation *ObservationEnvelope `json:"observation,omitempty"`
+	SensorObservation *SensorObservation `json:"sensor_observation,omitempty"`
 }
 
 type ActionBinding struct {
@@ -493,4 +494,4 @@ func rankedNodeIDs(nodes []*knowledge.ConceptNode) []knowledge.NodeID { out := m
 func cloneNodeValues(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 { if in == nil { return map[knowledge.NodeID]float64{} }; out := make(map[knowledge.NodeID]float64, len(in)); for id, value := range in { out[id] = value }; return out }
 func cloneContext(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 { if in == nil { return nil }; out := make(map[knowledge.NodeID]float64, len(in)); for id, value := range in { out[id] = value }; return out }
 func clonePrediction(in *activation.Prediction) *activation.Prediction { if in == nil { return nil }; return &activation.Prediction{State: cloneNodeValues(in.State), Confidence: cloneNodeValues(in.Confidence)} }
-func cloneEvent(in Event) *Event { out := in; out.Stimulus = append([]string(nil), in.Stimulus...); out.StimulusNodeIDs = append([]knowledge.NodeID(nil), in.StimulusNodeIDs...); out.Context = cloneContext(in.Context); out.ContextTokens = append([]string(nil), in.ContextTokens...); out.DataTokens = append([]string(nil), in.DataTokens...); out.PredictionOverride = clonePrediction(in.PredictionOverride); return &out }
+func cloneEvent(in Event) *Event { out := in; out.Stimulus = append([]string(nil), in.Stimulus...); out.StimulusNodeIDs = append([]knowledge.NodeID(nil), in.StimulusNodeIDs...); out.Context = cloneContext(in.Context); out.ContextTokens = append([]string(nil), in.ContextTokens...); out.DataTokens = append([]string(nil), in.DataTokens...); out.PredictionOverride = clonePrediction(in.PredictionOverride); if in.SensorObservation != nil { sensor := *in.SensorObservation; sensor.ChannelStates = append([]float64(nil), in.SensorObservation.ChannelStates...); sensor.SpatialCoordinates = append([]float64(nil), in.SensorObservation.SpatialCoordinates...); sensor.TemporalDelta = append([]float64(nil), in.SensorObservation.TemporalDelta...); sensor.Provenance.ParentSampleIDs = append([]string(nil), in.SensorObservation.Provenance.ParentSampleIDs...); out.SensorObservation = &sensor }; return &out }
