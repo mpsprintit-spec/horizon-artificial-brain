@@ -1,8 +1,8 @@
 package runtime
 
 import (
-	"errors"
-	"math"
+	"bytes"\n\t"errors"
+	"math"\n\t"path/filepath"\n\t"reflect"
 	"testing"
 	"time"
 
@@ -78,5 +78,58 @@ func TestProcessSensorObservationProjectsIntoCanonicalBrain(t *testing.T) {
 	}
 	if len(brain.Registry.Nodes()) <= before {
 		t.Fatal("expected sensor input to project numeric state into the canonical brain")
+	}
+}
+
+
+func TestSensorObservationEventReplayReconstructsCanonicalBrain(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "sensor-events.jsonl")
+	log, err := OpenEventLog(path)
+	if err != nil { t.Fatalf("open event log: %v", err) }
+	defer log.Close()
+
+	at := time.Date(2026, 10, 12, 8, 0, 0, 0, time.UTC)
+	sensor := testSensorObservation()
+	sensor.Timestamp = at
+	sensor.Provenance.ParentSampleIDs = []string{"frame-previous"}
+	originalBrain := knowledge.NewBootstrapBrain()
+	original := NewBrainRuntime(originalBrain)
+	original.SetClock(NewFixedClock(at))
+	original.SetEventLog(log)
+	if _, err := NewCognitiveOrchestrator(original).ProcessSensorObservation(sensor); err != nil {
+		t.Fatalf("process sensor observation: %v", err)
+	}
+
+	events, err := ReadEventLog(path)
+	if err != nil { t.Fatalf("read event log: %v", err) }
+	if len(events) != 1 || events[0].Type != EventTypeProcess || events[0].Event == nil || events[0].Event.SensorObservation == nil {
+		t.Fatalf("sensor observation was not persisted as a replayable process event: %+v", events)
+	}
+	persisted := events[0].Event.SensorObservation
+	if persisted.SampleID != sensor.SampleID || persisted.Provenance.CalibrationID != sensor.Provenance.CalibrationID ||
+		len(persisted.Provenance.ParentSampleIDs) != 1 || persisted.Provenance.ParentSampleIDs[0] != "frame-previous" {
+		t.Fatalf("sensor provenance did not survive event serialization: %+v", persisted)
+	}
+
+	replayedBrain := knowledge.NewBootstrapBrain()
+	replayed := NewBrainRuntime(replayedBrain)
+	replayed.SetClock(NewFixedClock(at))
+	if err := ReplayEventLog(replayed, events); err != nil {
+		t.Fatalf("replay sensor event: %v", err)
+	}
+
+	originalPath := filepath.Join(t.TempDir(), "original-checkpoint.json")
+	replayedPath := filepath.Join(t.TempDir(), "replayed-checkpoint.json")
+	if err := original.Checkpoint(originalPath); err != nil { t.Fatalf("checkpoint original: %v", err) }
+	if err := replayed.Checkpoint(replayedPath); err != nil { t.Fatalf("checkpoint replayed: %v", err) }
+	originalSnapshot, err := readCheckpointForTest(originalPath)
+	if err != nil { t.Fatalf("read original checkpoint: %v", err) }
+	replayedSnapshot, err := readCheckpointForTest(replayedPath)
+	if err != nil { t.Fatalf("read replayed checkpoint: %v", err) }
+	if !bytes.Equal(originalSnapshot.Brain, replayedSnapshot.Brain) {
+		t.Fatalf("sensor replay did not reproduce canonical neural substrate: original_bytes=%d replayed_bytes=%d", len(originalSnapshot.Brain), len(replayedSnapshot.Brain))
+	}
+	if !reflect.DeepEqual(originalSnapshot.Activation, replayedSnapshot.Activation) {
+		t.Fatal("sensor replay did not reproduce recurrent activation state")
 	}
 }
