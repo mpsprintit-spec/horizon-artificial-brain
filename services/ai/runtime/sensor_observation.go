@@ -68,11 +68,11 @@ func (s SensorObservation) NeuralVector() (knowledge.NeuralVector, error) {
 	if err := s.Validate(); err != nil {
 		return knowledge.NeuralVector{}, err
 	}
-	values := []float64{1, float64(len(s.ChannelStates)) / float64(max(1, len(s.ChannelStates)))}
+	values := []float64{1, float64(len(s.ChannelStates)) / 64}
 	values = append(values, s.ChannelStates...)
-	values = append(values, -1, float64(len(s.SpatialCoordinates))/float64(max(1, len(s.SpatialCoordinates))))
+	values = append(values, -1, float64(len(s.SpatialCoordinates))/64)
 	values = append(values, s.SpatialCoordinates...)
-	values = append(values, 0.5, float64(len(s.TemporalDelta))/float64(max(1, len(s.TemporalDelta))))
+	values = append(values, 0.5, float64(len(s.TemporalDelta))/64)
 	values = append(values, s.TemporalDelta...)
 	values = append(values, s.Confidence)
 	return knowledge.NewNeuralVector(values), nil
@@ -89,7 +89,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 	if err != nil {
 		return CognitiveInterpretation{}, err
 	}
-	population, err := o.Runtime.brain.ProjectVectorPopulationAt(vector, knowledge.GroundingThreshold, 4, sensor.Timestamp)
+	population, err := o.Runtime.brain.ProjectVectorPopulationAt(vector, GroundingThreshold, 4, sensor.Timestamp)
 	if err != nil {
 		return CognitiveInterpretation{}, err
 	}
