@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
@@ -177,4 +178,51 @@ func TestEventLogRejectsConcurrentWriter(t *testing.T) {
 	if _, err := first.file.Stat(); err != nil {
 		t.Fatalf("first writer should remain usable: %v", err)
 	}
+}
+
+
+func TestRepairConflictingSequencesPreservesBackupAndAllEvents(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	first := `{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":1,"type":"think","timestamp":"2026-10-11T00:00:00Z","event":{"cycles":1}}`
+	conflictA := `{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":2,"type":"think","timestamp":"2026-10-11T00:00:01Z","event":{"cycles":2}}`
+	conflictB := `{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":2,"type":"think","timestamp":"2026-10-11T00:00:02Z","event":{"cycles":3}}`
+	last := `{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":3,"type":"think","timestamp":"2026-10-11T00:00:03Z","event":{"cycles":4}}`
+	original := []byte(first + "\n" + conflictA + "\n" + conflictB + "\n" + last + "\n")
+	if err := os.WriteFile(path, original, 0600); err != nil { t.Fatalf("write original log: %v", err) }
+
+	log, err := OpenEventLog(path)
+	if err != nil { t.Fatalf("open log: %v", err) }
+	defer log.Close()
+	backupPath, err := log.RepairConflictingSequences()
+	if err != nil { t.Fatalf("repair conflicting sequences: %v", err) }
+	backup, err := os.ReadFile(backupPath)
+	if err != nil { t.Fatalf("read backup: %v", err) }
+	if !bytes.Equal(backup, original) { t.Fatal("backup does not exactly match original log") }
+
+	events, err := ReadEventLog(path)
+	if err != nil { t.Fatalf("read repaired log: %v", err) }
+	if len(events) != 4 { t.Fatalf("repaired event count: got %d want 4", len(events)) }
+	for i, event := range events {
+		if event.Sequence != uint64(i+1) { t.Fatalf("event %d sequence: got %d want %d", i, event.Sequence, i+1) }
+	}
+	if events[1].Event.Cycles != 2 || events[2].Event.Cycles != 3 {
+		t.Fatalf("repair did not preserve both conflicting payloads: %+v %+v", events[1].Event, events[2].Event)
+	}
+	if _, err := log.file.Stat(); err != nil { t.Fatalf("event log writer should remain usable after repair: %v", err) }
+}
+
+func TestRepairConflictingSequencesRefusesGapsWithoutChangingOriginal(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "events.jsonl")
+	data := []byte(
+		`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":1,"type":"think","timestamp":"2026-10-11T00:00:00Z","event":{"cycles":1}}` + "\n" +
+		`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":3,"type":"think","timestamp":"2026-10-11T00:00:01Z","event":{"cycles":2}}` + "\n" +
+		`{"schema_version":1,"brain_identity":"horizon-primary-brain","sequence":3,"type":"think","timestamp":"2026-10-11T00:00:02Z","event":{"cycles":3}}` + "\n")
+	if err := os.WriteFile(path, data, 0600); err != nil { t.Fatalf("write original log: %v", err) }
+	log, err := OpenEventLog(path)
+	if err != nil { t.Fatalf("open log: %v", err) }
+	defer log.Close()
+	if _, err := log.RepairConflictingSequences(); err == nil { t.Fatal("expected repair to refuse sequence gaps") }
+	got, err := os.ReadFile(path)
+	if err != nil { t.Fatalf("read original log: %v", err) }
+	if !bytes.Equal(got, data) { t.Fatal("failed repair modified the original log") }
 }

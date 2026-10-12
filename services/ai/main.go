@@ -46,7 +46,17 @@ func main() {
 	if err != nil { logger.Error("failed to open brain event log", "path", eventLogPath, "error", err); os.Exit(1) }
 	defer eventLog.Close()
 	horizon.Runtime.SetEventLog(eventLog)
-	if events, readErr := runtime.ReadEventLog(eventLogPath); readErr == nil && len(events) > 0 {
+	events, readErr := runtime.ReadEventLog(eventLogPath)
+	if readErr != nil && strings.Contains(readErr.Error(), "conflicting duplicate event sequence") {
+		backupPath, repairErr := eventLog.RepairConflictingSequences()
+		if repairErr != nil {
+			logger.Error("failed to safely recover brain event log", "error", repairErr)
+			os.Exit(1)
+		}
+		logger.Warn("recovered conflicting brain event log; original preserved", "backup", backupPath)
+		events, readErr = runtime.ReadEventLog(eventLogPath)
+	}
+	if readErr == nil && len(events) > 0 {
 		if err := horizon.Runtime.RestoreEventIndex(events); err != nil { logger.Error("failed to restore event index", "error", err); os.Exit(1) }
 	} else if readErr != nil && !os.IsNotExist(readErr) {
 		logger.Error("failed to read brain event log", "error", readErr); os.Exit(1)
