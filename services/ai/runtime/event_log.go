@@ -345,7 +345,17 @@ func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
 			if _, err := brainRuntime.LearnExperience(*logged.Experience, logged.Timestamp); err != nil { return err }
 		case EventTypeProcess:
 			if logged.Event == nil { return errors.New("process event has no event payload") }
-			if _, _, err := brainRuntime.Process(*logged.Event); err != nil { return err }
+			if logged.Event.SensorObservation != nil {
+				// Sensor processing includes deterministic projection into the canonical
+				// substrate before cognitive processing. Re-run the complete boundary,
+				// not only the downstream event with previously assigned node IDs.
+				orchestrator := NewCognitiveOrchestrator(brainRuntime)
+				if _, err := orchestrator.ProcessSensorObservation(*logged.Event.SensorObservation); err != nil {
+					return fmt.Errorf("replay sensor observation %q: %w", logged.Event.SensorObservation.SampleID, err)
+				}
+			} else if _, _, err := brainRuntime.Process(*logged.Event); err != nil {
+				return err
+			}
 		case EventTypeThink:
 			if logged.Event == nil { return errors.New("think event has no event payload") }
 			if _, _, err := brainRuntime.ThinkAt(logged.Event.Cycles, logged.Timestamp); err != nil { return err }
