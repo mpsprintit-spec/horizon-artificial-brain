@@ -44,7 +44,7 @@ func (s SensorObservation) Validate() error {
 	if len(s.ChannelStates)+len(s.SpatialCoordinates)+len(s.TemporalDelta) == 0 {
 		return fmt.Errorf("%w: no numeric sensor state", ErrInvalidSensorObservation)
 	}
-	if math.IsNaN(s.Confidence) || math.IsInf(s.Confidence, 0) || s.Confidence < 0 || s.Confidence > 1 {
+	if len(s.ChannelStates) > 64 || len(s.SpatialCoordinates) > 64 || len(s.TemporalDelta) > 64 {\n\t\treturn fmt.Errorf("%w: each numeric feature group is limited to 64 values", ErrInvalidSensorObservation)\n\t}\n\tif math.IsNaN(s.Confidence) || math.IsInf(s.Confidence, 0) || s.Confidence < 0 || s.Confidence > 1 {
 		return fmt.Errorf("%w: confidence must be finite and within [0,1]", ErrInvalidSensorObservation)
 	}
 	for name, values := range map[string][]float64{
