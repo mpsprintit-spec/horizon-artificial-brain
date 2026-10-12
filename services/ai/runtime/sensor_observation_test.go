@@ -73,7 +73,7 @@ func TestProcessSensorObservationProjectsIntoCanonicalBrain(t *testing.T) {
 	before := len(brain.Registry.Nodes())
 	interpretation, err := orchestrator.ProcessSensorObservation(testSensorObservation())
 	if err != nil { t.Fatalf("process sensor observation: %v", err) }
-	if interpretation.State.Sequence == 0 {
+	if runtime.LastSequence() == 0 {
 		t.Fatal("expected sensor input to advance canonical runtime state")
 	}
 	if len(brain.Registry.Nodes()) <= before {
