@@ -18,6 +18,8 @@ jobs:
         run: make validate
       - name: Build Go runtime
         run: make build
+      - name: Race-test sensor/runtime concurrency
+        run: go test -race ./services/ai/runtime
       - name: Live Bridge integration smoke
         run: make bridge-smoke
 
