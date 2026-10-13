@@ -6,6 +6,7 @@ import (
 	"math"
 	"path/filepath"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -163,5 +164,36 @@ func TestDuplicateSensorSampleIsRejectedBeforeSecondProjection(t *testing.T) {
 	}
 	if got := runtime.LastSequence(); got != sequenceAfterFirst {
 		t.Fatalf("duplicate sample advanced runtime sequence: before=%d after=%d", sequenceAfterFirst, got)
+	}
+}
+
+
+func TestConcurrentDuplicateSensorSamplesOnlyProjectOnce(t *testing.T) {
+	brain := knowledge.NewBootstrapBrain()
+	runtime := NewBrainRuntime(brain)
+	orchestrator := NewCognitiveOrchestrator(runtime)
+	sensor := testSensorObservation()
+	const workers = 8
+	var wg sync.WaitGroup
+	var mu sync.Mutex
+	successes := 0
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			_, err := orchestrator.ProcessSensorObservation(sensor)
+			mu.Lock()
+			defer mu.Unlock()
+			if err == nil {
+				successes++
+			}
+		}()
+	}
+	wg.Wait()
+	if successes != 1 {
+		t.Fatalf("expected exactly one successful projection for duplicate concurrent samples, got %d", successes)
+	}
+	if got := runtime.LastSequence(); got == 0 {
+		t.Fatal("expected the accepted sensor sample to advance runtime state")
 	}
 }
