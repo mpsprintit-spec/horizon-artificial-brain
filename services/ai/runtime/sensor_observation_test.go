@@ -214,3 +214,74 @@ func TestSensorObservationCloneOwnsNestedSlices(t *testing.T) {
 		t.Fatal("sensor observation clone aliases mutable input slices")
 	}
 }
+
+
+func TestSequentialSensorReplayReconstructsTemporalTransitions(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "sequential-sensor-events.jsonl")
+	log, err := OpenEventLog(path)
+	if err != nil { t.Fatalf("open event log: %v", err) }
+	defer log.Close()
+
+	start := time.Date(2026, 10, 12, 9, 0, 0, 0, time.UTC)
+	originalBrain := knowledge.NewBootstrapBrain()
+	original := NewBrainRuntime(originalBrain)
+	original.SetClock(NewFixedClock(start))
+	original.SetEventLog(log)
+	orchestrator := NewCognitiveOrchestrator(original)
+
+	first := testSensorObservation()
+	first.Timestamp = start
+	first.SampleID = "camera-0:sequence-1"
+	if _, err := orchestrator.ProcessSensorObservation(first); err != nil {
+		t.Fatalf("process first observation: %v", err)
+	}
+	second := testSensorObservation()
+	second.Timestamp = start.Add(100 * time.Millisecond)
+	second.SampleID = "camera-0:sequence-2"
+	second.ChannelStates[0] = 0.75
+	second.SpatialCoordinates[0] = -0.65
+	second.TemporalDelta[0] = 0.9
+	if _, err := orchestrator.ProcessSensorObservation(second); err != nil {
+		t.Fatalf("process second observation: %v", err)
+	}
+
+	events, err := ReadEventLog(path)
+	if err != nil { t.Fatalf("read event log: %v", err) }
+	var sensorEvents int
+	for _, event := range events {
+		if event.Type == EventTypeProcess && event.Event != nil && event.Event.SensorObservation != nil {
+			sensorEvents++
+		}
+	}
+	if sensorEvents != 2 {
+		t.Fatalf("expected two durable sensor events, got %d", sensorEvents)
+	}
+
+	replayedBrain := knowledge.NewBootstrapBrain()
+	replayed := NewBrainRuntime(replayedBrain)
+	replayed.SetClock(NewFixedClock(start))
+	if err := ReplayEventLog(replayed, events); err != nil {
+		t.Fatalf("replay sequential observations: %v", err)
+	}
+	if !reflect.DeepEqual(original.lastObservationPopulation, replayed.lastObservationPopulation) {
+		t.Fatal("replay did not reconstruct the last temporal observation population")
+	}
+	if !original.lastObservationAt.Equal(replayed.lastObservationAt) {
+		t.Fatalf("replay temporal timestamp mismatch: original=%s replayed=%s", original.lastObservationAt, replayed.lastObservationAt)
+	}
+
+	originalPath := filepath.Join(t.TempDir(), "original-sequential-checkpoint.json")
+	replayedPath := filepath.Join(t.TempDir(), "replayed-sequential-checkpoint.json")
+	if err := original.Checkpoint(originalPath); err != nil { t.Fatalf("checkpoint original: %v", err) }
+	if err := replayed.Checkpoint(replayedPath); err != nil { t.Fatalf("checkpoint replayed: %v", err) }
+	originalSnapshot, err := readCheckpointForTest(originalPath)
+	if err != nil { t.Fatalf("read original checkpoint: %v", err) }
+	replayedSnapshot, err := readCheckpointForTest(replayedPath)
+	if err != nil { t.Fatalf("read replayed checkpoint: %v", err) }
+	if !bytes.Equal(originalSnapshot.Brain, replayedSnapshot.Brain) {
+		t.Fatalf("sequential replay diverged from canonical neural substrate: original_bytes=%d replayed_bytes=%d", len(originalSnapshot.Brain), len(replayedSnapshot.Brain))
+	}
+	if !reflect.DeepEqual(originalSnapshot.Activation, replayedSnapshot.Activation) {
+		t.Fatal("sequential replay diverged from recurrent activation state")
+	}
+}
