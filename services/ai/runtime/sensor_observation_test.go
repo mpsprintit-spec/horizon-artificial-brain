@@ -1,8 +1,11 @@
 package runtime
 
 import (
-	"bytes"\n\t"errors"
-	"math"\n\t"path/filepath"\n\t"reflect"
+	"bytes"
+	"errors"
+	"math"
+	"path/filepath"
+	"reflect"
 	"testing"
 	"time"
 
