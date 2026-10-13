@@ -201,15 +201,16 @@ func TestConcurrentDuplicateSensorSamplesOnlyProjectOnce(t *testing.T) {
 
 func TestSensorObservationCloneOwnsNestedSlices(t *testing.T) {
 	original := testSensorObservation()
+	original.Provenance.ParentSampleIDs = []string{"parent-1"}
 	clone := original.Clone()
 	original.ChannelStates[0] = -0.99
 	original.SpatialCoordinates[0] = -0.88
 	original.TemporalDelta[0] = -0.77
-	original.Provenance.ParentSampleIDs = append(original.Provenance.ParentSampleIDs, "mutated-parent")
+	original.Provenance.ParentSampleIDs[0] = "mutated-parent"
 	if clone.ChannelStates[0] == original.ChannelStates[0] ||
 		clone.SpatialCoordinates[0] == original.SpatialCoordinates[0] ||
 		clone.TemporalDelta[0] == original.TemporalDelta[0] ||
-		len(clone.Provenance.ParentSampleIDs) != 0 {
+		clone.Provenance.ParentSampleIDs[0] != "parent-1" {
 		t.Fatal("sensor observation clone aliases mutable input slices")
 	}
 }
