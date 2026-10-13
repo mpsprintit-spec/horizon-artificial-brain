@@ -143,3 +143,25 @@ func TestSensorObservationEventReplayReconstructsCanonicalBrain(t *testing.T) {
 		t.Fatal("sensor replay did not reproduce recurrent activation state")
 	}
 }
+
+
+func TestDuplicateSensorSampleIsRejectedBeforeSecondProjection(t *testing.T) {
+	brain := knowledge.NewBootstrapBrain()
+	runtime := NewBrainRuntime(brain)
+	orchestrator := NewCognitiveOrchestrator(runtime)
+	sensor := testSensorObservation()
+	if _, err := orchestrator.ProcessSensorObservation(sensor); err != nil {
+		t.Fatalf("first sensor sample: %v", err)
+	}
+	nodesAfterFirst := len(brain.Registry.Nodes())
+	sequenceAfterFirst := runtime.LastSequence()
+	if _, err := orchestrator.ProcessSensorObservation(sensor); err == nil {
+		t.Fatal("expected duplicate sensor sample ID to be rejected")
+	}
+	if got := len(brain.Registry.Nodes()); got != nodesAfterFirst {
+		t.Fatalf("duplicate sample mutated neural registry: before=%d after=%d", nodesAfterFirst, got)
+	}
+	if got := runtime.LastSequence(); got != sequenceAfterFirst {
+		t.Fatalf("duplicate sample advanced runtime sequence: before=%d after=%d", sequenceAfterFirst, got)
+	}
+}
