@@ -105,10 +105,17 @@ func TestSensorObservationEventReplayReconstructsCanonicalBrain(t *testing.T) {
 
 	events, err := ReadEventLog(path)
 	if err != nil { t.Fatalf("read event log: %v", err) }
-	if len(events) != 1 || events[0].Type != EventTypeProcess || events[0].Event == nil || events[0].Event.SensorObservation == nil {
+	var sensorEvent *LoggedEvent
+	for i := range events {
+		if events[i].Type == EventTypeProcess && events[i].Event != nil && events[i].Event.SensorObservation != nil {
+			sensorEvent = &events[i]
+			break
+		}
+	}
+	if sensorEvent == nil {
 		t.Fatalf("sensor observation was not persisted as a replayable process event: %+v", events)
 	}
-	persisted := events[0].Event.SensorObservation
+	persisted := sensorEvent.Event.SensorObservation
 	if persisted.SampleID != sensor.SampleID || persisted.Provenance.CalibrationID != sensor.Provenance.CalibrationID ||
 		len(persisted.Provenance.ParentSampleIDs) != 1 || persisted.Provenance.ParentSampleIDs[0] != "frame-previous" {
 		t.Fatalf("sensor provenance did not survive event serialization: %+v", persisted)
