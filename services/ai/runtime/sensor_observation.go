@@ -88,6 +88,9 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 	if o == nil || o.Runtime == nil {
 		return CognitiveInterpretation{}, errors.New("cognitive orchestrator is not initialized")
 	}
+	if o.Runtime.HasProcessedEvent(sensor.SampleID) {
+		return CognitiveInterpretation{}, fmt.Errorf("duplicate sensor sample ID %q", sensor.SampleID)
+	}
 	vector, err := sensor.NeuralVector()
 	if err != nil {
 		return CognitiveInterpretation{}, err
