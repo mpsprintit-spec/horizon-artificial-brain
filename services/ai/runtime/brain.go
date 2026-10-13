@@ -64,6 +64,7 @@ type BrainRuntime struct {
 	eventLog *EventLog
 	clock Clock
 	mu sync.Mutex
+	sensorMu sync.Mutex
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
