@@ -142,6 +142,16 @@ func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock
 func (r *BrainRuntime) nowLocked() time.Time { if r.clock == nil { r.clock = WallClock{} }; now := r.clock.Now(); if now.IsZero() { now = time.Now().UTC() }; return now.UTC() }
 func (r *BrainRuntime) now() time.Time { if r == nil { return time.Now().UTC() }; r.mu.Lock(); defer r.mu.Unlock(); return r.nowLocked() }
 func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); r.eventLog = log }
+// HasProcessedEvent reports whether an event ID is already in the durable runtime index.
+// It is used by adapters to reject duplicate samples before they mutate the neural substrate.
+func (r *BrainRuntime) HasProcessedEvent(id string) bool {
+	if r == nil || strings.TrimSpace(id) == "" { return false }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	_, exists := r.processedEvents[id]
+	return exists
+}
+
 func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 	if r == nil || r.brain == nil || r.activation == nil { return activation.Result{}, 0, errors.New("brain runtime is not initialized") }
 	r.mu.Lock()
