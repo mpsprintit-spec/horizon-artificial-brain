@@ -202,17 +202,22 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	previous := append([]knowledge.NodeID(nil), r.lastObservationPopulation...)
 	previousAt := r.lastObservationAt
 	currentCopy := append([]knowledge.NodeID(nil), current...)
-	r.lastObservationPopulation = currentCopy
-	r.lastObservationAt = now
 
-	if len(previous) == 0 {
-		return nil
+	if len(previous) > 0 {
+		// Do not publish the new temporal predecessor until reinforcement has
+		// succeeded. Otherwise a failed canonical mutation would make the next
+		// observation learn from a transition that was never committed.
+		if err := r.brain.ReinforceTransitionPopulation(previous, currentCopy, previousAt, now, 0.25); err != nil {
+			return err
+		}
 	}
 
-	// Keep the observation transition atomic with its runtime predecessor
-	// snapshot. The canonical Brain mutation remains protected by the Brain
-	// mutation boundary inside ReinforceTransitionPopulation.
-	return r.brain.ReinforceTransitionPopulation(previous, currentCopy, previousAt, now, 0.25)
+	// Commit temporal runtime state only after the associated transition
+	// mutation succeeds. For the first observation there is no predecessor
+	// transition to reinforce, so it becomes the initial temporal state here.
+	r.lastObservationPopulation = currentCopy
+	r.lastObservationAt = now
+	return nil
 }
 
 func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
