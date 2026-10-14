@@ -114,7 +114,7 @@ func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold
 // dynamic connections. ProjectionPopulations records distributed receptive
 // fields so repeated experiences can recover the same population without
 // turning similar experiences into one identical representation.
-type BootstrapProvenance struct { Origin string `json:"origin"`; DirectExperience bool `json:"direct_experience"`; Status string `json:"status"` }
+type BootstrapProvenance struct { Origin string `json:"origin"`; DirectExperience bool `json:"direct_experience"`; Status string `json:"status"`; SourceHash string `json:"source_hash,omitempty"` }
 
 type BootstrapExperience struct { ID string `json:"id"`; Populations []NodeID `json:"populations"`; TemporalTrace []time.Time `json:"temporal_trace,omitempty"`; Activation float64 `json:"activation"`; Confidence float64 `json:"confidence"`; Provenance BootstrapProvenance `json:"provenance"` }
 
@@ -154,6 +154,7 @@ type BrainState struct {
 	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`
 	Episodes []BootstrapExperience `json:"episodes,omitempty"`
 	ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"`
+	DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences,omitempty"`
 }
 
 type KnowledgeBase struct {

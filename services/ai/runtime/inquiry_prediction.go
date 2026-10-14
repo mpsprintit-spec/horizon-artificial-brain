@@ -35,10 +35,15 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 		at = r.now()
 	}
 
+	r.mu.Lock()
+	targetSet := r.inquiryTargetSetLocked(action)
+	r.mu.Unlock()
+	return r.predictInquiryInformationValueWithTargets(action, targetSet, uncertainty, at)
+}
+
+func (r *BrainRuntime) inquiryTargetSetLocked(action InquiryAction) map[knowledge.NodeID]struct{} {
 	targetSet := make(map[knowledge.NodeID]struct{})
 	intent := "inquiry:" + string(action)
-
-	r.mu.Lock()
 	for _, binding := range r.actions {
 		if binding.Intent != intent {
 			continue
@@ -50,8 +55,10 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 			targetSet[synapse.TargetNodeID] = struct{}{}
 		}
 	}
-	r.mu.Unlock()
+	return targetSet
+}
 
+func (r *BrainRuntime) predictInquiryInformationValueWithTargets(action InquiryAction, targetSet map[knowledge.NodeID]struct{}, uncertainty float64, at time.Time) (float64, bool, error) {
 	if len(targetSet) == 0 {
 		return uncertainty, false, nil
 	}
@@ -62,6 +69,13 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 	}
 	sort.Slice(targets, func(i, j int) bool { return targets[i] < targets[j] })
 
+	// Snapshot the learned information yield before taking the Brain read lock.
+	// InquiryInformationExperience acquires the same RWMutex internally; calling it
+	// while this read lock is held can deadlock when a writer is waiting.
+	yield, reliability, _, learned := r.brain.InquiryInformationExperience(string(action))
+
+	r.brain.RLock()
+	defer r.brain.RUnlock()
 	prediction := r.activation.PredictOutcomeFromNodes(targets, at, 1)
 
 	// Restrict the outcome distribution to neural units that are actually
@@ -112,7 +126,6 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 		}
 	}
 	uncertaintyOfOutcome := normalizedStateEntropy(channelState)
-	yield, reliability, _, learned := r.brain.InquiryInformationExperience(string(action))
 	if !learned {
 		return 0, true, nil
 	}

@@ -231,3 +231,44 @@ func TestBrainRuntimeInquiryOutcomeChangesAndPersistsLearningStrategy(t *testing
 	}
 	_ = os.Remove(path)
 }
+
+
+func TestBrainRuntimeSerializesAutonomousCognitionAndInquiryPlanning(t *testing.T) {
+	brain := knowledge.NewBrain()
+	for _, surface := range []string{"alpha", "beta", "gamma"} {
+		brain.Store(surface)
+	}
+	r := NewBrainRuntime(brain)
+
+	const workers = 8
+	var wg sync.WaitGroup
+	errs := make(chan error, workers*2)
+	wg.Add(workers * 2)
+
+	for i := 0; i < workers; i++ {
+		go func() {
+			defer wg.Done()
+			_, err := r.CognitiveThink(1)
+			errs <- err
+		}()
+		go func() {
+			defer wg.Done()
+			_, err := r.PlanInquiry(0.7, time.Unix(500, 0).UTC())
+			errs <- err
+		}()
+	}
+	wg.Wait()
+	close(errs)
+
+	for err := range errs {
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+	if got := r.LastSequence(); got != workers {
+		t.Fatalf("autonomous sequence = %d, want %d", got, workers)
+	}
+	if !brain.BrainState.InquiryState.Pending {
+		t.Fatal("inquiry planning did not persist a pending trajectory")
+	}
+}

@@ -42,3 +42,17 @@ Useful categories for future entries include:
 ## Meaning and context
 
 Literal meaning can be modified by pragmatics. `Bisa bantu saya?` literally asks ability, but commonly functions as a polite request. See `../pragmatics/README.md` and `../conversation/README.md` for intent and interaction patterns.
+
+
+## State and event representation
+
+A lexical sense should preserve more than a short gloss when the word describes an action, change, relation, or condition. Where applicable, record:
+
+- participants and semantic roles (agent, theme/patient, experiencer, recipient, instrument, source, goal, and location);
+- the initial state and the conditions under which the expression applies;
+- the event, action, or transition and its temporal order;
+- the resulting state, including what is not guaranteed by the expression;
+- contextual cues, alternative readings, presuppositions, and possible implicatures;
+- epistemic status and review requirements for the analysis itself.
+
+The cross-domain frame format is defined in `../../schemas/knowledge-frame-v1.schema.json`. The initial examples in `../../corpus/seed-v1.json` distinguish physical `membuka` from institutional and metaphorical uses. These entries are model-synthesized and unverified, so they are a representation pilot rather than authoritative dictionary definitions.
