@@ -2,7 +2,6 @@ package runtime
 
 import (
 	"os"
-	"reflect"
 	"sync"
 	"testing"
 	"time"
