@@ -168,6 +168,34 @@ func TestDuplicateSensorSampleIsRejectedBeforeSecondProjection(t *testing.T) {
 }
 
 
+func TestOutOfOrderSensorTimestampIsRejectedBeforeProjection(t *testing.T) {
+	brain := knowledge.NewBootstrapBrain()
+	runtime := NewBrainRuntime(brain)
+	orchestrator := NewCognitiveOrchestrator(runtime)
+	first := testSensorObservation()
+	first.Timestamp = time.Date(2026, 10, 12, 8, 0, 2, 0, time.UTC)
+	first.SampleID = "camera-0:later"
+	if _, err := orchestrator.ProcessSensorObservation(first); err != nil {
+		t.Fatalf("process later observation: %v", err)
+	}
+
+	nodesBefore := len(brain.Registry.Nodes())
+	sequenceBefore := runtime.LastSequence()
+	older := testSensorObservation()
+	older.Timestamp = first.Timestamp.Add(-time.Second)
+	older.SampleID = "camera-0:older"
+	if _, err := orchestrator.ProcessSensorObservation(older); !errors.Is(err, ErrInvalidSensorObservation) {
+		t.Fatalf("expected out-of-order timestamp rejection, got %v", err)
+	}
+	if got := len(brain.Registry.Nodes()); got != nodesBefore {
+		t.Fatalf("out-of-order observation mutated neural registry: before=%d after=%d", nodesBefore, got)
+	}
+	if got := runtime.LastSequence(); got != sequenceBefore {
+		t.Fatalf("out-of-order observation advanced runtime sequence: before=%d after=%d", sequenceBefore, got)
+	}
+}
+
+
 func TestConcurrentDuplicateSensorSamplesOnlyProjectOnce(t *testing.T) {
 	brain := knowledge.NewBootstrapBrain()
 	runtime := NewBrainRuntime(brain)
