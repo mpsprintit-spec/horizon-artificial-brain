@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"os"
+	"reflect"
 	"sync"
 	"testing"
 	"time"
@@ -270,5 +271,34 @@ func TestBrainRuntimeSerializesAutonomousCognitionAndInquiryPlanning(t *testing.
 	}
 	if !brain.BrainState.InquiryState.Pending {
 		t.Fatal("inquiry planning did not persist a pending trajectory")
+	}
+}
+
+
+func TestLearnObservedTransitionKeepsPredecessorWhenReinforcementFails(t *testing.T) {
+	brain := knowledge.NewBrain()
+	first := brain.Store("first-observation")
+	if first == nil {
+		t.Fatal("expected initial neural node")
+	}
+	r := NewBrainRuntime(brain)
+	firstAt := time.Unix(700, 0).UTC()
+	if err := r.LearnObservedTransition([]knowledge.NodeID{first.ID}, firstAt); err != nil {
+		t.Fatalf("seed temporal predecessor: %v", err)
+	}
+
+	beforePopulation := append([]knowledge.NodeID(nil), r.lastObservationPopulation...)
+	beforeAt := r.lastObservationAt
+	invalidNode := knowledge.NodeID(1 << 30)
+	nextAt := firstAt.Add(time.Second)
+	err := r.LearnObservedTransition([]knowledge.NodeID{invalidNode}, nextAt)
+	if err == nil {
+		t.Fatal("expected reinforcement to reject an unknown node")
+	}
+	if !reflect.DeepEqual(r.lastObservationPopulation, beforePopulation) {
+		t.Fatalf("temporal predecessor changed after failed reinforcement: before=%v after=%v", beforePopulation, r.lastObservationPopulation)
+	}
+	if !r.lastObservationAt.Equal(beforeAt) {
+		t.Fatalf("temporal timestamp changed after failed reinforcement: before=%s after=%s", beforeAt, r.lastObservationAt)
 	}
 }
