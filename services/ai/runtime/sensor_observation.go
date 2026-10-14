@@ -37,6 +37,16 @@ var ErrInvalidSensorObservation = errors.New("invalid sensor observation")
 
 // Validate rejects ambiguous or non-finite physical input before it reaches
 // the canonical brain. Numeric feature arrays are expected to be normalized.
+// Clone returns an ownership-safe copy of the observation and all nested slices.
+func (s SensorObservation) Clone() SensorObservation {
+	out := s
+	out.ChannelStates = append([]float64(nil), s.ChannelStates...)
+	out.SpatialCoordinates = append([]float64(nil), s.SpatialCoordinates...)
+	out.TemporalDelta = append([]float64(nil), s.TemporalDelta...)
+	out.Provenance.ParentSampleIDs = append([]string(nil), s.Provenance.ParentSampleIDs...)
+	return out
+}
+
 func (s SensorObservation) Validate() error {
 	if strings.TrimSpace(s.Modality) == "" || strings.TrimSpace(s.Source) == "" || strings.TrimSpace(s.SampleID) == "" || s.Timestamp.IsZero() {
 		return fmt.Errorf("%w: modality, source, sample_id and timestamp are required", ErrInvalidSensorObservation)
@@ -87,6 +97,22 @@ func (s SensorObservation) NeuralVector() (knowledge.NeuralVector, error) {
 func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservation) (CognitiveInterpretation, error) {
 	if o == nil || o.Runtime == nil {
 		return CognitiveInterpretation{}, errors.New("cognitive orchestrator is not initialized")
+	}
+	o.Runtime.sensorMu.Lock()
+	defer o.Runtime.sensorMu.Unlock()
+	sensor = sensor.Clone()
+	if err := sensor.Validate(); err != nil {
+		return CognitiveInterpretation{}, err
+	}
+	// Reject time-reversed samples before projection can mutate the canonical brain.
+	o.Runtime.mu.Lock()
+	lastObservationAt := o.Runtime.lastObservationAt
+	o.Runtime.mu.Unlock()
+	if !lastObservationAt.IsZero() && sensor.Timestamp.Before(lastObservationAt) {
+		return CognitiveInterpretation{}, fmt.Errorf("%w: timestamp %s precedes last observation %s", ErrInvalidSensorObservation, sensor.Timestamp.UTC().Format(time.RFC3339Nano), lastObservationAt.UTC().Format(time.RFC3339Nano))
+	}
+	if o.Runtime.HasProcessedEvent(sensor.SampleID) {
+		return CognitiveInterpretation{}, fmt.Errorf("duplicate sensor sample ID %q", sensor.SampleID)
 	}
 	vector, err := sensor.NeuralVector()
 	if err != nil {
