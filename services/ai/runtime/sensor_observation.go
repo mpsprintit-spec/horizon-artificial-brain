@@ -101,6 +101,16 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 	o.Runtime.sensorMu.Lock()
 	defer o.Runtime.sensorMu.Unlock()
 	sensor = sensor.Clone()
+	if err := sensor.Validate(); err != nil {
+		return CognitiveInterpretation{}, err
+	}
+	// Reject time-reversed samples before projection can mutate the canonical brain.
+	o.Runtime.mu.Lock()
+	lastObservationAt := o.Runtime.lastObservationAt
+	o.Runtime.mu.Unlock()
+	if !lastObservationAt.IsZero() && sensor.Timestamp.Before(lastObservationAt) {
+		return CognitiveInterpretation{}, fmt.Errorf("%w: timestamp %s precedes last observation %s", ErrInvalidSensorObservation, sensor.Timestamp.UTC().Format(time.RFC3339Nano), lastObservationAt.UTC().Format(time.RFC3339Nano))
+	}
 	if o.Runtime.HasProcessedEvent(sensor.SampleID) {
 		return CognitiveInterpretation{}, fmt.Errorf("duplicate sensor sample ID %q", sensor.SampleID)
 	}
