@@ -129,6 +129,12 @@ func TestSensorCommitFailureRequiresRecoveryAndRejectsFurtherMutations(t *testin
 	if _, err := r.LearnExperience(learning.Experience{}, time.Time{}); !errors.Is(err, ErrRuntimeRecoveryRequired) {
 		t.Fatalf("LearnExperience allowed mutation after failed commit: %v", err)
 	}
+	if err := r.Checkpoint(filepath.Join(t.TempDir(), "poisoned-checkpoint.json")); !errors.Is(err, ErrRuntimeRecoveryRequired) {
+		t.Fatalf("Checkpoint saved a partially committed runtime: %v", err)
+	}
+	if _, err := r.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{Action: InquiryFocus, Valence: 1}, time.Time{}); !errors.Is(err, ErrRuntimeRecoveryRequired) {
+		t.Fatalf("Inquiry consequence mutated a poisoned runtime: %v", err)
+	}
 	next := testSensorObservation()
 	next.SampleID = "camera-0:next"
 	next.Timestamp = next.Timestamp.Add(time.Second)
