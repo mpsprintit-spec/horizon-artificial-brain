@@ -198,7 +198,7 @@ func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (
 	})
 	r.seq = nextSeq
 	if event.ID != "" { r.processedEvents[event.ID] = r.seq }
-	if r.telemetry != nil && event.Observation == nil { r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess,event.Timestamp,&event,nil,nil)) }
+	if r.telemetry != nil && event.Observation == nil && persist { r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess,event.Timestamp,&event,nil,nil)) }
 	return result, r.seq, nil
 }
 // LearnObservedTransition binds consecutive grounded populations as a
