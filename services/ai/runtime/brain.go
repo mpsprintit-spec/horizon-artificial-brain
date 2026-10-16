@@ -20,6 +20,22 @@ import (
 const BrainIdentity = "horizon-primary-brain"
 const GroundingThreshold = 0.90
 
+var ErrRuntimeRecoveryRequired = errors.New("runtime recovery required")
+
+// Call only while r.mu is held. A poisoned runtime must be discarded and
+// rebuilt from a verified checkpoint and committed event log.
+func (r *BrainRuntime) ensureWritableLocked() error {
+	if r.recoveryRequired { return ErrRuntimeRecoveryRequired }
+	return nil
+}
+
+func (r *BrainRuntime) RecoveryRequired() bool {
+	if r == nil { return false }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.recoveryRequired
+}
+
 type Event struct {
 	ID string `json:"id"`
 	Stimulus []string `json:"stimulus,omitempty"`
@@ -65,6 +81,8 @@ type BrainRuntime struct {
 	clock Clock
 	mu sync.Mutex
 	sensorMu sync.Mutex
+	// Set when a sensor journal operation may have left an incomplete write.
+	recoveryRequired bool
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
@@ -161,10 +179,15 @@ func (r *BrainRuntime) Process(event Event) (activation.Result, uint64, error) {
 }
 
 func (r *BrainRuntime) processLocked(event Event) (activation.Result, uint64, error) {
+	return r.processWithPersistenceLocked(event, true)
+}
+
+func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (activation.Result, uint64, error) {
+	if err := r.ensureWritableLocked(); err != nil { return activation.Result{}, r.seq, err }
 	if event.ID != "" { if _, exists := r.processedEvents[event.ID]; exists { return activation.Result{}, r.seq, fmt.Errorf("duplicate event ID %q", event.ID) } }
 	if event.Timestamp.IsZero() { event.Timestamp = r.nowLocked() }
 	nextSeq := r.seq + 1
-	if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
+	if persist && r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeProcess, Timestamp: event.Timestamp, Event: cloneEvent(event)}); err != nil { return activation.Result{}, r.seq, err } }
 	result := r.activation.ActivateWith(activation.Request{
 		StimulusTokens: append([]string(nil), event.Stimulus...),
 		StimulusNodeIDs: append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),
@@ -195,6 +218,7 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 // boundary. Callers must hold r.mu throughout the preceding sensor projection
 // and cognitive processing stages.
 func (r *BrainRuntime) learnObservedTransitionLocked(current []knowledge.NodeID, now time.Time) error {
+	if err := r.ensureWritableLocked(); err != nil { return err }
 	if now.IsZero() {
 		now = r.nowLocked()
 	}
@@ -219,7 +243,7 @@ func (r *BrainRuntime) learnObservedTransitionLocked(current []knowledge.NodeID,
 	return nil
 }
 
-func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
+func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.Time) (uint64, error) { if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil { return 0, errors.New("brain runtime is not initialized") }; r.mu.Lock(); defer r.mu.Unlock(); if now.IsZero() { now = r.nowLocked() } if err := r.ensureWritableLocked(); err != nil { return r.seq, err }; nextSeq := r.seq + 1; copyExperience := experience; if r.eventLog != nil { if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeLearn, Timestamp: now, Experience: &copyExperience}); err != nil { return r.seq, err } }; r.learning.LearnExperience(experience, now); r.seq = nextSeq; return r.seq, nil }
 func (r *BrainRuntime) Think(cycles int) (activation.ThoughtResult, uint64, error) {
 	return r.ThinkAt(cycles, time.Time{})
 }
@@ -238,6 +262,7 @@ func (r *BrainRuntime) thinkAtWithContext(cycles int, context map[knowledge.Node
 }
 
 func (r *BrainRuntime) thinkAtWithContextLocked(cycles int, context map[knowledge.NodeID]float64, timestamp time.Time) (activation.ThoughtResult, uint64, error) {
+	if err := r.ensureWritableLocked(); err != nil { return activation.ThoughtResult{}, r.seq, err }
 	now := timestamp
 	if now.IsZero() {
 		now = r.nowLocked()
@@ -267,10 +292,15 @@ func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
 // learning signals and state deltas in one runtime mutation boundary.
 // Callers must already hold r.mu.
 func (r *BrainRuntime) cognitiveProcessLocked(event Event) (CognitiveOutput, error) {
+	return r.cognitiveProcessWithPersistenceLocked(event, true)
+}
+
+func (r *BrainRuntime) cognitiveProcessWithPersistenceLocked(event Event, persist bool) (CognitiveOutput, error) {
+	if err := r.ensureWritableLocked(); err != nil { return CognitiveOutput{}, err }
 	if event.Timestamp.IsZero() {
 		event.Timestamp = r.nowLocked()
 	}
-	result, sequence, err := r.processLocked(event)
+	result, sequence, err := r.processWithPersistenceLocked(event, persist)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
@@ -293,6 +323,7 @@ func (r *BrainRuntime) CognitiveThink(cycles int) (CognitiveOutput, error) {
 	// protects the underlying neural substrate.
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return CognitiveOutput{}, err }
 
 	now := r.nowLocked()
 	// Autonomous cognition needs an endogenous drive when no external event is
