@@ -60,6 +60,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
 
 	brainPath := path + ".brain.tmp"
 	if err := saveDeterministicBrain(r.brain, brainPath); err != nil {
