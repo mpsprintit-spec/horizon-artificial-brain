@@ -3,6 +3,7 @@ package runtime
 import (
 	"bufio"
 	"bytes"
+	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -27,6 +28,7 @@ type LoggedEvent struct {
 	Experience    *learning.Experience `json:"experience,omitempty"`
 	Outcome       *OutcomeEvent        `json:"outcome,omitempty"`
 	Consequence  *InquiryConsequenceEvent `json:"consequence,omitempty"`
+	IntentHash   string `json:"intent_hash,omitempty"`
 }
 
 const (
@@ -35,12 +37,16 @@ const (
 	EventTypeThink = "think"
 	EventTypeOutcome = "outcome"
 	EventTypeConsequence = "consequence"
+	EventTypeSensorIntent = "sensor_intent"
+	EventTypeSensorCommit = "sensor_commit"
 )
 
 type EventLog struct {
 	mu sync.Mutex
 	file *os.File
 	lockFile *os.File
+	// Test-only fault injection; guarded by mu like file writes.
+	beforeAppend func(LoggedEvent) error
 }
 
 func OpenEventLog(path string) (*EventLog, error) {
@@ -72,6 +78,9 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	if err != nil { return fmt.Errorf("encode logged event: %w", err) }
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	if l.beforeAppend != nil {
+		if err := l.beforeAppend(event); err != nil { return fmt.Errorf("inject event log append failure: %w", err) }
+	}
 	if _, err := l.file.Write(append(data, '\n')); err != nil { return fmt.Errorf("append logged event: %w", err) }
 	if err := l.file.Sync(); err != nil { return fmt.Errorf("sync event log: %w", err) }
 	return nil
@@ -154,6 +163,9 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		}
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
+		}
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit {
+			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
 			return "", fmt.Errorf("cannot repair zero event sequence at line %d", lineNumber)
@@ -260,6 +272,23 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 	return backupPath, nil
 }
 
+// ErrUncommittedSensorTransaction indicates that a durable intent does not
+// have a matching commit marker. It must not be silently replayed.
+var ErrUncommittedSensorTransaction = errors.New("uncommitted sensor transaction")
+
+func sensorIntentHash(intent LoggedEvent) (string, error) {
+	data, err := json.Marshal(intent)
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(data)
+	return fmt.Sprintf("%x", sum[:]), nil
+}
+
+// ReadEventLog preserves the v1 event stream while interpreting a committed
+// sensor intent/commit pair as one logical process event with one sequence.
+// An orphan, interrupted, or mismatched pair is an error, not a successful
+// observation. A caller must recover from a known-good checkpoint/log.
 func ReadEventLog(path string) ([]LoggedEvent, error) {
 	file, err := os.Open(path)
 	if err != nil { return nil, err }
@@ -267,10 +296,14 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 
 	var events []LoggedEvent
 	var expected uint64 = 1
-	seen := make(map[uint64][]byte)
+	type eventKey struct {
+		sequence uint64
+		eventType string
+	}
+	seen := make(map[eventKey][]byte)
+	var pending *LoggedEvent
+	var pendingHash string
 	scanner := bufio.NewScanner(file)
-	// Event payloads can exceed Scanner's small default token limit as the
-	// runtime evolves; allow records up to 16 MiB while still bounding memory.
 	scanner.Buffer(make([]byte, 64*1024), 16*1024*1024)
 	for lineNumber := 1; scanner.Scan(); lineNumber++ {
 		line := append([]byte(nil), scanner.Bytes()...)
@@ -288,31 +321,64 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		if err != nil {
 			return nil, fmt.Errorf("normalize event at line %d: %w", lineNumber, err)
 		}
-
+		key := eventKey{sequence: event.Sequence, eventType: event.Type}
 		if event.Sequence < expected {
-			// Repeated records may be separated by newer records after a retry
-			// or interrupted append. Skip only if the sequence and payload are
-			// identical to the first occurrence. Conflicting duplicates remain
-			// fatal so we never silently choose between different brain events.
-			prior, exists := seen[event.Sequence]
-			if exists && bytes.Equal(canonical, prior) {
+			// Preserve legacy nonadjacent idempotent duplicate recovery, but
+			// require identical bytes and the same physical record type.
+			if prior, ok := seen[key]; ok && bytes.Equal(prior, canonical) {
 				continue
 			}
-			if exists {
-				return nil, fmt.Errorf("conflicting duplicate event sequence %d at line %d", event.Sequence, lineNumber)
-			}
-			return nil, fmt.Errorf("event sequence %d at line %d is older than expected %d but has no prior record", event.Sequence, lineNumber, expected)
+			return nil, fmt.Errorf("conflicting or unknown duplicate event sequence %d type %q at line %d", event.Sequence, event.Type, lineNumber)
 		}
-		if event.Sequence > expected {
+		if event.Sequence > expected || event.Sequence == 0 {
 			return nil, fmt.Errorf("event sequence discontinuity at line %d: got %d want %d", lineNumber, event.Sequence, expected)
 		}
 
-		seen[event.Sequence] = canonical
-		events = append(events, event)
-		expected++
+		if pending != nil {
+			if event.Type != EventTypeSensorCommit {
+				return nil, fmt.Errorf("%w: sensor intent at sequence %d interrupted by %q at line %d", ErrUncommittedSensorTransaction, expected, event.Type, lineNumber)
+			}
+			if event.IntentHash == "" || event.IntentHash != pendingHash || event.Event != nil ||
+				event.Experience != nil || event.Outcome != nil || event.Consequence != nil ||
+				!event.Timestamp.Equal(pending.Timestamp) {
+				return nil, fmt.Errorf("%w: sensor commit mismatch at line %d", ErrUncommittedSensorTransaction, lineNumber)
+			}
+			seen[key] = canonical
+			committed := *pending
+			committed.Type = EventTypeProcess
+			committed.IntentHash = ""
+			events = append(events, committed)
+			pending = nil
+			pendingHash = ""
+			expected++
+			continue
+		}
+
+		switch event.Type {
+		case EventTypeSensorIntent:
+			if event.Event == nil || event.Event.SensorObservation == nil ||
+				event.Event.ID == "" || event.Event.ID != event.Event.SensorObservation.SampleID ||
+				!event.Timestamp.Equal(event.Event.Timestamp) ||
+				!event.Timestamp.Equal(event.Event.SensorObservation.Timestamp) ||
+				event.IntentHash != "" {
+				return nil, fmt.Errorf("invalid sensor intent payload at line %d", lineNumber)
+			}
+			digest, err := sensorIntentHash(event)
+			if err != nil { return nil, fmt.Errorf("hash sensor intent at line %d: %w", lineNumber, err) }
+			pending = &event
+			pendingHash = digest
+			seen[key] = canonical
+		case EventTypeSensorCommit:
+			return nil, fmt.Errorf("%w: sensor commit without intent at line %d", ErrUncommittedSensorTransaction, lineNumber)
+		default:
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
+		}
 	}
-	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("read event log: %w", err)
+	if err := scanner.Err(); err != nil { return nil, fmt.Errorf("read event log: %w", err) }
+	if pending != nil {
+		return nil, fmt.Errorf("%w: sensor intent sequence %d has no commit marker", ErrUncommittedSensorTransaction, pending.Sequence)
 	}
 	return events, nil
 }
