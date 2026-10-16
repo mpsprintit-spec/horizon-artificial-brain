@@ -186,13 +186,18 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	if r == nil || r.brain == nil {
 		return errors.New("brain runtime is not initialized")
 	}
-	if now.IsZero() {
-		now = r.now()
-	}
-
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.learnObservedTransitionLocked(current, now)
+}
 
+// learnObservedTransitionLocked is part of the serialized runtime mutation
+// boundary. Callers must hold r.mu throughout the preceding sensor projection
+// and cognitive processing stages.
+func (r *BrainRuntime) learnObservedTransitionLocked(current []knowledge.NodeID, now time.Time) error {
+	if now.IsZero() {
+		now = r.nowLocked()
+	}
 	if len(current) == 0 {
 		r.lastObservationPopulation = nil
 		r.lastObservationAt = time.Time{}
@@ -204,17 +209,11 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	currentCopy := append([]knowledge.NodeID(nil), current...)
 
 	if len(previous) > 0 {
-		// Do not publish the new temporal predecessor until reinforcement has
-		// succeeded. Otherwise a failed canonical mutation would make the next
-		// observation learn from a transition that was never committed.
+		// Commit the new temporal predecessor only after reinforcement succeeds.
 		if err := r.brain.ReinforceTransitionPopulation(previous, currentCopy, previousAt, now, 0.25); err != nil {
 			return err
 		}
 	}
-
-	// Commit temporal runtime state only after the associated transition
-	// mutation succeeds. For the first observation there is no predecessor
-	// transition to reinforce, so it becomes the initial temporal state here.
 	r.lastObservationPopulation = currentCopy
 	r.lastObservationAt = now
 	return nil
@@ -256,26 +255,25 @@ func (r *BrainRuntime) thinkAtWithContextLocked(cycles int, context map[knowledg
 }
 type CognitiveOutput struct { BrainIdentity string; Sequence uint64; Timestamp time.Time; RankedNodeIDs []knowledge.NodeID; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; Resonance float64; PredictionError float64; Prediction activation.Prediction; StateDelta CognitiveStateDelta }
 func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
-	if r == nil {
+	if r == nil || r.brain == nil || r.activation == nil {
 		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
 	}
-	if event.Timestamp.IsZero() {
-		r.mu.Lock()
-		event.Timestamp = r.nowLocked()
-		r.mu.Unlock()
-	}
-
-	// Keep inference, prediction capture, learning, memory dynamics, and state
-	// delta calculation in one runtime transaction. A second cognition cycle
-	// must not interleave between activation and its prediction snapshot.
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	return r.cognitiveProcessLocked(event)
+}
 
+// cognitiveProcessLocked keeps event persistence, activation, prediction,
+// learning signals and state deltas in one runtime mutation boundary.
+// Callers must already hold r.mu.
+func (r *BrainRuntime) cognitiveProcessLocked(event Event) (CognitiveOutput, error) {
+	if event.Timestamp.IsZero() {
+		event.Timestamp = r.nowLocked()
+	}
 	result, sequence, err := r.processLocked(event)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
-
 	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
 	output.Prediction = r.activation.PredictionSnapshot()
 	r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
