@@ -116,6 +116,7 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 	if outcome.Modality == "" { outcome.Modality = "execution-outcome" }
 
 	r.mu.Lock(); defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return r.seq, err }
 	binding, ok := r.actions[outcome.RequestID]
 	if !ok { return 0, errors.New("outcome has no registered action binding") }
 	if binding.BrainIdentity != BrainIdentity { return 0, errors.New("action binding belongs to a different brain") }
