@@ -193,6 +193,11 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				r.recoveryRequired = true
 				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)
 			}
+			// Do not expose the process event to telemetry before the commit
+			// marker is durable; a failed transaction remains internal.
+			if r.telemetry != nil {
+				r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
+			}
 		}
 		return processedSensor{output: output, ids: ids, similarity: population.Units[0].Activation}, nil
 	}()
