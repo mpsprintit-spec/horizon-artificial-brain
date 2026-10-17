@@ -31,6 +31,7 @@ type Config struct {
 
 type Server struct {
 	runtime *runtime.BrainRuntime
+	owner *runtime.RuntimeOwner
 	cfg Config
 	rateMu sync.Mutex
 	rate map[string]*rateBucket
@@ -43,6 +44,27 @@ func New(brainRuntime *runtime.BrainRuntime, cfg Config) (*Server, error) {
 	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
 	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
 	return &Server{runtime: brainRuntime, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
+}
+
+// NewManaged routes HTTP and streaming access through the single active
+// RuntimeOwner. New remains available for legacy nonrecovering deployments.
+func NewManaged(owner *runtime.RuntimeOwner, cfg Config) (*Server, error) {
+	if owner == nil { return nil, errors.New("active runtime owner is required") }
+	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
+	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
+	return &Server{owner: owner, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
+}
+
+func (s *Server) withRuntime(fn func(*runtime.BrainRuntime) error) error {
+	if s.owner != nil { return s.owner.WithRuntime(fn) }
+	if s.runtime == nil { return errors.New("bridge runtime is unavailable") }
+	return fn(s.runtime)
+}
+
+func (s *Server) withRuntimeGeneration(fn func(*runtime.BrainRuntime, <-chan struct{}) error) error {
+	if s.owner != nil { return s.owner.WithRuntimeGeneration(fn) }
+	if s.runtime == nil { return errors.New("bridge runtime is unavailable") }
+	return fn(s.runtime, nil)
 }
 
 func (s *Server) Handler() http.Handler {
@@ -59,41 +81,54 @@ func (s *Server) Handler() http.Handler {
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	snapshot, err := s.runtime.MonitorSnapshot()
+	var snapshot runtime.MonitorSnapshot
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		snapshot, e = active.MonitorSnapshot()
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,map[string]any{"status":"ok","brain_identity":runtime.BrainIdentity,"state_revision":snapshot.StateRevision,"canonical_state_hash":snapshot.CanonicalStateHash})
 }
 
 func (s *Server) handshake(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	handshake, err := s.runtime.MonitorHandshake(s.cfg.RuntimeCommit)
+	var handshake runtime.MonitorHandshake
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		handshake, e = active.MonitorHandshake(s.cfg.RuntimeCommit)
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,handshake)
 }
 
 func (s *Server) snapshot(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	snapshot, err := s.runtime.MonitorSnapshot()
+	var snapshot runtime.MonitorSnapshot
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		snapshot, e = active.MonitorSnapshot()
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,snapshot)
 }
 
 func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	events, err := s.readEvents(afterRevision(r))
+	var events []replayEvent
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		events, e = s.readEvents(afterRevision(r))
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,map[string]any{"brain_identity":runtime.BrainIdentity,"events":events})
-}
-
-type replayEvent struct {
-	Type string `json:"type"`
-	BrainIdentity string `json:"brain_identity"`
-	StateRevision uint64 `json:"state_revision"`
-	Timestamp time.Time `json:"timestamp"`
-	EventHash string `json:"event_hash"`
-	Event *runtime.Event `json:"event,omitempty"`
-	Experience any `json:"experience,omitempty"`
-	Outcome *runtime.OutcomeEvent `json:"outcome,omitempty"`
 }
 
 func (s *Server) readEvents(after uint64) ([]replayEvent,error) {
