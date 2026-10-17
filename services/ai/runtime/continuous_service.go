@@ -59,7 +59,7 @@ func (s *ContinuousService) Run(ctx context.Context, onOutput func(CognitiveOutp
 		var output CognitiveOutput
 		var cycleErr error
 		if s.Supervisor != nil {
-			err := s.Supervisor.With(func(r *BrainRuntime) error {
+			err := s.Supervisor.WithMutation(func(r *BrainRuntime) error {
 				output, cycleErr = r.CognitiveThink(s.Cycles)
 				return nil
 			})
@@ -70,7 +70,7 @@ func (s *ContinuousService) Run(ctx context.Context, onOutput func(CognitiveOutp
 		// Do not invoke an external callback while the supervisor read lock
 		// is held. It may legitimately request a recovery handover.
 		onOutput(output, cycleErr)
-		if errors.Is(cycleErr, ErrRuntimeSupervisorClosed) { return cycleErr }
+		if errors.Is(cycleErr, ErrRuntimeSupervisorClosed) || errors.Is(cycleErr, ErrRuntimeRecoveryRequired) { return cycleErr }
 		return nil
 	}
 
