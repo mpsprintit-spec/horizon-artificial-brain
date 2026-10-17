@@ -131,6 +131,17 @@ func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w,http.StatusOK,map[string]any{"brain_identity":runtime.BrainIdentity,"events":events})
 }
 
+type replayEvent struct {
+	Type string `json:"type"`
+	BrainIdentity string `json:"brain_identity"`
+	StateRevision uint64 `json:"state_revision"`
+	Timestamp time.Time `json:"timestamp"`
+	EventHash string `json:"event_hash"`
+	Event *runtime.Event `json:"event,omitempty"`
+	Experience any `json:"experience,omitempty"`
+	Outcome *runtime.OutcomeEvent `json:"outcome,omitempty"`
+}
+
 func (s *Server) readEvents(after uint64) ([]replayEvent,error) {
 	if strings.TrimSpace(s.cfg.EventLogPath)=="" { return []replayEvent{},nil }
 	logged, err := runtime.ReadEventLog(s.cfg.EventLogPath)
