@@ -75,6 +75,19 @@ func TestRuntimeOwnerRecoveryWaitsForInflightOperation(t *testing.T) {
 	if _, err := initial.CognitiveThink(1); !errors.Is(err, ErrRuntimeRetired) {
 		t.Fatalf("retired runtime accepted cognition: %v", err)
 	}
+	if err := initial.SaveBrain(filepath.Join(t.TempDir(), "retired-brain.json")); !errors.Is(err, ErrRuntimeRetired) {
+		t.Fatalf("retired runtime persisted stale neural state: %v", err)
+	}
+	if _, err := initial.GroundObservation("stale", "test", "vision"); !errors.Is(err, ErrRuntimeRetired) {
+		t.Fatalf("retired runtime accepted neural grounding: %v", err)
+	}
+	if _, err := initial.ActivateBootstrap(at); !errors.Is(err, ErrRuntimeRetired) {
+		t.Fatalf("retired runtime accepted bootstrap activation: %v", err)
+	}
+	initial.SetEventLog(nil)
+	if initial.eventLog != nil {
+		t.Fatal("retired runtime regained an event log")
+	}
 	if err := owner.WithRuntime(func(r *BrainRuntime) error {
 		if r == initial || r.LastSequence() != 2 {
 			t.Fatalf("owner served old runtime or lost committed event: old=%t sequence=%d", r == initial, r.LastSequence())
