@@ -235,7 +235,7 @@ func (s *Server) observations(w http.ResponseWriter, r *http.Request) {
 	if envelope.BrainIdentity!="" && envelope.BrainIdentity!=runtime.BrainIdentity { writeError(w,http.StatusBadRequest,"invalid brain_identity"); return }
 	var interpretation runtime.CognitiveInterpretation
 	var persistenceErr error
-	err := s.withRuntime(func(rt *runtime.BrainRuntime) error {
+	err := s.withMutatingRuntime(func(rt *runtime.BrainRuntime) error {
 		var err error
 		interpretation, err = rt.ProcessObservationEnvelope(envelope)
 		if err != nil { return err }
@@ -261,7 +261,7 @@ func (s *Server) outcomes(w http.ResponseWriter, r *http.Request) {
 	if err:=json.NewDecoder(r.Body).Decode(&outcome); err!=nil { writeError(w,http.StatusBadRequest,"invalid outcome: "+err.Error()); return }
 	var seq uint64
 	var persistenceErr error
-	err := s.withRuntime(func(rt *runtime.BrainRuntime) error {
+	err := s.withMutatingRuntime(func(rt *runtime.BrainRuntime) error {
 		var err error
 		seq, err = rt.ObserveOutcome(outcome)
 		if err != nil { return err }
