@@ -53,7 +53,22 @@ func (s *RuntimeSupervisor) WithEpoch(fn func(*BrainRuntime, <-chan struct{}) er
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if s.closed || s.current == nil { return ErrRuntimeSupervisorClosed }
+	if s.current.RecoveryRequired() { return ErrRuntimeRecoveryRequired }
 	return fn(s.current, s.epoch)
+}
+
+// WithMutation serializes a complete managed mutation, including its
+// multi-step grounding, cognitive processing, and optional persistence,
+// against other managed operations and checkpoint handover. Do not call
+// recovery/Close from inside fn.
+func (s *RuntimeSupervisor) WithMutation(fn func(*BrainRuntime) error) error {
+	if s == nil { return errors.New("runtime supervisor is nil") }
+	if fn == nil { return errors.New("runtime mutation is nil") }
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.closed || s.current == nil { return ErrRuntimeSupervisorClosed }
+	if s.current.RecoveryRequired() { return ErrRuntimeRecoveryRequired }
+	return fn(s.current)
 }
 
 // RecoverFromCheckpoint performs an exclusive, fail-closed handover.
