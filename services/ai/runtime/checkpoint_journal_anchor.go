@@ -59,6 +59,9 @@ func cloneProcessedEventIndex(input map[string]uint64) map[string]uint64 {
 // intent/commit physical framing. This anchors a checkpoint to a specific
 // replayable event history and detects tampering with its earlier records.
 func journalPrefixHash(events []LoggedEvent) (string, error) {
+	// The authenticated empty prefix is identical whether the journal
+	// decoder returns nil or a zero-length slice.
+	if len(events) == 0 { events = nil }
 	data, err := json.Marshal(events)
 	if err != nil { return "", err }
 	hash := sha256.Sum256(data)
