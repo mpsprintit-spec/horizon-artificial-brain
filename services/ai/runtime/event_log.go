@@ -388,7 +388,17 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 // Replay is intended as a recovery operation and should not run concurrently
 // with normal runtime mutation.
 func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
+	return replayEventLogFromSequence(brainRuntime, events, 1)
+}
+
+// replayEventLogFromSequence is used for *isolated* checkpoint recovery.
+// The caller must not expose brainRuntime to concurrent writers during replay.
+func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent, firstSequence uint64) error {
 	if brainRuntime == nil { return errors.New("brain runtime is nil") }
+	if firstSequence == 0 { return errors.New("replay sequence must start at 1 or later") }
+	if brainRuntime.LastSequence() != firstSequence-1 {
+		return fmt.Errorf("replay target sequence %d does not precede first event %d", brainRuntime.LastSequence(), firstSequence)
+	}
 	brainRuntime.mu.Lock()
 	originalLog := brainRuntime.eventLog
 	brainRuntime.eventLog = nil
@@ -399,7 +409,7 @@ func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
 		brainRuntime.mu.Unlock()
 	}()
 
-	var expected uint64 = 1
+	var expected uint64 = firstSequence
 	for _, logged := range events {
 		if logged.BrainIdentity != BrainIdentity { return fmt.Errorf("cannot replay event for brain %q", logged.BrainIdentity) }
 		if logged.SchemaVersion != EventLogSchemaVersion { return fmt.Errorf("unsupported event log schema version %d", logged.SchemaVersion) }
