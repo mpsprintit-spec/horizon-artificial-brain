@@ -12,6 +12,12 @@ import (
 // In contrast to the legacy v4 checksum, changing the event sequence,
 // timestamp predecessor, dedup index, or journal anchor is detectable.
 func checkpointChecksumV5(snapshot BrainSnapshot) (string, error) {
+	// These fields are omitted from the snapshot JSON when empty. Normalize
+	// them here so encoding and subsequent decoding hash the same state.
+	processed := snapshot.ProcessedEvents
+	if len(processed) == 0 { processed = nil }
+	population := snapshot.LastObservationPopulation
+	if len(population) == 0 { population = nil }
 	payload := struct {
 		SchemaVersion int `json:"schema_version"`
 		BrainIdentity string `json:"brain_identity"`
@@ -32,9 +38,9 @@ func checkpointChecksumV5(snapshot BrainSnapshot) (string, error) {
 		Activation: snapshot.Activation,
 		CognitiveState: snapshot.CognitiveState,
 		InquiryValence: snapshot.InquiryValence,
-		LastObservationPopulation: snapshot.LastObservationPopulation,
+		LastObservationPopulation: population,
 		LastObservationAt: snapshot.LastObservationAt,
-		ProcessedEvents: snapshot.ProcessedEvents,
+		ProcessedEvents: processed,
 		JournalPrefixHash: snapshot.JournalPrefixHash,
 	}
 	data, err := json.Marshal(payload)
