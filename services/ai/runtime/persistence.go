@@ -186,6 +186,9 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	// A poisoned runtime may have mutated neural state or runtime caches that
+	// a checkpoint restore cannot safely unwind. Always use a new runtime.
+	if err := r.ensureWritableLocked(); err != nil { return err }
 	brainPath := path + ".restore.tmp"
 	if err := os.WriteFile(brainPath, snapshot.Brain, 0600); err != nil {
 		return fmt.Errorf("stage brain restore: %w", err)
@@ -201,7 +204,6 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	r.lastObservationPopulation = append([]knowledge.NodeID(nil), snapshot.LastObservationPopulation...)
 	r.lastObservationAt = snapshot.LastObservationAt
 	r.processedEvents = cloneProcessedEventIndex(snapshot.ProcessedEvents)
-	r.recoveryRequired = false // Only a verified, checksummed snapshot may reset this flag.
 	return nil
 }
 
