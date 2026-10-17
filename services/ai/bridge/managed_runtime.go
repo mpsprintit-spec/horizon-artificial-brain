@@ -26,6 +26,15 @@ func (s *Server) withRuntime(fn func(*runtime.BrainRuntime) error) error {
 	return fn(s.runtime)
 }
 
+// withMutatingRuntime excludes concurrent managed observations, outcome
+// updates, thinking cycles, and handover during a multi-step operation.
+func (s *Server) withMutatingRuntime(fn func(*runtime.BrainRuntime) error) error {
+	if s == nil { return errors.New("brain bridge is not initialized") }
+	if s.supervisor != nil { return s.supervisor.WithMutation(fn) }
+	if s.runtime == nil { return errors.New("brain runtime is not initialized") }
+	return fn(s.runtime)
+}
+
 // withRuntimeEpoch obtains a lease and an epoch invalidation signal. It is
 // used to initialize long-lived telemetry subscriptions without holding
 // the supervisor read lock across a WebSocket session.
