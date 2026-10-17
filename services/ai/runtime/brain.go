@@ -21,12 +21,21 @@ const BrainIdentity = "horizon-primary-brain"
 const GroundingThreshold = 0.90
 
 var ErrRuntimeRecoveryRequired = errors.New("runtime recovery required")
+var ErrRuntimeRetired = errors.New("runtime retired from active service")
 
 // Call only while r.mu is held. A poisoned runtime must be discarded and
 // rebuilt from a verified checkpoint and committed event log.
 func (r *BrainRuntime) ensureWritableLocked() error {
+	if r.retired { return ErrRuntimeRetired }
 	if r.recoveryRequired { return ErrRuntimeRecoveryRequired }
 	return nil
+}
+
+func (r *BrainRuntime) Retired() bool {
+	if r == nil { return false }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	return r.retired
 }
 
 func (r *BrainRuntime) RecoveryRequired() bool {
@@ -83,6 +92,8 @@ type BrainRuntime struct {
 	sensorMu sync.Mutex
 	// Set when a sensor journal operation may have left an incomplete write.
 	recoveryRequired bool
+	// Set once by RuntimeOwner when a replacement brain becomes active.
+	retired bool
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
@@ -110,8 +121,8 @@ func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, even
 func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry=NewTelemetryHub(256) }; return r.telemetry }
 func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry==nil {r.telemetry=NewTelemetryHub(256)}; envelope.Sequence=output.Sequence; e:=r.telemetryEventLocked("observation",output.Timestamp,nil,&envelope,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
 func (r *BrainRuntime) SaveBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); return r.brain.Save(path) }
-func (r *BrainRuntime) LoadBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); if err:=r.brain.Load(path);err!=nil{return err};r.seq=0;r.lastCognitiveState=CognitiveState{};r.processedEvents=make(map[string]uint64);return nil }
-func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error { if r==nil{return errors.New("brain runtime is not initialized")};r.mu.Lock();defer r.mu.Unlock();expected:=uint64(1);for _,event:=range events{if event.Sequence!=expected{return fmt.Errorf("event index discontinuity: got %d want %d",event.Sequence,expected)};expected++;if event.Type==EventTypeProcess&&event.Event!=nil&&event.Event.ID!=""{r.processedEvents[event.Event.ID]=event.Sequence};if event.Sequence>r.seq{r.seq=event.Sequence}};return nil }
+func (r *BrainRuntime) LoadBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); if err:=r.ensureWritableLocked();err!=nil{return err}; if err:=r.brain.Load(path);err!=nil{return err};r.seq=0;r.lastCognitiveState=CognitiveState{};r.processedEvents=make(map[string]uint64);return nil }
+func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error { if r==nil{return errors.New("brain runtime is not initialized")};r.mu.Lock();defer r.mu.Unlock();if err:=r.ensureWritableLocked();err!=nil{return err};expected:=uint64(1);for _,event:=range events{if event.Sequence!=expected{return fmt.Errorf("event index discontinuity: got %d want %d",event.Sequence,expected)};expected++;if event.Type==EventTypeProcess&&event.Event!=nil&&event.Event.ID!=""{r.processedEvents[event.Event.ID]=event.Sequence};if event.Sequence>r.seq{r.seq=event.Sequence}};return nil }
 
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
@@ -155,12 +166,12 @@ func (r *BrainRuntime) ActivateBootstrap(now time.Time) (activation.Result, erro
 	}), nil
 }
 
-func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error { if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }; if binding.RequestID == "" { return errors.New("action binding request ID is required") }; if binding.BrainIdentity == "" { binding.BrainIdentity = BrainIdentity }; if binding.BrainIdentity != BrainIdentity { return errors.New("action binding belongs to a different brain") }; if len(binding.TargetNodeIDs) == 0 && len(binding.Synapses) == 0 { return errors.New("action binding requires at least one neural target") }; for _, syn := range binding.Synapses { if r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil { return errors.New("action binding references an unknown synapse node") } }; r.mu.Lock(); defer r.mu.Unlock(); binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); r.actions[binding.RequestID] = binding; return nil }
+func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error { if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }; if binding.RequestID == "" { return errors.New("action binding request ID is required") }; if binding.BrainIdentity == "" { binding.BrainIdentity = BrainIdentity }; if binding.BrainIdentity != BrainIdentity { return errors.New("action binding belongs to a different brain") }; if len(binding.TargetNodeIDs) == 0 && len(binding.Synapses) == 0 { return errors.New("action binding requires at least one neural target") }; for _, syn := range binding.Synapses { if r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil { return errors.New("action binding references an unknown synapse node") } }; r.mu.Lock(); defer r.mu.Unlock(); if err := r.ensureWritableLocked(); err != nil { return err }; binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); r.actions[binding.RequestID] = binding; return nil }
 func (r *BrainRuntime) actionBinding(requestID string) (ActionBinding, bool) { if r == nil { return ActionBinding{}, false }; r.mu.Lock(); defer r.mu.Unlock(); binding, ok := r.actions[requestID]; if !ok { return ActionBinding{}, false }; binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); return binding, true }
 func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if clock == nil { r.clock = WallClock{} } else { r.clock = clock } }
 func (r *BrainRuntime) nowLocked() time.Time { if r.clock == nil { r.clock = WallClock{} }; now := r.clock.Now(); if now.IsZero() { now = time.Now().UTC() }; return now.UTC() }
 func (r *BrainRuntime) now() time.Time { if r == nil { return time.Now().UTC() }; r.mu.Lock(); defer r.mu.Unlock(); return r.nowLocked() }
-func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); r.eventLog = log }
+func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.retired { return }; r.eventLog = log }
 // HasProcessedEvent reports whether an event ID is already in the durable runtime index.
 // It is used by adapters to reject duplicate samples before they mutate the neural substrate.
 func (r *BrainRuntime) HasProcessedEvent(id string) bool {
