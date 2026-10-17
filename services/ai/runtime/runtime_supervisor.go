@@ -20,6 +20,9 @@ var ErrRuntimeSupervisorClosed = errors.New("runtime supervisor is closed")
 type RuntimeSupervisor struct {
 	mu sync.RWMutex
 	current *BrainRuntime
+	// epoch is closed when a managed runtime is replaced or retired. It
+	// invalidates long-lived bridge subscriptions without holding With open.
+	epoch chan struct{}
 	closed bool
 }
 
@@ -30,18 +33,27 @@ func NewRuntimeSupervisor(initial *BrainRuntime) (*RuntimeSupervisor, error) {
 	if initial.RecoveryRequired() {
 		return nil, ErrRuntimeRecoveryRequired
 	}
-	return &RuntimeSupervisor{current: initial}, nil
+	return &RuntimeSupervisor{current: initial, epoch: make(chan struct{})}, nil
 }
 
 // With serializes the lifetime of a managed runtime operation against
 // replacement. Do not call RecoverFromCheckpoint or Close from inside fn.
 func (s *RuntimeSupervisor) With(fn func(*BrainRuntime) error) error {
+	if fn == nil { return errors.New("runtime operation is nil") }
+	return s.WithEpoch(func(r *BrainRuntime, _ <-chan struct{}) error { return fn(r) })
+}
+
+// WithEpoch also supplies an invalidation signal for long-lived read-only
+// consumers, such as WebSocket telemetry streams. The signal closes on
+// handover or supervisor shutdown. Do not retain the BrainRuntime argument or
+// start background mutations outside the callback.
+func (s *RuntimeSupervisor) WithEpoch(fn func(*BrainRuntime, <-chan struct{}) error) error {
 	if s == nil { return errors.New("runtime supervisor is nil") }
 	if fn == nil { return errors.New("runtime operation is nil") }
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	if s.closed || s.current == nil { return ErrRuntimeSupervisorClosed }
-	return fn(s.current)
+	return fn(s.current, s.epoch)
 }
 
 // RecoverFromCheckpoint performs an exclusive, fail-closed handover.
@@ -84,6 +96,8 @@ func (s *RuntimeSupervisor) RecoverFromCheckpoint(log *EventLog, checkpointPath 
 
 	recovered.SetEventLog(log)
 	s.current = recovered
+	close(s.epoch)
+	s.epoch = make(chan struct{})
 	return nil
 }
 
@@ -101,5 +115,6 @@ func (s *RuntimeSupervisor) Close() error {
 	}
 	s.current = nil
 	s.closed = true
+	close(s.epoch)
 	return nil
 }
