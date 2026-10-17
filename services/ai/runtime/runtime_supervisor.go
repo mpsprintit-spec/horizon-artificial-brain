@@ -66,24 +66,21 @@ func (s *RuntimeSupervisor) RecoverFromCheckpoint(log *EventLog, checkpointPath 
 	// Do not let a live runtime with a separate event writer advance the
 	// canonical state while rebuilding from the supplied journal.
 	old.mu.Lock()
+	defer old.mu.Unlock()
 	if old.eventLog != nil && old.eventLog != log {
-		old.mu.Unlock()
 		return errors.New("supervisor runtime is attached to a different event log")
 	}
-	old.mu.Unlock()
-
+	// Hold old.mu for the entire rebuild. Even a direct runtime writer using
+	// the same lock cannot advance its state while the journal is verified.
+	// The lock order remains old runtime -> event log.
 	recovered, err := RebuildRuntimeFromCheckpointAndJournal(log, checkpointPath)
 	if err != nil { return fmt.Errorf("runtime handover aborted: %w", err) }
 	if recovered == nil || recovered.RecoveryRequired() || recovered.eventLog != nil {
 		return errors.New("recovery did not return a clean, detached runtime")
 	}
 
-	// Lock the old runtime before publication so a direct writer cannot
-	// overlap the swap. Keep it permanently fail-closed after retirement.
-	old.mu.Lock()
 	old.recoveryRequired = true
 	old.eventLog = nil
-	old.mu.Unlock()
 
 	recovered.SetEventLog(log)
 	s.current = recovered
