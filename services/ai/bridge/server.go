@@ -173,7 +173,8 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 			writeMu.Lock()
 			defer writeMu.Unlock()
 			if err := conn.SetWriteDeadline(time.Now().Add(5*time.Second)); err != nil { return err }
-			return writeWebSocketJSON(rw.Writer, value)
+			if err := writeWebSocketJSON(rw.Writer, value); err != nil { return err }
+			return rw.Flush()
 		})
 	}
 	if err := writeJSONFrame(handshake); err != nil { return }
