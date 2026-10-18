@@ -212,7 +212,8 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 // handleCommand never exposes a live neural pointer to inspection code.
 // Save/load and autonomous monitor controls are separate managed mutations.
 func (c *cli) handleCommand(input string) bool {
-	switch strings.ToLower(input) {
+	lower:=strings.ToLower(strings.TrimSpace(input))
+	switch lower {
 	case "brain":
 		c.toggleBrainMonitor()
 		return true
@@ -226,6 +227,20 @@ func (c *cli) handleCommand(input string) bool {
 			fmt.Fprintf(c.out,"Load failed: %v\n",err)
 		} else {fmt.Fprintln(c.out,"Memory loaded.")}
 		return true
+	case "help","exit","quit","activation","context","history","clear","debug on","debug off":
+		// These commands only inspect local CLI state, so they must not
+		// serialize a potentially massive neural graph.
+		return c.handleCommandWithSnapshot(input,knowledge.BrainReadSnapshot{})
+	case "memory","nodes","synapses","clusters","patterns":
+		// Fall through to the managed brain inspection below.
+	default:
+		if !strings.HasPrefix(lower,"stats ") &&
+			!strings.HasPrefix(lower,"relations ") &&
+			!strings.HasPrefix(lower,"name ") {
+			// The ordinary user input path must not construct a neural
+			// snapshot before entering the cognition pipeline.
+			return false
+		}
 	}
 	inspection,err:=c.horizon.InspectActiveBrain()
 	if err!=nil {
