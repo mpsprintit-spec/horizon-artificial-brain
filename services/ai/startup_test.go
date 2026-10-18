@@ -121,6 +121,41 @@ func TestProductionStartupGenesisReplayMustMatchLegacyBrainFile(t *testing.T) {
 	}
 }
 
+func TestProductionStartupResumesInterruptedFirstBootstrap(t *testing.T) {
+	dir:=t.TempDir()
+	journal:=filepath.Join(dir,"events.jsonl")
+	memory:=filepath.Join(dir,"brain.json")
+	checkpoint:=filepath.Join(dir,"checkpoint.json")
+	log:=newStartupJournal(t,journal)
+	first,needsBootstrap,err:=initializeProductionHorizon(log,journal,memory,checkpoint)
+	if err!=nil || !needsBootstrap {t.Fatalf("fresh startup: bootstrap=%t err=%v",needsBootstrap,err)}
+	// Simulate a crash after the sequence-zero checkpoint but before the
+	// initial bootstrap event or standalone brain-memory file is written.
+	if err:=first.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=log.Close();err!=nil {t.Fatal(err)}
+	reopened:=newStartupJournal(t,journal)
+	second,needsBootstrap,err:=initializeProductionHorizon(reopened,journal,memory,checkpoint)
+	if err!=nil || !needsBootstrap {
+		t.Fatalf("sequence-zero checkpoint prematurely suppressed bootstrap: bootstrap=%t err=%v",needsBootstrap,err)
+	}
+	if err:=second.Supervisor.WithMutation(func(rt *runtime.BrainRuntime)error{
+		if rt.LastSequence()!=0 {t.Fatalf("empty checkpoint restarted at sequence %d",rt.LastSequence())}
+		_,err:=rt.CognitiveProcess(runtime.Event{ID:"bootstrap",Stimulus:[]string{"restarted"},Cycles:1,Timestamp:time.Date(2026,10,18,13,0,0,0,time.UTC)})
+		if err!=nil{return err}
+		if err:=rt.SaveBrain(memory);err!=nil{return err}
+		return rt.Checkpoint(checkpoint)
+	});err!=nil {t.Fatal(err)}
+	if err:=second.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=reopened.Close();err!=nil {t.Fatal(err)}
+	thirdLog:=newStartupJournal(t,journal)
+	third,needsBootstrap,err:=initializeProductionHorizon(thirdLog,journal,memory,checkpoint)
+	if err!=nil || needsBootstrap {t.Fatalf("bootstrapped restart reinitialized: bootstrap=%t err=%v",needsBootstrap,err)}
+	if err:=third.Supervisor.With(func(rt *runtime.BrainRuntime)error{
+		if rt.LastSequence()!=1 {t.Fatalf("bootstrap event duplicated or lost: sequence %d",rt.LastSequence())}
+		return nil
+	});err!=nil {t.Fatal(err)}
+}
+
 func TestProductionStartupLegacyMemoryOnlyIsAnchoredAndRestartable(t *testing.T) {
 	dir:=t.TempDir()
 	journal:=filepath.Join(dir,"events.jsonl")
