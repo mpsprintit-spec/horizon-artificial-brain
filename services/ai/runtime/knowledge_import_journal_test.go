@@ -53,7 +53,7 @@ func assertRecoveredNeuralState(t *testing.T, before, after *BrainRuntime) {
 	got,err:=after.brain.CanonicalJSON()
 	if err!=nil {t.Fatal(err)}
 	if !bytes.Equal(orig,got) {
-		t.Fatalf("replayed canonical neural substrate differs from accepted knowledge import: original=%d replayed=%d bytes, first-difference=%d",len(orig),len(got), firstJSONDifference(orig,got))
+		t.Fatalf("replayed canonical neural substrate differs from accepted knowledge import: original=%d replayed=%d bytes, first-difference=%d, expected=%q, actual=%q",len(orig),len(got), firstJSONDifference(orig,got), diagnosticFragment(orig,firstJSONDifference(orig,got)), diagnosticFragment(got,firstJSONDifference(orig,got)))
 	}
 	if before.LastSequence()!=after.LastSequence() {
 		t.Fatalf("replayed runtime sequence differs: live %d recovered %d",before.LastSequence(),after.LastSequence())
@@ -224,4 +224,12 @@ func firstJSONDifference(a,b []byte) int {
 	i:=0
 	for i<len(a) && i<len(b) && a[i]==b[i] {i++}
 	return i
+}
+
+func diagnosticFragment(data []byte, index int) string {
+	lo:=index-40
+	if lo<0 {lo=0}
+	hi:=index+120
+	if hi>len(data) {hi=len(data)}
+	return string(data[lo:hi])
 }
