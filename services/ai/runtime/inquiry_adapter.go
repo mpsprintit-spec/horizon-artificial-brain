@@ -50,8 +50,9 @@ func (r *BrainRuntime) BuildInquiryRequest(agenda InquiryAgenda) (InquiryRequest
 	}
 
 	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return InquiryRequest{}, err }
 	targets := append([]knowledge.NodeID(nil), r.lastCognitiveState.ActiveNodeIDs...)
-	r.mu.Unlock()
 
 	requestID := fmt.Sprintf("inquiry-%d-%s", agenda.Sequence, agenda.Selected.Action)
 	return InquiryRequest{
