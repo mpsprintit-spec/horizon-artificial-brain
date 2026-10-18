@@ -70,16 +70,14 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return err }
 
-	brainPath := path + ".brain.tmp"
-	if err := saveDeterministicBrain(r.brain, brainPath); err != nil {
-		return fmt.Errorf("save brain: %w", err)
-	}
-	brainBytes, err := os.ReadFile(brainPath)
+	// Checkpoint v5 must persist the ENTIRE canonical substrate, including
+	// developmental experiences, bootstrap episodes, learned policy and
+	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
+	// these states and made checkpoint-offset replay diverge from live memory.
+	brainBytes, err := r.brain.CanonicalJSON()
 	if err != nil {
-		_ = os.Remove(brainPath)
-		return fmt.Errorf("read brain snapshot: %w", err)
+		return fmt.Errorf("serialize complete canonical brain: %w", err)
 	}
-	_ = os.Remove(brainPath)
 
 	activationState := r.activation.SnapshotState()
 	cognitiveState := cloneCognitiveState(r.lastCognitiveState)
