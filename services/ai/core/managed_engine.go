@@ -2,7 +2,6 @@ package core
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
@@ -10,10 +9,10 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
-// WithActiveBrain executes a synchronous, lock-scoped visit to the currently
-// published canonical brain. The callback must not retain a brain/node
-// reference or call the supervisor again. Legacy public Knowledge/Runtime
-// aliases are not retargeted during recovery; only this managed path is safe.
+// Deprecated: WithActiveBrain exposes a live mutable pointer and MUST NOT
+// be used by read-only tools, monitoring adapters, or untrusted callbacks.
+// Use InspectActiveBrain to obtain detached value-only state. This legacy API
+// remains temporarily for source compatibility and is not a security boundary.
 func (h *HorizonEngine) WithActiveBrain(fn func(*knowledge.Brain) error) error {
 	if h == nil { return errors.New("horizon engine is unavailable") }
 	if fn == nil { return errors.New("active brain callback is nil") }
@@ -26,50 +25,34 @@ func (h *HorizonEngine) WithActiveBrain(fn func(*knowledge.Brain) error) error {
 	})
 }
 
-// PulseWithLabels is the managed CLI boundary. Cognition and the associated
-// label resolution happen within a SINGLE mutation lease; the labels therefore
-// cannot accidentally come from a different runtime after a handover.
+// PulseWithLabels resolves labels from the exact runtime that processed
+// the input, without exposing live Brain or Registry pointers. A single
+// supervisor mutation lease prevents handover during perception processing
+// and label resolution.
 func (h *HorizonEngine) PulseWithLabels(input string) (runtime.CognitiveInterpretation, []string, error) {
 	if h == nil || h.Perception == nil {
-		return runtime.CognitiveInterpretation{}, nil, errors.New("horizon cognitive pipeline is unavailable")
+		return runtime.CognitiveInterpretation{},nil,errors.New("horizon cognitive pipeline is unavailable")
 	}
-	signals, err := h.Perception.Perceive(input)
-	if err != nil { return runtime.CognitiveInterpretation{}, nil, err }
-	if len(signals) == 0 { return runtime.CognitiveInterpretation{}, nil, errors.New("perception produced no signals") }
-
+	signals,err:=h.Perception.Perceive(input)
+	if err!=nil {return runtime.CognitiveInterpretation{},nil,err}
+	if len(signals)==0 {return runtime.CognitiveInterpretation{},nil,errors.New("perception produced no signals")}
 	var result runtime.CognitiveInterpretation
 	var labels []string
-	resolve := func(brain *knowledge.Brain) {
-		labels = make([]string, 0, len(result.Interpretation.RankedNodeIDs))
-		seen := make(map[string]struct{})
-		for _, id := range result.Interpretation.RankedNodeIDs {
-			node := brain.Registry.GetByID(id)
-			if node == nil { continue }
-			label := brain.SurfaceForNode(id, "language")
-			if label == "" { label = fmt.Sprintf("node:%d", node.ID) }
-			if _, ok := seen[label]; ok { continue }
-			seen[label] = struct{}{}
-			labels = append(labels, label)
-		}
+	process:=func(active *runtime.BrainRuntime) error {
+		interpretations,err:=h.pulseSignalsWith(runtime.NewCognitiveOrchestrator(active),signals)
+		if err!=nil {return err}
+		result=interpretations[len(interpretations)-1]
+		labels,err=active.ResolveNodeLabels(result.Interpretation.RankedNodeIDs,"language")
+		return err
 	}
-	if h.Supervisor != nil {
-		err = h.Supervisor.WithMutation(func(rt *runtime.BrainRuntime) error {
-			interpretations, err := h.pulseSignalsWith(runtime.NewCognitiveOrchestrator(rt), signals)
-			if err != nil { return err }
-			result = interpretations[len(interpretations)-1]
-			return rt.WithBrainView(func(brain *knowledge.Brain) error {
-				resolve(brain)
-				return nil
-			})
-		})
+	if h.Supervisor!=nil {
+		err=h.Supervisor.WithMutation(process)
 	} else {
-		interpretations, processErr := h.PulseSignals(signals)
-		if processErr != nil { return runtime.CognitiveInterpretation{}, nil, processErr }
-		result = interpretations[len(interpretations)-1]
-		err = h.WithActiveBrain(func(brain *knowledge.Brain) error { resolve(brain); return nil })
+		if h.Runtime==nil {return runtime.CognitiveInterpretation{},nil,errors.New("brain runtime is unavailable")}
+		err=process(h.Runtime)
 	}
-	if err != nil { return runtime.CognitiveInterpretation{}, nil, err }
-	return result, labels, nil
+	if err!=nil {return runtime.CognitiveInterpretation{},nil,err}
+	return result,labels,nil
 }
 
 // ThinkActive advances the active runtime through its supervisor. The facade
