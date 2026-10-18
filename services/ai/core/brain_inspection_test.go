@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"path/filepath"
+	"sync"
+	"time"
 	"testing"
 
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
@@ -59,4 +61,53 @@ func TestReadSnapshotAccessDoesNotAdvanceNeuralRuntime(t *testing.T) {
 			t.Fatal("read-only inspection mutated recurrent or canonical neural state")
 		}
 	}
+}
+
+func TestConcurrentSnapshotsAndCheckpointHandoverDoNotExposeRetiredBrain(t *testing.T) {
+	h:=NewHorizonEngine()
+	log,err:=runtime.OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
+	if err!=nil {t.Fatal(err)}
+	defer log.Close()
+	old:=h.Runtime
+	old.SetEventLog(log)
+	checkpoint:=filepath.Join(t.TempDir(),"checkpoint.json")
+	if err:=old.Checkpoint(checkpoint);err!=nil {t.Fatal(err)}
+	initial,err:=h.InspectActiveBrain()
+	if err!=nil {t.Fatal(err)}
+	expected:=initial.Graph.CanonicalBytes()
+	const readers=8
+	const readsPerWorker=12
+	start:=make(chan struct{})
+	finished:=make(chan struct{})
+	errorsCh:=make(chan error,readers+1)
+	var wg sync.WaitGroup
+	for i:=0;i<readers;i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			for j:=0;j<readsPerWorker;j++ {
+				snapshot,err:=h.InspectActiveBrain()
+				if err!=nil {errorsCh<-err;return}
+				if snapshot.Revision!=initial.Revision || !bytes.Equal(snapshot.Graph.CanonicalBytes(),expected) {
+					errorsCh<-errors.New("snapshot captured inconsistent runtime during handover")
+					return
+				}
+			}
+		}()
+	}
+	go func() {
+		close(start)
+		if err:=h.Supervisor.RecoverFromCheckpoint(log,checkpoint);err!=nil {errorsCh<-err}
+		wg.Wait()
+		close(finished)
+	}()
+	select {
+	case <-finished:
+	case <-time.After(6*time.Second):
+		t.Fatal("concurrent read snapshots deadlocked checkpoint handover")
+	}
+	close(errorsCh)
+	for err:=range errorsCh {t.Fatalf("concurrent snapshot or handover: %v",err)}
+	if !old.RecoveryRequired() {t.Fatal("handover left old runtime writable")}
 }
