@@ -50,7 +50,6 @@ type canonicalBrainFile struct {
 	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences"`
 	ExperienceTraces []ExperienceTrace `json:"experience_traces"`
 	DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences"`
-	SurfaceAnnotations []SurfaceAnnotation `json:"surface_annotations,omitempty"`
 	AttentionState map[string]float64 `json:"attention_state"`
 	PredictionState map[string]float64 `json:"prediction_state"`
 	ErrorState map[string]float64 `json:"error_state"`
@@ -68,8 +67,6 @@ type canonicalBrainFile struct {
 func marshalCanonicalBrain(k *KnowledgeBase) ([]byte, error) {
 	k.projectionMu.RLock()
 	defer k.projectionMu.RUnlock()
-	k.annotationMu.RLock()
-	defer k.annotationMu.RUnlock()
 	nodes := k.Registry.Nodes()
 	sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
 	neuralUnits := make([]canonicalNeuralUnit, 0, len(nodes))
@@ -102,13 +99,13 @@ func marshalCanonicalBrain(k *KnowledgeBase) ([]byte, error) {
 	state := k.BrainState
 	errorState := map[string]float64{}
 	for key, value := range state.PredictionState { if len(key) >= 6 && key[:6] == "error_" { errorState[key[6:]] = value } }
-	payload := canonicalBrainFile{SchemaVersion: 2, BrainIdentity: "horizon", NeuralUnits: neuralUnits, Populations: append([]ProjectionPopulation(nil), k.ProjectionPopulations...), Synapses: synapses, TemporalPatterns: append([]*PatternSynapse(nil), k.Patterns.All()...), Episodes: append([]BootstrapExperience(nil), state.Episodes...), BootstrapExperiences: append([]BootstrapExperience(nil), state.BootstrapExperiences...), AttentionState: cloneFloatMap(state.AttentionState), PredictionState: cloneFloatMap(state.PredictionState), ErrorState: errorState, MemoryState: cloneFloatMap(state.MemoryState), CuriosityState: cloneFloatMap(state.CuriosityState), LearningPolicyState: state.LearningPolicyState, SelfModelState: cloneFloatMap(state.SelfModelState), SocialModelState: cloneFloatMap(state.SocialModelState), ValueState: cloneFloatMap(state.ValueState), PlasticityState: cloneFloatMap(state.PlasticityState), InquiryState: state.InquiryState, Provenance: provenance, DevelopmentalExperiences: append([]DevelopmentalExperience(nil), state.DevelopmentalExperiences...), ExperienceTraces: append([]ExperienceTrace(nil), state.ExperienceTraces...), SurfaceAnnotations: append([]SurfaceAnnotation(nil), k.SurfaceAnnotations...) }
+	payload := canonicalBrainFile{SchemaVersion: 2, BrainIdentity: "horizon", NeuralUnits: neuralUnits, Populations: append([]ProjectionPopulation(nil), k.ProjectionPopulations...), Synapses: synapses, TemporalPatterns: append([]*PatternSynapse(nil), k.Patterns.All()...), Episodes: append([]BootstrapExperience(nil), state.Episodes...), BootstrapExperiences: append([]BootstrapExperience(nil), state.BootstrapExperiences...), AttentionState: cloneFloatMap(state.AttentionState), PredictionState: cloneFloatMap(state.PredictionState), ErrorState: errorState, MemoryState: cloneFloatMap(state.MemoryState), CuriosityState: cloneFloatMap(state.CuriosityState), LearningPolicyState: state.LearningPolicyState, SelfModelState: cloneFloatMap(state.SelfModelState), SocialModelState: cloneFloatMap(state.SocialModelState), ValueState: cloneFloatMap(state.ValueState), PlasticityState: cloneFloatMap(state.PlasticityState), InquiryState: state.InquiryState, Provenance: provenance, DevelopmentalExperiences: append([]DevelopmentalExperience(nil), state.DevelopmentalExperiences...), ExperienceTraces: append([]ExperienceTrace(nil), state.ExperienceTraces...) }
 	return json.MarshalIndent(payload, "", "  ")
 }
 
 func cloneFloatMap(in map[string]float64) map[string]float64 { out := make(map[string]float64, len(in)); for key, value := range in { out[key] = value }; return out }
 
-func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []ProjectionPopulation, []SurfaceAnnotation, BrainState, error) {
+func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []ProjectionPopulation, BrainState, error) {
 	var raw struct {
 		SchemaVersion int `json:"schema_version"`
 		NeuralUnits []canonicalNeuralUnit `json:"neural_units"`
@@ -119,7 +116,6 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 		BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences"`
 		ExperienceTraces []ExperienceTrace `json:"experience_traces"`
 		DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences"`
-		SurfaceAnnotations []SurfaceAnnotation `json:"surface_annotations,omitempty"`
 		AttentionState map[string]float64 `json:"attention_state"`
 		PredictionState map[string]float64 `json:"prediction_state"`
 		ErrorState map[string]float64 `json:"error_state"`
@@ -132,11 +128,11 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 		PlasticityState map[string]float64 `json:"plasticity_state"`
 		InquiryState InquiryState `json:"inquiry_state"`
 	}
-	if err := json.Unmarshal(data, &raw); err != nil { return nil, nil, nil, nil, BrainState{}, err }
+	if err := json.Unmarshal(data, &raw); err != nil { return nil, nil, nil, BrainState{}, err }
 	if raw.SchemaVersion < 2 && len(raw.NeuralUnits) == 0 {
 		var legacy persistedGraph
 		if err := json.Unmarshal(data, &legacy); err != nil { return nil, nil, nil, nil, BrainState{}, err }
-		return legacy.Nodes, legacy.Patterns, legacy.ProjectionPopulations, nil, legacy.BrainState, nil
+		return legacy.Nodes, legacy.Patterns, legacy.ProjectionPopulations, legacy.BrainState, nil
 	}
 	registry := make(map[NodeID]*ConceptNode, len(raw.NeuralUnits))
 	for _, unit := range raw.NeuralUnits { registry[unit.ID] = &ConceptNode{ID: unit.ID, Representation: append([]float64(nil), unit.Representation...), Activation: unit.Activation, RestingActivation: unit.RestingActivation, Threshold: unit.Threshold, Frequency: unit.Frequency, Importance: unit.Importance, Plasticity: unit.Plasticity, UsageHistory: append([]time.Time(nil), unit.UsageHistory...), LastActivation: unit.LastActivation, Synapses: make(map[NodeID]SynapseList)} }
@@ -144,7 +140,7 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 	nodes := make([]*ConceptNode, 0, len(registry)); for _, node := range registry { nodes = append(nodes, node) }; sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
 	state := BrainState{AttentionState: raw.AttentionState, CuriosityState: raw.CuriosityState, PredictionState: raw.PredictionState, MemoryState: raw.MemoryState, SelfModelState: raw.SelfModelState, SocialModelState: raw.SocialModelState, ValueState: raw.ValueState, PlasticityState: raw.PlasticityState, LearningPolicyState: raw.LearningPolicyState, InquiryState: raw.InquiryState, BootstrapExperiences: raw.BootstrapExperiences, Episodes: raw.Episodes, ExperienceTraces: raw.ExperienceTraces, DevelopmentalExperiences: raw.DevelopmentalExperiences}
 	if state.PredictionState == nil { state.PredictionState = map[string]float64{} }; for key, value := range raw.ErrorState { state.PredictionState["error_"+key] = value }
-	return nodes, raw.TemporalPatterns, raw.Populations, raw.SurfaceAnnotations, state, nil
+	return nodes, raw.TemporalPatterns, raw.Populations, state, nil
 }
 
 // CanonicalJSON exposes the exact deterministic neural substrate encoding used
