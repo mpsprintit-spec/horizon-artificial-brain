@@ -135,7 +135,7 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 	if err := json.Unmarshal(data, &raw); err != nil { return nil, nil, nil, nil, BrainState{}, err }
 	if raw.SchemaVersion < 2 && len(raw.NeuralUnits) == 0 {
 		var legacy persistedGraph
-		if err := json.Unmarshal(data, &legacy); err != nil { return nil, nil, nil, BrainState{}, err }
+		if err := json.Unmarshal(data, &legacy); err != nil { return nil, nil, nil, nil, BrainState{}, err }
 		return legacy.Nodes, legacy.Patterns, legacy.ProjectionPopulations, nil, legacy.BrainState, nil
 	}
 	registry := make(map[NodeID]*ConceptNode, len(raw.NeuralUnits))
