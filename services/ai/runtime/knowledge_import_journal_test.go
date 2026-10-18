@@ -53,7 +53,7 @@ func assertRecoveredNeuralState(t *testing.T, before, after *BrainRuntime) {
 	got,err:=after.brain.CanonicalJSON()
 	if err!=nil {t.Fatal(err)}
 	if !bytes.Equal(orig,got) {
-		t.Fatalf("replayed canonical neural substrate differs from accepted knowledge import: original=%d replayed=%d bytes",len(orig),len(got))
+		t.Fatalf("replayed canonical neural substrate differs from accepted knowledge import: original=%d replayed=%d bytes, first-difference=%d",len(orig),len(got), firstJSONDifference(orig,got))
 	}
 	if before.LastSequence()!=after.LastSequence() {
 		t.Fatalf("replayed runtime sequence differs: live %d recovered %d",before.LastSequence(),after.LastSequence())
@@ -218,4 +218,10 @@ func TestKnowledgeImportReplayRejectsUnknownDocumentSequence(t *testing.T) {
 	events:=[]LoggedEvent{{SchemaVersion:EventLogSchemaVersion,BrainIdentity:BrainIdentity,Sequence:2,Type:EventTypeKnowledgeImport,Timestamp:at,KnowledgeDocument:&d}}
 	if err:=ReplayEventLog(rt,events);err==nil {t.Fatal("replay skipped missing knowledge revision")}
 	if rt.LastSequence()!=0 {t.Fatal("invalid replay changed runtime sequence")}
+}
+
+func firstJSONDifference(a,b []byte) int {
+	i:=0
+	for i<len(a) && i<len(b) && a[i]==b[i] {i++}
+	return i
 }
