@@ -134,10 +134,45 @@ func (r *BrainRuntime) LoadBrain(path string) error {
 	r.processedEvents = make(map[string]uint64)
 	return nil
 }
-func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error { if r==nil{return errors.New("brain runtime is not initialized")};r.mu.Lock();defer r.mu.Unlock();expected:=uint64(1);for _,event:=range events{if event.Sequence!=expected{return fmt.Errorf("event index discontinuity: got %d want %d",event.Sequence,expected)};expected++;if event.Type==EventTypeProcess&&event.Event!=nil&&event.Event.ID!=""{r.processedEvents[event.Event.ID]=event.Sequence};if event.Sequence>r.seq{r.seq=event.Sequence}};return nil }
+// RestoreEventIndex is only a standalone recovery/bootstrap operation. A
+// writer-attached runtime must obtain its sequence from committed replay, not
+// from an externally supplied index that could skip journal transactions.
+// Validate the entire index before changing any runtime state.
+func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
+	if r.eventLog != nil { return errors.New("cannot restore event index while journal writer is attached") }
+	if r.seq != 0 { return errors.New("cannot restore event index into a nonempty runtime") }
+	index := make(map[string]uint64)
+	expected := uint64(1)
+	for _, event := range events {
+		if event.SchemaVersion != EventLogSchemaVersion || event.BrainIdentity != BrainIdentity {
+			return errors.New("event index contains incompatible brain or schema")
+		}
+		if event.Sequence != expected {
+			return fmt.Errorf("event index discontinuity: got %d want %d", event.Sequence, expected)
+		}
+		if event.Type == EventTypeProcess && event.Event != nil && event.Event.ID != "" {
+			if _, exists := index[event.Event.ID]; exists { return fmt.Errorf("duplicate event ID %q in restored event index", event.Event.ID) }
+			index[event.Event.ID] = event.Sequence
+		}
+		expected++
+	}
+	r.processedEvents = index
+	r.seq = uint64(len(events))
+	return nil
+}
 
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
-func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) { if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }; return r.brain.GroundObservation(token, source, modality, GroundingThreshold) }
+func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) {
+	if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return knowledge.GroundedRepresentation{}, err }
+	return r.brain.GroundObservation(token, source, modality, GroundingThreshold)
+}
 
 // ActivateBootstrap rehydrates the persistent bootstrap populations into the
 // runtime activation state after the canonical brain has been loaded. It does
@@ -147,9 +182,10 @@ func (r *BrainRuntime) ActivateBootstrap(now time.Time) (activation.Result, erro
 	if r == nil || r.brain == nil || r.activation == nil {
 		return activation.Result{}, errors.New("brain runtime is not initialized")
 	}
-	if now.IsZero() {
-		now = r.now()
-	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return activation.Result{}, err }
+	if now.IsZero() { now = r.nowLocked() }
 
 	context := make(map[knowledge.NodeID]float64)
 	for _, experience := range r.brain.BrainState.BootstrapExperiences {
@@ -178,12 +214,42 @@ func (r *BrainRuntime) ActivateBootstrap(now time.Time) (activation.Result, erro
 	}), nil
 }
 
-func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error { if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }; if binding.RequestID == "" { return errors.New("action binding request ID is required") }; if binding.BrainIdentity == "" { binding.BrainIdentity = BrainIdentity }; if binding.BrainIdentity != BrainIdentity { return errors.New("action binding belongs to a different brain") }; if len(binding.TargetNodeIDs) == 0 && len(binding.Synapses) == 0 { return errors.New("action binding requires at least one neural target") }; for _, syn := range binding.Synapses { if r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil { return errors.New("action binding references an unknown synapse node") } }; r.mu.Lock(); defer r.mu.Unlock(); binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); r.actions[binding.RequestID] = binding; return nil }
+// RegisterActionBinding must validate its targets and commit the binding
+// under the same runtime mutation lock. Otherwise a concurrent reload or a
+// supervisor retirement could invalidate the validation before the write.
+func (r *BrainRuntime) RegisterActionBinding(binding ActionBinding) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
+	if binding.RequestID == "" { return errors.New("action binding request ID is required") }
+	if binding.BrainIdentity == "" { binding.BrainIdentity = BrainIdentity }
+	if binding.BrainIdentity != BrainIdentity { return errors.New("action binding belongs to a different brain") }
+	if len(binding.TargetNodeIDs) == 0 && len(binding.Synapses) == 0 {
+		return errors.New("action binding requires at least one neural target")
+	}
+	for _, nodeID := range binding.TargetNodeIDs {
+		if r.brain.Registry.GetByID(nodeID) == nil { return errors.New("action binding references an unknown target node") }
+	}
+	for _, syn := range binding.Synapses {
+		if r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil {
+			return errors.New("action binding references an unknown synapse node")
+		}
+	}
+	binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...)
+	binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...)
+	r.actions[binding.RequestID] = binding
+	return nil
+}
+
 func (r *BrainRuntime) actionBinding(requestID string) (ActionBinding, bool) { if r == nil { return ActionBinding{}, false }; r.mu.Lock(); defer r.mu.Unlock(); binding, ok := r.actions[requestID]; if !ok { return ActionBinding{}, false }; binding.TargetNodeIDs = append([]knowledge.NodeID(nil), binding.TargetNodeIDs...); binding.Synapses = append([]SynapseBinding(nil), binding.Synapses...); return binding, true }
-func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if clock == nil { r.clock = WallClock{} } else { r.clock = clock } }
+func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.recoveryRequired { return }; if clock == nil { r.clock = WallClock{} } else { r.clock = clock } }
 func (r *BrainRuntime) nowLocked() time.Time { if r.clock == nil { r.clock = WallClock{} }; now := r.clock.Now(); if now.IsZero() { now = time.Now().UTC() }; return now.UTC() }
 func (r *BrainRuntime) now() time.Time { if r == nil { return time.Now().UTC() }; r.mu.Lock(); defer r.mu.Unlock(); return r.nowLocked() }
-func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); r.eventLog = log }
+// SetEventLog is retained for existing callers. It never reattaches a
+// journal to a retired or poisoned runtime. New integrations should bind
+// journals through the owning supervisor at startup/recovery boundaries.
+func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.recoveryRequired { return }; r.eventLog = log }
 // HasProcessedEvent reports whether an event ID is already in the durable runtime index.
 // It is used by adapters to reject duplicate samples before they mutate the neural substrate.
 func (r *BrainRuntime) HasProcessedEvent(id string) bool {
