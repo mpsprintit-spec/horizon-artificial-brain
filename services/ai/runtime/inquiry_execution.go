@@ -162,6 +162,9 @@ func (r *BrainRuntime) CaptureInquiryPrediction(execution InquiryExecution, at t
 	if at.IsZero() {
 		at = time.Now().UTC()
 	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return InquiryExecution{}, err }
 	execution.Prediction = r.activation.PredictionSnapshot()
 	execution.PredictionCapturedAt = at.UTC()
 	return execution, nil
