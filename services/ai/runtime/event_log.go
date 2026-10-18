@@ -28,6 +28,7 @@ type LoggedEvent struct {
 	Event         *Event               `json:"event,omitempty"`
 	Experience    *learning.Experience `json:"experience,omitempty"`
 	KnowledgeDocument *knowledge.KnowledgeDocument `json:"knowledge_document,omitempty"`
+	Vector *knowledge.NeuralVector `json:"vector,omitempty"`
 	Outcome       *OutcomeEvent        `json:"outcome,omitempty"`
 	Consequence  *InquiryConsequenceEvent `json:"consequence,omitempty"`
 	IntentHash   string `json:"intent_hash,omitempty"`
@@ -44,6 +45,7 @@ const (
 	// A document import is one durable revision, even if it performs multiple
 	// ordered neural exposure updates in that same revision.
 	EventTypeKnowledgeImport = "knowledge_import"
+	EventTypeVectorGround = "vector_ground"
 )
 
 type EventLog struct {
@@ -169,7 +171,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport {
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -344,7 +346,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				return nil, fmt.Errorf("%w: sensor intent at sequence %d interrupted by %q at line %d", ErrUncommittedSensorTransaction, expected, event.Type, lineNumber)
 			}
 			if event.IntentHash == "" || event.IntentHash != pendingHash || event.Event != nil ||
-				event.Experience != nil || event.KnowledgeDocument != nil || event.Outcome != nil || event.Consequence != nil ||
+				event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil ||
 				!event.Timestamp.Equal(pending.Timestamp) {
 				return nil, fmt.Errorf("%w: sensor commit mismatch at line %d", ErrUncommittedSensorTransaction, lineNumber)
 			}
@@ -360,10 +362,22 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		}
 
 		switch event.Type {
+		case EventTypeVectorGround:
+			if event.Vector == nil || event.Event != nil || event.Experience != nil ||
+				event.KnowledgeDocument != nil || event.Outcome != nil ||
+				event.Consequence != nil || event.IntentHash != "" || event.Timestamp.IsZero() {
+				return nil, fmt.Errorf("invalid numeric grounding record at line %d", lineNumber)
+			}
+			if err := validateGroundVector(*event.Vector); err != nil {
+				return nil, fmt.Errorf("invalid numeric grounding vector at line %d: %w", lineNumber, err)
+			}
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
 		case EventTypeKnowledgeImport:
 			if event.KnowledgeDocument == nil || event.Event != nil ||
 				event.Experience != nil || event.Outcome != nil ||
-				event.Consequence != nil || event.IntentHash != "" ||
+				event.Consequence != nil || event.Vector != nil || event.IntentHash != "" ||
 				event.Timestamp.IsZero() {
 				return nil, fmt.Errorf("invalid knowledge import record at line %d", lineNumber)
 			}
@@ -378,7 +392,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				event.Event.ID == "" || event.Event.ID != event.Event.SensorObservation.SampleID ||
 				!event.Timestamp.Equal(event.Event.Timestamp) ||
 				!event.Timestamp.Equal(event.Event.SensorObservation.Timestamp) ||
-				event.IntentHash != "" || event.KnowledgeDocument != nil {
+				event.IntentHash != "" || event.KnowledgeDocument != nil || event.Vector != nil {
 				return nil, fmt.Errorf("invalid sensor intent payload at line %d", lineNumber)
 			}
 			digest, err := sensorIntentHash(event)
@@ -434,6 +448,11 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		if logged.Sequence != expected { return fmt.Errorf("replay sequence discontinuity: got %d want %d", logged.Sequence, expected) }
 		expected++
 		switch logged.Type {
+		case EventTypeVectorGround:
+			if logged.Vector == nil { return errors.New("numeric grounding record has no vector") }
+			if _, err := brainRuntime.GroundVectorAt(*logged.Vector, logged.Timestamp); err != nil {
+				return fmt.Errorf("replay numeric grounding at sequence %d: %w", logged.Sequence, err)
+			}
 		case EventTypeKnowledgeImport:
 			if logged.KnowledgeDocument == nil { return errors.New("knowledge import event has no document") }
 			if err := brainRuntime.replayKnowledgeDocument(*logged.KnowledgeDocument, logged.Timestamp); err != nil {
