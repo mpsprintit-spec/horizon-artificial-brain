@@ -45,11 +45,11 @@ func TestCLICommandsAndPulseUseRecoveredActiveBrain(t *testing.T) {
 	for _,command:=range []string{"memory","nodes","synapses","save","load","history","debug on","debug off"} {
 		if !cli.handleCommand(command) {t.Fatalf("command %q was not handled",command)}
 	}
-	if !strings.Contains(output.String(),"Memory saved.") || !strings.Contains(output.String(),"Memory loaded.") {
-		t.Fatalf("managed CLI memory commands unavailable: %s",output.String())
+	if !strings.Contains(output.String(),"Memory saved.") || !strings.Contains(output.String(),"Load failed:") {
+		t.Fatalf("managed CLI must save, but reject manual load while journal is attached: %s",output.String())
 	}
 	if err:=cli.horizon.Supervisor.With(func(active *runtime.BrainRuntime) error {
-		if active.LastSequence()!=0 {t.Fatalf("CLI load did not reset managed runtime sequence: %d",active.LastSequence())}
+		if active.LastSequence()!=2 {t.Fatalf("rejected manual import changed the committed journal sequence: %d",active.LastSequence())}
 		return nil
 	});err!=nil {t.Fatal(err)}
 }
