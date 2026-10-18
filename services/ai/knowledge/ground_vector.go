@@ -1,6 +1,9 @@
 package knowledge
 
-import "errors"
+import (
+ "errors"
+ "time"
+)
 
 // GroundedVector is the result of presenting a numeric observation to the
 // canonical brain substrate. Existing reports whether the representation was
@@ -18,13 +21,21 @@ func (k *KnowledgeBase) GroundVector(vector NeuralVector) (GroundedVector, error
 	if k == nil {
 		return GroundedVector{}, errors.New("brain is nil")
 	}
+	return k.GroundVectorAt(vector, time.Time{})
+}
+
+// GroundVectorAt preserves the timestamp supplied by the observing adapter.
+// Numeric grounding never creates another vector store; it only changes the
+// same population substrate that the runtime uses for cognition and replay.
+func (k *KnowledgeBase) GroundVectorAt(vector NeuralVector, at time.Time) (GroundedVector, error) {
+	if k == nil { return GroundedVector{}, errors.New("brain is nil") }
 	if vector.Empty() {
 		return GroundedVector{}, errors.New("neural vector is empty")
 	}
 
 	const threshold = 0.90
 	_, hadPopulation := k.findExactProjectionPopulation(vector)
-	population, err := k.ProjectVectorPopulation(vector, threshold, defaultProjectionPopulation)
+	population, err := k.ProjectVectorPopulationAt(vector, threshold, defaultProjectionPopulation, at)
 	if err != nil || len(population.Units) == 0 {
 		if err != nil {
 			return GroundedVector{}, err
