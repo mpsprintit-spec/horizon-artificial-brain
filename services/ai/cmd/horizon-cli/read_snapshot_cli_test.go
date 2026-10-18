@@ -64,3 +64,29 @@ func TestCLISnapshotLabelsAndCountsProgressAfterLearning(t *testing.T) {
 	if inspected.Revision!=1 {t.Fatalf("unexpected revision %d",inspected.Revision)}
 	if len(inspected.Graph.NeuralUnits())==0 {t.Fatal("empty detached neural result")}
 }
+
+func TestCLIOrdinaryInputAndHelpDoNotNeedNeuralSnapshot(t *testing.T) {
+	var output bytes.Buffer
+	app:=newCLI(strings.NewReader(""),&output,filepath.Join(t.TempDir(),"brain.json"))
+	const ordinary="cahaya bergerak melalui ruang"
+	if app.handleCommand(ordinary) {
+		t.Fatal("ordinary cognitive input was mistaken for a CLI command")
+	}
+	allocations:=testing.AllocsPerRun(100,func(){
+		if app.handleCommand(ordinary) {panic("ordinary input became command")}
+	})
+	if allocations>10 {
+		t.Fatalf("ordinary input command check allocated %.0f objects; possible neural snapshot in hot path",allocations)
+	}
+	if err:=app.horizon.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if !app.handleCommand("help") || !strings.Contains(output.String(),"Commands:") {
+		t.Fatalf("help unexpectedly requires an active brain: %s",output.String())
+	}
+	if app.handleCommand(ordinary) {
+		t.Fatal("ordinary input became a command after supervisor close")
+	}
+	output.Reset()
+	if !app.handleCommand("memory") || !strings.Contains(output.String(),"Brain command unavailable:") {
+		t.Fatalf("neural inspection failed to close on retired runtime: %s",output.String())
+	}
+}
