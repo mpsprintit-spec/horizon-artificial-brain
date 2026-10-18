@@ -39,7 +39,10 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 		if err := h.Supervisor.RecoverFromCheckpoint(log, checkpointPath); err != nil {
 			return nil, false, fmt.Errorf("verified checkpoint recovery failed; refusing unsafe bootstrap: %w",err)
 		}
-		return h, false, nil
+		// If the process stopped after its sequence-zero checkpoint but
+		// before the very first bootstrap event, complete bootstrap on
+		// restart instead of silently serving an uninitialized substrate.
+		return h, len(events) == 0 && !memoryExists, nil
 	}
 
 	if len(events) > 0 {
