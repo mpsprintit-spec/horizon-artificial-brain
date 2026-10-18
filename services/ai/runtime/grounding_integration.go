@@ -2,7 +2,6 @@ package runtime
 
 import (
 	"errors"
-	"sync"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -10,19 +9,14 @@ import (
 
 var ErrManagedGroundingRequired = errors.New("canonical brain is supervisor-owned; use managed grounding integration")
 
-// Managed brain identities are never released: a retired substrate must not
-// become writable again through a previously held legacy adapter pointer.
-// This is a legacy-adapter guard, NOT general pointer revocation; direct
-// callers of knowledge.Brain APIs still require separate migration.
-var supervisorOwnedBrains sync.Map
-
+// Ownership is stored atomically on the canonical Brain itself, so an
+// unlimited number of recoveries does not retain retired neural substrates
+// through a global pointer map.
 func markSupervisorOwnedBrain(brain *knowledge.Brain) {
-	if brain != nil { supervisorOwnedBrains.Store(brain, struct{}{}) }
+	if brain != nil { brain.MarkRuntimeOwned() }
 }
 func supervisorOwnsBrain(brain *knowledge.Brain) bool {
-	if brain == nil { return false }
-	_, exists := supervisorOwnedBrains.Load(brain)
-	return exists
+	return brain != nil && brain.RuntimeOwned()
 }
 
 // GroundingIntegration presents numeric observations to the ONE Brain.
