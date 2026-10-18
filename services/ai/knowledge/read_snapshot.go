@@ -40,12 +40,18 @@ type PatternRead struct {
 // substrate. All collections are private; public methods return fresh copies.
 // No method can mutate canonical Brain state, even after a runtime handover.
 type BrainReadSnapshot struct {
+	canonical []byte
 	units []NeuralUnitRead
 	synapses []SynapseRead
 	patterns []PatternRead
 	annotations []SurfaceAnnotation
 }
 
+// CanonicalBytes returns a detached numerical substrate encoding. Callers
+// may modify these returned bytes without affecting the snapshot or Brain.
+func (s BrainReadSnapshot) CanonicalBytes() []byte {
+	return append([]byte(nil),s.canonical...)
+}
 func (s BrainReadSnapshot) NeuralUnits() []NeuralUnitRead {
 	out:=make([]NeuralUnitRead,len(s.units))
 	for i,unit:=range s.units {
@@ -124,6 +130,7 @@ func (k *KnowledgeBase) InspectReadOnly() (BrainReadSnapshot,error) {
 	}
 	if err:=json.Unmarshal(data,&decoded);err!=nil{return BrainReadSnapshot{},err}
 	out:=BrainReadSnapshot{
+		canonical: data,
 		units:make([]NeuralUnitRead,0,len(decoded.NeuralUnits)),
 		synapses:make([]SynapseRead,0,len(decoded.Synapses)),
 		patterns:make([]PatternRead,0,len(decoded.TemporalPatterns)),
