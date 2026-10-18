@@ -378,7 +378,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				event.Event.ID == "" || event.Event.ID != event.Event.SensorObservation.SampleID ||
 				!event.Timestamp.Equal(event.Event.Timestamp) ||
 				!event.Timestamp.Equal(event.Event.SensorObservation.Timestamp) ||
-				event.IntentHash != "" {
+				event.IntentHash != "" || event.KnowledgeDocument != nil {
 				return nil, fmt.Errorf("invalid sensor intent payload at line %d", lineNumber)
 			}
 			digest, err := sensorIntentHash(event)
