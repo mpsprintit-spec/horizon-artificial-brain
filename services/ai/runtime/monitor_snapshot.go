@@ -78,6 +78,9 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil {
+		return MonitorSnapshot{}, err
+	}
 
 	data, err := r.brain.CanonicalJSON()
 	if err != nil {

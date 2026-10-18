@@ -30,7 +30,7 @@ func (s *RuntimeSupervisor) RecoverFromCommittedJournal(log *EventLog, foundatio
 	if recovered == nil || recovered.RecoveryRequired() || recovered.eventLog != nil {
 		return errors.New("genesis recovery did not return a clean detached runtime")
 	}
-	old.recoveryRequired = true
+	old.markRecoveryRequiredLocked()
 	old.eventLog = nil
 	recovered.SetEventLog(log)
 	markSupervisorOwnedBrain(recovered.brain)

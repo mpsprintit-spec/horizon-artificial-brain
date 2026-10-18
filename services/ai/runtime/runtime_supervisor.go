@@ -107,7 +107,7 @@ func (s *RuntimeSupervisor) RecoverFromCheckpoint(log *EventLog, checkpointPath 
 		return errors.New("recovery did not return a clean, detached runtime")
 	}
 
-	old.recoveryRequired = true
+	old.markRecoveryRequiredLocked()
 	old.eventLog = nil
 
 	recovered.SetEventLog(log)
@@ -126,7 +126,7 @@ func (s *RuntimeSupervisor) Close() error {
 	if s.closed { return nil }
 	if s.current != nil {
 		s.current.mu.Lock()
-		s.current.recoveryRequired = true
+		s.current.markRecoveryRequiredLocked()
 		s.current.eventLog = nil
 		s.current.mu.Unlock()
 	}
