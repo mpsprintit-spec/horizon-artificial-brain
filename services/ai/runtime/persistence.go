@@ -164,6 +164,9 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && len(snapshot.SurfaceAnnotations) > 0 {
+		return errors.New("legacy checkpoint cannot carry unauthenticated adapter annotations")
+	}
 	var checksum string
 	switch snapshot.SchemaVersion {
 	case legacyBrainSnapshotSchemaVersion:
