@@ -12,3 +12,4 @@ await cp("styles.css", "dist/styles.css");
 await cp("app.js", "dist/app.js");
 
 await cp("sensor-adapters.js", "dist/sensor-adapters.js");
+await cp("visual-correspondence.js", "dist/visual-correspondence.js");

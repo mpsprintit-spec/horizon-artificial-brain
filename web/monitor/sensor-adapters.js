@@ -1,13 +1,15 @@
 // Physical measurement adapters only. They assign no object, word, emotion,
 // metric distance or semantic identity. Returned values are relative sensor
 // coordinates; downstream cognition owns learning and interpretation.
+import { extractVisualCorrespondence } from "./visual-correspondence.js";
+
 const bounded = value => Math.max(-1, Math.min(1, value));
 const luma = (r, g, b) => .2126*r + .7152*g + .0722*b;
 
 export function extractVisionFields(rgba, width, height, previous = null, elapsedNS = 0) {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 4 || height < 4 || rgba.length !== width*height*4) throw new Error("invalid RGBA sensor frame");
-  const fields = [], state = [];
-  const old = previous?.width === width && previous?.height === height ? previous.state : null;
+  const fields = [], state = [], luminance = new Float32Array(width*height);
+  const old = previous?.width === width && previous?.height === height && previous.state?.length === 16 ? previous.state : null;
   for (let gy = 0; gy < 4; gy++) for (let gx = 0; gx < 4; gx++) {
     const x0 = Math.floor(gx*width/4), x1 = Math.floor((gx+1)*width/4);
     const y0 = Math.floor(gy*height/4), y1 = Math.floor((gy+1)*height/4);
@@ -15,6 +17,7 @@ export function extractVisionFields(rgba, width, height, previous = null, elapse
     for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) {
       const i = 4*(y*width+x), r = rgba[i]/255, g = rgba[i+1]/255, b = rgba[i+2]/255;
       const base = luma(r, g, b);
+      luminance[y*width+x] = base;
       red += r; green += g; blue += b; count++;
       if (x+1 < width) dx += luma(rgba[i+4]/255, rgba[i+5]/255, rgba[i+6]/255)-base;
       if (y+1 < height) { const j = i+4*width; dy += luma(rgba[j]/255, rgba[j+1]/255, rgba[j+2]/255)-base; }
@@ -27,12 +30,13 @@ export function extractVisionFields(rgba, width, height, previous = null, elapse
     add("light.rgb-v1", rgb.map(v => 2*v-1));
     add("light.gradient-v1", [dx/count, dy/count]);
     add("spatial.position-v1", [(coordinates[0]+coordinates[2])/2, (coordinates[1]+coordinates[3])/2]);
-    if (old && elapsedNS > 0 && elapsedNS <= 60e9) {
+    if (old && Number.isSafeInteger(elapsedNS) && elapsedNS > 0 && elapsedNS <= 60e9) {
       add("light.temporal-delta-v1", rgb.map((v, c) => v-old[region][c]), {temporal_offset_ns:-elapsedNS, temporal_scale_ns:elapsedNS});
     }
     state.push(rgb);
   }
-  return {fields, state:{width, height, state}};
+  if (old) fields.push(...extractVisualCorrespondence(previous.luminance, luminance, width, height, elapsedNS));
+  return {fields, state:{width, height, state, luminance}};
 }
 
 // Fixed physical frequency coordinates (125..2000 Hz) and a fixed -80..0 dB
