@@ -149,7 +149,7 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 				continue
 			}
 			seen[token] = true
-			representation, err := r.brain.GroundObservationAt(token, input.Source, input.Modality, GroundingThreshold, event.Timestamp)
+			representation, err := r.brain.GroundObservationWithEncodingAt(token, input.Source, input.Modality, GroundingThreshold, event.Timestamp, r.surfaceEncoding)
 			if err != nil {
 				return CognitiveInterpretation{}, false, err
 			}
@@ -166,7 +166,7 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 	}
 	learned := command.Experience != nil && len(command.Experience.Sequence) > 0
 	if learned {
-		r.learning.LearnExperience(*command.Experience, event.Timestamp)
+		r.learning.LearnExperienceWithEncoding(*command.Experience, event.Timestamp, r.surfaceEncoding)
 	}
 	cognitive, err := r.InterpretCognitive(output, Observation{Source: input.Source, Modality: input.Modality, Tokens: input.Tokens, ContextTokens: input.ContextTokens, DataTokens: input.DataTokens})
 	if err != nil {

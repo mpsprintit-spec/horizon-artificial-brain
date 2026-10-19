@@ -33,3 +33,5 @@ The browser sends camera and microphone measurements through typed numeric senso
 The runtime's complete observation/inquiry transactions, checkpoint v7 and historical recovery limits are documented in [COGNITIVE_JOURNAL.md](runtime/COGNITIVE_JOURNAL.md).
 
 The managed facade uses `Supervisor()` and detached inspection rather than exported neural aliases. See [MANAGED_OWNERSHIP.md](runtime/MANAGED_OWNERSHIP.md) for the API migration and lifetime contract.
+
+Written input, sequence learning, Bridge text and knowledge import share the [written text contract](runtime/WRITTEN_TEXT_CONTRACT.md). New journals use schema 2; schema 1 retains historical replay semantics. The contract documents explicit rebinding of legacy written populations and the remaining language-understanding limits.

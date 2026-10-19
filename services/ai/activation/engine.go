@@ -18,6 +18,7 @@ type Engine struct {
 }
 
 type Request struct {
+	SurfaceEncoding *knowledge.SurfaceEncoding
 	StimulusTokens []string
 	StimulusNodeIDs []knowledge.NodeID
 	ContextBoosts map[knowledge.NodeID]float64
@@ -66,7 +67,9 @@ func (e *Engine) ActivateWith(req Request) Result {
 		// boundary, not directly through population projection. Direct projection
 		// creates valid neural units but does not register the surface annotation
 		// needed to realize the neural state back into language.
-		grounded, err := e.Memory.GroundObservationAt(canonical, "activation", "language", e.Threshold, req.Now)
+		encoding := knowledge.WrittenTextEncoding
+		if req.SurfaceEncoding != nil { encoding = *req.SurfaceEncoding }
+		grounded, err := e.Memory.GroundObservationWithEncodingAt(canonical, "activation", "language", e.Threshold, req.Now, encoding)
 		if err != nil { continue }
 		vector := knowledge.EncodeObservation(canonical, "language")
 		for _, nodeID := range grounded.Population {

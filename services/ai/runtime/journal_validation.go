@@ -3,13 +3,18 @@ package runtime
 import (
 	"errors"
 	"fmt"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 // Reject foreign payloads rather than replaying only the recognized fraction
 // of a mixed record. Legacy process/think retain their lower-level meaning.
 func validateJournalPayload(event LoggedEvent) error {
+	if err := event.SurfaceEncoding.Validate(); err != nil { return err }
+	if event.SchemaVersion == 1 && event.SurfaceEncoding != knowledge.LegacySurfaceEncoding { return errors.New("versioned surface encoding requires journal schema 2") }
 	var required []string
 	switch event.Type {
+	case EventTypeSurfaceRebinding:
+		required = []string{"surface_rebinding"}
 	case EventTypeProcess, EventTypeThink, EventTypeCognitiveProcess, EventTypeCognitiveThink, EventTypeSensorIntent:
 		required = []string{"event"}
 	case EventTypeObservation:
@@ -33,7 +38,7 @@ func validateJournalPayload(event LoggedEvent) error {
 	default:
 		return fmt.Errorf("unknown event type %q", event.Type)
 	}
-	present := map[string]bool{"event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil}
+	present := map[string]bool{"event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
 	for _, field := range required {
 		if !present[field] {
 			return fmt.Errorf("%s record requires %s", event.Type, field)
@@ -46,6 +51,8 @@ func validateJournalPayload(event LoggedEvent) error {
 		}
 	}
 	switch event.Type {
+	case EventTypeSurfaceRebinding:
+		if event.SurfaceEncoding != knowledge.WrittenTextEncoding || event.Timestamp.IsZero() || event.SurfaceRebinding.ReferenceHash == "" { return errors.New("surface rebinding requires a versioned reference and event time") }
 	case EventTypeObservation, EventTypeInquiryOutcome, EventTypeCognitiveProcess, EventTypeCognitiveThink:
 		if event.Timestamp.IsZero() || !event.Timestamp.Equal(event.Event.Timestamp) || event.Event.SensorObservation != nil {
 			return errors.New("command event time or sensor boundary is invalid")

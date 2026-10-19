@@ -44,7 +44,7 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	if err != nil { return KnowledgeProcessingResult{}, fmt.Errorf("encode knowledge document: %w", err) }
 	var frozen knowledge.KnowledgeDocument
 	if err := json.Unmarshal(raw, &frozen); err != nil { return KnowledgeProcessingResult{}, fmt.Errorf("freeze knowledge document: %w", err) }
-	compiled, err := knowledge.CompileKnowledgeDocument(frozen, at)
+	compiled, err := knowledge.CompileKnowledgeDocumentWithEncoding(frozen, at, r.surfaceEncoding)
 	if err != nil { return KnowledgeProcessingResult{}, err }
 	if r.eventLog == nil {
 		// Standalone legacy imports preserve per-exposure sequence semantics.
@@ -52,6 +52,7 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	}
 	nextSeq := r.seq + 1
 	if err := r.eventLog.Append(LoggedEvent{
+		SurfaceEncoding: r.surfaceEncoding,
 		SchemaVersion: EventLogSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence: nextSeq,
@@ -83,7 +84,7 @@ func (r *BrainRuntime) replayKnowledgeDocument(document knowledge.KnowledgeDocum
 	if err := r.ensureWritableLocked(); err != nil { return err }
 	if r.eventLog != nil { return errors.New("knowledge import replay requires detached journal") }
 	if at.IsZero() { return errors.New("knowledge import replay requires a timestamp") }
-	compiled, err := knowledge.CompileKnowledgeDocument(document, at)
+	compiled, err := knowledge.CompileKnowledgeDocumentWithEncoding(document, at, r.surfaceEncoding)
 	if err != nil { return err }
 	r.seq++
 	if _, err := r.processKnowledgeDocumentLocked(document, compiled, at.UTC(), true); err != nil {
@@ -96,7 +97,7 @@ func (r *BrainRuntime) replayKnowledgeDocument(document knowledge.KnowledgeDocum
 // processKnowledgeDocumentLocked assumes r.mu. A journaled import has exactly
 // one sequence/revision, even when there are several cognition microsteps.
 func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.KnowledgeDocument, compiled knowledge.KnowledgeCompilation, at time.Time, singleRevision bool) (KnowledgeProcessingResult, error) {
-	if _, err := r.brain.ImportKnowledgeDocument(document, at); err != nil {
+	if _, err := r.brain.ImportKnowledgeDocumentWithEncoding(document, at, r.surfaceEncoding); err != nil {
 		return KnowledgeProcessingResult{}, err
 	}
 	result := KnowledgeProcessingResult{Compilation: compiled}
@@ -128,7 +129,7 @@ func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.Knowled
 			}
 			eventAt := at.Add(time.Duration(step) * time.Nanosecond)
 			step++
-			grounded, err := r.brain.GroundObservationAt(surface, "knowledge-import:"+document.Source, exposure.Modality, GroundingThreshold, eventAt)
+			grounded, err := r.brain.GroundObservationWithEncodingAt(surface, "knowledge-import:"+document.Source, exposure.Modality, GroundingThreshold, eventAt, r.surfaceEncoding)
 			if err != nil {
 				return result, fmt.Errorf("ground experience %q exposure %d: %w", experience.ID, exposure.SequencePosition, err)
 			}
@@ -180,6 +181,7 @@ func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.Knowled
 func (r *BrainRuntime) cognitiveKnowledgeExposureLocked(event Event) (CognitiveOutput, error) {
 	if err := r.ensureWritableLocked(); err != nil { return CognitiveOutput{}, err }
 	result := r.activation.ActivateWith(activation.Request{
+		SurfaceEncoding: &r.surfaceEncoding,
 		StimulusNodeIDs: append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),
 		Cycles: event.Cycles,
 		Now: event.Timestamp,

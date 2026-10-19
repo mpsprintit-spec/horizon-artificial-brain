@@ -6,10 +6,11 @@ the same owner handle through `Supervisor()`. Every facade operation resolves
 the active runtime through that owner; no raw neural alias or cached legacy
 cognitive engine is created by the facade.
 
-This is an explicit source migration from PR #28, not a serialization or neural
-representation change. Checkpoint v7 and the complete journal command protocol
-remain unchanged. The integration target remains the root Go module; separate
-nested modules and alternative owner prototypes are not implicitly integrated.
+The ownership migration from PR #28 did not change checkpoint v7 or the neural
+representation. Subsequent written encoding and journal schema changes are
+specified in [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md). The integration
+target remains the root Go module; separate nested modules and alternative
+owner prototypes are not implicitly integrated.
 
 ## API migration
 
@@ -108,6 +109,7 @@ failed recovery, subscription shutdown and epoch retirement; they remain part
 of race validation. This is not a claim about arbitrary external socket timing
 or code using unsupported raw pointers.
 
-Other audit findings, including text/language encoding (H24), sequence/role
-preservation (H11), decay/interference and serialization cost, remain separate
-work. This patch changes ownership and API access, not those learning rules.
+The ownership patch changes API access rather than learning rules. The H24
+text/language correction is documented in [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md).
+Sequence/role preservation (H11), decay/interference and serialization cost
+remain separate work.
