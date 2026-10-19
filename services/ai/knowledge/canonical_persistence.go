@@ -135,6 +135,7 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 		InquiryState InquiryState `json:"inquiry_state"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil { return nil, nil, nil, BrainState{}, err }
+	if err := ValidateOrderedState(data, nil, true); err != nil { return nil, nil, nil, BrainState{}, err }
 	if raw.SchemaVersion < 2 && len(raw.NeuralUnits) == 0 {
 		var legacy persistedGraph
 		if err := json.Unmarshal(data, &legacy); err != nil { return nil, nil, nil, BrainState{}, err }

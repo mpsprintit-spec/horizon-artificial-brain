@@ -15,6 +15,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	}
 	command.SchemaVersion, command.BrainIdentity, command.Sequence = EventLogSchemaVersion, BrainIdentity, r.seq+1
 	command.SurfaceEncoding = r.surfaceEncoding
+	command.DynamicsEncoding = r.dynamicsEncoding
 	if command.Timestamp.IsZero() {
 		command.Timestamp = r.nowLocked()
 	}

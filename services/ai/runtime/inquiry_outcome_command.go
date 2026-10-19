@@ -75,6 +75,11 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 	if !ok || binding.BrainIdentity != BrainIdentity {
 		return CognitiveInterpretation{}, false, r.seq, errors.New("outcome has no registered action binding")
 	}
+	if command.Observation.Experience != nil {
+		if err = r.validateExperienceLocked(*command.Observation.Experience); err != nil {
+			return CognitiveInterpretation{}, false, r.seq, err
+		}
+	}
 	var cognitive CognitiveInterpretation
 	learned := false
 	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeInquiryOutcome, Timestamp: event.Timestamp, Event: cloneEvent(event), InquiryOutcome: &command}, func() error {

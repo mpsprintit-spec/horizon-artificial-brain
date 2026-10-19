@@ -45,6 +45,7 @@ func (r *BrainRuntime) RecoveryRequired() bool {
 }
 
 type Event struct {
+	NeuralTrace *knowledge.ObservationTrace `json:"neural_trace,omitempty"`
 	ID string `json:"id"`
 	Stimulus []string `json:"stimulus,omitempty"`
 	StimulusNodeIDs []knowledge.NodeID `json:"stimulus_node_ids,omitempty"`
@@ -97,6 +98,7 @@ type BrainRuntime struct {
 	// Replay selects the recorded adapter contract on a private runtime.
 	// Serving runtimes use WrittenTextEncoding; this is not persistent Brain state.
 	surfaceEncoding knowledge.SurfaceEncoding
+	dynamicsEncoding knowledge.DynamicsEncoding
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
@@ -111,7 +113,7 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if !brain.BindRuntime() { return nil }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64), surfaceEncoding: knowledge.WrittenTextEncoding}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64), surfaceEncoding: knowledge.WrittenTextEncoding, dynamicsEncoding: knowledge.OrderedDynamics}
 }
 func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
 	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
@@ -322,6 +324,7 @@ func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (
 	if event.Timestamp.IsZero() {
 		event.Timestamp = r.nowLocked()
 	}
+	if err := r.validateNeuralEventLocked(event); err != nil { return activation.Result{}, r.seq, err }
 	if persist {
 		if event.SensorObservation != nil {
 			return activation.Result{}, r.seq, errors.New("use the sensor observation boundary for sensor events")
@@ -341,6 +344,9 @@ func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (
 	nextSeq := r.seq + 1
 	result := r.activation.ActivateWith(activation.Request{
 		SurfaceEncoding: &r.surfaceEncoding,
+		DynamicsEncoding: &r.dynamicsEncoding,
+		CarryPreviousContext: knowledge.CanonicalSurfaceModality(event.Modality) == "language",
+		NeuralTrace: event.NeuralTrace.Clone(),
 		StimulusTokens:     append([]string(nil), event.Stimulus...),
 		StimulusNodeIDs:    append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),
 		ContextBoosts:      cloneContext(event.Context),
@@ -403,20 +409,19 @@ func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.
 	if r == nil || r.brain == nil || r.learning == nil || r.dnf == nil {
 		return 0, errors.New("brain runtime is not initialized")
 	}
-	experience.Sequence = append([]string(nil), experience.Sequence...)
-	for _, token := range experience.Sequence {
-		if strings.TrimSpace(token) == "" {
-			return 0, errors.New("experience contains an empty surface")
-		}
-	}
+	var err error
+	experience, err = freezeExperience(experience)
+	if err != nil { return 0, err }
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if now.IsZero() {
 		now = r.nowLocked()
 	}
 	now = now.UTC()
-	err := r.runJournalCommandLocked(LoggedEvent{Type: EventTypeLearn, Timestamp: now, Experience: &experience}, func() error {
-		r.learning.LearnExperienceWithEncoding(experience, now, r.surfaceEncoding)
+	if err = r.ensureWritableLocked(); err != nil { return r.seq, err }
+	if err = r.validateExperienceLocked(experience); err != nil { return r.seq, err }
+	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeLearn, Timestamp: now, Experience: &experience}, func() error {
+		r.learning.LearnExperienceWithDynamics(experience, now, r.surfaceEncoding, r.dynamicsEncoding)
 		r.seq++
 		return nil
 	})
@@ -464,7 +469,7 @@ func (r *BrainRuntime) thinkAtWithContextPersistenceLocked(cycles int, context m
 		return thought, r.seq, err
 	}
 	nextSeq := r.seq + 1
-	thought := r.activation.ThinkWithContextAt(cycles, context, now)
+	thought := r.activation.ThinkWithContextDynamicsAt(cycles, context, now, r.dynamicsEncoding)
 	r.seq = nextSeq
 	return thought, r.seq, nil
 }
@@ -493,6 +498,7 @@ func (r *BrainRuntime) cognitiveProcessWithPersistenceLocked(event Event, persis
 	if event.Timestamp.IsZero() {
 		event.Timestamp = r.nowLocked()
 	}
+	if err := r.validateNeuralEventLocked(event); err != nil { return CognitiveOutput{}, err }
 	if persist {
 		if event.SensorObservation != nil {
 			return CognitiveOutput{}, errors.New("use the sensor observation boundary for sensor events")
@@ -776,6 +782,7 @@ func cloneContext(in map[knowledge.NodeID]float64) map[knowledge.NodeID]float64 
 func clonePrediction(in *activation.Prediction) *activation.Prediction { if in == nil { return nil }; return &activation.Prediction{State: cloneNodeValues(in.State), Confidence: cloneNodeValues(in.Confidence)} }
 func cloneEvent(in Event) *Event {
 	out := in
+	out.NeuralTrace = in.NeuralTrace.Canonical()
 	out.Stimulus = append([]string(nil), in.Stimulus...)
 	out.StimulusNodeIDs = append([]knowledge.NodeID(nil), in.StimulusNodeIDs...)
 	out.Context = cloneContext(in.Context)

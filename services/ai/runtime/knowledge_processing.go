@@ -53,6 +53,7 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	nextSeq := r.seq + 1
 	if err := r.eventLog.Append(LoggedEvent{
 		SurfaceEncoding: r.surfaceEncoding,
+		DynamicsEncoding: r.dynamicsEncoding,
 		SchemaVersion: EventLogSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence: nextSeq,
@@ -156,6 +157,9 @@ func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.Knowled
 				Cycles: 1,
 				Timestamp: eventAt,
 			}
+			if r.dynamicsEncoding == knowledge.OrderedDynamics {
+				event.NeuralTrace = (&knowledge.ObservationTrace{Stimulus: [][]knowledge.NodeID{nodeIDs}}).Canonical()
+			}
 			var output CognitiveOutput
 			if singleRevision {
 				// In an atomic document revision, all microsteps operate on the
@@ -182,6 +186,9 @@ func (r *BrainRuntime) cognitiveKnowledgeExposureLocked(event Event) (CognitiveO
 	if err := r.ensureWritableLocked(); err != nil { return CognitiveOutput{}, err }
 	result := r.activation.ActivateWith(activation.Request{
 		SurfaceEncoding: &r.surfaceEncoding,
+		DynamicsEncoding: &r.dynamicsEncoding,
+		CarryPreviousContext: knowledge.CanonicalSurfaceModality(event.Modality) == "language",
+		NeuralTrace: event.NeuralTrace.Clone(),
 		StimulusNodeIDs: append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),
 		Cycles: event.Cycles,
 		Now: event.Timestamp,
