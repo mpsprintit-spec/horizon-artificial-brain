@@ -90,7 +90,7 @@ func TestSensorCommitCannotChangeRecordedDynamics(t *testing.T) {
 	if len(lines) != 2 {
 		t.Fatal("sensor did not produce intent/commit pair")
 	}
-	lines[1] = strings.ReplaceAll(lines[1], `"dynamics_encoding":"ordered-observation-v1",`, "")
+	lines[1] = strings.ReplaceAll(lines[1], `"dynamics_encoding":"`+string(knowledge.CurrentDynamics)+`",`, "")
 	bad := filepath.Join(t.TempDir(), "bad-sensor.jsonl")
 	if err = os.WriteFile(bad, []byte(strings.Join(lines, "\n")+"\n"), 0600); err != nil {
 		t.Fatal(err)

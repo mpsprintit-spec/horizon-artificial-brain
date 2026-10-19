@@ -45,6 +45,8 @@ func (r *BrainRuntime) RecoveryRequired() bool {
 }
 
 type Event struct {
+	EpisodeID string `json:"episode_id,omitempty"`
+	ResetContext bool `json:"reset_context,omitempty"`
 	NeuralTrace *knowledge.ObservationTrace `json:"neural_trace,omitempty"`
 	ID string `json:"id"`
 	Stimulus []string `json:"stimulus,omitempty"`
@@ -113,7 +115,7 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if !brain.BindRuntime() { return nil }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64), surfaceEncoding: knowledge.WrittenTextEncoding, dynamicsEncoding: knowledge.OrderedDynamics}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64), surfaceEncoding: knowledge.WrittenTextEncoding, dynamicsEncoding: knowledge.CurrentDynamics}
 }
 func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
 	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
@@ -341,10 +343,12 @@ func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (
 		}
 		return result, r.seq, err
 	}
+	r.resetTemporalContextLocked(event)
 	nextSeq := r.seq + 1
 	result := r.activation.ActivateWith(activation.Request{
 		SurfaceEncoding: &r.surfaceEncoding,
 		DynamicsEncoding: &r.dynamicsEncoding,
+	EpisodeID: event.EpisodeID, ResetContext: event.ResetContext,
 		CarryPreviousContext: knowledge.CanonicalSurfaceModality(event.Modality) == "language",
 		NeuralTrace: event.NeuralTrace.Clone(),
 		StimulusTokens:     append([]string(nil), event.Stimulus...),

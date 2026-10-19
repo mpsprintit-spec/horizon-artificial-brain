@@ -53,8 +53,11 @@ func freezeExperience(experience learning.Experience) (learning.Experience, erro
 }
 
 func (r *BrainRuntime) validateNeuralEventLocked(event Event) error {
-	if event.NeuralTrace != nil && r.dynamicsEncoding != knowledge.OrderedDynamics {
+	if event.NeuralTrace != nil && !r.dynamicsEncoding.HasOrderedObservations() {
 		return errors.New("neural trace requires ordered dynamics")
+	}
+	if err := validateEpisodeControls(event, r.dynamicsEncoding); err != nil {
+		return err
 	}
 	return event.NeuralTrace.Validate(func(id knowledge.NodeID) bool { return r.brain.Registry.GetByID(id) != nil })
 }

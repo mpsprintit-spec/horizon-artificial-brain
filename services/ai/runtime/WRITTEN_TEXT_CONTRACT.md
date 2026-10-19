@@ -53,7 +53,7 @@ field. Schema 2 makes old readers reject the record instead of interpreting
 new input with their old encoder. Reader, repair, event-index and sensor-tail
 paths accept the supported schema versions and reject invalid payloads.
 
-Checkpoint v8 is the current complete runtime format; v7 remains readable and
+Checkpoint v9 is the current complete runtime format; v7/v8 remain readable and
 supports offset recovery. Historical logical-state checksums stay exact when
 comparing the original envelope version; absent adapter/trace fields are omitted.
 Unknown checkpoint adapter contracts are rejected before changing the target

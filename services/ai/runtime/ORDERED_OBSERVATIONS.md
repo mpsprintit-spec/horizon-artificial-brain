@@ -2,7 +2,8 @@
 
 ## Contract
 
-Serving runtimes use `ordered-observation-v1`. An observation carries ordered
+H11 introduced `ordered-observation-v1`. Serving runtimes now extend it with
+`recurrent-context-v1`; see [RECURRENT_CONTEXT.md](RECURRENT_CONTEXT.md). An observation carries ordered
 simultaneous population frames for stimulus, context and data. Repeated frames
 and stream boundaries survive grounding; IDs inside a frame form an unordered
 set. Context and data precede stimulus in recurrent microsteps inside the same
@@ -12,9 +13,10 @@ rules, semantic parser, LLM or separate answer store are introduced.
 `ObservationInput` derives these frames from its token groups. Unique grounding
 provenance remains deduplicated, but every occurrence enters the trace. Raw
 `StimulusNodeIDs` still means one simultaneous population. Explicit numeric
-sequences use `Event.NeuralTrace`, referencing already grounded neurons. Written
-observations without explicit context may use the preceding stimulus trace as
-context, including after checkpoint recovery. Physical sensor samples do not
+sequences use `Event.NeuralTrace`, referencing already grounded neurons. Historical v1 written
+observations without explicit context use the preceding stimulus trace as
+context, including after checkpoint recovery. Current dynamics use bounded
+learned context retrieval instead of implicitly injecting that trace. Physical sensor samples do not
 implicitly replay their predecessor into the current measurement.
 
 Learning accepts `Experience.ContextSequence` and `DataSequence` alongside the
@@ -48,7 +50,7 @@ behavior; each replayed record selects its own contract on an isolated runtime.
 The serving default is restored after replay. Sensor intent and commit markers
 must agree on dynamics and surface contracts.
 
-Checkpoint **v8** authenticates the last ordered trace and full learned pattern
+Checkpoint **v8** introduced authentication of the last ordered trace and full learned pattern
 populations. Anchored v7 checkpoints still support suffix recovery. V4–v6 retain
 their previous detached import restrictions. A pre-v8 envelope carrying ordered
 state, unknown dynamics or unknown population references is rejected before
@@ -85,5 +87,6 @@ This establishes ordered neural processing and trained conditional prediction.
 It does **not** establish general actor/role binding for unseen names, novel
 grammar, negation semantics, temporal reasoning, or reliable selected natural
 language answers. Prefix composition is limited suffix transfer. The generic
-answer ranker still ranks current activity. H10 long-history context retention
-and H23 independent generalization/corpus evaluation remain open.
+answer ranker still ranks current activity. H10 bounded predictive context is extended in [RECURRENT_CONTEXT.md](RECURRENT_CONTEXT.md);
+long-range semantic retrieval and H23 independent generalization/corpus evaluation
+remain open.

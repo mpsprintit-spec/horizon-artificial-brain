@@ -48,14 +48,33 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	e.mu.RLock()
 	previousPrediction := cloneState(e.lastPrediction)
 	previousTrace := e.lastTrace.Clone()
+	context := e.contextState.Clone()
 	e.mu.RUnlock()
+	recurrent := req.DynamicsEncoding != nil && *req.DynamicsEncoding == knowledge.RecurrentDynamics
+	resetContext := false
+	if recurrent {
+		context, resetContext = context.prepare(req.EpisodeID, req.ResetContext, req.Now)
+		if resetContext {
+			previousPrediction = nil
+		}
+	}
 	if req.PredictionOverride != nil {
 		previousPrediction = cloneState(req.PredictionOverride.State)
 	}
-	if (req.CarryPreviousContext || lexical) && len(trace.Context) == 0 && len(trace.Stimulus) > 0 && previousTrace != nil {
+	if !recurrent && (req.CarryPreviousContext || lexical) && len(trace.Context) == 0 && len(trace.Stimulus) > 0 && previousTrace != nil {
 		trace.Context = knowledge.ClonePopulationFrames(previousTrace.Stimulus)
 	}
 	if len(trace.Stimulus)+len(trace.Context)+len(trace.Data) == 0 {
+		if recurrent {
+			e.mu.Lock()
+			e.contextState = context
+			e.lastTrace = nil
+			if resetContext {
+				e.lastPrediction = nil
+				e.lastPredictionConf = nil
+			}
+			e.mu.Unlock()
+		}
 		return e.activateLegacyWith(req)
 	}
 	state, confidence := map[knowledge.NodeID]float64{}, map[knowledge.NodeID]float64{}
@@ -99,11 +118,19 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	e.Memory.UpdateInformationDynamics(previousPrediction, result.Activations, predictionError, req.Now)
 	next, nextConfidence := e.advance(result.Activations, result.Confidence, req.Now, req.Cycles)
 	next, nextConfidence = e.applyPatternPrediction(next, nextConfidence, result.Activations)
-	next, nextConfidence = e.applyOrderedPatternPrediction(next, nextConfidence, trace)
+	if recurrent {
+		next, nextConfidence = e.applyRecurrentPatternPrediction(next, nextConfidence, trace, context, req.Now, false)
+		context.observe(trace, req.Now)
+	} else {
+		next, nextConfidence = e.applyOrderedPatternPrediction(next, nextConfidence, trace)
+	}
 	e.mu.Lock()
 	e.internalState, e.internalConfidence = cloneState(result.Activations), cloneState(result.Confidence)
 	e.lastPrediction, e.lastPredictionConf = cloneState(next), cloneState(nextConfidence)
 	e.lastTrace = trace.Clone()
+	if recurrent {
+		e.contextState = context
+	}
 	e.mu.Unlock()
 	result.PredictionError = predictionError
 	return result
@@ -114,6 +141,10 @@ func (e *Engine) applyOrderedPatternPrediction(prediction, confidence map[knowle
 		return prediction, confidence
 	}
 	channels := e.Memory.Patterns.PredictOrdered(trace)
+	return e.applyPatternChannels(prediction, confidence, channels)
+}
+
+func (e *Engine) applyPatternChannels(prediction, confidence map[knowledge.NodeID]float64, channels knowledge.OrderedPatternPrediction) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
 	if len(channels.Competitors) == 0 {
 		return prediction, confidence
 	}

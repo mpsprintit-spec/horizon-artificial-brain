@@ -43,6 +43,9 @@ func ValidateOrderedState(data []byte, trace *ObservationTrace, allowOrdered boo
 			}
 			continue
 		}
+		if pattern.Dynamics != OrderedDynamics {
+			return errors.New("unsupported pattern dynamics")
+		}
 		if !allowOrdered {
 			return errors.New("legacy checkpoint cannot carry ordered patterns")
 		}

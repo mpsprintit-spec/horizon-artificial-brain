@@ -14,7 +14,7 @@ func (l *LearningUnit) LearnExperienceWithDynamics(experience Experience, now ti
 		l.LearnExperienceWithEncoding(experience, now, surface)
 		return
 	}
-	if l == nil || l.Kb == nil || dynamics != knowledge.OrderedDynamics {
+	if l == nil || l.Kb == nil || !dynamics.HasOrderedObservations() {
 		return
 	}
 	if now.IsZero() {
