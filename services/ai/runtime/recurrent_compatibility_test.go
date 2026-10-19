@@ -163,3 +163,47 @@ func TestRecurrentEpisodeControlsRequireTheirRecordedDynamics(t *testing.T) {
 		t.Fatal("new dynamics were downgraded to schema 2")
 	}
 }
+
+func TestRecurrentSensorIntentCannotCarryAnIgnoredResetEvenWithValidCommitHash(t *testing.T) {
+	r := NewBrainRuntime(knowledge.NewBrain())
+	log := openKnowledgeJournal(t)
+	r.SetEventLog(log)
+	if _, err := r.ProcessSensorObservation(testSensorObservation()); err != nil {
+		t.Fatal(err)
+	}
+	data, err := os.ReadFile(log.file.Name())
+	if err != nil {
+		t.Fatal(err)
+	}
+	records := bytes.Split(bytes.TrimSpace(data), []byte("\n"))
+	if len(records) != 2 {
+		t.Fatal("expected sensor intent and commit")
+	}
+	var intent, commit LoggedEvent
+	if err = json.Unmarshal(records[0], &intent); err != nil {
+		t.Fatal(err)
+	}
+	if err = json.Unmarshal(records[1], &commit); err != nil {
+		t.Fatal(err)
+	}
+	intent.Event.ResetContext = true
+	commit.IntentHash, err = sensorIntentHash(intent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, _ := json.Marshal(intent)
+	b, _ := json.Marshal(commit)
+	path := filepath.Join(t.TempDir(), "ignored-reset.jsonl")
+	if err = os.WriteFile(path, append(append(append(a, '\n'), b...), '\n'), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = ReadEventLog(path); err == nil {
+		t.Fatal("sensor reset was accepted but would be ignored on replay")
+	}
+	target := NewBrainRuntime(knowledge.NewBrain())
+	before := continuationBytes(t, target)
+	intent.Type = EventTypeProcess
+	if err = ReplayEventLog(target, []LoggedEvent{intent}); err == nil || !bytes.Equal(before, continuationBytes(t, target)) {
+		t.Fatal("ignored sensor reset was not rejected before replay mutation")
+	}
+}

@@ -46,7 +46,9 @@ Learned mappings remain in the existing synapses and pattern substrate.
 context at a durable observation boundary. HTTP `ObservationEnvelope.SessionID`
 and numeric `SensorObservation.SessionID` map to this episode identity. Native
 `PerceptionSignal` exposes `SessionID` and `ResetContext`, forwarded by the facade.
-Changing an identity, including between scoped and unscoped input, clears the
+Numeric sensor resets use a changed session identity; a reset flag on the
+internal sensor event is rejected because sensor replay derives its event from
+the sensor payload. Changing an identity, including between scoped and unscoped input, clears the
 previous eligibility. An empty ID is one bounded unscoped stream, not automatic
 real-world episode detection.
 

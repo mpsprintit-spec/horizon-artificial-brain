@@ -33,6 +33,9 @@ func validateCheckpointContext(snapshot BrainSnapshot) error {
 }
 
 func validateEpisodeControls(event Event, dynamics knowledge.DynamicsEncoding) error {
+	if event.SensorObservation != nil && event.ResetContext {
+		return errors.New("sensor episode reset requires a changed session identity")
+	}
 	if (event.ResetContext || event.EpisodeID != "" || event.SensorObservation != nil && event.SensorObservation.SessionID != "") && dynamics != knowledge.RecurrentDynamics {
 		return errors.New("episode controls require recurrent context dynamics")
 	}
