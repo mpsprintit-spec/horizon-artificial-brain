@@ -27,60 +27,7 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 // next inquiry is planned.
 func (o *CognitiveOrchestrator) processObservation(event Event, observation ObservationInput, experience *learning.Experience, planInquiry bool) (CognitiveInterpretation, bool, error) {
 	if o == nil || o.Runtime == nil { return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized") }
-	observationContext := Observation{Source: observation.Source, Modality: observation.Modality, Tokens: append([]string(nil), observation.Tokens...), ContextTokens: append([]string(nil), observation.ContextTokens...), DataTokens: append([]string(nil), observation.DataTokens...)}
-	grounded := make([]knowledge.GroundedRepresentation, 0, len(observation.Tokens)+len(observation.ContextTokens)+len(observation.DataTokens))
-	seen := make(map[string]struct{}, len(observation.Tokens)+len(observation.ContextTokens)+len(observation.DataTokens))
-	groundToken := func(token string) error {
-		key := token
-		if _, exists := seen[key]; exists { return nil }
-		seen[key] = struct{}{}
-		representation, err := o.Runtime.GroundObservationAt(token, observation.Source, observation.Modality, event.Timestamp)
-		if err != nil { return err }
-		grounded = append(grounded, representation)
-		return nil
-	}
-	for _, token := range observation.Tokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
-	for _, token := range observation.ContextTokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
-	for _, token := range observation.DataTokens { if err := groundToken(token); err != nil { return CognitiveInterpretation{}, false, err } }
-	event.Source = observation.Source
-	event.Modality = observation.Modality
-	event.ContextTokens = append([]string(nil), observation.ContextTokens...)
-	event.DataTokens = append([]string(nil), observation.DataTokens...)
-	// Feed the grounded population directly into the canonical substrate.
-	// Surface tokens remain adapter metadata and are not required for cognition.
-	event.StimulusNodeIDs = groundedPopulationNodeIDs(grounded)
-	output, err := o.Runtime.CognitiveProcess(event); if err != nil { return CognitiveInterpretation{}, false, err }
-	if err := o.Runtime.LearnObservedTransition(event.StimulusNodeIDs, event.Timestamp); err != nil { return CognitiveInterpretation{}, false, err }
-	learned := false
-	if experience != nil && len(experience.Sequence) > 0 {
-		if experience.ExperienceID == "" { experience.ExperienceID = event.ID }; if experience.Source == "" { experience.Source = observation.Source }; if experience.Modality == "" { experience.Modality = observation.Modality }; if experience.Timestamp.IsZero() { experience.Timestamp = event.Timestamp }
-		_, err = o.Runtime.LearnExperience(*experience, experience.Timestamp); if err != nil { return CognitiveInterpretation{}, false, err }; learned = true
-	}
-	cognitive, err := o.Runtime.InterpretCognitive(output, observationContext)
-	if err != nil { return CognitiveInterpretation{}, learned, err }
-	cognitive.GroundedRepresentations = grounded
-	if planInquiry {
-		inquiryAgenda, inquiryErr := o.Runtime.PlanInquiry(cognitive.Answer.Uncertainty.Level, output.Timestamp)
-		if inquiryErr != nil {
-			return CognitiveInterpretation{}, learned, inquiryErr
-		}
-		cognitive.InquiryAgenda = &inquiryAgenda
-	}
-	cognitive.ChangeAwareness = InternalChangeAwareness{
-		BrainIdentity: BrainIdentity,
-		Sequence: output.Sequence,
-		Timestamp: output.Timestamp,
-		StateDelta: output.StateDelta,
-		KnowledgeChanges: []KnowledgeInjectionEvent{{
-			BrainIdentity: BrainIdentity,
-			Sequence: output.Sequence,
-			Timestamp: event.Timestamp,
-			Claims: knowledgeClaimsFromGrounding(grounded, event.Timestamp),
-			ExperienceID: experienceID(experience),
-			ChangedNodeIDs: groundedNodeIDs(grounded),
-		}},
-	}
-	return cognitive, learned, nil
+	return o.Runtime.processObservationCommand(event, ObservationCommand{Input: observation, Experience: experience, PlanInquiry: planInquiry})
 }
 
 // RequestInquiry converts the selected internal policy decision into an adapter
@@ -110,20 +57,7 @@ func (o *CognitiveOrchestrator) ProcessInquiryObservation(request InquiryRequest
 	if request.Action == "" {
 		return CognitiveInterpretation{}, false, errors.New("inquiry request action is required")
 	}
-	cognitive, learned, err := o.processObservation(event, observation, experience, false)
-	if err != nil {
-		return CognitiveInterpretation{}, learned, err
-	}
-	observedInformationGain := clamp01(request.Uncertainty - clamp01(cognitive.Answer.Uncertainty.Level))
-	if err := o.Runtime.CompleteInquiry(observedInformationGain, cognitive.State.PredictionError, cognitive.State.Timestamp); err != nil {
-		return CognitiveInterpretation{}, learned, err
-	}
-	agenda, err := o.Runtime.PlanInquiry(cognitive.Answer.Uncertainty.Level, cognitive.State.Timestamp)
-	if err != nil {
-		return CognitiveInterpretation{}, learned, err
-	}
-	cognitive.InquiryAgenda = &agenda
-	return cognitive, learned, nil
+	return o.Runtime.processObservationCommand(event, ObservationCommand{Input: observation, Experience: experience, PlanInquiry: true, Inquiry: &request})
 }
 
 func (o *CognitiveOrchestrator) LearnFromOutcome(outcome OutcomeEvent) (uint64, error) { if o == nil || o.Runtime == nil { return 0, errors.New("cognitive orchestrator is not initialized") }; return o.Runtime.ObserveOutcome(outcome) }

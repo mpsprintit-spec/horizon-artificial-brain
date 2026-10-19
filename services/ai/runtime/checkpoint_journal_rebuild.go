@@ -10,7 +10,7 @@ import (
 )
 
 // RebuildRuntimeFromCheckpointAndJournal restores a fresh runtime from an
-// anchored v5 checkpoint, then replays only committed events after its
+// anchored v7 checkpoint, then replays only committed events after its
 // sequence. The journal writer must be held exclusively by the caller. An
 // incomplete journal is rejected; repair the trailing intent separately.
 //
@@ -67,8 +67,8 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 	// exactly in the authenticated journal prefix (no phantom dedup entries).
 	index := make(map[string]uint64)
 	for _, logged := range prefix {
-		if logged.Type == EventTypeProcess && logged.Event != nil && logged.Event.ID != "" {
-			index[logged.Event.ID] = logged.Sequence
+		if input := processedJournalEvent(logged); input != nil && input.ID != "" {
+			index[input.ID] = logged.Sequence
 		}
 	}
 	if len(index) != len(snapshot.ProcessedEvents) {

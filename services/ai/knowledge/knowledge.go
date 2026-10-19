@@ -397,7 +397,9 @@ func (k *KnowledgeBase) Load(path string) error {
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), populations...); k.projectionMu.Unlock()
 	k.BrainState = state
 	k.normalizeBrainState()
-	k.normalizeBootstrapState()
+	// Canonical state already records population provenance explicitly. Only
+	// legacy migration may synthesize missing bootstrap metadata.
+	if legacy { k.normalizeBootstrapState() }
 
 	return nil
 }
