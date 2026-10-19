@@ -343,6 +343,7 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
 	if r.eventLog != nil { return errors.New("standalone temporal reinforcement is forbidden with an attached journal; use ProcessObservation") }
 	return r.learnObservedTransitionLocked(current, now)
 }
@@ -649,6 +650,7 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 	// interleave between those steps.
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return InquiryAgenda{}, err }
 	if r.eventLog != nil { return InquiryAgenda{}, errors.New("standalone inquiry planning is forbidden with an attached journal; use ProcessObservation") }
 	return r.planInquiryLocked(uncertainty, at)
 }

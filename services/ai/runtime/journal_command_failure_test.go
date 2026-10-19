@@ -102,6 +102,12 @@ func TestAllRuntimeCommandsFailBeforeMutationOnUncertainAppend(t *testing.T) {
 			if _, err := r.CognitiveThink(1); !errors.Is(err, ErrRuntimeRecoveryRequired) {
 				t.Fatal("poisoned runtime accepted another transition")
 			}
+			if err := r.LearnObservedTransition([]knowledge.NodeID{grounded.NodeID}, at); !errors.Is(err, ErrRuntimeRecoveryRequired) {
+				t.Fatal("partial temporal helper hid runtime unavailability")
+			}
+			if _, err := r.PlanInquiry(.8, at); !errors.Is(err, ErrRuntimeRecoveryRequired) {
+				t.Fatal("partial inquiry helper hid runtime unavailability")
+			}
 			journal.beforeAppend = nil
 			rebuilt, err := RebuildRuntimeFromCommittedJournal(journal, knowledge.NewBrain)
 			if err != nil {
