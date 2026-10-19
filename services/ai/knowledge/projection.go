@@ -15,6 +15,7 @@ var (
 )
 
 type ProjectionPopulation struct {
+	Scope *ProjectionScope `json:"projection_scope,omitempty"`
 	Domain string `json:"domain,omitempty"`
 	Units []PopulationUnit `json:"units"`
 	// Prototype is a learned population-level trace. It is not semantic
@@ -110,9 +111,18 @@ type populationCandidate struct {
 }
 
 func (k *KnowledgeBase) matchRepresentationPopulation(vector NeuralVector, threshold float64) []populationCandidate {
+	// Scoped sensory receptive fields must not become anonymous candidates
+	// in the legacy, coordinate-system-free projector.
+	scoped := make(map[NodeID]bool)
+	k.projectionMu.RLock()
+	for _, population := range k.ProjectionPopulations {
+		if population.Scope != nil { for _, unit := range population.Units { scoped[unit.NodeID] = true } }
+	}
+	k.projectionMu.RUnlock()
 	nodes := k.Registry.Nodes()
 	candidates := make([]populationCandidate, 0, len(nodes))
 	for _, node := range nodes {
+		if scoped[node.ID] { continue }
 		if len(node.Representation) != len(vector.Values) {
 			continue
 		}
@@ -139,6 +149,7 @@ func (k *KnowledgeBase) findExactProjectionPopulation(vector NeuralVector) (Proj
 	var best ProjectionPopulation
 	found := false
 	for _, population := range populations {
+		if population.Scope != nil { continue }
 		if len(population.Prototype) == len(vector.Values) {
 			score := NewNeuralVector(population.Prototype).Similarity(vector)
 			if score >= projectionExactThreshold && (!found || score > bestScore) {
@@ -170,6 +181,8 @@ func (k *KnowledgeBase) registerProjectionPopulation(population ProjectionPopula
 	defer k.projectionMu.Unlock()
 	copyUnits := append([]PopulationUnit(nil), population.Units...)
 	k.ProjectionPopulations = append(k.ProjectionPopulations, ProjectionPopulation{
+		Scope: cloneProjectionScope(population.Scope),
+		Provenance: population.Provenance,
 		Units: copyUnits,
 		Prototype: append([]float64(nil), population.Prototype...),
 	})
@@ -182,6 +195,8 @@ func (k *KnowledgeBase) activateProjectionPopulation(population ProjectionPopula
 func (k *KnowledgeBase) activateProjectionPopulationAt(population ProjectionPopulation, vector NeuralVector, now time.Time) ProjectionPopulation {
 	if now.IsZero() { now = time.Now().UTC() } else { now = now.UTC() }
 	out := ProjectionPopulation{
+		Scope: cloneProjectionScope(population.Scope),
+		Provenance: population.Provenance,
 		Units: make([]PopulationUnit, len(population.Units)),
 		Prototype: append([]float64(nil), population.Prototype...),
 	}

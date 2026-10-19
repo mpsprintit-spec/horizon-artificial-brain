@@ -15,7 +15,7 @@ func NewManaged(supervisor *runtime.RuntimeSupervisor, cfg Config) (*Server, err
 		return nil, err
 	}
 	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
-	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
+	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 600 }
 	return &Server{supervisor: supervisor, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
 }
 

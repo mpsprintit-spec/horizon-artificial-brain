@@ -29,6 +29,7 @@ func (k *KnowledgeBase) AdaptPopulationRepresentationAt(population ProjectionPop
 	defer k.mu.Unlock()
 
 	updated := ProjectionPopulation{
+		Scope:                  cloneProjectionScope(population.Scope),
 		Domain:                 population.Domain,
 		Units:                  append([]PopulationUnit(nil), population.Units...),
 		Prototype:              append([]float64(nil), population.Prototype...),

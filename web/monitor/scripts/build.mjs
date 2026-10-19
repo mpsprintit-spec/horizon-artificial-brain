@@ -10,3 +10,5 @@ await cp("dist/lib/horizon-store.js", "lib/horizon-store.js");
 await cp("index.html", "dist/index.html");
 await cp("styles.css", "dist/styles.css");
 await cp("app.js", "dist/app.js");
+
+await cp("sensor-adapters.js", "dist/sensor-adapters.js");
