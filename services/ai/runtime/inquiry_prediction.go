@@ -30,14 +30,12 @@ func (r *BrainRuntime) PredictInquiryInformationValue(action InquiryAction, unce
 	if action == "" {
 		return 0, false, errors.New("inquiry action is required")
 	}
-	uncertainty = clamp01(uncertainty)
-	if at.IsZero() {
-		at = r.now()
-	}
-
 	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return 0, false, err }
+	uncertainty = clamp01(uncertainty)
+	if at.IsZero() { at = r.nowLocked() }
 	targetSet := r.inquiryTargetSetLocked(action)
-	r.mu.Unlock()
 	return r.predictInquiryInformationValueWithTargets(action, targetSet, uncertainty, at)
 }
 

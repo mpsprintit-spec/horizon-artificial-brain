@@ -33,10 +33,10 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 	memoryExists, err := startupFileExists(memoryPath)
 	if err != nil { return nil, false, fmt.Errorf("stat brain memory: %w",err) }
 	h := core.NewHorizonEngine()
-	if h == nil || h.Supervisor == nil { return nil, false, errors.New("cannot initialize canonical Horizon engine") }
+	if h == nil || h.Supervisor() == nil { return nil, false, errors.New("cannot initialize canonical Horizon engine") }
 
 	if checkpointExists {
-		if err := h.Supervisor.RecoverFromCheckpoint(log, checkpointPath); err != nil {
+		if err := h.Supervisor().RecoverFromCheckpoint(log, checkpointPath); err != nil {
 			return nil, false, fmt.Errorf("verified checkpoint recovery failed; refusing unsafe bootstrap: %w",err)
 		}
 		// If the process stopped after its sequence-zero checkpoint but
@@ -46,7 +46,7 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 	}
 
 	if len(events) > 0 {
-		if err := h.Supervisor.RecoverFromCommittedJournal(log, knowledge.NewBootstrapBrain); err != nil {
+		if err := h.Supervisor().RecoverFromCommittedJournal(log, knowledge.NewBootstrapBrain); err != nil {
 			return nil, false, fmt.Errorf("committed genesis replay failed; refusing unsafe bootstrap: %w",err)
 		}
 		// Historical deployments sometimes started from an unjournaled
@@ -68,7 +68,7 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 		}
 		// A v7 checkpoint now anchors any future recovery to this exact
 		// committed prefix, eliminating dependence on a raw memory alias.
-		if err := h.Supervisor.WithMutation(func(rt *runtime.BrainRuntime) error {
+		if err := h.Supervisor().WithMutation(func(rt *runtime.BrainRuntime) error {
 			return rt.Checkpoint(checkpointPath)
 		}); err != nil { return nil, false, fmt.Errorf("anchor replayed runtime: %w",err) }
 		return h, false, nil
@@ -81,8 +81,8 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 	if memoryExists {
 		if err := h.LoadActiveBrain(memoryPath); err != nil { return nil, false, fmt.Errorf("load standalone brain: %w",err) }
 	}
-	if err := h.Supervisor.WithMutation(func(rt *runtime.BrainRuntime) error {
-		rt.SetEventLog(log)
+	if err := h.Supervisor().AttachEventLog(log); err != nil { return nil, false, fmt.Errorf("attach genesis journal: %w", err) }
+	if err := h.Supervisor().WithMutation(func(rt *runtime.BrainRuntime) error {
 		return rt.Checkpoint(checkpointPath)
 	}); err != nil { return nil, false, fmt.Errorf("create genesis checkpoint: %w",err) }
 	return h, !memoryExists, nil

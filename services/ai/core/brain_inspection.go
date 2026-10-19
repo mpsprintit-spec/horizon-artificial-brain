@@ -10,18 +10,18 @@ import (
 // Snapshot data is detached: it has no live neural pointers, and is valid
 // after a checkpoint handover. Managed snapshots capture exactly one
 // runtime revision under the supervisor read lease.
-func (h *HorizonEngine) InspectActiveBrain() (runtime.BrainInspection,error) {
-	if h==nil {return runtime.BrainInspection{},errors.New("horizon engine is unavailable")}
+func (h *HorizonEngine) InspectActiveBrain() (runtime.BrainInspection, error) {
+	if h == nil {
+		return runtime.BrainInspection{}, errors.New("horizon engine is unavailable")
+	}
 	var snapshot runtime.BrainInspection
 	var err error
-	if h.Supervisor!=nil {
-		err=h.Supervisor.With(func(active *runtime.BrainRuntime)error {
-			snapshot,err=active.InspectBrain()
-			return err
-		})
-	} else {
-		if h.Runtime==nil {return runtime.BrainInspection{},errors.New("brain runtime is unavailable")}
-		snapshot,err=h.Runtime.InspectBrain()
+	if h.supervisor == nil {
+		return snapshot, errors.New("horizon engine is unavailable")
 	}
-	return snapshot,err
+	err = h.supervisor.With(func(active *runtime.BrainRuntime) error {
+		snapshot, err = active.InspectBrain()
+		return err
+	})
+	return snapshot, err
 }

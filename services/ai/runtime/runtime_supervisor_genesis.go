@@ -32,7 +32,8 @@ func (s *RuntimeSupervisor) RecoverFromCommittedJournal(log *EventLog, foundatio
 	}
 	old.markRecoveryRequiredLocked()
 	old.eventLog = nil
-	recovered.SetEventLog(log)
+	recovered.eventLog = log
+	recovered.supervised = true
 	markSupervisorOwnedBrain(recovered.brain)
 	s.current = recovered
 	close(s.epoch)

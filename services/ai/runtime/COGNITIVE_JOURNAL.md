@@ -99,7 +99,8 @@ Full replay of new commands is exact relative to the same explicit foundation;
 it is not evidence that an incomplete historical journal describes past live
 state completely.
 
-Legacy mutable Brain/engine aliases remain a separate H05/H06 ownership issue.
+The H05/H06 alias migration and supported ownership boundaries are documented
+in [MANAGED_OWNERSHIP.md](MANAGED_OWNERSHIP.md).
 Text/language encoding (H24), sequence-role preservation (H11), decay age (H08),
 evidence-source independence (H15), performance and behavioral findings remain
 open. Preserving evidence counts here does not validate their independence.

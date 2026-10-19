@@ -8,21 +8,28 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/perception"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 func TestManagedPulseWALFailureDoesNotInjectPopulation(t *testing.T) {
-	h := NewHorizonEngine()
-	defer h.Supervisor.Close()
+	// Retain a fixture-owned Brain only to measure state after the runtime
+	// becomes unavailable. The production facade exports no such reference.
+	brain := knowledge.NewBootstrapBrain()
+	rt := runtime.NewBrainRuntime(brain)
+	supervisor, err := runtime.NewRuntimeSupervisor(rt)
+	if err != nil { t.Fatal(err) }
+	h := &HorizonEngine{supervisor: supervisor, Perception: perception.UserInputPerception{}}
+	defer h.Supervisor().Close()
 	journal, err := runtime.OpenEventLog(filepath.Join(t.TempDir(), "events.jsonl"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	h.Runtime.SetEventLog(journal)
+	attachJournalForTest(t,h,journal)
 	if err := journal.Close(); err != nil {
 		t.Fatal(err)
 	}
-	before, err := h.Knowledge.CanonicalJSON()
+	before, err := brain.CanonicalJSON()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -30,11 +37,11 @@ func TestManagedPulseWALFailureDoesNotInjectPopulation(t *testing.T) {
 	if !errors.Is(err, runtime.ErrRuntimeRecoveryRequired) {
 		t.Fatalf("Pulse did not report uncertain write: %v", err)
 	}
-	after, err := h.Knowledge.CanonicalJSON()
+	after, err := brain.CanonicalJSON()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !bytes.Equal(before, after) || h.Runtime.LastSequence() != 0 {
+	if !bytes.Equal(before, after) || rt.LastSequence() != 0 {
 		t.Fatal("Pulse grounded before WAL")
 	}
 }

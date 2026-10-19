@@ -86,13 +86,14 @@ func OpenEventLog(path string) (*EventLog, error) {
 }
 
 func (l *EventLog) Append(event LoggedEvent) error {
-	if l == nil || l.file == nil { return errors.New("event log is not initialized") }
+	if l == nil { return errors.New("event log is not initialized") }
 	if event.SchemaVersion == 0 { event.SchemaVersion = EventLogSchemaVersion }
 	if event.BrainIdentity == "" { event.BrainIdentity = BrainIdentity }
 	data, err := json.Marshal(event)
 	if err != nil { return fmt.Errorf("encode logged event: %w", err) }
 	l.mu.Lock()
 	defer l.mu.Unlock()
+	if l.file == nil || l.lockFile == nil { return errors.New("event log is not initialized") }
 	if l.beforeAppend != nil {
 		if err := l.beforeAppend(event); err != nil { return fmt.Errorf("inject event log append failure: %w", err) }
 	}
@@ -497,6 +498,7 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		}
 	}
 	brainRuntime.mu.Lock()
+	if brainRuntime.supervised { brainRuntime.mu.Unlock(); return ErrManagedRuntimeAccess }
 	originalLog := brainRuntime.eventLog
 	brainRuntime.eventLog = nil
 	brainRuntime.mu.Unlock()

@@ -7,9 +7,9 @@ import (
 )
 
 // Regression guard for production access patterns. The legacy mutable
-// WithBrainView/WithActiveBrain APIs are deliberately still exported during
-// migration, but production consumers MUST use the detached inspection
-// boundary rather than reintroducing live neural pointers.
+// WithBrainView/WithActiveBrain APIs remain exported for source migration but
+// refuse managed callbacks. Production consumers use detached inspection
+// rather than depending on those legacy mutable interfaces.
 func TestProductionReadConsumersDoNotAcquireMutableBrainPointers(t *testing.T) {
 	sources:=[]string{
 		"../main.go",

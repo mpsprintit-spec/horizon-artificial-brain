@@ -6,18 +6,24 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-// Deprecated: WithBrainView exposes a LIVE mutable *knowledge.Brain and
-// cannot enforce read-only access or durable journaling for callback changes.
-// It is retained only for legacy API compatibility. Production services,
-// inspection tools and CLI consumers MUST use InspectBrain instead, which
-// returns detached numerical values. The runtime lock here prevents standard
-// concurrent methods, but it does not make this mutable callback safe.
+// Deprecated: WithBrainView is restricted to standalone, unjournaled legacy
+// experiments. Managed or journaled runtimes reject it without invoking fn.
+// Use InspectBrain for detached values and typed commands for mutation.
 
 func (r *BrainRuntime) WithBrainView(fn func(*knowledge.Brain) error) error {
-	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
-	if fn == nil { return errors.New("brain view callback is nil") }
+	if r == nil || r.brain == nil {
+		return errors.New("brain runtime is not initialized")
+	}
+	if fn == nil {
+		return errors.New("brain view callback is nil")
+	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil { return err }
+	if err := r.ensureWritableLocked(); err != nil {
+		return err
+	}
+	if r.supervised || r.eventLog != nil {
+		return ErrManagedRuntimeAccess
+	}
 	return fn(r.brain)
 }
