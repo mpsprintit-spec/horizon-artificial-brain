@@ -1,6 +1,6 @@
 # Observation, simulation and outcome feedback (H12)
 
-The observation/feedback law is retained by current `evidence-uncertainty-v1`
+The observation/feedback law is retained by current `stable-sensory-projection-v1`
 serving (see [EVIDENCE_UNCERTAINTY.md](EVIDENCE_UNCERTAINTY.md)), retaining ordered observations, bounded
 context, physical-time retention and local activity from the preceding contracts.
 All learning operates on the existing synapses and pattern index of one Brain.

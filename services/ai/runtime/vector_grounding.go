@@ -40,7 +40,7 @@ func (r *BrainRuntime) GroundVectorAt(vector knowledge.NeuralVector, at time.Tim
 	if at.IsZero() { at = r.nowLocked() } else { at = at.UTC() }
 	if r.eventLog != nil {
 		if err := r.eventLog.Append(LoggedEvent{
-			SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+			SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, DynamicsEncoding:r.dynamicsEncoding, SurfaceEncoding:r.surfaceEncoding,
 			Sequence: r.seq + 1, Type: EventTypeVectorGround,
 			Timestamp: at, Vector: &frozen,
 		}); err != nil {
@@ -48,7 +48,7 @@ func (r *BrainRuntime) GroundVectorAt(vector knowledge.NeuralVector, at time.Tim
 			return knowledge.GroundedVector{}, fmt.Errorf("%w: append numeric grounding: %v", ErrRuntimeRecoveryRequired, err)
 		}
 	}
-	grounded, err := r.brain.GroundVectorAt(frozen, at)
+	grounded, err := r.brain.GroundVectorWithDynamicsAt(frozen, at,r.dynamicsEncoding)
 	if err != nil {
 		r.markRecoveryRequiredLocked()
 		return knowledge.GroundedVector{}, fmt.Errorf("%w: apply numeric grounding: %v", ErrRuntimeRecoveryRequired, err)
