@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import vm from "node:vm";
 import { readFileSync } from "node:fs";
-import { extractVisionFields, extractAudioFields } from "../sensor-adapters.js";
+import { extractVisionFields, extractAudioFields, browserSensorProfile } from "../sensor-adapters.js";
 import { visualFrame } from "./visual-fixtures.js";
 
 // Execute the production event handlers with deterministic media devices.
@@ -26,7 +26,7 @@ test("browser camera and microphone submit local numeric fields and stop cleanly
     async close(){}
   }
   const context={
-    HorizonStore:class{snapshot=null;subscribe(){}},extractVisionFields,extractAudioFields,
+    HorizonStore:class{snapshot=null;subscribe(){}},extractVisionFields,extractAudioFields,browserSensorProfile,
     document:{getElementById:element,createElement:()=>({getContext:()=>drawing})},
     sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},
     navigator:{mediaDevices:{async getUserMedia(){const track={stopped:false,stop(){this.stopped=true;}};tracks.push(track);return {getTracks:()=>[track]};}}},
@@ -59,8 +59,9 @@ test("browser camera and microphone submit local numeric fields and stop cleanly
   assert.equal(requests[0].sensor.modality,"vision");
   assert.equal(requests[1].sensor.modality,"vision");
   assert.equal(requests[2].sensor.modality,"audio");
-  assert.equal(requests[0].sensor.source,"github-pages-camera:"+storage.get("horizon.session"));
-  assert.equal(requests[2].sensor.source,"github-pages-microphone:"+storage.get("horizon.session"));
+  assert.ok(requests[0].sensor.source.startsWith("github-pages-camera:"+storage.get("horizon.session")+":"));
+  assert.equal(requests[0].sensor.source,requests[1].sensor.source);
+  assert.ok(requests[2].sensor.source.startsWith("github-pages-microphone:"+storage.get("horizon.session")+":"));
   assert.deepEqual(requests[1].sensor.provenance.parent_sample_ids,[requests[0].sensor.sample_id]);
   assert.equal(requests[1].sensor.fields.length,128);
   assert.equal(requests[1].sensor.provenance.adapter,"browser-light-motion-v2");

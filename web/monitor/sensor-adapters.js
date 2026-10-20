@@ -74,3 +74,45 @@ export function extractAudioFields(samples, sampleRate) {
   }
   return fields;
 }
+
+// DeviceMotionEvent uses m/s², degrees/s and a reported sampling interval in
+// milliseconds (https://www.w3.org/TR/orientation-event/). Keep native rotation
+// channel names: browsers/spec revisions differ in their Cartesian mapping.
+// Softsign is continuous and monotonic. These fixed encoding scales are not
+// measured device calibration, world orientation, velocity or displacement.
+export function extractMotionFields(event) {
+  if (!event || typeof event !== "object") throw new Error("invalid motion sample");
+  const fields = [];
+  const axes = {x:[1,0,0], y:[0,1,0], z:[0,0,1]};
+  const add = (fieldID, kind, value, scale, coordinates) => {
+    if (value === null || value === undefined) return;
+    if (!Number.isFinite(value)) throw new Error("invalid motion channel "+fieldID);
+    const field = {field_id:fieldID, group_id:"device-imu", kind, values:[value/(scale+Math.abs(value))]};
+    if (coordinates) field.coordinates = [...coordinates];
+    fields.push(field);
+  };
+  for (const [name, kind, unit, scale] of [["acceleration","imu.linear-acceleration","mps2",16], ["accelerationIncludingGravity","imu.acceleration-with-gravity","mps2",16], ["rotationRate","imu.rotation-rate","degps",180]]) {
+    const channels = event[name];
+    if (channels === null || channels === undefined) continue;
+    if (typeof channels !== "object" || Array.isArray(channels)) throw new Error("invalid motion channels "+name);
+    for (const axis of name === "rotationRate" ? ["alpha","beta","gamma"] : ["x","y","z"]) {
+      // Axis belongs to the measurement coordinate system. Without it,
+      // exchanging equal X/Y magnitudes can activate the same population set.
+      const scopedKind=kind+"."+axis+"."+unit+".softsign"+scale+"-v1";
+      add(name+":"+axis, scopedKind, channels[axis], scale, name === "rotationRate" ? null : axes[axis]);
+    }
+  }
+  if (!fields.length) throw new Error("motion measurements unavailable");
+  if (event.interval !== undefined && event.interval !== null && event.interval !== 0) {
+    if (!Number.isFinite(event.interval) || event.interval < 0 || event.interval > 60000) throw new Error("invalid motion sampling interval");
+    add("reported-sample-interval", "imu.reported-interval.ms.softsign1000-v1", event.interval, 1000);
+  }
+  return fields;
+}
+
+export function browserSensorProfile(modality) {
+  if (modality === "vision") return {adapter:"browser-light-motion-v2", calibration_id:"uncalibrated-rgba8-relative-v1"};
+  if (modality === "audio") return {adapter:"browser-acoustic-bands-v1", calibration_id:"uncalibrated-rms-relative-bands125-2000-v1"};
+  if (modality === "motion") return {adapter:"browser-device-imu-v1", calibration_id:"uncalibrated-device-imu-softsign16-180-v1"};
+  throw new Error("unsupported physical browser sensor");
+}
