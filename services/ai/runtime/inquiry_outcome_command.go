@@ -125,9 +125,7 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 		return CognitiveInterpretation{}, false, r.seq, err
 	}
 	if r.telemetry != nil {
-		e := r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, &command.Outcome)
-		e.StateDelta, e.PredictionError = &cognitive.ChangeAwareness.StateDelta, &cognitive.State.PredictionError
-		r.telemetry.Publish(e)
+		r.publishTelemetryLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, &command.Outcome, &cognitive.ChangeAwareness.StateDelta, &cognitive.State.PredictionError)
 	}
 	return cognitive, learned, r.seq, nil
 }

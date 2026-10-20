@@ -246,9 +246,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		// Publish only after the complete sensor transition (and any durable
 		// commit marker), including temporal learning, has finished.
 		if r.telemetry != nil {
-			e := r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil)
-			e.StateDelta, e.PredictionError = &output.StateDelta, &output.PredictionError
-			r.telemetry.Publish(e)
+			r.publishTelemetryLocked(EventTypeProcess, event.Timestamp, &event, nil, nil, &output.StateDelta, &output.PredictionError)
 		}
 		similarity := 0.0
 		if len(population.Units) > 0 {

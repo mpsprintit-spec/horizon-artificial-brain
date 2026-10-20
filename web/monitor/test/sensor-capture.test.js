@@ -4,6 +4,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { extractVisionFields, extractAudioFields, browserSensorProfile } from "../sensor-adapters.js";
 import { visualFrame } from "./visual-fixtures.js";
+import { createSnapshotScheduler } from "../snapshot-scheduler.js";
 
 // Execute the production event handlers with deterministic media devices.
 // This verifies capture -> feature extraction -> HTTP wiring without granting
@@ -26,7 +27,7 @@ test("browser camera and microphone submit local numeric fields and stop cleanly
     async close(){}
   }
   const context={
-    HorizonStore:class{snapshot=null;subscribe(){}},extractVisionFields,extractAudioFields,browserSensorProfile,
+    HorizonStore:class{snapshot=null;subscribe(){}},extractVisionFields,extractAudioFields,browserSensorProfile,createSnapshotScheduler,
     document:{getElementById:element,createElement:()=>({getContext:()=>drawing})},
     sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},
     navigator:{mediaDevices:{async getUserMedia(){const track={stopped:false,stop(){this.stopped=true;}};tracks.push(track);return {getTracks:()=>[track]};}}},
