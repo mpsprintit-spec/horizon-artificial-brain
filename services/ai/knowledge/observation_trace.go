@@ -9,14 +9,15 @@ import (
 type DynamicsEncoding string
 
 const (
-	LegacyDynamics    DynamicsEncoding = ""
-	OrderedDynamics   DynamicsEncoding = "ordered-observation-v1"
-	RecurrentDynamics DynamicsEncoding = "recurrent-context-v1"
-	CurrentDynamics                    = RecurrentDynamics
+	LegacyDynamics         DynamicsEncoding = ""
+	OrderedDynamics        DynamicsEncoding = "ordered-observation-v1"
+	RecurrentDynamics      DynamicsEncoding = "recurrent-context-v1"
+	PhysicalMemoryDynamics DynamicsEncoding = "physical-memory-v1"
+	CurrentDynamics                         = PhysicalMemoryDynamics
 )
 
 func (d DynamicsEncoding) Validate() error {
-	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics {
+	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics {
 		return fmt.Errorf("unsupported neural dynamics %q", d)
 	}
 	return nil
@@ -95,5 +96,9 @@ func TraceSteps(frames [][]NodeID) []PatternStep {
 }
 
 func (d DynamicsEncoding) HasOrderedObservations() bool {
-	return d == OrderedDynamics || d == RecurrentDynamics
+	return d == OrderedDynamics || d.HasRecurrentContext()
+}
+
+func (d DynamicsEncoding) HasRecurrentContext() bool {
+	return d == RecurrentDynamics || d == PhysicalMemoryDynamics
 }

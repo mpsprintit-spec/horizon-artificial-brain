@@ -15,7 +15,9 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
-const BrainSnapshotSchemaVersion = 9
+const physicalMemoryBrainSnapshotSchemaVersion = 10
+const BrainSnapshotSchemaVersion = physicalMemoryBrainSnapshotSchemaVersion
+const recurrentBrainSnapshotSchemaVersion = 9
 const orderedBrainSnapshotSchemaVersion = 8
 const outcomeBrainSnapshotSchemaVersion = 7
 const neuralBrainSnapshotSchemaVersion = 6
@@ -167,7 +169,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	for _, annotation := range snapshot.SurfaceAnnotations {
@@ -224,6 +226,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 
 	if err := knowledge.ValidateOrderedState(snapshot.Brain, snapshot.Activation.LastTrace, snapshot.SchemaVersion >= orderedBrainSnapshotSchemaVersion); err != nil { return fmt.Errorf("checkpoint neural contract: %w", err) }
 
+	if err := knowledge.ValidateMemoryDecayState(snapshot.Brain, snapshot.SchemaVersion >= physicalMemoryBrainSnapshotSchemaVersion); err != nil { return fmt.Errorf("checkpoint memory contract: %w", err) }
 	if err:=validateCheckpointContext(snapshot); err!=nil {return err}
 	r.mu.Lock()
 	defer r.mu.Unlock()
