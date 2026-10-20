@@ -52,6 +52,7 @@ type OrderedPatternPrediction struct {
 	Support     map[NodeID]float64
 	Strength    map[NodeID]float64
 	Competitors []NodeID
+	Credit map[PatternID]float64
 }
 
 func observationTraceKey(trace *ObservationTrace) string {

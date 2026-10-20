@@ -1,4 +1,4 @@
-# Complete cognitive commands and checkpoint v10
+# Complete cognitive commands and checkpoint v11
 
 This change addresses the reproduced H03/H04 cases in the consolidated
 2026-10-19 audit, using PR #27 as its baseline. The production integration
@@ -39,8 +39,9 @@ See [ORDERED_OBSERVATIONS.md](ORDERED_OBSERVATIONS.md) for ordered frames and
 conditional pattern prediction. [RECURRENT_CONTEXT.md](RECURRENT_CONTEXT.md)
 describes bounded context dynamics and episode controls. [MEMORY_TIME.md](MEMORY_TIME.md)
 defines physical-memory-v1 retention and its historical compatibility.
-[LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md) defines current local-activity-v1
-learning and its controlled retention evidence. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
+[LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md) defines retained local-activity-v1
+learning and its controlled retention evidence. [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
+defines current observed-feedback-v1 evidence accounting and adaptation. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
 An action binding registration now consumes a revision. Re-registering the
@@ -84,6 +85,10 @@ This does not change the legacy hash-token fallback for nonnumeric envelopes.
 
 ## Checkpoint and historical data
 
+Checkpoint **v11** authenticates the pending actual observation, frozen forecast
+and learned channel credit. Pre-v11 envelopes cannot carry this evidence boundary.
+Anchored v7-v11 support suffix recovery.
+
 Checkpoint **v10** authenticates the exact physical memory watermark in canonical
 Brain v3. Pre-v10 envelopes cannot carry it. Anchored v7/v8/v9/v10 support
 offset recovery; see [MEMORY_TIME.md](MEMORY_TIME.md).
@@ -109,7 +114,7 @@ ordinary learned populations are not relabeled as bootstrap populations.
 
 Historical checkpoints v4-v6 retain detached read/import compatibility using
 their original checksums. They cannot provide verified journal-offset recovery
-because they lack outcome continuation state. Verified checkpoint-offset startup requires v7, v8, v9 or v10. Do not upgrade an old file by merely changing its schema
+because they lack outcome continuation state. Verified checkpoint-offset startup requires v7, v8, v9, v10 or v11. Do not upgrade an old file by merely changing its schema
 or checksum. Migration needs a verified complete baseline, including any
 action/evidence state, or a history demonstrably sufficient to reconstruct it.
 

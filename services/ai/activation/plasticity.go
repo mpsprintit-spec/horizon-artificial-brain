@@ -37,7 +37,7 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 // states. Residual eligibility or a stale node.Activation cannot attribute an
 // unrelated target's surprise to every incoming connection.
 func (e *Engine) ApplyPredictionErrorPlasticityWithDynamics(predicted, actual map[knowledge.NodeID]float64, errorSignal float64, now time.Time, dynamics knowledge.DynamicsEncoding) {
-	e.applyPredictionErrorPlasticity(predicted, actual, errorSignal, now, dynamics == knowledge.LocalActivityDynamics)
+	e.applyPredictionErrorPlasticity(predicted, actual, errorSignal, now, dynamics.HasLocalActivity())
 }
 
 func (e *Engine) applyPredictionErrorPlasticity(predicted, actual map[knowledge.NodeID]float64, errorSignal float64, now time.Time, local bool) {
@@ -112,7 +112,7 @@ func (e *Engine) ApplyConsequencePlasticity(valence, informationGain float64, no
 }
 
 func (e *Engine) ApplyConsequencePlasticityWithDynamics(valence, informationGain float64, now time.Time, dynamics knowledge.DynamicsEncoding) {
-	e.applyConsequencePlasticity(valence, informationGain, now, dynamics == knowledge.LocalActivityDynamics)
+	e.applyConsequencePlasticity(valence, informationGain, now, dynamics.HasLocalActivity())
 }
 
 func (e *Engine) applyConsequencePlasticity(valence, informationGain float64, now time.Time, local bool) {

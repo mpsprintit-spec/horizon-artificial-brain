@@ -1,6 +1,7 @@
 # Local activity and retention (H09)
 
-Serving uses `local-activity-v1`. It retains ordered observations, bounded
+The local activity contract is retained by current `observed-feedback-v1`
+serving (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)). It retains ordered observations, bounded
 recurrent context and H08 physical-time passive retention on the same canonical
 Brain. This change protects inactive pathways without a second memory store,
 semantic rules, external model or fixed list of protected answers.
@@ -114,8 +115,8 @@ restart and the next thought under the new serving policy.
 
 This addresses the reproduced call-based inactive-path interference and the
 tested shared-output credit case. Actively shared pathways can still compete;
-it is not a general guarantee against catastrophic forgetting. H12 adaptation
-of observed versus forecast activity, H13 uncertainty calibration, H23 independent
+it is not a general guarantee against catastrophic forgetting. H12 observed/forecast separation is addressed in OBSERVED_FEEDBACK.md.
+H13 uncertainty calibration, H23 independent
 generalization and broader continual-learning tasks retain their own criteria.
 
 Local Go 1.22.12 validation passed: root-module `go test ./...`, `go vet ./...`,

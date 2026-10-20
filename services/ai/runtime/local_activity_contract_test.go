@@ -56,7 +56,12 @@ func TestLocalActivityPreservesActualPR33ReplayAndNextHistoricalThought(t *testi
 		if e != nil {
 			t.Fatal(e)
 		}
-		return s.Checksum
+		s.SchemaVersion = physicalMemoryBrainSnapshotSchemaVersion
+		sum, e := checkpointChecksumV7(s)
+		if e != nil {
+			t.Fatal(e)
+		}
+		return sum
 	}
 	for _, r := range []*BrainRuntime{genesis, suffix} {
 		if r.dynamicsEncoding != knowledge.CurrentDynamics || checksum(r) != ref.Checksum {
@@ -112,7 +117,7 @@ func TestLocalActivityMixedJournalRestartAndNextThought(t *testing.T) {
 		t.Fatal("historical prefix lost its contract")
 	}
 	for _, event := range events[1:] {
-		if event.DynamicsEncoding != knowledge.LocalActivityDynamics {
+		if event.DynamicsEncoding != knowledge.CurrentDynamics {
 			t.Fatal("serving bypassed local activity version")
 		}
 	}
