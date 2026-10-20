@@ -1,0 +1,4 @@
+=== RUN   TestInspectionScaleChild
+H18_SCALE {"allocated_bytes":725633752,"canonical_hash":"","heap_after_bytes":475185160,"heap_before_bytes":313656952,"json_bytes":727051643,"mode":"save","peak_reset":true,"peak_rss_bytes":640811008,"rss_after_bytes":640811008,"rss_before_bytes":328601600,"seconds":6.570809251,"seed_synapses":0,"setup_seconds":0.586874278,"units":1000000}
+--- PASS: TestInspectionScaleChild (7.45s)
+PASS

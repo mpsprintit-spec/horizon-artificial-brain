@@ -51,6 +51,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/health", s.health)
 	mux.HandleFunc("/v1/brain/handshake", s.handshake)
 	mux.HandleFunc("/v1/brain/snapshot", s.snapshot)
+	mux.HandleFunc("/v1/brain/inspection", s.inspection)
 	mux.HandleFunc("/v1/brain/events", s.events)
 	mux.HandleFunc("/v1/brain/stream", s.stream)
 	mux.HandleFunc("/v1/observations", s.observations)
@@ -135,6 +136,8 @@ func (s *Server) readEvents(after uint64) ([]replayEvent,error) {
 
 func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	mode := r.URL.Query().Get("telemetry")
+	bounded := r.URL.Query().Get("inspection") == "bounded"
+	if value := r.URL.Query().Get("inspection"); value != "" && value != "bounded" || bounded && mode != "revisions" { writeError(w,400,"bounded inspection requires revision telemetry"); return }
 	if mode != "" && mode != "canonical" && mode != "revisions" { writeError(w,http.StatusBadRequest,"unsupported telemetry mode"); return }
 	if !websocketRequested(r) { writeError(w,http.StatusBadRequest,"websocket upgrade required"); return }
 	if !originAllowed(r.Header.Get("Origin"),s.cfg.AllowedOrigins) { writeError(w,http.StatusForbidden,"origin is not allowed"); return }
@@ -144,15 +147,19 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	var hub *runtime.TelemetryHub
 	var sub *runtime.TelemetrySubscriber
 	var epoch <-chan struct{}
-	var handshake runtime.MonitorHandshake
+	var handshake any
 	err := s.withRuntimeEpoch(func(rt *runtime.BrainRuntime, invalidated <-chan struct{}) error {
 		hub = rt.Telemetry()
 		if mode == "revisions" { sub = hub.SubscribeRevisions() } else { sub = hub.Subscribe() }
 		if sub == nil { return errors.New("telemetry hub is not initialized") }
 		var err error
-		handshake, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
+		if bounded { handshake, err = rt.MonitorInspectionHandshake(s.cfg.RuntimeCommit) } else {
+			var full runtime.MonitorHandshake
+			full, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
+			full.TelemetryMode = mode
+			handshake = full
+		}
 		if err != nil { hub.Unsubscribe(sub); sub = nil; return err }
-		handshake.TelemetryMode = mode
 		epoch = invalidated
 		return nil
 	})

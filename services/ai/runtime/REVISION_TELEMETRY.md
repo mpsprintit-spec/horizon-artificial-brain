@@ -255,3 +255,7 @@ and `make bridge-smoke` (including production browser sensor handlers against a
 live authenticated Bridge). Monitor `pnpm check`, all 32 tests, and `pnpm build`
 passed on Node 24.19.0; upstream monitor CI uses Node 22. Separate nested Go
 modules are outside these root-module checks. The draft PR records exact-head CI.
+
+Current bounded monitor reads and complete streamed persistence are described in
+[BOUNDED_INSPECTION.md](BOUNDED_INSPECTION.md); earlier measurements above retain
+their original baseline scope.

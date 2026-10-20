@@ -105,6 +105,7 @@ type BrainRuntime struct {
 	lastObservationAt time.Time
 	inquiryValence map[InquiryAction]float64
 	telemetry *TelemetryHub
+	inspectionEpoch string // Ephemeral read fence, never cognitive/persisted state.
 	processedEvents map[string]uint64
 }
 
@@ -162,6 +163,7 @@ func (r *BrainRuntime) LoadBrain(path string) error {
 	// reconciled with an existing attached journal; use checkpoint recovery.
 	if r.eventLog != nil { return errors.New("manual brain load is forbidden while an event journal is attached; use verified checkpoint recovery") }
 	if err := r.brain.Load(path); err != nil { return err }
+	r.inspectionEpoch = ""
 	r.seq = 0
 	r.lastCognitiveState = CognitiveState{}
 	r.lastObservationPopulation = nil

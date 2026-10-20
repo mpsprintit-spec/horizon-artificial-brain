@@ -2,6 +2,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { webcrypto } from "node:crypto";
 import * as adapters from "../sensor-adapters.js";
+import { verifyInspectionPage, inspectionGraph, readInspectionText } from "../inspection-page.js";
 import { createSnapshotScheduler } from "../snapshot-scheduler.js";
 
 // Execute production handlers. Only device, clock, transport and DOM surfaces
@@ -25,7 +26,7 @@ export function monitorHarness(options = {}) {
   }
   class ClockDate extends Date {constructor(...args){super(...(args.length?args:[epoch+clock.milliseconds]));}static now(){return epoch+clock.milliseconds;}}
   const reply=()=>({ok:true,json:async()=>({state_revision:requests.length,canonical_state_hash:"fixture"})});
-  const context={...adapters,createSnapshotScheduler,
+  const context={...adapters,createSnapshotScheduler,verifyInspectionPage,inspectionGraph,readInspectionText,
     HorizonStore:options.HorizonStore??class{snapshot=null;revision=0;subscribe(){}setSnapshot(){}resetForConnection(){}},
     document:{getElementById:element,createElement:()=>({getContext:()=>drawing})},
     sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},
@@ -38,11 +39,14 @@ export function monitorHarness(options = {}) {
     requestAnimationFrame:()=>1,cancelAnimationFrame(){},
     setTimeout,clearTimeout,WebSocket:options.WebSocket,
     async fetch(url,settings){
-      if(!settings?.body)return options.get ? options.get(url,settings) : reply();
+      if(!settings?.body){
+        if(url.includes("/v1/brain/inspection")&&!options.inspection)return {ok:false,status:404,text:async()=>"404 page not found\n"};
+        return options.get ? options.get(url,settings) : reply();
+      }
       const request={url,body:JSON.parse(settings.body),settings};requests.push(request);
       return options.fetch ? options.fetch(request,reply) : reply();
     },
-    Float32Array,Uint8ClampedArray,TextEncoder,URL,console,
+    Float32Array,Uint8ClampedArray,TextEncoder,URL,URLSearchParams,console,
   };
   if(options.extractVisionFields)context.extractVisionFields=(...args)=>options.extractVisionFields(clock,...args);
   if(options.extractAudioFields)context.extractAudioFields=(...args)=>options.extractAudioFields(clock,...args);

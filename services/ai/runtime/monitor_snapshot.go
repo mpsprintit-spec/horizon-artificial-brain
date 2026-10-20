@@ -142,18 +142,17 @@ func (r *BrainRuntime) MonitorHandshake(runtimeCommit string) (MonitorHandshake,
 	}
 	// A handshake needs the exact digest, not a second decoded graph. Keep
 	// the canonical byte format and hash identical to MonitorSnapshot.
-	data, err := r.brain.CanonicalJSON()
+	hash, err := r.brain.CanonicalHash()
 	if err != nil {
 		return MonitorHandshake{}, err
 	}
-	hash := sha256.Sum256(data)
 	return MonitorHandshake{
 		Type:               "brain.handshake",
 		BrainIdentity:      BrainIdentity,
 		SchemaVersion:      MonitorSchemaVersion,
 		RuntimeCommit:      runtimeCommit,
 		StateRevision:      r.seq,
-		CanonicalStateHash: "sha256:" + hex.EncodeToString(hash[:]),
+		CanonicalStateHash: hash,
 		Capabilities:       []string{"snapshot", "recurrent_state", "plasticity", "checkpoint", "inquiry", "observation", "vision", "audio", "motion", "outcomes", "stream", "sensor_states", "factorized_sensor_fields", "revision_stream"},
 	}, nil
 }
