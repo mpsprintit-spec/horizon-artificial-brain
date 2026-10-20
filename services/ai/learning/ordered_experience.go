@@ -21,7 +21,7 @@ func (l *LearningUnit) LearnExperienceWithDynamics(experience Experience, now ti
 		now = time.Now().UTC()
 	}
 	now = now.UTC()
-	if dynamics == knowledge.PhysicalMemoryDynamics {
+	if dynamics.HasPhysicalMemory() {
 		l.Kb.ApplyMemoryDynamicsWithEncoding(now, dynamics)
 	}
 	frames := func(words []string, populations [][]knowledge.NodeID) [][]knowledge.NodeID {

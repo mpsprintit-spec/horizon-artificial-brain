@@ -100,7 +100,7 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 		}
 		consequence := AssessConsequence(ConsequenceInput{Success: command.Outcome.Success, Reliability: command.Outcome.Reliability, Reversible: command.Reversible, Cost: command.Cost, Risk: command.Risk, InformationGain: command.InformationGain, PredictionError: predictionError})
 		cognitive.Consequence = &consequence
-		r.activation.ApplyConsequencePlasticity(consequence.Valence, consequence.InformationGain, event.Timestamp)
+		r.activation.ApplyConsequencePlasticityWithDynamics(consequence.Valence, consequence.InformationGain, event.Timestamp, r.dynamicsEncoding)
 		r.applyInquiryConsequenceLocked(InquiryConsequenceEvent{Action: command.Action, Valence: consequence.Valence, InformationGain: consequence.InformationGain, PredictionError: consequence.PredictionError, Reliability: consequence.Reliability, TargetNodeIDs: binding.TargetNodeIDs, OutcomeNodeIDs: groundedPopulationNodeIDs(cognitive.GroundedRepresentations), CausalLink: "inquiry:" + command.Outcome.RequestID}, event.Timestamp)
 		return nil
 	})
