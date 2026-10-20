@@ -86,7 +86,7 @@ func (l *LearningUnit) LearnExperienceWithDynamics(experience Experience, now ti
 	for _, result := range sequence[len(sequence)-1] {
 		pattern := l.Kb.Patterns.LearnOrderedTraceWithEvidence(trace, result, weight, confidence, experience.evidence(now))
 		if pattern != nil {
-			pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
+			pattern.Confidence = knowledge.CalibratedConfidenceWithDynamics(confidence, pattern.Evidence, dynamics)
 		}
 	}
 }

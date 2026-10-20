@@ -8,10 +8,19 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
-type CognitiveOrchestrator struct { Runtime *BrainRuntime }
-func NewCognitiveOrchestrator(runtime *BrainRuntime) *CognitiveOrchestrator { return &CognitiveOrchestrator{Runtime: runtime} }
+type CognitiveOrchestrator struct{ Runtime *BrainRuntime }
 
-type ObservationInput struct { Source string; Modality string; Tokens []string; ContextTokens []string; DataTokens []string }
+func NewCognitiveOrchestrator(runtime *BrainRuntime) *CognitiveOrchestrator {
+	return &CognitiveOrchestrator{Runtime: runtime}
+}
+
+type ObservationInput struct {
+	Source        string
+	Modality      string
+	Tokens        []string
+	ContextTokens []string
+	DataTokens    []string
+}
 
 // ProcessObservation is the canonical integration boundary. Context and data
 // are first grounded into the same Brain substrate, then the event is processed
@@ -26,7 +35,9 @@ func (o *CognitiveOrchestrator) ProcessObservation(event Event, observation Obse
 // Inquiry feedback uses false so the completed inquiry is closed before the
 // next inquiry is planned.
 func (o *CognitiveOrchestrator) processObservation(event Event, observation ObservationInput, experience *learning.Experience, planInquiry bool) (CognitiveInterpretation, bool, error) {
-	if o == nil || o.Runtime == nil { return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized") }
+	if o == nil || o.Runtime == nil {
+		return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized")
+	}
 	return o.Runtime.processObservationCommand(event, ObservationCommand{Input: observation, Experience: experience, PlanInquiry: planInquiry})
 }
 
@@ -60,9 +71,19 @@ func (o *CognitiveOrchestrator) ProcessInquiryObservation(request InquiryRequest
 	return o.Runtime.processObservationCommand(event, ObservationCommand{Input: observation, Experience: experience, PlanInquiry: true, Inquiry: &request})
 }
 
-func (o *CognitiveOrchestrator) LearnFromOutcome(outcome OutcomeEvent) (uint64, error) { if o == nil || o.Runtime == nil { return 0, errors.New("cognitive orchestrator is not initialized") }; return o.Runtime.ObserveOutcome(outcome) }
-func NewExperienceFromObservation(event Event, observation ObservationInput, sequence []string) learning.Experience { timestamp := event.Timestamp; if timestamp.IsZero() { timestamp = time.Now().UTC() }; return learning.Experience{ExperienceID: event.ID, Sequence: append([]string(nil), sequence...), Weight: 0.50, Confidence: 0.20, Source: observation.Source, Modality: observation.Modality, Timestamp: timestamp, Reliability: 0.50, IndependenceGroup: event.ID} }
-
+func (o *CognitiveOrchestrator) LearnFromOutcome(outcome OutcomeEvent) (uint64, error) {
+	if o == nil || o.Runtime == nil {
+		return 0, errors.New("cognitive orchestrator is not initialized")
+	}
+	return o.Runtime.ObserveOutcome(outcome)
+}
+func NewExperienceFromObservation(event Event, observation ObservationInput, sequence []string) learning.Experience {
+	timestamp := event.Timestamp
+	if timestamp.IsZero() {
+		timestamp = time.Now().UTC()
+	}
+	return learning.Experience{ExperienceID: event.ID, Sequence: append([]string(nil), sequence...), Weight: 0.50, Confidence: 0.20, Source: observation.Source, Modality: observation.Modality, Timestamp: timestamp, Reliability: 0.50, EpisodeID: event.EpisodeID}
+}
 
 func knowledgeClaimsFromGrounding(grounded []knowledge.GroundedRepresentation, at time.Time) []KnowledgeClaim {
 	claims := make([]KnowledgeClaim, 0, len(grounded))
@@ -70,12 +91,12 @@ func knowledgeClaimsFromGrounding(grounded []knowledge.GroundedRepresentation, a
 		claims = append(claims, KnowledgeClaim{
 			NodeID: representation.NodeID,
 			Origin: KnowledgeOrigin{
-				Source: representation.Source,
-				Modality: representation.Modality,
+				Source:     representation.Source,
+				Modality:   representation.Modality,
 				ObservedAt: at,
 			},
 			Verified: false,
-			Status: representation.Status,
+			Status:   representation.Status,
 		})
 	}
 	return claims
@@ -90,10 +111,11 @@ func groundedNodeIDs(grounded []knowledge.GroundedRepresentation) []knowledge.No
 }
 
 func experienceID(experience *learning.Experience) string {
-	if experience == nil { return "" }
+	if experience == nil {
+		return ""
+	}
 	return experience.ExperienceID
 }
-
 
 func groundedPopulationNodeIDs(grounded []knowledge.GroundedRepresentation) []knowledge.NodeID {
 	seen := make(map[knowledge.NodeID]struct{})

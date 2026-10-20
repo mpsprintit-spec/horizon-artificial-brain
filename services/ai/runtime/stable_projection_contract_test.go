@@ -120,7 +120,7 @@ func TestStableProjectionGenesisSuffixNoiseAndNextObservation(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, event := range events {
-		if event.DynamicsEncoding != knowledge.StableProjectionDynamics {
+		if event.DynamicsEncoding != knowledge.CurrentDynamics {
 			t.Fatal("new projection policy was not versioned, including numeric grounding")
 		}
 	}
