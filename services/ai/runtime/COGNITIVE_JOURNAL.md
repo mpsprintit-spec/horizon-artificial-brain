@@ -41,7 +41,9 @@ describes bounded context dynamics and episode controls. [MEMORY_TIME.md](MEMORY
 defines physical-memory-v1 retention and its historical compatibility.
 [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md) defines retained local-activity-v1
 learning and its controlled retention evidence. [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
-defines current observed-feedback-v1 evidence accounting and adaptation. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
+defines retained observed-feedback-v1 evidence accounting and adaptation.
+[EVIDENCE_UNCERTAINTY.md](EVIDENCE_UNCERTAINTY.md) defines the current
+evidence-uncertainty-v1 predictive readout and scoped inquiry feedback. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
 An action binding registration now consumes a revision. Re-registering the

@@ -9,17 +9,18 @@ import (
 type DynamicsEncoding string
 
 const (
-	LegacyDynamics           DynamicsEncoding = ""
-	OrderedDynamics          DynamicsEncoding = "ordered-observation-v1"
-	RecurrentDynamics        DynamicsEncoding = "recurrent-context-v1"
-	PhysicalMemoryDynamics   DynamicsEncoding = "physical-memory-v1"
-	LocalActivityDynamics    DynamicsEncoding = "local-activity-v1"
-	ObservedFeedbackDynamics DynamicsEncoding = "observed-feedback-v1"
-	CurrentDynamics                           = ObservedFeedbackDynamics
+	LegacyDynamics              DynamicsEncoding = ""
+	OrderedDynamics             DynamicsEncoding = "ordered-observation-v1"
+	RecurrentDynamics           DynamicsEncoding = "recurrent-context-v1"
+	PhysicalMemoryDynamics      DynamicsEncoding = "physical-memory-v1"
+	LocalActivityDynamics       DynamicsEncoding = "local-activity-v1"
+	ObservedFeedbackDynamics    DynamicsEncoding = "observed-feedback-v1"
+	EvidenceUncertaintyDynamics DynamicsEncoding = "evidence-uncertainty-v1"
+	CurrentDynamics                              = EvidenceUncertaintyDynamics
 )
 
 func (d DynamicsEncoding) Validate() error {
-	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics && d != ObservedFeedbackDynamics {
+	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics && d != ObservedFeedbackDynamics && d != EvidenceUncertaintyDynamics {
 		return fmt.Errorf("unsupported neural dynamics %q", d)
 	}
 	return nil
@@ -110,5 +111,9 @@ func (d DynamicsEncoding) HasPhysicalMemory() bool {
 }
 
 func (d DynamicsEncoding) HasLocalActivity() bool {
-	return d == LocalActivityDynamics || d == ObservedFeedbackDynamics
+	return d == LocalActivityDynamics || d.HasObservedFeedback()
+}
+
+func (d DynamicsEncoding) HasObservedFeedback() bool {
+	return d == ObservedFeedbackDynamics || d == EvidenceUncertaintyDynamics
 }

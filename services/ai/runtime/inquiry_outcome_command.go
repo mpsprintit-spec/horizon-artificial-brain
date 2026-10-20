@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"slices"
 	"time"
-
-	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 // InquiryOutcomeCommand is observed causal data, never an execution request.
@@ -97,11 +95,11 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 			return applyErr
 		}
 		actual := cognitive.State.Activations
-		if r.dynamicsEncoding == knowledge.ObservedFeedbackDynamics {
+		if r.dynamicsEncoding.HasObservedFeedback() {
 			actual = r.activation.LastObservedPopulation()
 		}
 		predictionError := r.activation.PredictionError(*event.PredictionOverride, actual)
-		if r.dynamicsEncoding == knowledge.ObservedFeedbackDynamics {
+		if r.dynamicsEncoding.HasObservedFeedback() {
 			r.activation.ApplyObservedActionFeedback(binding.TargetNodeIDs, *event.PredictionOverride, actual, event.Timestamp)
 		}
 		if absFloat(predictionError-cognitive.State.PredictionError) > 1e-9 {
