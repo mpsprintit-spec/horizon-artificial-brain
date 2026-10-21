@@ -1,0 +1,58 @@
+=== RUN   TestSynapticSpellingUnicodeLabelsDriftPersistenceAndAblation
+--- PASS: TestSynapticSpellingUnicodeLabelsDriftPersistenceAndAblation (3.53s)
+=== RUN   TestSynapticSpellingAmbiguityMissingSupportAndNoPartialText
+--- PASS: TestSynapticSpellingAmbiguityMissingSupportAndNoPartialText (0.00s)
+=== RUN   TestSynapticSpellingBitWeightsAreCausalAndCorrectionRetainsHistory
+--- PASS: TestSynapticSpellingBitWeightsAreCausalAndCorrectionRetainsHistory (0.00s)
+=== RUN   TestSynapticSpellingLimitsAndScalarValidation
+--- PASS: TestSynapticSpellingLimitsAndScalarValidation (0.02s)
+=== RUN   TestSynapticSpellingRejectsCorruptBankAndInvalidDecodedScalar
+--- PASS: TestSynapticSpellingRejectsCorruptBankAndInvalidDecodedScalar (0.14s)
+=== RUN   TestSynapticSpellingReadSerializesWithNumericalConnectionUpdates
+--- PASS: TestSynapticSpellingReadSerializesWithNumericalConnectionUpdates (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	4.728s
+=== RUN   TestLearnedSpellingJournalCheckpointGenesisSuffixAndNextThought
+--- PASS: TestLearnedSpellingJournalCheckpointGenesisSuffixAndNextThought (1.85s)
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/empty
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/duplicate
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/missing
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/scalar
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/length
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/weight
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/confidence
+=== RUN   TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/codec
+--- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation (0.01s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/empty (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/duplicate (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/missing (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/scalar (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/length (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/weight (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/confidence (0.00s)
+    --- PASS: TestLearnedSpellingRejectsInvalidInputBeforeAppendOrMutation/codec (0.00s)
+=== RUN   TestLearnedSpellingUncertainAppendRetiresAndRecovers
+=== RUN   TestLearnedSpellingUncertainAppendRetiresAndRecovers/absent
+=== RUN   TestLearnedSpellingUncertainAppendRetiresAndRecovers/durable-lost-ack
+--- PASS: TestLearnedSpellingUncertainAppendRetiresAndRecovers (0.29s)
+    --- PASS: TestLearnedSpellingUncertainAppendRetiresAndRecovers/absent (0.14s)
+    --- PASS: TestLearnedSpellingUncertainAppendRetiresAndRecovers/durable-lost-ack (0.15s)
+=== RUN   TestLearnedSpellingCompoundJournalAndOwnerConcurrency
+--- PASS: TestLearnedSpellingCompoundJournalAndOwnerConcurrency (0.17s)
+=== RUN   TestLearnedSpellingFrozenV1JournalAndNextThought
+--- PASS: TestLearnedSpellingFrozenV1JournalAndNextThought (0.04s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	3.376s
+=== RUN   TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery
+=== RUN   TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery/normal
+=== RUN   TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery/hidden
+=== RUN   TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery/forged
+--- PASS: TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery (0.59s)
+    --- PASS: TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery/normal (0.13s)
+    --- PASS: TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery/hidden (0.11s)
+    --- PASS: TestManagedSpellingUsesSelectedForecastWithoutLabelsAndAfterRecovery/forged (0.13s)
+=== RUN   TestManagedSpellingDoesNotUseUntrainedActivityAsAnswer
+--- PASS: TestManagedSpellingDoesNotUseUntrainedActivityAsAnswer (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/core	1.617s

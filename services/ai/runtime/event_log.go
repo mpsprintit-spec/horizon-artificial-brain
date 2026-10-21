@@ -22,6 +22,7 @@ const EventLogSchemaVersion = 3
 func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion }
 
 type LoggedEvent struct {
+	SpellingExposure *knowledge.SpellingExposure `json:"spelling_exposure,omitempty"`
 	WrittenGroundingMigration *WrittenGroundingMigration `json:"written_grounding_migration,omitempty"`
 	DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding,omitempty"`
 	SurfaceRebinding *WrittenSurfaceRebinding `json:"surface_rebinding,omitempty"`
@@ -187,7 +188,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding || event.Type == EventTypeWrittenGroundingMigration {
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding || event.Type == EventTypeWrittenGroundingMigration || event.Type == EventTypeSpellingExposure {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -384,7 +385,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			return nil, fmt.Errorf("invalid journal payload at line %d: %w", lineNumber, err)
 		}
 		switch event.Type {
-		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration:
+		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeSpellingExposure:
 			seen[key] = canonical
 			events = append(events, event)
 			expected++
@@ -555,6 +556,8 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeSpellingExposure:
+			if _, err := brainRuntime.LearnSpelling(*logged.SpellingExposure, logged.Timestamp); err != nil { return err }
 		case EventTypeWrittenGroundingMigration:
 			if err := brainRuntime.replayWrittenGroundingMigration(*logged.WrittenGroundingMigration, logged.Timestamp); err != nil { return err }
 		case EventTypeSurfaceRebinding:
