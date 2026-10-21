@@ -148,6 +148,12 @@ func checkpointChecksumV8WithBrain(snapshot BrainSnapshot, writer jsonstream.Val
 // intent/commit physical framing. This anchors a checkpoint to a specific
 // replayable event history and detects tampering with its earlier records.
 func journalPrefixHash(events []LoggedEvent) (string, error) {
+	// ReadEventLog returns nil for an empty journal. Preserve its historical
+	// SHA256(null), including when recovery slices a zero-length prefix from
+	// a journal that now has a suffix. Do not change old checkpoint checksums.
+	if len(events) == 0 {
+		events = nil
+	}
 	data, err := json.Marshal(events)
 	if err != nil {
 		return "", err
