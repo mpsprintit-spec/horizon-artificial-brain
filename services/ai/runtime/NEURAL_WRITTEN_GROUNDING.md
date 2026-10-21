@@ -127,7 +127,8 @@ Older readers reject the unknown command/encoding. Recovery validates the
 whole supplied contract timeline before applying its first command: v2 cannot
 appear without migration, and the contract cannot silently revert afterward.
 Checkpoint mode tampering, old-schema flags and invalid scoped routes fail
-before target mutation.
+before target mutation. Equivalent Unicode-escaped JSON spellings are decoded
+and checked too; valid escaped v2 state remains readable.
 
 The enabled serving contract survives complete checkpoint restore, genesis
 replay, and suffix replay from both pre- and post-migration checkpoints.

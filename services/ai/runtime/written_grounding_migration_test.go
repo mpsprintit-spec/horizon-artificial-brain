@@ -400,6 +400,30 @@ func TestNumericWrittenCheckpointAuthenticatesServingModeAndRejectsDowngrade(t *
 	if err := target.RestoreCheckpoint(bad); err == nil || !bytes.Equal(before, continuationBytes(t, target)) {
 		t.Fatal("scoped routes accepted under the legacy serving mode")
 	}
+	// Equivalent JSON spellings must not bypass validation's fast path.
+	snapshot.Brain = bytes.ReplaceAll(snapshot.Brain, []byte("written-neural-v2"), []byte(`written-neural-v\u0032`))
+	snapshot.Checksum, _ = checkpointChecksumV8(snapshot)
+	data, _ = json.Marshal(snapshot)
+	if err := os.WriteFile(bad, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := target.RestoreCheckpoint(bad); err == nil || !bytes.Equal(before, continuationBytes(t, target)) {
+		t.Fatal("Unicode-escaped routes bypassed the serving contract before mutation")
+	}
+	snapshot.NeuralWrittenGrounding = true
+	snapshot.Checksum, _ = checkpointChecksumV8(snapshot)
+	data, _ = json.Marshal(snapshot)
+	if err := os.WriteFile(bad, data, 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := target.RestoreCheckpoint(bad); err != nil {
+		t.Fatal("valid escaped v2 checkpoint rejected", err)
+	}
+	wantHash, _ := r.brain.CanonicalHash()
+	gotHash, _ := target.brain.CanonicalHash()
+	if wantHash != gotHash || target.surfaceEncoding != knowledge.NeuralWrittenEncoding {
+		t.Fatal("escaped v2 checkpoint changed the numerical state or mode")
+	}
 }
 
 func TestNumericWrittenFreshLearningImportAndRepeatedExposureReusePrototypes(t *testing.T) {

@@ -27,7 +27,9 @@ func (k *KnowledgeBase) HasNeuralWrittenProjection() bool {
 // checkpoint can mutate its target. Ordinary legacy files take the byte-scan
 // fast path; the new mode may have no routes yet immediately after activation.
 func ValidateWrittenNumericState(data []byte, enabled bool) error {
-	if !bytes.Contains(data, []byte(writtenNumericScope.Field)) {
+	// An equivalent field/value can use JSON Unicode escapes. Only skip the
+	// semantic decode when neither the literal marker nor an escape occurs.
+	if !bytes.Contains(data, []byte(writtenNumericScope.Field)) && bytes.IndexByte(data, '\\') < 0 {
 		return nil
 	}
 	var state struct {
