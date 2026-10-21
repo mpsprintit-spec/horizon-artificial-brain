@@ -16,7 +16,16 @@ import (
 )
 
 func TestManagedBridgeTextRetrievesTrainedTargetBeforeAndAfterRestart(t *testing.T) {
-	r := runtime.NewBrainRuntime(knowledge.NewBrain())
+	testManagedBridgeWrittenContract(t, false)
+}
+
+func TestManagedBridgeNumericWrittenContractWithoutLabelsAndAfterRestart(t *testing.T) {
+	testManagedBridgeWrittenContract(t, true)
+}
+
+func testManagedBridgeWrittenContract(t *testing.T, neural bool) {
+	brain := knowledge.NewBrain()
+	r := runtime.NewBrainRuntime(brain)
 	owner, err := runtime.NewRuntimeSupervisor(r)
 	if err != nil {
 		t.Fatal(err)
@@ -34,6 +43,15 @@ func TestManagedBridgeTextRetrievesTrainedTargetBeforeAndAfterRestart(t *testing
 	cp := filepath.Join(t.TempDir(), "trained.json")
 	var target knowledge.NodeID
 	if err := owner.WithMutation(func(active *runtime.BrainRuntime) error {
+		if neural {
+			plan, err := active.PlanNeuralWrittenGrounding()
+			if err != nil {
+				return err
+			}
+			if err := active.ApplyNeuralWrittenGrounding(plan, filepath.Join(t.TempDir(), "pre-migration.json"), at); err != nil {
+				return err
+			}
+		}
 		for i := 0; i < 3; i++ {
 			if _, err := active.LearnExperience(learning.Experience{Sequence: []string{"naku", "melo", "tiva"}, Weight: .8, Confidence: .8, Source: "same-teacher", Modality: "text", IndependenceGroup: "same-teacher"}, at); err != nil {
 				return err
@@ -48,11 +66,21 @@ func TestManagedBridgeTextRetrievesTrainedTargetBeforeAndAfterRestart(t *testing
 		if !ok {
 			t.Fatal("trained target has no detached label")
 		}
+		if neural {
+			// Controlled ablation on this test Brain, inside its owner lease.
+			if err := brain.RestoreSurfaceAnnotations(nil); err != nil {
+				return err
+			}
+		}
 		return active.Checkpoint(cp)
 	}); err != nil {
 		t.Fatal(err)
 	}
-	server, err := NewManaged(owner, Config{})
+	config := Config{}
+	if neural {
+		config.Token = "numeric-written-diagnostic"
+	}
+	server, err := NewManaged(owner, config)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -63,7 +91,11 @@ func TestManagedBridgeTextRetrievesTrainedTargetBeforeAndAfterRestart(t *testing
 			t.Fatal(err)
 		}
 		response := httptest.NewRecorder()
-		server.Handler().ServeHTTP(response, httptest.NewRequest(http.MethodPost, "/v1/observations", bytes.NewReader(body)))
+		request := httptest.NewRequest(http.MethodPost, "/v1/observations", bytes.NewReader(body))
+		if neural {
+			request.Header.Set("Authorization", "Bearer "+config.Token)
+		}
+		server.Handler().ServeHTTP(response, request)
 		if response.Code != http.StatusAccepted {
 			t.Fatalf("Bridge text failed: %d %s", response.Code, response.Body.String())
 		}

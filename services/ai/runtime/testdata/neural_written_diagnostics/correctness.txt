@@ -1,0 +1,45 @@
+=== RUN   TestNumericWrittenGroundingIsIndependentOfAdapterLabelsAndMemberDrift
+--- PASS: TestNumericWrittenGroundingIsIndependentOfAdapterLabelsAndMemberDrift (0.05s)
+=== RUN   TestLegacyWrittenGroundingLabelAblationExposesTheOriginalDependency
+    written_grounding_migration_test.go:172: legacy units: labels=6 hidden=12; this control is not a semantic accuracy test
+--- PASS: TestLegacyWrittenGroundingLabelAblationExposesTheOriginalDependency (0.00s)
+=== RUN   TestNumericWrittenMigrationAndSuffixRecoverWithTheSameNextThought
+--- PASS: TestNumericWrittenMigrationAndSuffixRecoverWithTheSameNextThought (0.03s)
+=== RUN   TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation
+=== RUN   TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/revision
+=== RUN   TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/reference
+=== RUN   TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/route
+=== RUN   TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/existing-backup
+=== RUN   TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/existing-journal-backup
+--- PASS: TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation (0.04s)
+    --- PASS: TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/revision (0.01s)
+    --- PASS: TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/reference (0.01s)
+    --- PASS: TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/route (0.01s)
+    --- PASS: TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/existing-backup (0.01s)
+    --- PASS: TestNumericWrittenMigrationRejectsInvalidPlanOrBackupBeforeMutation/existing-journal-backup (0.01s)
+=== RUN   TestNumericWrittenMigrationAppendFailureRetainsBackupAndRecoveryBoundary
+--- PASS: TestNumericWrittenMigrationAppendFailureRetainsBackupAndRecoveryBoundary (0.01s)
+=== RUN   TestNumericWrittenCheckpointAuthenticatesServingModeAndRejectsDowngrade
+--- PASS: TestNumericWrittenCheckpointAuthenticatesServingModeAndRejectsDowngrade (0.01s)
+=== RUN   TestNumericWrittenFreshLearningImportAndRepeatedExposureReusePrototypes
+--- PASS: TestNumericWrittenFreshLearningImportAndRepeatedExposureReusePrototypes (0.01s)
+=== RUN   TestH18Schema12FixtureRetainsExactHashAndNextThought
+--- PASS: TestH18Schema12FixtureRetainsExactHashAndNextThought (0.00s)
+=== RUN   TestNumericWrittenJournalContractTimelineRejectsBeforeAnyReplayMutation
+--- PASS: TestNumericWrittenJournalContractTimelineRejectsBeforeAnyReplayMutation (0.01s)
+=== RUN   TestNumericWrittenOwnerCommandsAndInspectionSerializeWithoutDuplication
+--- PASS: TestNumericWrittenOwnerCommandsAndInspectionSerializeWithoutDuplication (0.01s)
+=== RUN   TestNumericWrittenPrefixPredictionDependsOnLearnedConnectionsAndPatterns
+    written_grounding_migration_test.go:556: naku melo: target prediction=1.3555009204981134 alternative=0 ablated=0 (scores, not semantic-answer probabilities)
+    written_grounding_migration_test.go:556: sopo keri: target prediction=1.3555009204981134 alternative=0 ablated=0 (scores, not semantic-answer probabilities)
+--- PASS: TestNumericWrittenPrefixPredictionDependsOnLearnedConnectionsAndPatterns (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	0.183s
+=== RUN   TestManagedFacadeUsesNumericWrittenRoutesAfterMigrationAndRecovery
+--- PASS: TestManagedFacadeUsesNumericWrittenRoutesAfterMigrationAndRecovery (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/core	0.019s
+=== RUN   TestManagedBridgeNumericWrittenContractWithoutLabelsAndAfterRestart
+--- PASS: TestManagedBridgeNumericWrittenContractWithoutLabelsAndAfterRestart (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/bridge	0.020s

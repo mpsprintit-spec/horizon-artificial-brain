@@ -257,3 +257,7 @@ visual/browser sensor and persistence/replay checks. Monitor TypeScript checking
 all 37 Node tests and the production build passed (Node 24.19.0, pnpm 11.25.0).
 Nested Go modules outside the root module are not covered by `go test ./...`.
 The scale figures above are explicit local probes, not regular CI workloads.
+
+Current P0 follow-up: [numerical written grounding](NEURAL_WRITTEN_GROUNDING.md)
+introduces explicit migration, schema-13 serving-mode checksums and schema-12
+rollback backups. Historical measurements/contracts above retain their stated scope.

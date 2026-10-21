@@ -78,6 +78,8 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	var required []string
 	switch event.Type {
+	case EventTypeWrittenGroundingMigration:
+		required = []string{"written_grounding_migration"}
 	case EventTypeSurfaceRebinding:
 		required = []string{"surface_rebinding"}
 	case EventTypeProcess, EventTypeThink, EventTypeCognitiveProcess, EventTypeCognitiveThink, EventTypeSensorIntent:
@@ -104,6 +106,7 @@ func validateJournalPayload(event LoggedEvent) error {
 		return fmt.Errorf("unknown event type %q", event.Type)
 	}
 	present := map[string]bool{"event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
+	present["written_grounding_migration"] = event.WrittenGroundingMigration != nil
 	for _, field := range required {
 		if !present[field] {
 			return fmt.Errorf("%s record requires %s", event.Type, field)
@@ -116,6 +119,10 @@ func validateJournalPayload(event LoggedEvent) error {
 		}
 	}
 	switch event.Type {
+	case EventTypeWrittenGroundingMigration:
+		if event.SurfaceEncoding != knowledge.WrittenTextEncoding || event.SchemaVersion < 3 || event.Timestamp.IsZero() { return errors.New("numeric written migration requires schema 3 and event time") }
+		if err := event.WrittenGroundingMigration.validateShape(); err != nil { return err }
+		if event.Sequence != event.WrittenGroundingMigration.Plan.ReferenceRevision+1 { return errors.New("written migration reference revision disagrees with its journal position") }
 	case EventTypeSurfaceRebinding:
 		if event.SurfaceEncoding != knowledge.WrittenTextEncoding || event.Timestamp.IsZero() || event.SurfaceRebinding.ReferenceHash == "" {
 			return errors.New("surface rebinding requires a versioned reference and event time")

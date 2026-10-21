@@ -31,7 +31,9 @@ func (h *HorizonEngine) WithActiveBrain(fn func(*knowledge.Brain) error) error {
 	return h.supervisor.WithMutation(func(rt *runtime.BrainRuntime) error { return rt.WithBrainView(fn) })
 }
 
-// PulseWithLabels holds one owner lease across cognition and label lookup.
+// PulseWithLabels holds one owner lease across cognition and diagnostic label
+// lookup. Returned labels name ranked activity; they are not a learned language
+// decoder or evidence that a semantic question has been answered.
 func (h *HorizonEngine) PulseWithLabels(input string) (runtime.CognitiveInterpretation, []string, error) {
 	if h == nil || h.Perception == nil || h.supervisor == nil {
 		return runtime.CognitiveInterpretation{}, nil, errors.New("horizon cognitive pipeline is unavailable")

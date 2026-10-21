@@ -158,7 +158,7 @@ func TestWrittenEncodingRequiresNewJournalSchemaAndUnknownCheckpointFailsUnchang
 		t.Fatal(err)
 	}
 	s.SurfaceAnnotations[0].Encoding = "future-unknown-contract"
-	s.Checksum, err = checkpointChecksumV7(s)
+	s.Checksum, err = checkpointChecksumForSchema(s)
 	if err != nil {
 		t.Fatal(err)
 	}

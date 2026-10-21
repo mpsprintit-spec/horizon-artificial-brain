@@ -1,0 +1,18 @@
+goos: linux
+goarch: amd64
+pkg: github.com/project-horizon/horizon-core/services/ai/runtime
+cpu: AMD EPYC 9V74 80-Core Processor
+BenchmarkWrittenGroundingContracts/units=100/numeric=false-4         	      20	      1922 ns/op	     88891 checkpoint_bytes	       100.0 final_units	         0 populations	         0.002052 setup_s	     288 B/op	       5 allocs/op
+BenchmarkWrittenGroundingContracts/units=100/numeric=false-4         	      20	      1927 ns/op	     88891 checkpoint_bytes	       100.0 final_units	         0 populations	         0.001928 setup_s	     288 B/op	       5 allocs/op
+BenchmarkWrittenGroundingContracts/units=100/numeric=false-4         	      20	      1988 ns/op	     88891 checkpoint_bytes	       100.0 final_units	         0 populations	         0.002071 setup_s	     288 B/op	       5 allocs/op
+BenchmarkWrittenGroundingContracts/units=100/numeric=true-4          	      20	      1846 ns/op	    142406 checkpoint_bytes	       100.0 final_units	       100.0 populations	         0.01255 setup_s	     456 B/op	       6 allocs/op
+BenchmarkWrittenGroundingContracts/units=100/numeric=true-4          	      20	      1767 ns/op	    142406 checkpoint_bytes	       100.0 final_units	       100.0 populations	         0.01582 setup_s	     456 B/op	       6 allocs/op
+BenchmarkWrittenGroundingContracts/units=100/numeric=true-4          	      20	      1728 ns/op	    142406 checkpoint_bytes	       100.0 final_units	       100.0 populations	         0.01176 setup_s	     456 B/op	       6 allocs/op
+BenchmarkWrittenGroundingContracts/units=1000/numeric=false-4        	      20	     14814 ns/op	    882093 checkpoint_bytes	      1000 final_units	         0 populations	         0.1339 setup_s	     288 B/op	       5 allocs/op
+BenchmarkWrittenGroundingContracts/units=1000/numeric=false-4        	      20	     14528 ns/op	    882093 checkpoint_bytes	      1000 final_units	         0 populations	         0.1545 setup_s	     288 B/op	       5 allocs/op
+BenchmarkWrittenGroundingContracts/units=1000/numeric=false-4        	      20	     12980 ns/op	    882093 checkpoint_bytes	      1000 final_units	         0 populations	         0.1422 setup_s	     288 B/op	       5 allocs/op
+BenchmarkWrittenGroundingContracts/units=1000/numeric=true-4         	      20	     12503 ns/op	   1415604 checkpoint_bytes	      1000 final_units	      1000 populations	         0.2076 setup_s	     456 B/op	       6 allocs/op
+BenchmarkWrittenGroundingContracts/units=1000/numeric=true-4         	      20	     12503 ns/op	   1415604 checkpoint_bytes	      1000 final_units	      1000 populations	         0.2218 setup_s	     456 B/op	       6 allocs/op
+BenchmarkWrittenGroundingContracts/units=1000/numeric=true-4         	      20	     11650 ns/op	   1415604 checkpoint_bytes	      1000 final_units	      1000 populations	         0.2140 setup_s	     456 B/op	       6 allocs/op
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	2.434s
