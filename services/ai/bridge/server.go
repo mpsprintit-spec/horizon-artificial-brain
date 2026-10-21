@@ -262,7 +262,7 @@ func (s *Server) observations(w http.ResponseWriter, r *http.Request) {
 		writeError(w,status,err.Error())
 		return
 	}
-	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs})
+	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs,"answer":readoutForAnswer(interpretation.Answer)})
 }
 
 func (s *Server) outcomes(w http.ResponseWriter, r *http.Request) {

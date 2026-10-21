@@ -162,6 +162,10 @@ are not established by these small fixtures.
 | Event/causal prediction without text | Subsequent recurrent thought is unchanged by label ablation | **OPEN** for world-state, counterfactual and causal task correctness. |
 | User memory / main curriculum | Synthetic isolated fixtures only | **Not migrated/trained. P0 remains RED / OPEN.** |
 
+The next [neural answer readout step](NEURAL_ANSWER_READOUT.md) exposes the native
+selected forecast separately from activity ranking. It does not supply the
+learned decoder or close the generalization/grounding gates above.
+
 ## Small routing-cost measurements
 
 Linux/amd64, Go 1.22.12, AMD EPYC 9V74, GOMAXPROCS=4. The same candidate binary

@@ -43,27 +43,29 @@ type cli struct {
 }
 
 type pipelineResult struct {
-	Input         string
-	Tokens        []string
-	Answer        string
-	Confidence    float64
-	Activation    []string
-	Understanding string
-	Reasoning     string
-	Context       []string
-	Hypothesis    []string
-	NeedsWeb      bool
-	Learned       bool
-	PatternEvidence []string
-	Intent        string
-	Path          string
-	FocusToken    string
-	FunctionalSignals []string
+	Input               string
+	Tokens              []string
+	Answer              string
+	Confidence          float64
+	Activation          []string
+	Forecast            []string
+	AnswerStatus        runtime.AnswerStatus
+	Understanding       string
+	Reasoning           string
+	Context             []string
+	Hypothesis          []string
+	NeedsWeb            bool
+	Learned             bool
+	PatternEvidence     []string
+	Intent              string
+	Path                string
+	FocusToken          string
+	FunctionalSignals   []string
 	InterpretationNotes []string
-	Propositions []string
-	Constraints []string
-	EvidencePaths []string
-	EvalStatus string
+	Propositions        []string
+	Constraints         []string
+	EvidencePaths       []string
+	EvalStatus          string
 }
 
 func main() {
@@ -112,13 +114,10 @@ func (c *cli) startup() error {
 			fmt.Fprintf(c.out, "! Bootstrap activation skipped: %v\n", activationErr)
 		}
 	}
-	fmt.Fprintln(c.out, "✓ Neural Memory")
-	fmt.Fprintln(c.out, "✓ Activation Engine")
-	fmt.Fprintln(c.out, "✓ Understanding Engine")
-	fmt.Fprintln(c.out, "✓ Reasoning Engine")
-	fmt.Fprintln(c.out, "✓ Language Engine")
-	fmt.Fprintln(c.out, "✓ Learning Engine")
-	fmt.Fprintln(c.out, "✓ WebSearch Engine")
+	fmt.Fprintln(c.out, "✓ Persistent neural runtime")
+	fmt.Fprintln(c.out, "✓ Input adapters")
+	fmt.Fprintln(c.out, "✓ Learning interface")
+	fmt.Fprintln(c.out, "✓ WebSearch adapter")
 	fmt.Fprintln(c.out, "✓ Brain Monitor: starting autonomous loop")
 	c.startBrainMonitor()
 	if err != nil && os.IsNotExist(err) {
@@ -133,7 +132,7 @@ func (c *cli) startup() error {
 func (c *cli) printBanner() {
 	fmt.Fprintln(c.out, "======================================")
 	fmt.Fprintln(c.out, " Horizon Cognitive Intelligence")
-	fmt.Fprintln(c.out, " Neural Semantic Memory Ready")
+	fmt.Fprintln(c.out, " Persistent Neural Runtime")
 	fmt.Fprintln(c.out, "======================================")
 }
 
@@ -185,26 +184,25 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	}
 
 	c.context = deriveContext(nil, concepts)
-	answer := strings.Join(concepts, ", ")
-	if answer == "" {
-		answer = "Tidak ada node neural yang teraktivasi."
-	}
+	// Labels returned by PulseWithLabels name activity for inspection. They
+	// cannot serve as a learned language decoder, even when a forecast exists.
+	answer := "Jawaban bahasa belum tersedia."
 	return pipelineResult{
-		Input: input,
-		Tokens: strings.Fields(input),
-		Answer: answer,
-		Path: "neural_runtime",
-		Confidence: result.Answer.Confidence,
-		Activation: activeNodeTokens(result.State.ActiveNodeIDs),
-		Understanding: strings.Join(concepts, ", "),
-		Reasoning: answer,
-		Context: c.context,
-		FunctionalSignals: nil,
+		Input:               input,
+		Tokens:              strings.Fields(input),
+		Answer:              answer,
+		Path:                "neural_runtime",
+		Confidence:          result.Answer.Confidence,
+		Activation:          activeNodeTokens(result.State.ActiveNodeIDs),
+		Forecast:            activeNodeTokens(result.Answer.NodeIDs),
+		AnswerStatus:        result.Answer.Status,
+		Context:             c.context,
+		FunctionalSignals:   nil,
 		InterpretationNotes: []string{"source=" + result.Interpretation.Source},
-		Propositions: nil,
-		Constraints: nil,
-		EvidencePaths: nil,
-		EvalStatus: "cognitive_interpretation",
+		Propositions:        nil,
+		Constraints:         nil,
+		EvidencePaths:       nil,
+		EvalStatus:          "cognitive_interpretation",
 	}
 }
 
@@ -465,6 +463,8 @@ func (c *cli) safePrintln(value string) {
 
 func (c *cli) printDebug(r pipelineResult) {
 	fmt.Fprintf(c.out, "[debug] Activation: %s\n", strings.Join(r.Activation, ", "))
+	fmt.Fprintf(c.out, "[debug] Forecast: %s\n", strings.Join(r.Forecast, ", "))
+	fmt.Fprintf(c.out, "[debug] Answer status: %s\n", r.AnswerStatus)
 	fmt.Fprintf(c.out, "[debug] Understanding: %s\n", r.Understanding)
 	fmt.Fprintf(c.out, "[debug] Reasoning: %s\n", r.Reasoning)
 	fmt.Fprintf(c.out, "[debug] Confidence: %.2f\n", r.Confidence)
