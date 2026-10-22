@@ -17,6 +17,7 @@ type Engine struct {
 	lastPrediction, lastPredictionConf map[knowledge.NodeID]float64
 	lastTrace *knowledge.ObservationTrace
 	contextState *ContextState
+	observationPrediction *ObservationPrediction
 }
 
 type Request struct {
@@ -33,7 +34,7 @@ type Request struct {
 	Cycles int
 	Now time.Time
 }
-type Result struct { Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode; PredictionError float64 }
+type Result struct { ObservedInput bool `json:"-"`; Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode; PredictionError float64 }
 type Prediction struct { State, Confidence map[knowledge.NodeID]float64 }
 type ThoughtResult struct { Result; Prediction Prediction; PredictionError float64 }
 
@@ -43,6 +44,9 @@ func (e *Engine) Think(cycles int) Result { return e.ThinkWithPrediction(cycles)
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkWithPredictionAt(cycles,time.Now().UTC()) }
 
 func (e *Engine) ActivateWith(req Request) Result {
+	if req.DynamicsEncoding==nil || *req.DynamicsEncoding!=knowledge.ObservedFeedbackDynamics {
+		e.mu.Lock();e.observationPrediction=nil;e.mu.Unlock()
+	}
 	if req.DynamicsEncoding == nil || *req.DynamicsEncoding == knowledge.LegacyDynamics { return e.activateLegacyWith(req) }
 	return e.activateOrderedWith(req)
 }

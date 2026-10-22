@@ -42,7 +42,7 @@ func (e *Engine) ApplyActivityPlasticity(preState, postState map[knowledge.NodeI
 // inactive connection. Prediction error and consequences still adapt eligible
 // paths in either direction; this does not freeze previously learned weights.
 func (e *Engine) ApplyActivityPlasticityWithDynamics(preState, postState map[knowledge.NodeID]float64, now time.Time, dynamics knowledge.DynamicsEncoding) {
-	e.applyActivityPlasticity(preState, postState, now, dynamics == knowledge.LocalActivityDynamics)
+	e.applyActivityPlasticity(preState, postState, now, dynamics.HasLocalActivity())
 }
 
 func (e *Engine) applyActivityPlasticity(preState, postState map[knowledge.NodeID]float64, now time.Time, local bool) {

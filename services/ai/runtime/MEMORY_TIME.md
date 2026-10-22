@@ -1,7 +1,8 @@
 # Physical-time passive retention (H08)
 
 The `physical-memory-v1` retention law is also retained by current
-`local-activity-v1` serving runtimes (see [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)).
+`observed-feedback-v1` serving runtimes (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
+and [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)).
 Passive forgetting operates on existing
 synapses and experience traces in the single canonical Brain. It adds no
 semantic rules, answer store, second Brain or external model.
@@ -39,7 +40,8 @@ the memory clock.
 Passive retention neither reinforces connections nor consumes synaptic
 eligibility. Activity, prediction error and consequences retain their separate
 one-second eligibility clock and per-experience updates. H09 inactive activity
-weakening is addressed in LOCAL_PLASTICITY.md. Prediction adaptation (H12), uncertainty calibration (H13) and
+weakening is addressed in LOCAL_PLASTICITY.md. Bounded prediction adaptation
+(H12) is covered in OBSERVED_FEEDBACK.md; uncertainty calibration (H13) and
 generalization (H23) remain open. Repeated actual learning/thought may change
 weights even at the same physical timestamp; passive idempotence does not claim
 idempotence of those experiences.
