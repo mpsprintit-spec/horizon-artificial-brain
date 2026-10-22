@@ -24,7 +24,20 @@ type Uncertainty struct {
 	Reason          string
 }
 
+type AnswerStatus string
+
+const (
+	AnswerUninterpreted  AnswerStatus = "uninterpreted"
+	AnswerNeuralForecast AnswerStatus = "neural-forecast"
+)
+
+// Answer exposes the population already selected by the native prediction
+// assessment, not the general activity ranking. A neural forecast is a numeric
+// candidate with uncertainty; it is neither a semantic answer nor decoded text.
+// An absent assessment/selection leaves the answer uninterpreted. Historical
+// confidence/uncertainty scalars are retained for versioned inquiry dynamics.
 type Answer struct {
+	Status               AnswerStatus                    `json:"status"`
 	PredictionAssessment *knowledge.PredictionAssessment `json:"prediction_assessment,omitempty"`
 	NodeIDs              []knowledge.NodeID
 	Confidence           float64
@@ -61,7 +74,7 @@ func ToCognitiveInterpretation(observation Observation, interpretation Interpret
 		},
 		Interpretation: interpretation,
 		Answer: Answer{
-			NodeIDs:    append([]knowledge.NodeID(nil), interpretation.RankedNodeIDs...),
+			Status:     AnswerUninterpreted,
 			Confidence: bestInterpretationConfidence(interpretation),
 			Uncertainty: Uncertainty{
 				Level:           1 - resonance,
@@ -72,6 +85,12 @@ func ToCognitiveInterpretation(observation Observation, interpretation Interpret
 	}
 	if assessment := interpretation.PredictionAssessment; assessment != nil {
 		result.Answer.PredictionAssessment = assessment.Clone()
+		if len(assessment.NodeIDs) > 0 {
+			// Preserve the native selection, including all population members.
+			// Do not rerank using activity, labels, a target or a confidence cutoff.
+			result.Answer.NodeIDs = append([]knowledge.NodeID(nil), assessment.NodeIDs...)
+			result.Answer.Status = AnswerNeuralForecast
+		}
 		confidence := assessment.Confidence
 		if math.IsNaN(confidence) || math.IsInf(confidence, 0) {
 			confidence = 0

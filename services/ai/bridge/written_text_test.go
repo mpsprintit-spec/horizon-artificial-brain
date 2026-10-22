@@ -101,12 +101,16 @@ func testManagedBridgeWrittenContract(t *testing.T, neural bool) {
 		}
 		var result struct {
 			Active []knowledge.NodeID `json:"active_node_ids"`
+			Answer answerReadout      `json:"answer"`
 		}
 		if err := json.Unmarshal(response.Body.Bytes(), &result); err != nil {
 			t.Fatal(err)
 		}
 		if !slices.Contains(result.Active, target) {
 			t.Fatal("held-out target missing from production endpoint's neural readout")
+		}
+		if result.Answer.Status != runtime.AnswerNeuralForecast || !slices.Equal(result.Answer.NodeIDs, []knowledge.NodeID{target}) || result.Answer.Scope != "learned-next-population" || result.Answer.Confidence <= 0 || result.Answer.Uncertainty != 1-result.Answer.Confidence {
+			t.Fatalf("Bridge confused selected forecast with activity: %+v", result.Answer)
 		}
 		if err := owner.With(func(active *runtime.BrainRuntime) error {
 			inspection, err := active.InspectBrain()
