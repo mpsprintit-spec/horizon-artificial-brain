@@ -1,4 +1,4 @@
-# Complete cognitive commands and checkpoint v8
+# Complete cognitive commands and checkpoint v9
 
 This change addresses the reproduced H03/H04 cases in the consolidated
 2026-10-19 audit, using PR #27 as its baseline. The production integration
@@ -36,7 +36,8 @@ is captured after the entire transition, including temporal learning.
 New records use journal schema 3 with explicit written surface and neural
 dynamics encodings. Schemas 1 and 2 replay with their original dynamics.
 See [ORDERED_OBSERVATIONS.md](ORDERED_OBSERVATIONS.md) for ordered frames and
-conditional pattern prediction. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
+conditional pattern prediction. [RECURRENT_CONTEXT.md](RECURRENT_CONTEXT.md)
+describes current bounded context dynamics and episode controls. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
 An action binding registration now consumes a revision. Re-registering the
@@ -80,6 +81,10 @@ This does not change the legacy hash-token fallback for nonnumeric envelopes.
 
 ## Checkpoint and historical data
 
+Checkpoint **v9** adds authenticated bounded recurrent context and episode state;
+anchored v7/v8 remain supported for offset recovery. Pre-v9 envelopes cannot
+carry recurrent eligibility.
+
 Checkpoint **v8** additionally authenticates the last ordered observation and
 full population pattern frames. V7 remains supported for journal-offset recovery.
 Pre-v8 envelopes cannot carry ordered state.
@@ -97,7 +102,7 @@ ordinary learned populations are not relabeled as bootstrap populations.
 
 Historical checkpoints v4-v6 retain detached read/import compatibility using
 their original checksums. They cannot provide verified journal-offset recovery
-because they lack outcome continuation state. Verified checkpoint-offset startup requires v7 or v8. Do not upgrade an old file by merely changing its schema
+because they lack outcome continuation state. Verified checkpoint-offset startup requires v7, v8 or v9. Do not upgrade an old file by merely changing its schema
 or checksum. Migration needs a verified complete baseline, including any
 action/evidence state, or a history demonstrably sufficient to reconstruct it.
 

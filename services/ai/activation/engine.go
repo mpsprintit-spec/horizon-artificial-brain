@@ -16,9 +16,12 @@ type Engine struct {
 	internalState, internalConfidence map[knowledge.NodeID]float64
 	lastPrediction, lastPredictionConf map[knowledge.NodeID]float64
 	lastTrace *knowledge.ObservationTrace
+	contextState *ContextState
 }
 
 type Request struct {
+	EpisodeID string
+	ResetContext bool
 	CarryPreviousContext bool
 	DynamicsEncoding *knowledge.DynamicsEncoding
 	NeuralTrace *knowledge.ObservationTrace

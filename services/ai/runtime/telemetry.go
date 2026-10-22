@@ -183,6 +183,7 @@ func (r *BrainRuntime) ProcessObservationEnvelope(envelope ObservationEnvelope) 
 	}
 	event := Event{
 		ID: normalized.EventID,
+ EpisodeID: normalized.SessionID,
 		Stimulus: tokens,
 		Source: normalized.Source,
 		Modality: normalized.Modality,

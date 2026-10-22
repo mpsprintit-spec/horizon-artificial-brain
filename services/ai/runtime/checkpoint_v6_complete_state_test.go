@@ -70,6 +70,8 @@ func TestCheckpointV6RejectsCorruptedAdapterMetadata(t *testing.T) {
 func TestCheckpointV5ReadCompatibilityButNoOffsetReplay(t *testing.T) {
 	log:=openKnowledgeJournal(t)
 	r:=NewBrainRuntime(knowledge.NewBootstrapBrain())
+	// Generate historical dynamics for this detached legacy import fixture.
+	r.dynamicsEncoding=knowledge.LegacyDynamics
 	r.SetEventLog(log)
 	at:=time.Date(2026,10,18,12,0,0,0,time.UTC)
 	if _,_,err:=r.Process(Event{ID:"prefix",Cycles:1,Timestamp:at});err!=nil {t.Fatal(err)}

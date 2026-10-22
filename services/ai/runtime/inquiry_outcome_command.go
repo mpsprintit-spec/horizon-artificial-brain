@@ -80,6 +80,9 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 			return CognitiveInterpretation{}, false, r.seq, err
 		}
 	}
+	if err = r.validateNeuralEventLocked(event); err != nil {
+		return CognitiveInterpretation{}, false, r.seq, err
+	}
 	var cognitive CognitiveInterpretation
 	learned := false
 	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeInquiryOutcome, Timestamp: event.Timestamp, Event: cloneEvent(event), InquiryOutcome: &command}, func() error {

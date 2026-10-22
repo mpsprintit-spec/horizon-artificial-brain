@@ -98,6 +98,7 @@ func (r *BrainRuntime) replayKnowledgeDocument(document knowledge.KnowledgeDocum
 // processKnowledgeDocumentLocked assumes r.mu. A journaled import has exactly
 // one sequence/revision, even when there are several cognition microsteps.
 func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.KnowledgeDocument, compiled knowledge.KnowledgeCompilation, at time.Time, singleRevision bool) (KnowledgeProcessingResult, error) {
+	r.resetTemporalContextLocked(Event{Timestamp:at})
 	if _, err := r.brain.ImportKnowledgeDocumentWithEncoding(document, at, r.surfaceEncoding); err != nil {
 		return KnowledgeProcessingResult{}, err
 	}
@@ -157,7 +158,7 @@ func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.Knowled
 				Cycles: 1,
 				Timestamp: eventAt,
 			}
-			if r.dynamicsEncoding == knowledge.OrderedDynamics {
+			if r.dynamicsEncoding.HasOrderedObservations() {
 				event.NeuralTrace = (&knowledge.ObservationTrace{Stimulus: [][]knowledge.NodeID{nodeIDs}}).Canonical()
 			}
 			var output CognitiveOutput
@@ -187,6 +188,7 @@ func (r *BrainRuntime) cognitiveKnowledgeExposureLocked(event Event) (CognitiveO
 	result := r.activation.ActivateWith(activation.Request{
 		SurfaceEncoding: &r.surfaceEncoding,
 		DynamicsEncoding: &r.dynamicsEncoding,
+	EpisodeID: event.EpisodeID, ResetContext: event.ResetContext,
 		CarryPreviousContext: knowledge.CanonicalSurfaceModality(event.Modality) == "language",
 		NeuralTrace: event.NeuralTrace.Clone(),
 		StimulusNodeIDs: append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),

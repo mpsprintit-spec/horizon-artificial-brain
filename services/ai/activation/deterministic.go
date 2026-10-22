@@ -35,6 +35,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 	confidence := cloneState(e.internalConfidence)
 	previousPrediction := cloneState(e.lastPrediction)
 	trace := e.lastTrace.Clone()
+	recurrentContext := e.contextState.Clone()
 	e.mu.RUnlock()
 
 	for id, boost := range context {
@@ -63,7 +64,9 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 	}
 
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
-	if dynamics == knowledge.OrderedDynamics { nextPrediction, nextPredictionConfidence = e.applyOrderedPatternPrediction(nextPrediction, nextPredictionConfidence, trace) }
+	if dynamics == knowledge.RecurrentDynamics {
+  nextPrediction,nextPredictionConfidence=e.applyRecurrentPatternPrediction(nextPrediction,nextPredictionConfidence,trace,recurrentContext,now,true)
+	} else if dynamics == knowledge.OrderedDynamics {nextPrediction,nextPredictionConfidence=e.applyOrderedPatternPrediction(nextPrediction,nextPredictionConfidence,trace)}
 
 	e.mu.Lock()
 	e.internalState = cloneState(actual.Activations)

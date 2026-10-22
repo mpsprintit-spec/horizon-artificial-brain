@@ -18,6 +18,8 @@ const (
 // (bukan cuma Tokens) karena Learning butuh struktur kalimat/klausa penuh,
 // bukan sekadar kumpulan kata lepas.
 type PerceptionSignal struct {
+	SessionID string
+	ResetContext bool
 	Kind       PerceptionKind
 	Source     string
 	// Modality identifies the sensory/input channel at the perception boundary.

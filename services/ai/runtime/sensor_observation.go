@@ -14,6 +14,7 @@ import (
 // boundary. Numeric values are normalized to [-1, 1] by the sensor adapter;
 // labels and provenance remain metadata and never become neural identity.
 type SensorObservation struct {
+	SessionID string `json:"session_id,omitempty"`
 	Fields             []SensorField    `json:"fields,omitempty"`
 	Modality           string           `json:"modality"`
 	Source             string           `json:"source"`
@@ -56,6 +57,7 @@ func (s SensorObservation) Clone() SensorObservation {
 // Validate rejects ambiguous or non-finite physical input before it reaches
 // the canonical brain. Numeric feature arrays are expected to be normalized.
 func (s SensorObservation) Validate() error {
+	if s.SessionID!="" && strings.TrimSpace(s.SessionID)=="" {return fmt.Errorf("%w: blank session",ErrInvalidSensorObservation)}
 	if strings.TrimSpace(s.Modality) == "" || strings.TrimSpace(s.Source) == "" || strings.TrimSpace(s.SampleID) == "" || s.Timestamp.IsZero() {
 		return fmt.Errorf("%w: modality, source, sample_id and timestamp are required", ErrInvalidSensorObservation)
 	}
@@ -154,7 +156,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		var intentHash string
 		if journaled {
 			intentEvent := Event{
-				ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
+				ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality, EpisodeID: sensor.SessionID,
 				Timestamp: sensor.Timestamp.UTC(), Cycles: 1, SensorObservation: &sensor,
 			}
 			intent := LoggedEvent{
@@ -162,6 +164,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				Sequence: r.seq + 1, Type: EventTypeSensorIntent,
 				Timestamp: sensor.Timestamp.UTC(), Event: cloneEvent(intentEvent),
 			}
+			if err:=validateJournalPayload(intent);err!=nil {return processedSensor{},err}
 			intentHash, err = sensorIntentHash(intent)
 			if err != nil {
 				return processedSensor{}, err
@@ -192,7 +195,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 			return processedSensor{}, fmt.Errorf("%w: sensor projection produced no neural population", ErrRuntimeRecoveryRequired)
 		}
 		event := Event{
-			ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
+			ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality, EpisodeID: sensor.SessionID,
 			Timestamp: sensor.Timestamp.UTC(), Cycles: 1,
 			StimulusNodeIDs: ids, SensorObservation: &sensor,
 		}
