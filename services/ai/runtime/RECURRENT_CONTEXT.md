@@ -3,7 +3,8 @@
 ## Mechanism and limits
 
 The recurrent context contract introduced by `recurrent-context-v1` is retained
-by current `physical-memory-v1` serving runtimes (see [MEMORY_TIME.md](MEMORY_TIME.md)). Actual observed stimulus population
+by current `local-activity-v1` serving runtimes (see [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)
+and [MEMORY_TIME.md](MEMORY_TIME.md)). Actual observed stimulus population
 frames retain transient neural eligibility on the same persistent Brain. A
 learned ordered pattern can use eligible earlier populations to supply its
 missing stimulus prefix or context. Retrieval selects the most recent ordered
@@ -102,7 +103,7 @@ Pulse, managed HTTP, invalid checkpoints/contracts and uncertain writes.
 This establishes bounded learned predictive context on these probes. Unseen
 actor/role binding, arbitrary grammar, semantic answer selection, automatic
 real-world episode segmentation and long-range retrieval beyond these bounds
-remain unproven. H08 passive retention is addressed in MEMORY_TIME.md. H09 interference,
-H12 adaptation, H13 calibration and
+remain unproven. H08 passive retention is addressed in MEMORY_TIME.md and the
+reproduced H09 interference in LOCAL_PLASTICITY.md. H12 adaptation, H13 calibration and
 H23 independent language/generalization evaluation retain their own acceptance
 criteria.

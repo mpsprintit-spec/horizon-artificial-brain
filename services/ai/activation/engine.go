@@ -95,11 +95,13 @@ func (e *Engine) activateLegacyWith(req Request) Result {
 	}
 	for id,b:=range req.ContextBoosts { state[id]+=b; conf[id]=max(conf[id],b) }
 	state=normalize(state); pre:=cloneState(state); state,conf=e.advance(state,conf,req.Now,req.Cycles); result:=e.converge(state,conf,req.Now)
-	e.ApplyActivityPlasticity(pre,result.Activations,req.Now)
+	dynamics := knowledge.LegacyDynamics
+	if req.DynamicsEncoding != nil { dynamics = *req.DynamicsEncoding }
+	e.ApplyActivityPlasticityWithDynamics(pre,result.Activations,req.Now,dynamics)
 	predictionError:=0.0
 	if len(previousPrediction)>0 {
 		predictionError=stateDifference(previousPrediction,result.Activations)
-		e.ApplyPredictionErrorPlasticity(previousPrediction,result.Activations,predictionError,req.Now)
+		e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction,result.Activations,predictionError,req.Now,dynamics)
 		e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction,result.Activations,predictionError,0.20,req.Now)
 	}
 	e.Memory.UpdateInformationDynamics(previousPrediction,result.Activations,predictionError,req.Now)

@@ -29,7 +29,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 	} else {
 		now = now.UTC()
 	}
-	if dynamics == knowledge.PhysicalMemoryDynamics {
+	if dynamics.HasPhysicalMemory() {
 		e.Memory.ApplyMemoryDynamicsWithEncoding(now, dynamics)
 	}
 
@@ -58,12 +58,12 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 
 	actualState, actualConfidence := e.advance(state, confidence, now, cycles)
 	actual := e.converge(actualState, actualConfidence, now)
-	e.ApplyActivityPlasticity(state, actual.Activations, now)
+	e.ApplyActivityPlasticityWithDynamics(state, actual.Activations, now, dynamics)
 
 	error := 0.0
 	if len(previousPrediction) > 0 {
 		error = stateDifference(previousPrediction, actual.Activations)
-		e.ApplyPredictionErrorPlasticity(previousPrediction, actual.Activations, error, now)
+		e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction, actual.Activations, error, now, dynamics)
 	}
 
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
