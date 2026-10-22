@@ -29,6 +29,14 @@ func (r *BrainRuntime) ensureWritableLocked() error {
 	return nil
 }
 
+// markRecoveryRequiredLocked invalidates both cognition and live monitoring.
+// Call with r.mu held, including uncertain commits and successful retirement.
+// Failed recovery validation must not call this on the still-active runtime.
+func (r *BrainRuntime) markRecoveryRequiredLocked() {
+	r.recoveryRequired = true
+	r.telemetry.Close()
+}
+
 func (r *BrainRuntime) RecoveryRequired() bool {
 	if r == nil { return false }
 	r.mu.Lock()
@@ -107,8 +115,38 @@ func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, even
 	r.brain.RUnlock()
 	return TelemetryEvent{Type:eventType, BrainIdentity:BrainIdentity, StateRevision:r.seq, Timestamp:at.UTC(), EventHash:"sha256:"+hex.EncodeToString(eh[:]), CanonicalStateHash:"sha256:"+hex.EncodeToString(bh[:]), Event:event, Observation:observation, Outcome:outcome, Plasticity:plasticity}
 }
-func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry=NewTelemetryHub(256) }; return r.telemetry }
-func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry==nil {r.telemetry=NewTelemetryHub(256)}; envelope.Sequence=output.Sequence; e:=r.telemetryEventLocked("observation",output.Timestamp,nil,&envelope,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
+func (r *BrainRuntime) Telemetry() *TelemetryHub {
+	if r == nil {
+		return nil
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.recoveryRequired {
+		return nil
+	}
+	if r.telemetry == nil {
+		r.telemetry = NewTelemetryHub(256)
+	}
+	return r.telemetry
+}
+func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) {
+	if r == nil {
+		return
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.recoveryRequired {
+		return
+	}
+	if r.telemetry == nil {
+		r.telemetry = NewTelemetryHub(256)
+	}
+	envelope.Sequence = output.Sequence
+	e := r.telemetryEventLocked("observation", output.Timestamp, nil, &envelope, nil)
+	e.StateDelta = &output.StateDelta
+	e.PredictionError = &output.PredictionError
+	r.telemetry.Publish(e)
+}
 func (r *BrainRuntime) SaveBrain(path string) error {
 	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
 	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }

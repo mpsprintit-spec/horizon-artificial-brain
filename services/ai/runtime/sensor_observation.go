@@ -149,18 +149,18 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				return processedSensor{}, err
 			}
 			if err := r.eventLog.Append(intent); err != nil {
-				r.recoveryRequired = true
+				r.markRecoveryRequiredLocked()
 				return processedSensor{}, fmt.Errorf("%w: append sensor intent: %v", ErrRuntimeRecoveryRequired, err)
 			}
 		}
 
 		population, err := r.brain.ProjectVectorPopulationAt(vector, GroundingThreshold, 4, sensor.Timestamp)
 		if err != nil {
-			r.recoveryRequired = true
+			r.markRecoveryRequiredLocked()
 			return processedSensor{}, fmt.Errorf("%w: sensor projection: %v", ErrRuntimeRecoveryRequired, err)
 		}
 		if len(population.Units) == 0 {
-			r.recoveryRequired = true
+			r.markRecoveryRequiredLocked()
 			return processedSensor{}, fmt.Errorf("%w: sensor projection produced no neural population", ErrRuntimeRecoveryRequired)
 		}
 		ids := make([]knowledge.NodeID, 0, len(population.Units))
@@ -176,11 +176,11 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		// intent/commit pair, not a second standalone process record.
 		output, err := r.cognitiveProcessWithPersistenceLocked(event, !journaled)
 		if err != nil {
-			r.recoveryRequired = true
+			r.markRecoveryRequiredLocked()
 			return processedSensor{}, fmt.Errorf("%w: sensor cognition: %v", ErrRuntimeRecoveryRequired, err)
 		}
 		if err := r.learnObservedTransitionLocked(ids, event.Timestamp); err != nil {
-			r.recoveryRequired = true
+			r.markRecoveryRequiredLocked()
 			return processedSensor{}, fmt.Errorf("%w: sensor temporal learning: %v", ErrRuntimeRecoveryRequired, err)
 		}
 		if journaled {
@@ -190,7 +190,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				Timestamp: sensor.Timestamp.UTC(), IntentHash: intentHash,
 			}
 			if err := r.eventLog.Append(commit); err != nil {
-				r.recoveryRequired = true
+				r.markRecoveryRequiredLocked()
 				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)
 			}
 			// Do not expose the process event to telemetry before the commit

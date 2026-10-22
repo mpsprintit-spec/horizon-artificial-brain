@@ -44,13 +44,13 @@ func (r *BrainRuntime) GroundVectorAt(vector knowledge.NeuralVector, at time.Tim
 			Sequence: r.seq + 1, Type: EventTypeVectorGround,
 			Timestamp: at, Vector: &frozen,
 		}); err != nil {
-			r.recoveryRequired = true
+			r.markRecoveryRequiredLocked()
 			return knowledge.GroundedVector{}, fmt.Errorf("%w: append numeric grounding: %v", ErrRuntimeRecoveryRequired, err)
 		}
 	}
 	grounded, err := r.brain.GroundVectorAt(frozen, at)
 	if err != nil {
-		r.recoveryRequired = true
+		r.markRecoveryRequiredLocked()
 		return knowledge.GroundedVector{}, fmt.Errorf("%w: apply numeric grounding: %v", ErrRuntimeRecoveryRequired, err)
 	}
 	r.seq++

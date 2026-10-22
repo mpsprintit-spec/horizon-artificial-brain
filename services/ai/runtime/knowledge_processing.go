@@ -61,13 +61,13 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	}); err != nil {
 		// Append might have partially persisted a record. Never assume the
 		// journal is clean or let this in-memory runtime accept more writes.
-		r.recoveryRequired = true
+		r.markRecoveryRequiredLocked()
 		return KnowledgeProcessingResult{}, fmt.Errorf("%w: append knowledge import: %v", ErrRuntimeRecoveryRequired, err)
 	}
 	r.seq = nextSeq
 	result, err := r.processKnowledgeDocumentLocked(frozen, compiled, at, true)
 	if err != nil {
-		r.recoveryRequired = true
+		r.markRecoveryRequiredLocked()
 		return result, fmt.Errorf("%w: apply committed knowledge import: %v", ErrRuntimeRecoveryRequired, err)
 	}
 	return result, nil
@@ -87,7 +87,7 @@ func (r *BrainRuntime) replayKnowledgeDocument(document knowledge.KnowledgeDocum
 	if err != nil { return err }
 	r.seq++
 	if _, err := r.processKnowledgeDocumentLocked(document, compiled, at.UTC(), true); err != nil {
-		r.recoveryRequired = true
+		r.markRecoveryRequiredLocked()
 		return fmt.Errorf("%w: replay knowledge import: %v", ErrRuntimeRecoveryRequired, err)
 	}
 	return nil
