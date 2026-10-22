@@ -33,6 +33,7 @@ func NewRuntimeSupervisor(initial *BrainRuntime) (*RuntimeSupervisor, error) {
 	if initial.RecoveryRequired() {
 		return nil, ErrRuntimeRecoveryRequired
 	}
+	markSupervisorOwnedBrain(initial.brain)
 	return &RuntimeSupervisor{current: initial, epoch: make(chan struct{})}, nil
 }
 
@@ -110,6 +111,7 @@ func (s *RuntimeSupervisor) RecoverFromCheckpoint(log *EventLog, checkpointPath 
 	old.eventLog = nil
 
 	recovered.SetEventLog(log)
+	markSupervisorOwnedBrain(recovered.brain)
 	s.current = recovered
 	close(s.epoch)
 	s.epoch = make(chan struct{})

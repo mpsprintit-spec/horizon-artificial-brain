@@ -46,6 +46,7 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 		!tail.Timestamp.Equal(tail.Event.Timestamp) ||
 		!tail.Timestamp.Equal(tail.Event.SensorObservation.Timestamp) ||
 		tail.IntentHash != "" || tail.Experience != nil ||
+		tail.KnowledgeDocument != nil || tail.Vector != nil ||
 		tail.Outcome != nil || tail.Consequence != nil {
 		return "", errors.New("journal tail is not a valid uncommitted sensor intent")
 	}
