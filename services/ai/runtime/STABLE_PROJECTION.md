@@ -1,6 +1,8 @@
 # Stable sensory population recovery (H14)
 
-Serving uses `stable-sensory-projection-v1`. The change retains H13 uncertainty,
+The stable projection law is retained by current `evidence-provenance-v1` serving.
+See [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md) for H15 provenance and checkpoint v12.
+The H14 change retains H13 uncertainty,
 H12 observed feedback, local activity, physical-time retention and recurrent
 context on one Brain. Recovery reads existing ProjectionPopulations; it adds no
 semantic identity, answer table, input-hash database or external model.
@@ -109,7 +111,7 @@ Journal schema 3 explicitly records `stable-sensory-projection-v1`; unsupported
 readers reject it. Numeric GroundVectorAt now records its actual dynamics and
 surface encoding, so replay cannot silently execute a different projection law.
 Sensor intents include the declared tolerance in their existing authenticated
-payload. Checkpoint v11 and canonical Brain v3 remain unchanged: all persistent
+payload. At H14, checkpoint v11 and canonical Brain v3 remained unchanged: all persistent
 state already exists in population prototypes, members and neural histories.
 
 The immutable evidence_uncertainty_v1 fixture was generated using Go 1.22.12 on
@@ -122,8 +124,9 @@ Previously drifted prototypes are not magically reconstructed. Adopting an old
 Brain can require one new receptive population for an input that no longer
 matches its stored trace; existing history is retained. Ambiguous/unbounded noise,
 changing calibration/confidence/layout, long-term retention, sensor drift and
-broader perceptual generalization require further evaluation. H15 independence
-accounting and H23 task generalization retain their own acceptance criteria.
+broader perceptual generalization require further evaluation. Bounded H15
+accounting is now specified in [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md);
+H23 task generalization retains its own acceptance criteria.
 
 Local Go 1.22.12 validation passed: root-module `go test ./...`, `go vet ./...`,
 `go build ./...`, race tests for knowledge/learning/activation/runtime/Bridge/core/

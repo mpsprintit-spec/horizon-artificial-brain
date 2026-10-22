@@ -1,9 +1,11 @@
 # Bounded recurrent context (H10)
 
+For current provenance accounting and checkpoint v12, see [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md).
+
 ## Mechanism and limits
 
 The recurrent context contract introduced by `recurrent-context-v1` is retained
-by current `stable-sensory-projection-v1` serving runtimes (see [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)
+by current `evidence-provenance-v1` serving runtimes (see [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)
 and [MEMORY_TIME.md](MEMORY_TIME.md)). Actual observed stimulus population
 frames retain transient neural eligibility on the same persistent Brain. A
 learned ordered pattern can use eligible earlier populations to supply its

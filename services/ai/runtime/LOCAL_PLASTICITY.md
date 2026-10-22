@@ -1,6 +1,8 @@
 # Local activity and retention (H09)
 
-The local activity contract is retained by current `stable-sensory-projection-v1`
+For current provenance accounting and checkpoint v12, see [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md).
+
+The local activity contract is retained by current `evidence-provenance-v1`
 serving (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)). It retains ordered observations, bounded
 recurrent context and H08 physical-time passive retention on the same canonical
 Brain. This change protects inactive pathways without a second memory store,

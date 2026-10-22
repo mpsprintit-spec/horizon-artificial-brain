@@ -68,12 +68,22 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 	if err = r.ensureWritableLocked(); err != nil {
 		return CognitiveInterpretation{}, false, r.seq, err
 	}
+	if err = validateInquiryOutcomeDynamics(event, command, r.dynamicsEncoding); err != nil {
+		return CognitiveInterpretation{}, false, r.seq, err
+	}
 	if _, exists := r.processedEvents[event.ID]; exists {
 		return CognitiveInterpretation{}, false, r.seq, fmt.Errorf("duplicate event ID %q", event.ID)
 	}
 	binding, ok := r.actions[command.Outcome.RequestID]
 	if !ok || binding.BrainIdentity != BrainIdentity {
 		return CognitiveInterpretation{}, false, r.seq, errors.New("outcome has no registered action binding")
+	}
+	if r.dynamicsEncoding.HasEvidenceProvenance() {
+		for _, id := range binding.TargetNodeIDs {
+			if r.evidence.HasObservation(id, command.Outcome.RequestID, command.Outcome.Source) {
+				return CognitiveInterpretation{}, false, r.seq, errors.New("duplicate inquiry outcome identity")
+			}
+		}
 	}
 	if command.Observation.Experience != nil {
 		if err = r.validateExperienceLocked(*command.Observation.Experience); err != nil {
@@ -108,7 +118,7 @@ func (r *BrainRuntime) processInquiryOutcomeCommand(event Event, command Inquiry
 		consequence := AssessConsequence(ConsequenceInput{Success: command.Outcome.Success, Reliability: command.Outcome.Reliability, Reversible: command.Reversible, Cost: command.Cost, Risk: command.Risk, InformationGain: command.InformationGain, PredictionError: predictionError})
 		cognitive.Consequence = &consequence
 		r.activation.ApplyConsequencePlasticityWithDynamics(consequence.Valence, consequence.InformationGain, event.Timestamp, r.dynamicsEncoding)
-		r.applyInquiryConsequenceLocked(InquiryConsequenceEvent{Action: command.Action, Valence: consequence.Valence, InformationGain: consequence.InformationGain, PredictionError: consequence.PredictionError, Reliability: consequence.Reliability, TargetNodeIDs: binding.TargetNodeIDs, OutcomeNodeIDs: groundedPopulationNodeIDs(cognitive.GroundedRepresentations), CausalLink: "inquiry:" + command.Outcome.RequestID}, event.Timestamp)
+		r.applyInquiryConsequenceLocked(InquiryConsequenceEvent{Action: command.Action, Valence: consequence.Valence, InformationGain: consequence.InformationGain, PredictionError: consequence.PredictionError, Reliability: consequence.Reliability, TargetNodeIDs: binding.TargetNodeIDs, OutcomeNodeIDs: groundedPopulationNodeIDs(cognitive.GroundedRepresentations), CausalLink: "inquiry:" + command.Outcome.RequestID, Source: command.Outcome.Source, EpisodeID: command.Outcome.EpisodeID, IndependenceGroup: command.Outcome.IndependenceGroup, CausalGroup: command.Outcome.CausalGroup}, event.Timestamp)
 		return nil
 	})
 	if err != nil {

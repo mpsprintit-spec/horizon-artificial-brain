@@ -8,24 +8,36 @@ import (
 )
 
 type InquiryResult struct {
-	Execution InquiryExecution
-	Event Event
-	Observation ObservationInput
-	Experience *learning.Experience
-	Success bool
-	Reliability float64
-	Cost float64
-	Risk float64
-	InformationGain float64
-	PredictionError float64
+	Execution         InquiryExecution
+	Event             Event
+	Observation       ObservationInput
+	Experience        *learning.Experience
+	Success           bool
+	Reliability       float64
+	Cost              float64
+	Risk              float64
+	InformationGain   float64
+	PredictionError   float64
+	IndependenceGroup string `json:"independence_group,omitempty"`
+	CausalGroup       string `json:"causal_group,omitempty"`
 }
 
 func (o *CognitiveOrchestrator) ProcessInquiryResult(result InquiryResult, now time.Time) (CognitiveInterpretation, bool, error) {
-	if o == nil || o.Runtime == nil { return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized") }
-	if now.IsZero() { now = time.Now().UTC() }
-	if err := ValidateInquiryExecution(result.Execution, now); err != nil { return CognitiveInterpretation{}, false, err }
-	if result.Event.ID == "" { result.Event.ID = result.Execution.Request.RequestID }
-	if result.Event.Timestamp.IsZero() { result.Event.Timestamp = now.UTC() }
+	if o == nil || o.Runtime == nil {
+		return CognitiveInterpretation{}, false, errors.New("cognitive orchestrator is not initialized")
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
+	if err := ValidateInquiryExecution(result.Execution, now); err != nil {
+		return CognitiveInterpretation{}, false, err
+	}
+	if result.Event.ID == "" {
+		result.Event.ID = result.Execution.Request.RequestID
+	}
+	if result.Event.Timestamp.IsZero() {
+		result.Event.Timestamp = now.UTC()
+	}
 	result.Event.Source = result.Observation.Source
 	result.Event.Modality = result.Observation.Modality
 	return o.ProcessObservation(result.Event, result.Observation, result.Experience)
@@ -74,7 +86,7 @@ func (o *CognitiveOrchestrator) ProcessInquiryOutcome(result InquiryResult, now 
 	result.Event, observation = normalizeObservationCommand(result.Event, observation, observedAt)
 	return o.Runtime.processInquiryOutcomeCommand(result.Event, InquiryOutcomeCommand{
 		Observation: observation,
-		Outcome:     OutcomeEvent{RequestID: result.Execution.Request.RequestID, BrainIdentity: result.Execution.Request.BrainIdentity, Success: result.Success, Observation: append([]string(nil), result.Observation.Tokens...), Source: source, Modality: modality, ObservedAt: observedAt.UTC(), Reliability: result.Reliability},
+		Outcome:     OutcomeEvent{RequestID: result.Execution.Request.RequestID, BrainIdentity: result.Execution.Request.BrainIdentity, Success: result.Success, Observation: append([]string(nil), result.Observation.Tokens...), Source: source, Modality: modality, ObservedAt: observedAt.UTC(), Reliability: result.Reliability, EpisodeID: result.Event.EpisodeID, IndependenceGroup: result.IndependenceGroup, CausalGroup: result.CausalGroup},
 		Action:      result.Execution.Proposal.Action,
 		Reversible:  result.Execution.Proposal.Reversibility,
 		Cost:        result.Cost, Risk: result.Risk, InformationGain: result.InformationGain, ValidatedAt: now.UTC(),

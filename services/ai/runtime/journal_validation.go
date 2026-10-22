@@ -47,12 +47,34 @@ func validateJournalPayload(event LoggedEvent) error {
 		if experience == nil {
 			continue
 		}
+		if !event.DynamicsEncoding.HasEvidenceProvenance() && (experience.EpisodeID != "" || experience.CausalGroup != "") {
+			return errors.New("typed experience provenance requires evidence-provenance dynamics")
+		}
 		if err := validateExperienceStructure(*experience); err != nil {
 			return err
 		}
 		if experience.HasOrderedFields() && !event.DynamicsEncoding.HasOrderedObservations() {
 			return errors.New("ordered experience requires ordered dynamics")
 		}
+	}
+	outcomes := []*OutcomeEvent{event.Outcome}
+	if event.InquiryOutcome != nil {
+		if event.Event != nil {
+			if err := validateInquiryOutcomeDynamics(*event.Event, *event.InquiryOutcome, event.DynamicsEncoding); err != nil {
+				return err
+			}
+		}
+		outcomes = append(outcomes, &event.InquiryOutcome.Outcome)
+	}
+	for _, outcome := range outcomes {
+		if outcome != nil {
+			if err := validateOutcomeDynamics(*outcome, event.DynamicsEncoding); err != nil {
+				return err
+			}
+		}
+	}
+	if c := event.Consequence; c != nil && !event.DynamicsEncoding.HasEvidenceProvenance() && (c.Source != "" || c.EpisodeID != "" || c.IndependenceGroup != "" || c.CausalGroup != "") {
+		return errors.New("typed consequence provenance requires evidence-provenance dynamics")
 	}
 	var required []string
 	switch event.Type {

@@ -17,11 +17,12 @@ const (
 	ObservedFeedbackDynamics    DynamicsEncoding = "observed-feedback-v1"
 	EvidenceUncertaintyDynamics DynamicsEncoding = "evidence-uncertainty-v1"
 	StableProjectionDynamics    DynamicsEncoding = "stable-sensory-projection-v1"
-	CurrentDynamics                              = StableProjectionDynamics
+	EvidenceProvenanceDynamics  DynamicsEncoding = "evidence-provenance-v1"
+	CurrentDynamics                              = EvidenceProvenanceDynamics
 )
 
 func (d DynamicsEncoding) Validate() error {
-	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics && d != ObservedFeedbackDynamics && d != EvidenceUncertaintyDynamics && d != StableProjectionDynamics {
+	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics && d != ObservedFeedbackDynamics && d != EvidenceUncertaintyDynamics && d != StableProjectionDynamics && d != EvidenceProvenanceDynamics {
 		return fmt.Errorf("unsupported neural dynamics %q", d)
 	}
 	return nil
@@ -123,4 +124,8 @@ func (d DynamicsEncoding) HasEvidenceUncertainty() bool {
 	return d == EvidenceUncertaintyDynamics || d.HasStableProjection()
 }
 
-func (d DynamicsEncoding) HasStableProjection() bool { return d == StableProjectionDynamics }
+func (d DynamicsEncoding) HasStableProjection() bool {
+	return d == StableProjectionDynamics || d.HasEvidenceProvenance()
+}
+
+func (d DynamicsEncoding) HasEvidenceProvenance() bool { return d == EvidenceProvenanceDynamics }

@@ -1,0 +1,204 @@
+{
+  "action_bindings": {
+    "request-1": {
+      "RequestID": "request-1",
+      "BrainIdentity": "horizon-primary-brain",
+      "Intent": "",
+      "TargetNodeIDs": [
+        1
+      ],
+      "Synapses": null
+    },
+    "request-2": {
+      "RequestID": "request-2",
+      "BrainIdentity": "horizon-primary-brain",
+      "Intent": "",
+      "TargetNodeIDs": [
+        1
+      ],
+      "Synapses": null
+    },
+    "request-3": {
+      "RequestID": "request-3",
+      "BrainIdentity": "horizon-primary-brain",
+      "Intent": "",
+      "TargetNodeIDs": [
+        1
+      ],
+      "Synapses": null
+    }
+  },
+  "evidence_ledger": {
+    "by_node": {
+      "1": {
+        "Weight": 0.6,
+        "Confidence": 0.5,
+        "Reliability": 0.9,
+        "IndependentSources": 1,
+        "Contradictions": 0
+      }
+    },
+    "seen": {
+      "1": [
+        "request-1|same-camera"
+      ]
+    }
+  },
+  "schema_version": 11,
+  "brain_identity": "horizon-primary-brain",
+  "sequence": 5,
+  "timestamp": "2026-10-20T09:00:00Z",
+  "checksum": "42feee425dc6ba0d91a22695b274a4c9be8627531df5c1f48650d624ba550aec",
+  "brain": {
+    "schema_version": 2,
+    "brain_identity": "horizon",
+    "neural_units": [
+      {
+        "id": 1,
+        "representation": [
+          0.2,
+          0.8
+        ],
+        "activation": 1,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "last_activation": "2026-10-20T09:00:00Z"
+      },
+      {
+        "id": 2,
+        "representation": [
+          0.17750000000000002,
+          0.8225
+        ],
+        "activation": 0.98875,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "last_activation": "2026-10-20T09:00:00Z"
+      },
+      {
+        "id": 3,
+        "representation": [
+          0.225,
+          0.775
+        ],
+        "activation": 0.9875,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "last_activation": "2026-10-20T09:00:00Z"
+      },
+      {
+        "id": 4,
+        "representation": [
+          0.17250000000000001,
+          0.8275
+        ],
+        "activation": 0.98625,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "last_activation": "2026-10-20T09:00:00Z"
+      }
+    ],
+    "populations": [
+      {
+        "units": [
+          {
+            "node_id": 1,
+            "activation": 1
+          },
+          {
+            "node_id": 2,
+            "activation": 0.98875
+          },
+          {
+            "node_id": 3,
+            "activation": 0.9875
+          },
+          {
+            "node_id": 4,
+            "activation": 0.98625
+          }
+        ],
+        "prototype": [
+          0.2,
+          0.8
+        ],
+        "provenance": {
+          "origin": "",
+          "direct_experience": false,
+          "status": ""
+        }
+      }
+    ],
+    "synapses": [],
+    "temporal_patterns": null,
+    "episodes": null,
+    "bootstrap_experiences": null,
+    "experience_traces": null,
+    "developmental_experiences": null,
+    "attention_state": {},
+    "prediction_state": {},
+    "error_state": {},
+    "memory_state": {},
+    "curiosity_state": {},
+    "learning_policy_state": {
+      "novelty_sensitivity": 0.7,
+      "uncertainty_sensitivity": 0.8,
+      "memory_retention": 0.6,
+      "curiosity_pressure": 0.65,
+      "exploration_bias": 0.3,
+      "repeat_observation_bias": 0.2,
+      "defer_conclusion_bias": 0.2
+    },
+    "self_model_state": {},
+    "social_model_state": {},
+    "value_state": {},
+    "plasticity_state": {},
+    "inquiry_state": {
+      "sequence": 0,
+      "last_updated": "0001-01-01T00:00:00Z",
+      "pending": false,
+      "uncertainty": 0,
+      "expected_information_gain": 0,
+      "selected_score": 0,
+      "observed_information_gain": 0,
+      "outcome_prediction_error": 0
+    },
+    "provenance": [
+      {
+        "domain": "",
+        "experience_id": "bootstrap-existence",
+        "provenance": {
+          "origin": "developmental_bootstrap",
+          "direct_experience": false,
+          "status": "initial_hypothesis"
+        }
+      }
+    ]
+  },
+  "activation": {},
+  "cognitive_state": {
+    "BrainIdentity": "",
+    "Sequence": 0,
+    "Timestamp": "0001-01-01T00:00:00Z",
+    "ActiveNodeIDs": null,
+    "Activations": {},
+    "Confidence": {},
+    "Resonance": 0,
+    "PredictionError": 0
+  },
+  "inquiry_valence": {},
+  "last_observation_at": "0001-01-01T00:00:00Z",
+  "journal_prefix_hash": "c157bf70161cf45b02eb46a399cdbb4ce86fa87f4049aad41b7029e9d1d2b45a"
+}
