@@ -59,15 +59,9 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 			}
 			disk, err := diskBrain.CanonicalJSON()
 			if err != nil { return nil, false, err }
-			var recovered []byte
-			err = h.Supervisor.With(func(rt *runtime.BrainRuntime) error {
-				return rt.WithBrainView(func(brain *knowledge.Brain) error {
-					var inner error
-					recovered, inner = brain.CanonicalJSON()
-					return inner
-				})
-			})
+			inspection, err := h.InspectActiveBrain()
 			if err != nil { return nil, false, err }
+			recovered := inspection.Graph.CanonicalBytes()
 			if !bytes.Equal(disk, recovered) {
 				return nil, false, errors.New("legacy brain memory disagrees with committed journal; checkpoint or explicit migration required")
 			}
