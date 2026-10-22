@@ -21,6 +21,10 @@ type HorizonEngine struct {
 	// Runtime is the official neural runtime boundary. The fields below remain
 	// available during migration, but they all operate on the same Brain.
 	Runtime   *runtime.BrainRuntime
+	// Supervisor is the canonical managed entry point. The Runtime,
+	// Knowledge, Orchestrator, Learning, Thinking and Language fields are
+	// legacy aliases and MUST NOT be used after a recovery handover.
+	Supervisor *runtime.RuntimeSupervisor
 	Knowledge *knowledge.KnowledgeBase
 	Learning  *learning.LearningUnit
 	Thinking  *thinking.ThinkingEngine
@@ -48,7 +52,7 @@ type HorizonEngine struct {
 // an Experience, so an observation cannot become trusted learning merely by
 // entering through the facade.
 func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, error) {
-	if h == nil || h.Perception == nil || h.Orchestrator == nil || h.Runtime == nil {
+	if h == nil || h.Perception == nil || (h.Supervisor == nil && (h.Orchestrator == nil || h.Runtime == nil)) {
 		return runtime.CognitiveInterpretation{}, errors.New("horizon cognitive pipeline is unavailable")
 	}
 	signals, err := h.Perception.Perceive(input)
@@ -70,13 +74,27 @@ func (h *HorizonEngine) Pulse(input string) (runtime.CognitiveInterpretation, er
 // modality, so multimodal input is not collapsed into text before grounding.
 // The returned interpretations are ordered exactly as the input signals.
 func (h *HorizonEngine) PulseSignals(signals []perception.PerceptionSignal) ([]runtime.CognitiveInterpretation, error) {
-	if h == nil || h.Orchestrator == nil || h.Runtime == nil {
+	if h == nil || (h.Supervisor == nil && (h.Orchestrator == nil || h.Runtime == nil)) {
 		return nil, errors.New("horizon cognitive pipeline is unavailable")
 	}
 	if len(signals) == 0 {
 		return nil, errors.New("perception produced no signals")
 	}
+	if h.Supervisor == nil {
+		return h.pulseSignalsWith(h.Orchestrator, signals)
+	}
+	var outputs []runtime.CognitiveInterpretation
+	err := h.Supervisor.WithMutation(func(active *runtime.BrainRuntime) error {
+		var err error
+		outputs, err = h.pulseSignalsWith(runtime.NewCognitiveOrchestrator(active), signals)
+		return err
+	})
+	return outputs, err
+}
 
+// pulseSignalsWith assumes the caller owns a supervisor mutation lease when
+// managed. The same active runtime serves the entire multimodal batch.
+func (h *HorizonEngine) pulseSignalsWith(orchestrator *runtime.CognitiveOrchestrator, signals []perception.PerceptionSignal) ([]runtime.CognitiveInterpretation, error) {
 	interpretations := make([]runtime.CognitiveInterpretation, 0, len(signals))
 	for index, signal := range signals {
 		observedAt := signal.ObservedAt
@@ -102,7 +120,7 @@ func (h *HorizonEngine) PulseSignals(signals []perception.PerceptionSignal) ([]r
 			Tokens:   append([]string(nil), signal.Tokens...),
 		}
 
-		interpretation, _, err := h.Orchestrator.ProcessObservation(event, observation, nil)
+		interpretation, _, err := orchestrator.ProcessObservation(event, observation, nil)
 		if err != nil {
 			return nil, err
 		}
@@ -114,9 +132,11 @@ func (h *HorizonEngine) PulseSignals(signals []perception.PerceptionSignal) ([]r
 func NewHorizonEngine() *HorizonEngine {
 	brain := knowledge.NewBootstrapBrain()
 	rt := runtime.NewBrainRuntime(brain)
+	supervisor, err := runtime.NewRuntimeSupervisor(rt)
+	if err != nil { return nil }
 	core := execution.NewExecutionCore()
 	return &HorizonEngine{
-		Runtime: rt, Knowledge: brain, Learning: learning.NewLearningUnit(brain),
+		Runtime: rt, Supervisor: supervisor, Knowledge: brain, Learning: learning.NewLearningUnit(brain),
 		Thinking: thinking.NewThinkingEngine(brain), Decision: decision.NewEngine(),
 		Language: language.NewEngine(brain), Orchestrator: runtime.NewCognitiveOrchestrator(rt),
 		Gateway: execution.NewExecutionGateway(core),

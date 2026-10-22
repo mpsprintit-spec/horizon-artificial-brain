@@ -109,8 +109,31 @@ func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, even
 }
 func (r *BrainRuntime) Telemetry() *TelemetryHub { if r == nil { return nil }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry == nil { r.telemetry=NewTelemetryHub(256) }; return r.telemetry }
 func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope, output CognitiveOutput) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.telemetry==nil {r.telemetry=NewTelemetryHub(256)}; envelope.Sequence=output.Sequence; e:=r.telemetryEventLocked("observation",output.Timestamp,nil,&envelope,nil); e.StateDelta=&output.StateDelta; e.PredictionError=&output.PredictionError; r.telemetry.Publish(e) }
-func (r *BrainRuntime) SaveBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); return r.brain.Save(path) }
-func (r *BrainRuntime) LoadBrain(path string) error { if r==nil||r.brain==nil{return errors.New("brain runtime is not initialized")}; if strings.TrimSpace(path)==""{return errors.New("brain path is empty")}; r.mu.Lock(); defer r.mu.Unlock(); if err:=r.brain.Load(path);err!=nil{return err};r.seq=0;r.lastCognitiveState=CognitiveState{};r.processedEvents=make(map[string]uint64);return nil }
+func (r *BrainRuntime) SaveBrain(path string) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
+	return r.brain.Save(path)
+}
+func (r *BrainRuntime) LoadBrain(path string) error {
+	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
+	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
+	// Manual brain import resets the local event sequence. It cannot be
+	// reconciled with an existing attached journal; use checkpoint recovery.
+	if r.eventLog != nil { return errors.New("manual brain load is forbidden while an event journal is attached; use verified checkpoint recovery") }
+	if err := r.brain.Load(path); err != nil { return err }
+	r.seq = 0
+	r.lastCognitiveState = CognitiveState{}
+	r.lastObservationPopulation = nil
+	r.lastObservationAt = time.Time{}
+	r.processedEvents = make(map[string]uint64)
+	return nil
+}
 func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error { if r==nil{return errors.New("brain runtime is not initialized")};r.mu.Lock();defer r.mu.Unlock();expected:=uint64(1);for _,event:=range events{if event.Sequence!=expected{return fmt.Errorf("event index discontinuity: got %d want %d",event.Sequence,expected)};expected++;if event.Type==EventTypeProcess&&event.Event!=nil&&event.Event.ID!=""{r.processedEvents[event.Event.ID]=event.Sequence};if event.Sequence>r.seq{r.seq=event.Sequence}};return nil }
 
 func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
