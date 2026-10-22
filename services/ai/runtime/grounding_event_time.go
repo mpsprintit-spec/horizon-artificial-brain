@@ -17,5 +17,8 @@ func (r *BrainRuntime) GroundObservationAt(token, source, modality string, at ti
 	if err := r.ensureWritableLocked(); err != nil {
 		return knowledge.GroundedRepresentation{}, err
 	}
+	if r.eventLog != nil {
+		return knowledge.GroundedRepresentation{}, errors.New("standalone grounding is forbidden with an attached journal; use ProcessObservation")
+	}
 	return r.brain.GroundObservationAt(token, source, modality, GroundingThreshold, at)
 }

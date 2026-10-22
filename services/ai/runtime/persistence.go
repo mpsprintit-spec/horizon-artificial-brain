@@ -12,13 +12,17 @@ import (
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
-const BrainSnapshotSchemaVersion = 6
+const BrainSnapshotSchemaVersion = 7
+const neuralBrainSnapshotSchemaVersion = 6
 const priorBrainSnapshotSchemaVersion = 5
 const legacyBrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
+	ActionBindings map[string]ActionBinding `json:"action_bindings,omitempty"`
+	EvidenceLedger *learning.EvidenceLedgerSnapshot `json:"evidence_ledger,omitempty"`
 	SchemaVersion int                      `json:"schema_version"`
 	BrainIdentity string                   `json:"brain_identity"`
 	Sequence      uint64                   `json:"sequence"`
@@ -74,7 +78,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return err }
 
-	// Checkpoint v5 must persist the ENTIRE canonical substrate, including
+	// Checkpoints must persist the ENTIRE canonical substrate, including
 	// developmental experiences, bootstrap episodes, learned policy and
 	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
 	// these states and made checkpoint-offset replay diverge from live memory.
@@ -92,7 +96,10 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	if err != nil {
 		return fmt.Errorf("anchor checkpoint to committed journal: %w", err)
 	}
+	ledger := r.evidence.Snapshot()
 	snapshot := BrainSnapshot{
+		ActionBindings: cloneActionBindings(r.actions),
+		EvidenceLedger: &ledger,
 		SchemaVersion: BrainSnapshotSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence:      r.seq,
@@ -107,7 +114,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		SurfaceAnnotations: r.brain.SurfaceAnnotationsSnapshot(),
 		JournalPrefixHash: journalHash,
 	}
-	snapshot.Checksum, err = checkpointChecksumV6(snapshot)
+	snapshot.Checksum, err = checkpointChecksumV7(snapshot)
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
@@ -158,14 +165,29 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && len(snapshot.SurfaceAnnotations) > 0 {
+	if snapshot.SchemaVersion < neuralBrainSnapshotSchemaVersion && len(snapshot.SurfaceAnnotations) > 0 {
 		return errors.New("legacy checkpoint cannot carry unauthenticated adapter annotations")
+	}
+	if snapshot.SchemaVersion < BrainSnapshotSchemaVersion && (len(snapshot.ActionBindings) > 0 || snapshot.EvidenceLedger != nil) {
+		return errors.New("legacy checkpoint cannot carry unauthenticated outcome state")
+	}
+	var ledger *learning.EvidenceLedger
+	if snapshot.SchemaVersion == BrainSnapshotSchemaVersion {
+		if snapshot.EvidenceLedger == nil {
+			return errors.New("checkpoint is missing outcome continuation state")
+		}
+		ledger, err = learning.RestoreEvidenceLedger(*snapshot.EvidenceLedger)
+		if err != nil {
+			return err
+		}
+	} else {
+		ledger = learning.NewEvidenceLedger()
 	}
 	var checksum string
 	switch snapshot.SchemaVersion {
@@ -173,8 +195,10 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 		checksum, err = checkpointChecksum(snapshot.Brain, snapshot.Activation, snapshot.CognitiveState, snapshot.InquiryValence)
 	case priorBrainSnapshotSchemaVersion:
 		checksum, err = checkpointChecksumV5(snapshot)
-	default:
+	case neuralBrainSnapshotSchemaVersion:
 		checksum, err = checkpointChecksumV6(snapshot)
+	default:
+		checksum, err = checkpointChecksumV7(snapshot)
 	}
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
@@ -197,7 +221,12 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	defer r.mu.Unlock()
 	// A poisoned runtime may have mutated neural state or runtime caches that
 	// a checkpoint restore cannot safely unwind. Always use a new runtime.
-	if err := r.ensureWritableLocked(); err != nil { return err }
+	if err := r.ensureWritableLocked(); err != nil {
+		return err
+	}
+	if r.eventLog != nil {
+		return errors.New("checkpoint restore requires a detached runtime; use supervisor recovery")
+	}
 	brainPath := path + ".restore.tmp"
 	if err := os.WriteFile(brainPath, snapshot.Brain, 0600); err != nil {
 		return fmt.Errorf("stage brain restore: %w", err)
@@ -210,6 +239,24 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 		r.markRecoveryRequiredLocked()
 		return fmt.Errorf("%w: restore checkpoint adapter provenance: %v", ErrRuntimeRecoveryRequired, err)
 	}
+	actions := make(map[string]ActionBinding, len(snapshot.ActionBindings))
+	for id, binding := range snapshot.ActionBindings {
+		validated, bindingErr := r.validateActionBindingLocked(binding)
+		if bindingErr != nil || id != binding.RequestID {
+			r.markRecoveryRequiredLocked()
+			return fmt.Errorf("%w: invalid checkpoint action binding %q", ErrRuntimeRecoveryRequired, id)
+		}
+		actions[id] = validated
+	}
+	if snapshot.EvidenceLedger != nil {
+		for id := range snapshot.EvidenceLedger.ByNode {
+			if r.brain.Registry.GetByID(id) == nil {
+				r.markRecoveryRequiredLocked()
+				return fmt.Errorf("%w: evidence targets an unknown node", ErrRuntimeRecoveryRequired)
+			}
+		}
+	}
+	r.actions, r.evidence = actions, ledger
 	r.activation.RestoreState(snapshot.Activation)
 	r.lastCognitiveState = cloneCognitiveState(snapshot.CognitiveState)
 	r.inquiryValence = cloneInquiryValence(snapshot.InquiryValence)
@@ -219,7 +266,6 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	r.processedEvents = cloneProcessedEventIndex(snapshot.ProcessedEvents)
 	return nil
 }
-
 
 func cloneInquiryValence(in map[InquiryAction]float64) map[InquiryAction]float64 {
 	out := make(map[InquiryAction]float64, len(in))

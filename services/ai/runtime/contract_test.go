@@ -74,18 +74,18 @@ func TestObserveOutcomeWritesEventForBoundTarget(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if seq != 1 || rt.LastSequence() != 1 {
+	if seq != 2 || rt.LastSequence() != 2 {
 		t.Fatalf("unexpected runtime sequence: got %d", seq)
 	}
 	events, err := ReadEventLog(path)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(events) != 1 || events[0].Type != EventTypeOutcome || events[0].Outcome == nil {
+	if len(events) != 2 || events[0].Type != EventTypeActionBinding || events[1].Type != EventTypeOutcome || events[1].Outcome == nil {
 		t.Fatalf("outcome was not persisted as a first-class event: %+v", events)
 	}
-	if events[0].Outcome.RequestID != "req-1" {
-		t.Fatalf("wrong outcome request ID: %+v", events[0].Outcome)
+	if events[1].Outcome.RequestID != "req-1" {
+		t.Fatalf("wrong outcome request ID: %+v", events[1].Outcome)
 	}
 	if brain.Registry.Get("motor") == nil || brain.Registry.Get("completed") == nil {
 		t.Fatal("bound outcome targets disappeared from the canonical Brain")

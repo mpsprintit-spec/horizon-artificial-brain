@@ -30,7 +30,7 @@ func TestCheckpointV6PreservesCompleteNeuralStateAndSeparateAdapterSurfaces(t *t
 	if err:=rt.Checkpoint(checkpoint);err!=nil {t.Fatal(err)}
 	snapshot,err:=readCheckpointForTest(checkpoint)
 	if err!=nil {t.Fatal(err)}
-	if snapshot.SchemaVersion!=6 {t.Fatalf("schema version %d",snapshot.SchemaVersion)}
+	if snapshot.SchemaVersion!=BrainSnapshotSchemaVersion {t.Fatalf("schema version %d",snapshot.SchemaVersion)}
 	if len(snapshot.SurfaceAnnotations)!=len(annotations) {t.Fatal("checkpoint lost adapter surface annotations")}
 	if !bytes.Contains(snapshot.Brain,[]byte("bootstrap_experiences")) || !bytes.Contains(snapshot.Brain,[]byte("episodes")) {
 		t.Fatal("checkpoint omitted bootstrap experience and episodes")
@@ -78,6 +78,8 @@ func TestCheckpointV5ReadCompatibilityButNoOffsetReplay(t *testing.T) {
 	snapshot,err:=readCheckpointForTest(path)
 	if err!=nil {t.Fatal(err)}
 	snapshot.SchemaVersion=priorBrainSnapshotSchemaVersion
+	snapshot.ActionBindings=nil
+	snapshot.EvidenceLedger=nil
 	snapshot.SurfaceAnnotations=nil
 	snapshot.Checksum,err=checkpointChecksumV5(snapshot)
 	if err!=nil {t.Fatal(err)}

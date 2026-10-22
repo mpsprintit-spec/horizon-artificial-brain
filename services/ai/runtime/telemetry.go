@@ -60,13 +60,19 @@ func NormalizeObservationEnvelope(e ObservationEnvelope) (ObservationEnvelope, e
 	if e.BrainIdentity == "" { e.BrainIdentity = BrainIdentity }
 	if e.Timestamp.IsZero() { e.Timestamp = time.Now().UTC() }
 	e.Timestamp = e.Timestamp.UTC()
+	e.Modality = strings.TrimSpace(e.Modality)
+	e.Source = strings.TrimSpace(e.Source)
+	// Verify a supplied digest before normalization can replace it. Persist
+	// the same JSON representation that encoding/json writes to the journal.
+	if err := e.Validate(); err != nil { return ObservationEnvelope{}, err }
 	if len(e.Payload) > 0 {
+		payload, err := json.Marshal(e.Payload)
+		if err != nil { return ObservationEnvelope{}, fmt.Errorf("invalid observation payload: %w", err) }
+		e.Payload = payload
 		sum := sha256.Sum256(e.Payload)
 		e.PayloadHash = "sha256:" + hex.EncodeToString(sum[:])
 		e.PayloadBytes = len(e.Payload)
 	}
-	e.Modality = strings.TrimSpace(e.Modality)
-	e.Source = strings.TrimSpace(e.Source)
 	if err := e.Validate(); err != nil { return ObservationEnvelope{}, err }
 	return e, nil
 }
@@ -195,16 +201,6 @@ func (r *BrainRuntime) ProcessObservationEnvelope(envelope ObservationEnvelope) 
 		DataTokens: normalized.DataTokens,
 	}, nil)
 	if err != nil { return CognitiveInterpretation{}, err }
-	r.PublishObservationTelemetry(normalized, CognitiveOutput{
-		BrainIdentity: BrainIdentity,
-		Sequence: cognitive.State.Sequence,
-		Timestamp: cognitive.State.Timestamp,
-		RankedNodeIDs: cognitive.State.ActiveNodeIDs,
-		Activations: cognitive.State.Activations,
-		Confidence: cognitive.State.Confidence,
-		Resonance: cognitive.State.Resonance,
-		PredictionError: cognitive.State.PredictionError,
-		StateDelta: cognitive.ChangeAwareness.StateDelta,
-	})
+
 	return cognitive, nil
 }

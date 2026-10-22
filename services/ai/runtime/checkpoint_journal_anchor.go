@@ -65,6 +65,28 @@ func checkpointChecksumV6(snapshot BrainSnapshot) (string, error) {
 	return hex.EncodeToString(sum[:]), nil
 }
 
+// v7 authenticates the runtime action/evidence state required by later outcomes.
+func checkpointChecksumV7(snapshot BrainSnapshot) (string, error) {
+	base, err := checkpointChecksumV6(snapshot)
+	if err != nil {
+		return "", err
+	}
+	actions := snapshot.ActionBindings
+	if len(actions) == 0 {
+		actions = nil
+	}
+	data, err := json.Marshal(struct {
+		Base     string
+		Actions  map[string]ActionBinding
+		Evidence any
+	}{base, actions, snapshot.EvidenceLedger})
+	if err != nil {
+		return "", err
+	}
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
 func cloneProcessedEventIndex(input map[string]uint64) map[string]uint64 {
 	out := make(map[string]uint64, len(input))
 	for id, seq := range input { out[id] = seq }

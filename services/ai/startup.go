@@ -66,7 +66,7 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 				return nil, false, errors.New("legacy brain memory disagrees with committed journal; checkpoint or explicit migration required")
 			}
 		}
-		// A v6 checkpoint now anchors any future recovery to this exact
+		// A v7 checkpoint now anchors any future recovery to this exact
 		// committed prefix, eliminating dependence on a raw memory alias.
 		if err := h.Supervisor.WithMutation(func(rt *runtime.BrainRuntime) error {
 			return rt.Checkpoint(checkpointPath)
@@ -76,7 +76,7 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 
 	// The journal is empty and there is no checkpoint. Importing a historic
 	// standalone Brain is safe only before connecting the journal, and the
-	// imported state is immediately captured by the initial anchored v6
+	// imported state is immediately captured by the initial anchored v7
 	// checkpoint. It is never merged with a nonempty committed history.
 	if memoryExists {
 		if err := h.LoadActiveBrain(memoryPath); err != nil { return nil, false, fmt.Errorf("load standalone brain: %w",err) }

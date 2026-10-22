@@ -56,6 +56,7 @@ func (s *ContinuousService) Run(ctx context.Context, onOutput func(CognitiveOutp
 	}
 
 	run := func() error {
+		if err := ctx.Err(); err != nil { return err }
 		var output CognitiveOutput
 		var cycleErr error
 		if s.Supervisor != nil {
@@ -71,7 +72,10 @@ func (s *ContinuousService) Run(ctx context.Context, onOutput func(CognitiveOutp
 		// is held. It may legitimately request a recovery handover.
 		onOutput(output, cycleErr)
 		if errors.Is(cycleErr, ErrRuntimeSupervisorClosed) || errors.Is(cycleErr, ErrRuntimeRecoveryRequired) { return cycleErr }
-		return nil
+		// A callback can cancel while a ticker notification is already ready.
+		// Stop after this completed transaction, before select can start a new
+		// cycle and block another callback during shutdown.
+		return ctx.Err()
 	}
 
 	if err := run(); err != nil { return err }
