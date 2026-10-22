@@ -29,6 +29,9 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 	} else {
 		now = now.UTC()
 	}
+	if dynamics == knowledge.PhysicalMemoryDynamics {
+		e.Memory.ApplyMemoryDynamicsWithEncoding(now, dynamics)
+	}
 
 	e.mu.RLock()
 	state := cloneState(e.internalState)
@@ -64,7 +67,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 	}
 
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
-	if dynamics == knowledge.RecurrentDynamics {
+	if dynamics.HasRecurrentContext() {
   nextPrediction,nextPredictionConfidence=e.applyRecurrentPatternPrediction(nextPrediction,nextPredictionConfidence,trace,recurrentContext,now,true)
 	} else if dynamics == knowledge.OrderedDynamics {nextPrediction,nextPredictionConfidence=e.applyOrderedPatternPrediction(nextPrediction,nextPredictionConfidence,trace)}
 

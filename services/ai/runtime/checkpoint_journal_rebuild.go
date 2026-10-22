@@ -10,7 +10,7 @@ import (
 )
 
 // RebuildRuntimeFromCheckpointAndJournal restores a fresh runtime from an
-// anchored v7/v8/v9 checkpoint, then replays only committed events after its
+// anchored v7/v8/v9/v10 checkpoint, then replays only committed events after its
 // sequence. The journal writer must be held exclusively by the caller. An
 // incomplete journal is rejected; repair the trailing intent separately.
 //
@@ -36,7 +36,7 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return nil, fmt.Errorf("decode recovery checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion {
 		return nil, fmt.Errorf("checkpoint schema %d cannot support journal offset replay", snapshot.SchemaVersion)
 	}
 	// Earlier v5 checkpoints used a graph-only legacy Brain encoding that
@@ -47,7 +47,7 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 	if err := json.Unmarshal(snapshot.Brain, &brainFormat); err != nil {
 		return nil, fmt.Errorf("decode checkpoint canonical brain header: %w", err)
 	}
-	if brainFormat.SchemaVersion != 2 {
+	if brainFormat.SchemaVersion != 2 && brainFormat.SchemaVersion != 3 {
 		return nil, errors.New("checkpoint brain format is incomplete for journal offset recovery; create a new canonical checkpoint")
 	}
 	if snapshot.JournalPrefixHash == "" {

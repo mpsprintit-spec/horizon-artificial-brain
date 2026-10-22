@@ -14,7 +14,7 @@ func validateCheckpointContext(snapshot BrainSnapshot) error {
 	if state == nil {
 		return nil
 	}
-	if snapshot.SchemaVersion < BrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion < recurrentBrainSnapshotSchemaVersion {
 		return errors.New("legacy checkpoint cannot carry recurrent context")
 	}
 	var raw struct {
@@ -36,13 +36,13 @@ func validateEpisodeControls(event Event, dynamics knowledge.DynamicsEncoding) e
 	if event.SensorObservation != nil && event.ResetContext {
 		return errors.New("sensor episode reset requires a changed session identity")
 	}
-	if (event.ResetContext || event.EpisodeID != "" || event.SensorObservation != nil && event.SensorObservation.SessionID != "") && dynamics != knowledge.RecurrentDynamics {
+	if (event.ResetContext || event.EpisodeID != "" || event.SensorObservation != nil && event.SensorObservation.SessionID != "") && !dynamics.HasRecurrentContext() {
 		return errors.New("episode controls require recurrent context dynamics")
 	}
 	if event.EpisodeID != "" && strings.TrimSpace(event.EpisodeID) == "" {
 		return errors.New("episode identity is blank")
 	}
-	if dynamics == knowledge.RecurrentDynamics {
+	if dynamics.HasRecurrentContext() {
 		if event.Observation != nil && event.Observation.SessionID != event.EpisodeID {
 			return errors.New("observation and neural episode identities disagree")
 		}
@@ -57,7 +57,7 @@ func validateEpisodeControls(event Event, dynamics knowledge.DynamicsEncoding) e
 // context. Otherwise the observation learner would create an accidental edge
 // between two explicitly separate episodes after activation had been reset.
 func (r *BrainRuntime) resetTemporalContextLocked(event Event) {
-	if r.dynamicsEncoding != knowledge.RecurrentDynamics {
+	if !r.dynamicsEncoding.HasRecurrentContext() {
 		return
 	}
 	episode, present := r.activation.RecurrentEpisode()

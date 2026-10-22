@@ -98,6 +98,7 @@ func (r *BrainRuntime) replayKnowledgeDocument(document knowledge.KnowledgeDocum
 // processKnowledgeDocumentLocked assumes r.mu. A journaled import has exactly
 // one sequence/revision, even when there are several cognition microsteps.
 func (r *BrainRuntime) processKnowledgeDocumentLocked(document knowledge.KnowledgeDocument, compiled knowledge.KnowledgeCompilation, at time.Time, singleRevision bool) (KnowledgeProcessingResult, error) {
+	r.settleMemoryTimeLocked(at)
 	r.resetTemporalContextLocked(Event{Timestamp:at})
 	if _, err := r.brain.ImportKnowledgeDocumentWithEncoding(document, at, r.surfaceEncoding); err != nil {
 		return KnowledgeProcessingResult{}, err
@@ -198,7 +199,7 @@ func (r *BrainRuntime) cognitiveKnowledgeExposureLocked(event Event) (CognitiveO
 	output := cognitiveOutputFromResult(BrainIdentity, r.seq, event.Timestamp, result)
 	output.Prediction = r.activation.PredictionSnapshot()
 	r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
-	r.brain.ApplyMemoryDynamics(event.Timestamp)
+	r.brain.ApplyMemoryDynamicsWithEncoding(event.Timestamp, r.dynamicsEncoding)
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()
 	return output, nil

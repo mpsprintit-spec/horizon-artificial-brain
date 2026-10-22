@@ -202,6 +202,7 @@ func (r *BrainRuntime) applyOutcomeLocked(outcome OutcomeEvent, binding ActionBi
 			return err
 		}
 		if decision == learning.PromotionAccepted {
+			r.settleMemoryTimeLocked(outcome.ObservedAt)
 			for _, synapse := range binding.Synapses {
 				if synapse.TargetNodeID != nodeID {
 					continue

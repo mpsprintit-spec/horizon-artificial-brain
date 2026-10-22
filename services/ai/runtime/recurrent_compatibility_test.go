@@ -72,7 +72,11 @@ func TestRecurrentDynamicsPreserveActualPR31ReplayAndNextThought(t *testing.T) {
 			t.Fatal("PR31 complete logical state changed")
 		}
 		r.SetClock(NewFixedClock(time.Date(2026, 10, 19, 10, 0, 0, 0, time.UTC)))
+		// Pin the historical continuation to its recorded law. New serving
+		// commands intentionally use the corrected passive-time dynamics.
+		r.dynamicsEncoding = knowledge.OrderedDynamics
 		next, err := r.CognitiveThink(1)
+		r.dynamicsEncoding = knowledge.CurrentDynamics
 		if err != nil {
 			t.Fatal(err)
 		}

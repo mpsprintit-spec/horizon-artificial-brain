@@ -175,6 +175,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 			}
 		}
 
+		r.settleMemoryTimeLocked(sensor.Timestamp)
 		var population knowledge.ProjectionPopulation
 		var bindings []knowledge.SensoryFieldBinding
 		var ids []knowledge.NodeID

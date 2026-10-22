@@ -14,6 +14,9 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	if req.Now.IsZero() {
 		req.Now = time.Now().UTC()
 	}
+	if req.DynamicsEncoding != nil && *req.DynamicsEncoding == knowledge.PhysicalMemoryDynamics {
+		e.Memory.ApplyMemoryDynamicsWithEncoding(req.Now, *req.DynamicsEncoding)
+	}
 	trace := req.NeuralTrace.Canonical()
 	lexical := false
 	if trace == nil {
@@ -50,7 +53,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	previousTrace := e.lastTrace.Clone()
 	context := e.contextState.Clone()
 	e.mu.RUnlock()
-	recurrent := req.DynamicsEncoding != nil && *req.DynamicsEncoding == knowledge.RecurrentDynamics
+	recurrent := req.DynamicsEncoding != nil && req.DynamicsEncoding.HasRecurrentContext()
 	resetContext := false
 	if recurrent {
 		context, resetContext = context.prepare(req.EpisodeID, req.ResetContext, req.Now)

@@ -44,6 +44,13 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 			r.markRecoveryRequiredLocked()
 		}
 	}()
+	switch command.Type {
+	case EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeOutcome:
+		// Metadata-only changes do not advance neural time. Candidate outcomes
+		// settle retention only if their evidence actually promotes a synapse.
+	default:
+		r.settleMemoryTimeLocked(command.Timestamp)
+	}
 	if err := apply(); err != nil {
 		return fmt.Errorf("%w: apply %s: %v", ErrRuntimeRecoveryRequired, command.Type, err)
 	}
