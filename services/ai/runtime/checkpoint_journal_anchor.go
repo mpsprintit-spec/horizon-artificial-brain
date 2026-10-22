@@ -126,6 +126,24 @@ func cloneProcessedEventIndex(input map[string]uint64) map[string]uint64 {
 	return out
 }
 
+// v8 binds the serving contract separately from neural state. All historical
+// checksum laws remain unchanged and continue to validate old checkpoints.
+func checkpointChecksumV8(snapshot BrainSnapshot) (string, error) {
+	return checkpointChecksumV8WithBrain(snapshot, nil)
+}
+
+func checkpointChecksumV8WithBrain(snapshot BrainSnapshot, writer jsonstream.ValueWriter) (string, error) {
+	base, err := checkpointChecksumV7WithBrain(snapshot, writer)
+	if err != nil { return "", err }
+	data, err := json.Marshal(struct {
+		Base string `json:"base_digest"`
+		NeuralWrittenGrounding bool `json:"neural_written_grounding"`
+	}{base, snapshot.NeuralWrittenGrounding})
+	if err != nil { return "", err }
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
 // journalPrefixHash hashes the *logical committed* prefix, never the raw
 // intent/commit physical framing. This anchors a checkpoint to a specific
 // replayable event history and detects tampering with its earlier records.

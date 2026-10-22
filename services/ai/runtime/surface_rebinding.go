@@ -49,6 +49,7 @@ func (r *BrainRuntime) PlanWrittenSurfaceRebinding(surface, modality string) (Wr
 	if err := r.ensureWritableLocked(); err != nil {
 		return WrittenSurfaceRebinding{}, err
 	}
+	if r.neuralWrittenGrounding { return WrittenSurfaceRebinding{}, errors.New("metadata rebinding cannot change numeric written routes") }
 	source, err := r.brain.LegacyWrittenSurface(surface, modality)
 	if err != nil {
 		return WrittenSurfaceRebinding{}, err
@@ -77,6 +78,7 @@ func (r *BrainRuntime) ApplyWrittenSurfaceRebinding(plan WrittenSurfaceRebinding
 	if err := r.ensureWritableLocked(); err != nil {
 		return err
 	}
+	if r.neuralWrittenGrounding { return errors.New("metadata rebinding cannot change numeric written routes") }
 	if frozen.ReferenceRevision != r.seq {
 		return errors.New("surface rebinding reference revision changed")
 	}

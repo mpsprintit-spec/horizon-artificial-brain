@@ -69,7 +69,7 @@ func (k *KnowledgeBase) GroundObservationWithEncodingAt(token, source, modality 
 	if err := encoding.Validate(); err != nil { return GroundedRepresentation{}, err }
 	canonical := strings.TrimSpace(token)
 	annotationModality := modality
-	written := encoding == WrittenTextEncoding && CanonicalSurfaceModality(modality) == "language"
+	written := (encoding == WrittenTextEncoding || encoding == NeuralWrittenEncoding) && CanonicalSurfaceModality(modality) == "language"
 	if written { canonical, annotationModality = canonicalToken(token), "language" }
 	if written && now.IsZero() { now = time.Now().UTC() }
 	if canonical == "" {
@@ -77,6 +77,19 @@ func (k *KnowledgeBase) GroundObservationWithEncodingAt(token, source, modality 
 	}
 
 	vector := observationVectorWithEncoding(canonical, modality, encoding)
+	if encoding == NeuralWrittenEncoding && CanonicalSurfaceModality(modality) == "language" {
+		canonical = canonicalToken(token)
+		population, existing, err := k.projectWrittenNumeric(vector, threshold, defaultProjectionPopulation, now, false)
+		if err != nil {
+			return GroundedRepresentation{}, err
+		}
+		ids := writtenPopulationIDs(population)
+		status := GroundingCandidate
+		if existing { status = GroundingExisting }
+		k.recordEncodedSurfaceAnnotation(canonical, "language", ids[0], ids, now, encoding)
+		return GroundedRepresentation{NodeID: ids[0], Population: ids, Similarity: population.Units[0].Activation,
+			Status: status, Source: source, Modality: modality, Token: canonical, Timestamp: now.UTC()}, nil
+	}
 
 	// A repeated observation can recover its previously learned distributed
 	// population through adapter provenance even after plasticity has moved the

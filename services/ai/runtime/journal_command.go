@@ -45,7 +45,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 		}
 	}()
 	switch command.Type {
-	case EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeOutcome:
+	case EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeOutcome:
 		// Metadata-only changes do not advance neural time. Candidate outcomes
 		// settle retention only if their evidence actually promotes a synapse.
 	default:

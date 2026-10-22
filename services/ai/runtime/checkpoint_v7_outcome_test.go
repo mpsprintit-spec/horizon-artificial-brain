@@ -71,7 +71,7 @@ func TestCheckpointV7AuthenticatesBindingsAndEvidence(t *testing.T) {
 	binding := snapshot.ActionBindings["request"]
 	binding.TargetNodeIDs[0] = knowledge.NodeID(999999)
 	snapshot.ActionBindings["request"] = binding
-	snapshot.Checksum, err = checkpointChecksumV7(snapshot)
+	snapshot.Checksum, err = checkpointChecksumForSchema(snapshot)
 	if err != nil {
 		t.Fatal(err)
 	}

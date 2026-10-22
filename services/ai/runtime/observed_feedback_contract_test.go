@@ -168,7 +168,7 @@ func TestObservedFeedbackCheckpointValidationPrecedesMutation(t *testing.T) {
 		var changed BrainSnapshot
 		_ = json.Unmarshal(packet, &changed)
 		mutate(&changed)
-		changed.Checksum, err = checkpointChecksumV7(changed)
+		changed.Checksum, err = checkpointChecksumForSchema(changed)
 		if err != nil {
 			t.Fatal(err)
 		}

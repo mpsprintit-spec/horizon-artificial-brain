@@ -187,7 +187,7 @@ func TestInspectionActivityWindowIsDetachedAndBounded(t *testing.T) {
 	}
 }
 
-func TestStreamingCheckpointPreservesLegacyChecksumAndContinuation(t *testing.T) {
+func TestStreamingCheckpointPreservesLogicalChecksumAndContinuation(t *testing.T) {
 	r := NewBrainRuntime(nil)
 	at := time.Date(2026, 10, 20, 12, 0, 0, 0, time.UTC)
 	if _, err := r.ProcessObservationEnvelope(transactionObservation("checkpoint-stream", at, "naku", "melo")); err != nil {
@@ -205,9 +205,9 @@ func TestStreamingCheckpointPreservesLegacyChecksumAndContinuation(t *testing.T)
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		t.Fatal(err)
 	}
-	want, err := checkpointChecksumV7(snapshot)
+	want, err := checkpointChecksumForSchema(snapshot)
 	if err != nil || want != snapshot.Checksum {
-		t.Fatal("streaming changed legacy logical checksum", err)
+		t.Fatal("streaming changed logical checksum", err)
 	}
 	restored := orderedFixtureClone(t, path)
 	if !bytes.Equal(continuationBytes(t, r), continuationBytes(t, restored)) {

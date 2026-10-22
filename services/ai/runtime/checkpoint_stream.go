@@ -25,7 +25,7 @@ func (c *checkpointCounter) Write(p []byte) (int, error) {
 	return n, err
 }
 
-// Write one complete compact v12 envelope to a private temp file. The Brain is
+// Write one complete compact envelope to a private temp file. The Brain is
 // streamed ONCE to both the checksum's Brain field and the file's Brain field.
 // Its checksum slot is patched before sync/rename; incomplete files never replace
 // an existing checkpoint. The v5/v6/v7 logical checksum law is unchanged.
@@ -48,7 +48,9 @@ func (r *BrainRuntime) writeCheckpointLocked(path string, snapshot BrainSnapshot
 			return jsonstream.Value(w, strings.Repeat("0", 64), false, "")
 		},
 		"brain": func(_ io.Writer, _ bool, _ string) error {
-			checksum, e := checkpointChecksumV7WithBrain(snapshot, func(hash io.Writer, _ bool, _ string) error {
+			checksumLaw := checkpointChecksumV7WithBrain
+			if snapshot.SchemaVersion >= neuralWrittenBrainSnapshotSchemaVersion { checksumLaw = checkpointChecksumV8WithBrain }
+			checksum, e := checksumLaw(snapshot, func(hash io.Writer, _ bool, _ string) error {
 				return r.brain.WriteCanonical(io.MultiWriter(hash, file), false, "")
 			})
 			if e != nil {

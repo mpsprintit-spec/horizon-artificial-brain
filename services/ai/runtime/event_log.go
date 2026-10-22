@@ -22,6 +22,7 @@ const EventLogSchemaVersion = 3
 func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion }
 
 type LoggedEvent struct {
+	WrittenGroundingMigration *WrittenGroundingMigration `json:"written_grounding_migration,omitempty"`
 	DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding,omitempty"`
 	SurfaceRebinding *WrittenSurfaceRebinding `json:"surface_rebinding,omitempty"`
 	SurfaceEncoding knowledge.SurfaceEncoding `json:"surface_encoding,omitempty"`
@@ -186,7 +187,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding {
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding || event.Type == EventTypeWrittenGroundingMigration {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -383,7 +384,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			return nil, fmt.Errorf("invalid journal payload at line %d: %w", lineNumber, err)
 		}
 		switch event.Type {
-		case EventTypeSurfaceRebinding:
+		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration:
 			seen[key] = canonical
 			events = append(events, event)
 			expected++
@@ -510,6 +511,19 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	}
 	brainRuntime.mu.Lock()
 	if brainRuntime.supervised { brainRuntime.mu.Unlock(); return ErrManagedRuntimeAccess }
+	// Validate the whole contract timeline before the first mutation. A v2
+	// command cannot bypass its migration, nor can serving silently revert.
+	migrated := brainRuntime.neuralWrittenGrounding
+	for _, logged := range events {
+		if (logged.SurfaceEncoding == knowledge.NeuralWrittenEncoding) != migrated {
+			brainRuntime.mu.Unlock()
+			return errors.New("written grounding contract changed without its migration")
+		}
+		if logged.Type == EventTypeWrittenGroundingMigration {
+			if migrated { brainRuntime.mu.Unlock(); return errors.New("duplicate written grounding migration") }
+			migrated = true
+		}
+	}
 	originalLog := brainRuntime.eventLog
 	originalEncoding := brainRuntime.surfaceEncoding
 	originalDynamics := brainRuntime.dynamicsEncoding
@@ -519,6 +533,7 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.mu.Lock()
 		brainRuntime.eventLog = originalLog
 		brainRuntime.surfaceEncoding = originalEncoding
+		if brainRuntime.neuralWrittenGrounding { brainRuntime.surfaceEncoding = knowledge.NeuralWrittenEncoding }
 		brainRuntime.dynamicsEncoding = originalDynamics
 		brainRuntime.mu.Unlock()
 	}()
@@ -540,6 +555,8 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeWrittenGroundingMigration:
+			if err := brainRuntime.replayWrittenGroundingMigration(*logged.WrittenGroundingMigration, logged.Timestamp); err != nil { return err }
 		case EventTypeSurfaceRebinding:
 			if err := brainRuntime.ApplyWrittenSurfaceRebinding(*logged.SurfaceRebinding, logged.Timestamp); err != nil { return err }
 		case EventTypeVectorGround:
