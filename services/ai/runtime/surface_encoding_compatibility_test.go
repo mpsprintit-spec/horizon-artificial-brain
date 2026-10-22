@@ -44,7 +44,14 @@ func surfaceCheckpointChecksum(t *testing.T, r *BrainRuntime) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return s.Checksum
+	// Reference envelopes were written with v7. Preserve every logical state
+	// field while normalizing only the envelope version for historical comparison.
+	s.SchemaVersion = outcomeBrainSnapshotSchemaVersion
+	checksum, err := checkpointChecksumV7(s)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return checksum
 }
 
 func TestLegacySurfaceJournalMatchesPreChangeReferenceAndNextThought(t *testing.T) {
@@ -131,7 +138,7 @@ func TestWrittenEncodingRequiresNewJournalSchemaAndUnknownCheckpointFailsUnchang
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(events) != 1 || events[0].SchemaVersion != 2 || events[0].SurfaceEncoding != knowledge.WrittenTextEncoding {
+	if len(events) != 1 || events[0].SchemaVersion != EventLogSchemaVersion || events[0].SurfaceEncoding != knowledge.WrittenTextEncoding {
 		t.Fatal("new written command is not explicitly versioned")
 	}
 	events[0].SchemaVersion = 1

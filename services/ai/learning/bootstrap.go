@@ -18,6 +18,11 @@ var foundationalExperienceCorpus []byte
 var foundationalVectorExperienceCorpus []byte
 
 type Experience struct {
+	ContextSequence []string `json:"context_sequence,omitempty"`
+	DataSequence []string `json:"data_sequence,omitempty"`
+	NeuralSequence [][]knowledge.NodeID `json:"neural_sequence,omitempty"`
+	NeuralContext [][]knowledge.NodeID `json:"neural_context,omitempty"`
+	NeuralData [][]knowledge.NodeID `json:"neural_data,omitempty"`
 	Sequence          []string  `json:"sequence"`
 	Weight            float64   `json:"weight"`
 	Confidence        float64   `json:"confidence"`

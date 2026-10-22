@@ -158,7 +158,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				Timestamp: sensor.Timestamp.UTC(), Cycles: 1, SensorObservation: &sensor,
 			}
 			intent := LoggedEvent{
-				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, DynamicsEncoding: r.dynamicsEncoding, SurfaceEncoding: r.surfaceEncoding,
 				Sequence: r.seq + 1, Type: EventTypeSensorIntent,
 				Timestamp: sensor.Timestamp.UTC(), Event: cloneEvent(intentEvent),
 			}
@@ -214,7 +214,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		}
 		if journaled {
 			commit := LoggedEvent{
-				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, DynamicsEncoding: r.dynamicsEncoding, SurfaceEncoding: r.surfaceEncoding,
 				Sequence: output.Sequence, Type: EventTypeSensorCommit,
 				Timestamp: sensor.Timestamp.UTC(), IntentHash: intentHash,
 			}

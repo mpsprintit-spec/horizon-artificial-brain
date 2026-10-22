@@ -38,7 +38,8 @@ authenticated in complete checkpoints.
 
 ## Journal and checkpoint compatibility
 
-New journal records use **schema 2**. Commands that consume written surfaces
+Written encoding was introduced in **schema 2**. New records now use schema 3
+for ordered neural dynamics (see [ORDERED_OBSERVATIONS.md](ORDERED_OBSERVATIONS.md)). Commands that consume written surfaces
 record `surface_encoding: "written-text-v1"`. Schema 1 remains readable with
 its historical encoding, original annotations and learning behavior. A mixed
 journal is valid: each replayed command chooses its recorded contract inside
@@ -52,8 +53,9 @@ field. Schema 2 makes old readers reject the record instead of interpreting
 new input with their old encoder. Reader, repair, event-index and sensor-tail
 paths accept the supported schema versions and reject invalid payloads.
 
-Checkpoint v7 remains the complete runtime format. Historical checkpoint
-checksums stay exact because added adapter fields are omitted when absent.
+Checkpoint v8 is the current complete runtime format; v7 remains readable and
+supports offset recovery. Historical logical-state checksums stay exact when
+comparing the original envelope version; absent adapter/trace fields are omitted.
 Unknown checkpoint adapter contracts are rejected before changing the target
 runtime. New serving operations use the new contract after restoration;
 historical records do not silently upgrade themselves during replay.

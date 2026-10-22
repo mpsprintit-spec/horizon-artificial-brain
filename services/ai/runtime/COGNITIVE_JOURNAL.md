@@ -1,4 +1,4 @@
-# Complete cognitive commands and checkpoint v7
+# Complete cognitive commands and checkpoint v8
 
 This change addresses the reproduced H03/H04 cases in the consolidated
 2026-10-19 audit, using PR #27 as its baseline. The production integration
@@ -33,8 +33,10 @@ is captured after the entire transition, including temporal learning.
 | `sensor_intent` + `sensor_commit` | Existing two-record numeric sensor protocol, interpreted as one revision |
 | `surface_rebinding` | Explicit adapter-only selection of an existing written population, with a verified revision/state reference |
 
-New records use journal schema 2 with an explicit written surface encoding.
-Schema 1 is replayed with its original contract. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
+New records use journal schema 3 with explicit written surface and neural
+dynamics encodings. Schemas 1 and 2 replay with their original dynamics.
+See [ORDERED_OBSERVATIONS.md](ORDERED_OBSERVATIONS.md) for ordered frames and
+conditional pattern prediction. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
 An action binding registration now consumes a revision. Re-registering the
@@ -78,7 +80,11 @@ This does not change the legacy hash-token fallback for nonnumeric envelopes.
 
 ## Checkpoint and historical data
 
-Checkpoint **v7** adds authenticated action bindings, accumulated evidence and
+Checkpoint **v8** additionally authenticates the last ordered observation and
+full population pattern frames. V7 remains supported for journal-offset recovery.
+Pre-v8 envelopes cannot carry ordered state.
+
+Checkpoint **v7** added authenticated action bindings, accumulated evidence and
 the evidence ledger's node/request/source dedup keys to the existing complete
 canonical substrate, recurrent activation, cognitive state, temporal
 predecessor, event index, inquiry preferences, adapter annotations and journal
@@ -91,8 +97,7 @@ ordinary learned populations are not relabeled as bootstrap populations.
 
 Historical checkpoints v4-v6 retain detached read/import compatibility using
 their original checksums. They cannot provide verified journal-offset recovery
-because they lack outcome continuation state. Production checkpoint startup
-therefore requires v7. Do not upgrade an old file by merely changing its schema
+because they lack outcome continuation state. Verified checkpoint-offset startup requires v7 or v8. Do not upgrade an old file by merely changing its schema
 or checksum. Migration needs a verified complete baseline, including any
 action/evidence state, or a history demonstrably sufficient to reconstruct it.
 

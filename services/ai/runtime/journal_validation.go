@@ -4,13 +4,50 @@ import (
 	"errors"
 	"fmt"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 // Reject foreign payloads rather than replaying only the recognized fraction
 // of a mixed record. Legacy process/think retain their lower-level meaning.
 func validateJournalPayload(event LoggedEvent) error {
-	if err := event.SurfaceEncoding.Validate(); err != nil { return err }
-	if event.SchemaVersion == 1 && event.SurfaceEncoding != knowledge.LegacySurfaceEncoding { return errors.New("versioned surface encoding requires journal schema 2") }
+	if err := event.SurfaceEncoding.Validate(); err != nil {
+		return err
+	}
+	if event.SchemaVersion == 1 && event.SurfaceEncoding != knowledge.LegacySurfaceEncoding {
+		return errors.New("versioned surface encoding requires journal schema 2")
+	}
+	if err := event.DynamicsEncoding.Validate(); err != nil {
+		return err
+	}
+	if event.SchemaVersion < 3 && event.DynamicsEncoding != knowledge.LegacyDynamics {
+		return errors.New("ordered neural dynamics require journal schema 3")
+	}
+	if event.Event != nil {
+		if event.Event.NeuralTrace != nil && event.DynamicsEncoding != knowledge.OrderedDynamics {
+			return errors.New("neural trace requires ordered dynamics")
+		}
+		if err := event.Event.NeuralTrace.Validate(nil); err != nil {
+			return err
+		}
+	}
+	experiences := []*learning.Experience{event.Experience}
+	if event.ObservationCommand != nil {
+		experiences = append(experiences, event.ObservationCommand.Experience)
+	}
+	if event.InquiryOutcome != nil {
+		experiences = append(experiences, event.InquiryOutcome.Observation.Experience)
+	}
+	for _, experience := range experiences {
+		if experience == nil {
+			continue
+		}
+		if err := validateExperienceStructure(*experience); err != nil {
+			return err
+		}
+		if experience.HasOrderedFields() && event.DynamicsEncoding != knowledge.OrderedDynamics {
+			return errors.New("ordered experience requires ordered dynamics")
+		}
+	}
 	var required []string
 	switch event.Type {
 	case EventTypeSurfaceRebinding:
@@ -52,7 +89,9 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	switch event.Type {
 	case EventTypeSurfaceRebinding:
-		if event.SurfaceEncoding != knowledge.WrittenTextEncoding || event.Timestamp.IsZero() || event.SurfaceRebinding.ReferenceHash == "" { return errors.New("surface rebinding requires a versioned reference and event time") }
+		if event.SurfaceEncoding != knowledge.WrittenTextEncoding || event.Timestamp.IsZero() || event.SurfaceRebinding.ReferenceHash == "" {
+			return errors.New("surface rebinding requires a versioned reference and event time")
+		}
 	case EventTypeObservation, EventTypeInquiryOutcome, EventTypeCognitiveProcess, EventTypeCognitiveThink:
 		if event.Timestamp.IsZero() || !event.Timestamp.Equal(event.Event.Timestamp) || event.Event.SensorObservation != nil {
 			return errors.New("command event time or sensor boundary is invalid")
@@ -74,7 +113,7 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	if event.Type == EventTypeCognitiveThink || event.Type == EventTypeThink {
 		e := event.Event
-		if e.ID != "" || len(e.Stimulus)+len(e.StimulusNodeIDs)+len(e.ContextTokens)+len(e.DataTokens) != 0 || e.Source != "" || e.Modality != "" || e.PredictionOverride != nil || e.Observation != nil || e.SensorObservation != nil || event.Type == EventTypeCognitiveThink && len(e.Context) > 0 {
+		if e.ID != "" || len(e.Stimulus)+len(e.StimulusNodeIDs)+len(e.ContextTokens)+len(e.DataTokens) != 0 || e.Source != "" || e.Modality != "" || e.NeuralTrace != nil || e.PredictionOverride != nil || e.Observation != nil || e.SensorObservation != nil || event.Type == EventTypeCognitiveThink && len(e.Context) > 0 {
 			return errors.New("think record contains ignored event fields")
 		}
 	}
