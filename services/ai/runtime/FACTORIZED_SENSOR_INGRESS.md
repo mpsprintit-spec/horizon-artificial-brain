@@ -94,9 +94,12 @@ runtime signal; this increment does not add field-level causal attribution.
 Camera capture downsamples to a maximum 160×120 canvas and measures 16 fixed
 patches: luma intensity, RGB, signed local brightness gradients, spatial
 position, and subsequent RGB differences. The first frame has 64 fields;
-subsequent frames can have 80. It sends numerical measurements, not JPEGs,
-base64 media, hashes, class labels, or adapter-produced distances. Brightness
-differences are not optical flow, parallax, occlusion, or a depth estimate.
+subsequent frames can have up to 128, including local correspondence quality,
+supported image displacement, and differences from shared apparent image
+motion. It sends numerical measurements, not JPEGs, base64 media, hashes,
+class labels, or adapter-produced distances. See
+[VISUAL_CORRESPONDENCE.md](VISUAL_CORRESPONDENCE.md) for coordinates, support
+criteria, ambiguity, and the boundary before learned relative depth.
 
 Microphone capture samples a 16,384-sample analyser buffer once per second and
 divides it into eight timed windows. Each carries RMS and 16 Hann-windowed
@@ -141,7 +144,7 @@ Run `go test ./...`, `go vet ./...`, `go build ./...`,
 and `make bridge-smoke`. In `web/monitor`, run `pnpm check`, `pnpm test`, and
 `pnpm build`.
 
-Next work from the brief is measured motion/parallax/occlusion evidence and
-relative-depth uncertainty, followed by strategy traces and causal attribution.
-Those capabilities require their own behavioral evidence and are not inferred
-from this ingress implementation.
+Local image motion and correspondence quality now provide one part of the
+brief's required evidence. Learned relative-depth hypotheses, camera/body
+motion disambiguation, additional occlusion/perspective evidence, strategy
+traces, and causal attribution still require their own behavioral evidence.

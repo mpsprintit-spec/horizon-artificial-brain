@@ -50,7 +50,7 @@ async function postObservation(envelope) {
 }
 function makeSensorObservation(modality, source, fields, parents = []) {
   return {modality, source:source+":"+browserSessionId(), timestamp:new Date().toISOString(), sample_id:nextId(modality), fields, confidence:.5,
-    provenance:{adapter:"browser-numeric-v1", calibration_id:"uncalibrated-relative-v1", parent_sample_ids:parents}};
+    provenance:{adapter:modality==="vision" ? "browser-light-motion-v2" : "browser-numeric-v1", calibration_id:"uncalibrated-relative-v1", parent_sample_ids:parents}};
 }
 function postSensorObservation(sensor, current) {
   const send = async () => {
@@ -237,7 +237,9 @@ $("cameraStart").onclick=async()=>{
         const response = await postSensorObservation(sensor, () => generation === cameraGeneration);
         if (generation === cameraGeneration) {
           previous = measured.state; previousAt = capturedAt; parent = sensor.sample_id;
-          $("cameraStatus").textContent = "acknowledged r"+response.state_revision;
+          const quality = measured.fields.filter(field => field.kind.startsWith("light.flow.quality."));
+          const supported = quality.filter(field => field.values[5]===1).length;
+          $("cameraStatus").textContent = "acknowledged r"+response.state_revision+" · motion evidence "+(quality.length ? supported+"/"+quality.length : "pending");
         }
       } catch (error) { if (generation === cameraGeneration) $("cameraStatus").textContent = "failed: "+error.message; }
       finally { busy = false; }
