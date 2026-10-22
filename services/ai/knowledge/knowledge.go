@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -159,6 +160,11 @@ type BrainState struct {
 }
 
 type KnowledgeBase struct {
+	// Ownership is a monotonic, non-serialized guard against legacy
+	// adapters mutating the canonical brain after a runtime handover.
+	// An atomic flag lives WITH the substrate rather than a global map,
+	// so retired brains remain guarded without leaking all old pointers.
+	runtimeOwned atomic.Bool
 	Registry              *NeuralRegistry
 	Patterns              *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
@@ -167,6 +173,16 @@ type KnowledgeBase struct {
 	projectionMu          sync.RWMutex
 	annotationMu          sync.RWMutex
 	mu                    sync.RWMutex
+}
+
+// MarkRuntimeOwned prevents legacy GroundingIntegration from bypassing the
+// runtime owner. This flag cannot be cleared, including after a handover.
+func (k *KnowledgeBase) MarkRuntimeOwned() {
+	if k != nil { k.runtimeOwned.Store(true) }
+}
+
+func (k *KnowledgeBase) RuntimeOwned() bool {
+	return k != nil && k.runtimeOwned.Load()
 }
 
 // Lock serializes mutations to the canonical neural substrate.

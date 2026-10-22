@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 func TestRecoverTrailingSensorIntentPreservesCommittedPrefix(t *testing.T) {
@@ -60,6 +62,12 @@ func TestRecoverTrailingSensorIntentRejectsCommittedOrMalformedJournal(t *testin
 				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
 				Sequence: 1, Type: EventTypeThink, Event: &Event{Cycles: 1},
 			}); err != nil { t.Fatal(err) }
+		}},
+		{"vector-smuggling", func(t *testing.T, log *EventLog) {
+			intent := sensorJournalTestIntent()
+			vector := knowledge.NewNeuralVector([]float64{0.3, -0.2})
+			intent.Vector = &vector
+			if err := log.Append(intent); err != nil { t.Fatal(err) }
 		}},
 		{"wrong-sequence", func(t *testing.T, log *EventLog) {
 			intent := sensorJournalTestIntent()
