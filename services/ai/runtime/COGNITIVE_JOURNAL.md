@@ -49,6 +49,9 @@ recovery and representation credit. [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE
 defines current evidence-provenance-v1 accounting and checkpoint v12. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
+[BROWSER_SENSOR_STRUCTURE.md](BROWSER_SENSOR_STRUCTURE.md) documents current
+text/camera/audio/IMU/simulator wiring into these existing versioned interfaces.
+
 An action binding registration now consumes a revision. Re-registering the
 same binding is a no-op; changing an existing request ID's targets is rejected.
 Explicit bootstrap activation is a journaled `process` with numeric context.

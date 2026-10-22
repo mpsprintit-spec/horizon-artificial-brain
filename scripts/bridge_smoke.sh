@@ -75,6 +75,7 @@ jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id)' "${t
 curl -fsS "${base}/v1/brain/events?after=0" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.events | any(.[]; .event.sensor_observation.sample_id==$id and (.event.sensor_observation.fields | length==2))' >/dev/null
 
 node scripts/visual_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/brain_memory.json"
+node scripts/browser_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/brain_memory.json"
 
 echo "Bridge smoke: health, handshake, snapshot, legacy/numeric observations, persistence and event replay passed"
 echo "revision: ${before_revision} -> ${after_revision}"

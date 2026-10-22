@@ -1,0 +1,3738 @@
+[
+  {
+    "modality": "motion",
+    "source": "browser-motion:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:00.000Z",
+    "sample_id": "motion-a",
+    "fields": [
+      {
+        "field_id": "acceleration:x",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.x.mps2.softsign16-v1",
+        "values": [
+          0.3333333333333333
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "acceleration:y",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:x",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.x.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:y",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:z",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.z.mps2.softsign16-v1",
+        "values": [
+          0.3800852382797365
+        ],
+        "coordinates": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "rotationRate:alpha",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.alpha.degps.softsign180-v1",
+        "values": [
+          0.3333333333333333
+        ]
+      },
+      {
+        "field_id": "rotationRate:beta",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.beta.degps.softsign180-v1",
+        "values": [
+          0
+        ]
+      },
+      {
+        "field_id": "reported-sample-interval",
+        "group_id": "device-imu",
+        "kind": "imu.reported-interval.ms.softsign1000-v1",
+        "values": [
+          0.0196078431372549
+        ]
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-device-imu-v1",
+      "calibration_id": "uncalibrated-device-imu-softsign16-180-v1",
+      "parent_sample_ids": []
+    }
+  },
+  {
+    "modality": "motion",
+    "source": "browser-motion:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:01.000Z",
+    "sample_id": "motion-near",
+    "fields": [
+      {
+        "field_id": "acceleration:x",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.x.mps2.softsign16-v1",
+        "values": [
+          0.33609958506224064
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "acceleration:y",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:x",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.x.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:y",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:z",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.z.mps2.softsign16-v1",
+        "values": [
+          0.3800852382797365
+        ],
+        "coordinates": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "rotationRate:alpha",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.alpha.degps.softsign180-v1",
+        "values": [
+          0.3333333333333333
+        ]
+      },
+      {
+        "field_id": "rotationRate:beta",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.beta.degps.softsign180-v1",
+        "values": [
+          0
+        ]
+      },
+      {
+        "field_id": "reported-sample-interval",
+        "group_id": "device-imu",
+        "kind": "imu.reported-interval.ms.softsign1000-v1",
+        "values": [
+          0.0196078431372549
+        ]
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-device-imu-v1",
+      "calibration_id": "uncalibrated-device-imu-softsign16-180-v1",
+      "parent_sample_ids": [
+        "motion-a"
+      ]
+    }
+  },
+  {
+    "modality": "motion",
+    "source": "browser-motion:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:02.000Z",
+    "sample_id": "motion-b",
+    "fields": [
+      {
+        "field_id": "acceleration:x",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.x.mps2.softsign16-v1",
+        "values": [
+          -0.3333333333333333
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "acceleration:y",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:x",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.x.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:y",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:z",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.z.mps2.softsign16-v1",
+        "values": [
+          0.3800852382797365
+        ],
+        "coordinates": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "rotationRate:alpha",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.alpha.degps.softsign180-v1",
+        "values": [
+          0.3333333333333333
+        ]
+      },
+      {
+        "field_id": "rotationRate:beta",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.beta.degps.softsign180-v1",
+        "values": [
+          0
+        ]
+      },
+      {
+        "field_id": "reported-sample-interval",
+        "group_id": "device-imu",
+        "kind": "imu.reported-interval.ms.softsign1000-v1",
+        "values": [
+          0.0196078431372549
+        ]
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-device-imu-v1",
+      "calibration_id": "uncalibrated-device-imu-softsign16-180-v1",
+      "parent_sample_ids": [
+        "motion-near"
+      ]
+    }
+  },
+  {
+    "modality": "motion",
+    "source": "browser-motion:fixture:capture-2",
+    "timestamp": "2026-10-20T11:00:03.000Z",
+    "sample_id": "motion-restarted",
+    "fields": [
+      {
+        "field_id": "acceleration:x",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.x.mps2.softsign16-v1",
+        "values": [
+          0.3333333333333333
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "acceleration:y",
+        "group_id": "device-imu",
+        "kind": "imu.linear-acceleration.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:x",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.x.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          1,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:y",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.y.mps2.softsign16-v1",
+        "values": [
+          0
+        ],
+        "coordinates": [
+          0,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "accelerationIncludingGravity:z",
+        "group_id": "device-imu",
+        "kind": "imu.acceleration-with-gravity.z.mps2.softsign16-v1",
+        "values": [
+          0.3800852382797365
+        ],
+        "coordinates": [
+          0,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "rotationRate:alpha",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.alpha.degps.softsign180-v1",
+        "values": [
+          0.3333333333333333
+        ]
+      },
+      {
+        "field_id": "rotationRate:beta",
+        "group_id": "device-imu",
+        "kind": "imu.rotation-rate.beta.degps.softsign180-v1",
+        "values": [
+          0
+        ]
+      },
+      {
+        "field_id": "reported-sample-interval",
+        "group_id": "device-imu",
+        "kind": "imu.reported-interval.ms.softsign1000-v1",
+        "values": [
+          0.0196078431372549
+        ]
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-device-imu-v1",
+      "calibration_id": "uncalibrated-device-imu-softsign16-180-v1",
+      "parent_sample_ids": []
+    }
+  },
+  {
+    "modality": "audio",
+    "source": "browser-microphone:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:04.000Z",
+    "sample_id": "audio-a",
+    "fields": [
+      {
+        "field_id": "window-0:audio.rms-v1",
+        "group_id": "window-0",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -1024000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-0:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-0",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.999787826867939,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -1024000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-1:audio.rms-v1",
+        "group_id": "window-1",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -896000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-1:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-1",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679394,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -896000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-1:audio.onset-delta-v1",
+        "group_id": "window-1",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -896000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-2:audio.rms-v1",
+        "group_id": "window-2",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -768000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-2:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-2",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679401,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -768000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-2:audio.onset-delta-v1",
+        "group_id": "window-2",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -768000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-3:audio.rms-v1",
+        "group_id": "window-3",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -640000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-3:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-3",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679394,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -640000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-3:audio.onset-delta-v1",
+        "group_id": "window-3",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -640000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-4:audio.rms-v1",
+        "group_id": "window-4",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -512000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-4:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-4",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679397,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -512000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-4:audio.onset-delta-v1",
+        "group_id": "window-4",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -512000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-5:audio.rms-v1",
+        "group_id": "window-5",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -384000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-5:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-5",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679397,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -384000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-5:audio.onset-delta-v1",
+        "group_id": "window-5",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -384000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-6:audio.rms-v1",
+        "group_id": "window-6",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -256000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-6:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-6",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679397,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -256000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-6:audio.onset-delta-v1",
+        "group_id": "window-6",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -256000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-7:audio.rms-v1",
+        "group_id": "window-7",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -128000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-7:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-7",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679403,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -128000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-7:audio.onset-delta-v1",
+        "group_id": "window-7",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0
+        ],
+        "temporal_offset_ns": -128000000,
+        "temporal_scale_ns": 128000000
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-acoustic-bands-v1",
+      "calibration_id": "uncalibrated-rms-relative-bands125-2000-v1",
+      "parent_sample_ids": []
+    }
+  },
+  {
+    "modality": "audio",
+    "source": "browser-microphone:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:05.000Z",
+    "sample_id": "audio-b",
+    "fields": [
+      {
+        "field_id": "window-0:audio.rms-v1",
+        "group_id": "window-0",
+        "kind": "audio.rms-v1",
+        "values": [
+          0.13137085880020316
+        ],
+        "temporal_offset_ns": -1024000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-0:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-0",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.999787826867939,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -1024000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-1:audio.rms-v1",
+        "group_id": "window-1",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -896000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-1:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-1",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679394,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -896000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-1:audio.onset-delta-v1",
+        "group_id": "window-1",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          -0.4242640720500762
+        ],
+        "temporal_offset_ns": -896000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-2:audio.rms-v1",
+        "group_id": "window-2",
+        "kind": "audio.rms-v1",
+        "values": [
+          0.13137085880020316
+        ],
+        "temporal_offset_ns": -768000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-2:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-2",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679401,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -768000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-2:audio.onset-delta-v1",
+        "group_id": "window-2",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0.4242640720500762
+        ],
+        "temporal_offset_ns": -768000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-3:audio.rms-v1",
+        "group_id": "window-3",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -640000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-3:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-3",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679394,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -640000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-3:audio.onset-delta-v1",
+        "group_id": "window-3",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          -0.4242640720500762
+        ],
+        "temporal_offset_ns": -640000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-4:audio.rms-v1",
+        "group_id": "window-4",
+        "kind": "audio.rms-v1",
+        "values": [
+          0.13137085880020316
+        ],
+        "temporal_offset_ns": -512000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-4:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-4",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679397,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -512000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-4:audio.onset-delta-v1",
+        "group_id": "window-4",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0.4242640720500762
+        ],
+        "temporal_offset_ns": -512000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-5:audio.rms-v1",
+        "group_id": "window-5",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -384000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-5:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-5",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679397,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -384000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-5:audio.onset-delta-v1",
+        "group_id": "window-5",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          -0.4242640720500762
+        ],
+        "temporal_offset_ns": -384000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-6:audio.rms-v1",
+        "group_id": "window-6",
+        "kind": "audio.rms-v1",
+        "values": [
+          0.13137085880020316
+        ],
+        "temporal_offset_ns": -256000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-6:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-6",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679397,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -256000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-6:audio.onset-delta-v1",
+        "group_id": "window-6",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          0.4242640720500762
+        ],
+        "temporal_offset_ns": -256000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-7:audio.rms-v1",
+        "group_id": "window-7",
+        "kind": "audio.rms-v1",
+        "values": [
+          -0.7171572852999493
+        ],
+        "temporal_offset_ns": -128000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-7:audio.spectral-shape.125-2000hz-v1",
+        "group_id": "window-7",
+        "kind": "audio.spectral-shape.125-2000hz-v1",
+        "values": [
+          -1,
+          -1,
+          -1,
+          0.9997878268679403,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1,
+          -1
+        ],
+        "temporal_offset_ns": -128000000,
+        "temporal_scale_ns": 128000000
+      },
+      {
+        "field_id": "window-7:audio.onset-delta-v1",
+        "group_id": "window-7",
+        "kind": "audio.onset-delta-v1",
+        "values": [
+          -0.4242640720500762
+        ],
+        "temporal_offset_ns": -128000000,
+        "temporal_scale_ns": 128000000
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-acoustic-bands-v1",
+      "calibration_id": "uncalibrated-rms-relative-bands125-2000-v1",
+      "parent_sample_ids": [
+        "audio-a"
+      ]
+    }
+  },
+  {
+    "modality": "vision",
+    "source": "browser-camera:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:06.000Z",
+    "sample_id": "vision-a",
+    "fields": [
+      {
+        "field_id": "patch-0:light.intensity.luma-v1",
+        "group_id": "patch-0",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:light.rgb-v1",
+        "group_id": "patch-0",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:light.gradient-v1",
+        "group_id": "patch-0",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:spatial.position-v1",
+        "group_id": "patch-0",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          -0.75
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:light.intensity.luma-v1",
+        "group_id": "patch-1",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:light.rgb-v1",
+        "group_id": "patch-1",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:light.gradient-v1",
+        "group_id": "patch-1",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:spatial.position-v1",
+        "group_id": "patch-1",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          -0.75
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:light.intensity.luma-v1",
+        "group_id": "patch-2",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:light.rgb-v1",
+        "group_id": "patch-2",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:light.gradient-v1",
+        "group_id": "patch-2",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:spatial.position-v1",
+        "group_id": "patch-2",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          -0.75
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:light.intensity.luma-v1",
+        "group_id": "patch-3",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:light.rgb-v1",
+        "group_id": "patch-3",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:light.gradient-v1",
+        "group_id": "patch-3",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:spatial.position-v1",
+        "group_id": "patch-3",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          -0.75
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-4:light.intensity.luma-v1",
+        "group_id": "patch-4",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:light.rgb-v1",
+        "group_id": "patch-4",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:light.gradient-v1",
+        "group_id": "patch-4",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:spatial.position-v1",
+        "group_id": "patch-4",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          -0.25
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:light.intensity.luma-v1",
+        "group_id": "patch-5",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:light.rgb-v1",
+        "group_id": "patch-5",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:light.gradient-v1",
+        "group_id": "patch-5",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:spatial.position-v1",
+        "group_id": "patch-5",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          -0.25
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:light.intensity.luma-v1",
+        "group_id": "patch-6",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:light.rgb-v1",
+        "group_id": "patch-6",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:light.gradient-v1",
+        "group_id": "patch-6",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:spatial.position-v1",
+        "group_id": "patch-6",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          -0.25
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:light.intensity.luma-v1",
+        "group_id": "patch-7",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:light.rgb-v1",
+        "group_id": "patch-7",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:light.gradient-v1",
+        "group_id": "patch-7",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:spatial.position-v1",
+        "group_id": "patch-7",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          -0.25
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-8:light.intensity.luma-v1",
+        "group_id": "patch-8",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:light.rgb-v1",
+        "group_id": "patch-8",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:light.gradient-v1",
+        "group_id": "patch-8",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:spatial.position-v1",
+        "group_id": "patch-8",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          0.25
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:light.intensity.luma-v1",
+        "group_id": "patch-9",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:light.rgb-v1",
+        "group_id": "patch-9",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:light.gradient-v1",
+        "group_id": "patch-9",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:spatial.position-v1",
+        "group_id": "patch-9",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          0.25
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:light.intensity.luma-v1",
+        "group_id": "patch-10",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:light.rgb-v1",
+        "group_id": "patch-10",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:light.gradient-v1",
+        "group_id": "patch-10",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:spatial.position-v1",
+        "group_id": "patch-10",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          0.25
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:light.intensity.luma-v1",
+        "group_id": "patch-11",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:light.rgb-v1",
+        "group_id": "patch-11",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:light.gradient-v1",
+        "group_id": "patch-11",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:spatial.position-v1",
+        "group_id": "patch-11",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          0.25
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-12:light.intensity.luma-v1",
+        "group_id": "patch-12",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:light.rgb-v1",
+        "group_id": "patch-12",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:light.gradient-v1",
+        "group_id": "patch-12",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:spatial.position-v1",
+        "group_id": "patch-12",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          0.75
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:light.intensity.luma-v1",
+        "group_id": "patch-13",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:light.rgb-v1",
+        "group_id": "patch-13",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:light.gradient-v1",
+        "group_id": "patch-13",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:spatial.position-v1",
+        "group_id": "patch-13",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          0.75
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:light.intensity.luma-v1",
+        "group_id": "patch-14",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:light.rgb-v1",
+        "group_id": "patch-14",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:light.gradient-v1",
+        "group_id": "patch-14",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:spatial.position-v1",
+        "group_id": "patch-14",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          0.75
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:light.intensity.luma-v1",
+        "group_id": "patch-15",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:light.rgb-v1",
+        "group_id": "patch-15",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:light.gradient-v1",
+        "group_id": "patch-15",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:spatial.position-v1",
+        "group_id": "patch-15",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          0.75
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-light-motion-v2",
+      "calibration_id": "uncalibrated-rgba8-relative-v1",
+      "parent_sample_ids": []
+    }
+  },
+  {
+    "modality": "vision",
+    "source": "browser-camera:fixture:capture-1",
+    "timestamp": "2026-10-20T11:00:07.000Z",
+    "sample_id": "vision-b",
+    "fields": [
+      {
+        "field_id": "patch-0:light.intensity.luma-v1",
+        "group_id": "patch-0",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          1
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:light.rgb-v1",
+        "group_id": "patch-0",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          1,
+          1
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:light.gradient-v1",
+        "group_id": "patch-0",
+        "kind": "light.gradient-v1",
+        "values": [
+          -0.19685,
+          -0.19685
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:spatial.position-v1",
+        "group_id": "patch-0",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          -0.75
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-0:light.temporal-delta-v1",
+        "group_id": "patch-0",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          1,
+          1
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-1:light.intensity.luma-v1",
+        "group_id": "patch-1",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:light.rgb-v1",
+        "group_id": "patch-1",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:light.gradient-v1",
+        "group_id": "patch-1",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:spatial.position-v1",
+        "group_id": "patch-1",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          -0.75
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-1:light.temporal-delta-v1",
+        "group_id": "patch-1",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-2:light.intensity.luma-v1",
+        "group_id": "patch-2",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:light.rgb-v1",
+        "group_id": "patch-2",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:light.gradient-v1",
+        "group_id": "patch-2",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:spatial.position-v1",
+        "group_id": "patch-2",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          -0.75
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-2:light.temporal-delta-v1",
+        "group_id": "patch-2",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-3:light.intensity.luma-v1",
+        "group_id": "patch-3",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:light.rgb-v1",
+        "group_id": "patch-3",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:light.gradient-v1",
+        "group_id": "patch-3",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:spatial.position-v1",
+        "group_id": "patch-3",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          -0.75
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ]
+      },
+      {
+        "field_id": "patch-3:light.temporal-delta-v1",
+        "group_id": "patch-3",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-4:light.intensity.luma-v1",
+        "group_id": "patch-4",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:light.rgb-v1",
+        "group_id": "patch-4",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:light.gradient-v1",
+        "group_id": "patch-4",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:spatial.position-v1",
+        "group_id": "patch-4",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          -0.25
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-4:light.temporal-delta-v1",
+        "group_id": "patch-4",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-5:light.intensity.luma-v1",
+        "group_id": "patch-5",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:light.rgb-v1",
+        "group_id": "patch-5",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:light.gradient-v1",
+        "group_id": "patch-5",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:spatial.position-v1",
+        "group_id": "patch-5",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          -0.25
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-5:light.temporal-delta-v1",
+        "group_id": "patch-5",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-6:light.intensity.luma-v1",
+        "group_id": "patch-6",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:light.rgb-v1",
+        "group_id": "patch-6",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:light.gradient-v1",
+        "group_id": "patch-6",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:spatial.position-v1",
+        "group_id": "patch-6",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          -0.25
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-6:light.temporal-delta-v1",
+        "group_id": "patch-6",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-7:light.intensity.luma-v1",
+        "group_id": "patch-7",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:light.rgb-v1",
+        "group_id": "patch-7",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:light.gradient-v1",
+        "group_id": "patch-7",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:spatial.position-v1",
+        "group_id": "patch-7",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          -0.25
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ]
+      },
+      {
+        "field_id": "patch-7:light.temporal-delta-v1",
+        "group_id": "patch-7",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-8:light.intensity.luma-v1",
+        "group_id": "patch-8",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:light.rgb-v1",
+        "group_id": "patch-8",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:light.gradient-v1",
+        "group_id": "patch-8",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:spatial.position-v1",
+        "group_id": "patch-8",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          0.25
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-8:light.temporal-delta-v1",
+        "group_id": "patch-8",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-9:light.intensity.luma-v1",
+        "group_id": "patch-9",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:light.rgb-v1",
+        "group_id": "patch-9",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:light.gradient-v1",
+        "group_id": "patch-9",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:spatial.position-v1",
+        "group_id": "patch-9",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          0.25
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-9:light.temporal-delta-v1",
+        "group_id": "patch-9",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-10:light.intensity.luma-v1",
+        "group_id": "patch-10",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:light.rgb-v1",
+        "group_id": "patch-10",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:light.gradient-v1",
+        "group_id": "patch-10",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:spatial.position-v1",
+        "group_id": "patch-10",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          0.25
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-10:light.temporal-delta-v1",
+        "group_id": "patch-10",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-11:light.intensity.luma-v1",
+        "group_id": "patch-11",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:light.rgb-v1",
+        "group_id": "patch-11",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:light.gradient-v1",
+        "group_id": "patch-11",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:spatial.position-v1",
+        "group_id": "patch-11",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          0.25
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ]
+      },
+      {
+        "field_id": "patch-11:light.temporal-delta-v1",
+        "group_id": "patch-11",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-12:light.intensity.luma-v1",
+        "group_id": "patch-12",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:light.rgb-v1",
+        "group_id": "patch-12",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:light.gradient-v1",
+        "group_id": "patch-12",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:spatial.position-v1",
+        "group_id": "patch-12",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.75,
+          0.75
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-12:light.temporal-delta-v1",
+        "group_id": "patch-12",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-13:light.intensity.luma-v1",
+        "group_id": "patch-13",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:light.rgb-v1",
+        "group_id": "patch-13",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:light.gradient-v1",
+        "group_id": "patch-13",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:spatial.position-v1",
+        "group_id": "patch-13",
+        "kind": "spatial.position-v1",
+        "values": [
+          -0.25,
+          0.75
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-13:light.temporal-delta-v1",
+        "group_id": "patch-13",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-14:light.intensity.luma-v1",
+        "group_id": "patch-14",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:light.rgb-v1",
+        "group_id": "patch-14",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:light.gradient-v1",
+        "group_id": "patch-14",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:spatial.position-v1",
+        "group_id": "patch-14",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.25,
+          0.75
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-14:light.temporal-delta-v1",
+        "group_id": "patch-14",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-15:light.intensity.luma-v1",
+        "group_id": "patch-15",
+        "kind": "light.intensity.luma-v1",
+        "values": [
+          -0.5748
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:light.rgb-v1",
+        "group_id": "patch-15",
+        "kind": "light.rgb-v1",
+        "values": [
+          1,
+          -1,
+          -1
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:light.gradient-v1",
+        "group_id": "patch-15",
+        "kind": "light.gradient-v1",
+        "values": [
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:spatial.position-v1",
+        "group_id": "patch-15",
+        "kind": "spatial.position-v1",
+        "values": [
+          0.75,
+          0.75
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ]
+      },
+      {
+        "field_id": "patch-15:light.temporal-delta-v1",
+        "group_id": "patch-15",
+        "kind": "light.temporal-delta-v1",
+        "values": [
+          0,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-0:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-0",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          -1,
+          -0.5,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-1:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-1",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -1,
+          0,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-2:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-2",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -1,
+          0.5,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-3:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-3",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -1,
+          1,
+          -0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-4:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-4",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          -0.5,
+          -0.5,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-5:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-5",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          -0.5,
+          0,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-6:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-6",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          -0.5,
+          0.5,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-7:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-7",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          -0.5,
+          1,
+          0
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-8:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-8",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0,
+          -0.5,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-9:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-9",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0,
+          0,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-10:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-10",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0,
+          0.5,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-11:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-11",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0,
+          1,
+          0.5
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-12:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-12",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -1,
+          0.5,
+          -0.5,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-13:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-13",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          -0.5,
+          0.5,
+          0,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-14:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-14",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0,
+          0.5,
+          0.5,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      },
+      {
+        "field_id": "patch-15:light.flow.quality.r6px.16x16-v1",
+        "group_id": "patch-15",
+        "kind": "light.flow.quality.r6px.16x16-v1",
+        "values": [
+          0,
+          1,
+          0,
+          1,
+          1,
+          0,
+          0
+        ],
+        "coordinates": [
+          0.5,
+          0.5,
+          1,
+          1
+        ],
+        "temporal_offset_ns": -1000000000,
+        "temporal_scale_ns": 1000000000
+      }
+    ],
+    "confidence": 0.5,
+    "provenance": {
+      "adapter": "browser-light-motion-v2",
+      "calibration_id": "uncalibrated-rgba8-relative-v1",
+      "parent_sample_ids": [
+        "vision-a"
+      ]
+    }
+  }
+]
