@@ -31,6 +31,7 @@ type Config struct {
 
 type Server struct {
 	runtime *runtime.BrainRuntime
+	owner *runtime.RuntimeOwner
 	cfg Config
 	rateMu sync.Mutex
 	rate map[string]*rateBucket
@@ -43,6 +44,27 @@ func New(brainRuntime *runtime.BrainRuntime, cfg Config) (*Server, error) {
 	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
 	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
 	return &Server{runtime: brainRuntime, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
+}
+
+// NewManaged routes HTTP and streaming access through the single active
+// RuntimeOwner. New remains available for legacy nonrecovering deployments.
+func NewManaged(owner *runtime.RuntimeOwner, cfg Config) (*Server, error) {
+	if owner == nil { return nil, errors.New("active runtime owner is required") }
+	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
+	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
+	return &Server{owner: owner, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
+}
+
+func (s *Server) withRuntime(fn func(*runtime.BrainRuntime) error) error {
+	if s.owner != nil { return s.owner.WithRuntime(fn) }
+	if s.runtime == nil { return errors.New("bridge runtime is unavailable") }
+	return fn(s.runtime)
+}
+
+func (s *Server) withRuntimeGeneration(fn func(*runtime.BrainRuntime, <-chan struct{}) error) error {
+	if s.owner != nil { return s.owner.WithRuntimeGeneration(fn) }
+	if s.runtime == nil { return errors.New("bridge runtime is unavailable") }
+	return fn(s.runtime, nil)
 }
 
 func (s *Server) Handler() http.Handler {
@@ -59,28 +81,52 @@ func (s *Server) Handler() http.Handler {
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	snapshot, err := s.runtime.MonitorSnapshot()
+	var snapshot runtime.MonitorSnapshot
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		snapshot, e = active.MonitorSnapshot()
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,map[string]any{"status":"ok","brain_identity":runtime.BrainIdentity,"state_revision":snapshot.StateRevision,"canonical_state_hash":snapshot.CanonicalStateHash})
 }
 
 func (s *Server) handshake(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	handshake, err := s.runtime.MonitorHandshake(s.cfg.RuntimeCommit)
+	var handshake runtime.MonitorHandshake
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		handshake, e = active.MonitorHandshake(s.cfg.RuntimeCommit)
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,handshake)
 }
 
 func (s *Server) snapshot(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	snapshot, err := s.runtime.MonitorSnapshot()
+	var snapshot runtime.MonitorSnapshot
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		snapshot, e = active.MonitorSnapshot()
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,snapshot)
 }
 
 func (s *Server) events(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	events, err := s.readEvents(afterRevision(r))
+	var events []replayEvent
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		var e error
+		events, e = s.readEvents(afterRevision(r))
+		return e
+	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
 	writeJSON(w,http.StatusOK,map[string]any{"brain_identity":runtime.BrainIdentity,"events":events})
 }
@@ -122,21 +168,40 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	_,_ = rw.WriteString("HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Accept: "+accept+"\r\n\r\n")
 	_ = rw.Flush()
 
-	sub:=s.runtime.Telemetry().Subscribe()
-	if sub==nil { return }
-	defer s.runtime.Telemetry().Unsubscribe(sub)
-	handshake, err := s.runtime.MonitorHandshake(s.cfg.RuntimeCommit)
-	if err == nil { _ = writeWebSocketJSON(rw.Writer,handshake) }
+	after := afterRevision(r)
+	var hub *runtime.TelemetryHub
+	var sub *runtime.TelemetrySubscriber
+	var handshake runtime.MonitorHandshake
+	var events []replayEvent
+	var generationChanged <-chan struct{}
+	err = s.withRuntimeGeneration(func(active *runtime.BrainRuntime, changed <-chan struct{}) error {
+		if active.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
+		generationChanged = changed
+		hub = active.Telemetry()
+		sub = hub.Subscribe()
+		if sub == nil { return errors.New("telemetry subscriber unavailable") }
+		var e error
+		handshake, e = active.MonitorHandshake(s.cfg.RuntimeCommit)
+		if e != nil { return e }
+		events, e = s.readEvents(after)
+		return e
+	})
+	if sub != nil { defer hub.Unsubscribe(sub) }
+	if err != nil { return }
 
-	after:=afterRevision(r)
-	if events, err := s.readEvents(after); err == nil {
-		for _, event := range events { if err:=writeWebSocketJSON(rw.Writer,event); err!=nil{return} }
-	}
+	// WebSocket clients must reconnect after handover, obtaining a new
+	// snapshot, replay cursor and subscription from the replacement runtime.
+	select { case <-generationChanged: return; default: }
+	if err := writeWebSocketJSON(rw.Writer, handshake); err != nil { return }
+	for _, event := range events { if err := writeWebSocketJSON(rw.Writer, event); err != nil { return } }
+	if err := rw.Flush(); err != nil { return }
+
 	var writeMu sync.Mutex
 	writeJSONFrame := func(value any) error {
 		writeMu.Lock()
 		defer writeMu.Unlock()
-		return writeWebSocketJSON(rw.Writer, value)
+		if err := writeWebSocketJSON(rw.Writer, value); err != nil { return err }
+		return rw.Flush()
 	}
 	readDone := make(chan struct{})
 	go func() {
@@ -161,13 +226,17 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	}()
 	for {
 		select {
+		case <-generationChanged:
+			return
 		case <-readDone:
 			return
 		case event, ok := <-sub.C():
 			if !ok { return }
+			// Never transmit events originating from a retired generation.
+			select { case <-generationChanged: return; default: }
 			if event.StateRevision <= after { continue }
-			if err:=writeJSONFrame(event); err!=nil{return}
-			after=event.StateRevision
+			if err := writeJSONFrame(event); err != nil { return }
+			after = event.StateRevision
 		}
 	}
 }
@@ -179,9 +248,23 @@ func (s *Server) observations(w http.ResponseWriter, r *http.Request) {
 	var envelope runtime.ObservationEnvelope
 	if err:=json.NewDecoder(r.Body).Decode(&envelope); err!=nil { writeError(w,http.StatusBadRequest,"invalid observation envelope: "+err.Error()); return }
 	if envelope.BrainIdentity!="" && envelope.BrainIdentity!=runtime.BrainIdentity { writeError(w,http.StatusBadRequest,"invalid brain_identity"); return }
-	interpretation, err:=s.runtime.ProcessObservationEnvelope(envelope)
-	if err!=nil { writeError(w,http.StatusUnprocessableEntity,err.Error()); return }
-	if s.cfg.BrainMemoryPath!="" { if err:=s.runtime.SaveBrain(s.cfg.BrainMemoryPath); err!=nil { writeError(w,http.StatusInternalServerError,"brain persistence failed: "+err.Error()); return } }
+
+	var interpretation runtime.CognitiveInterpretation
+	var persistenceFailed bool
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		var e error
+		interpretation, e = active.ProcessObservationEnvelope(envelope)
+		if e != nil { return e }
+		if s.cfg.BrainMemoryPath != "" {
+			if e = active.SaveBrain(s.cfg.BrainMemoryPath); e != nil { persistenceFailed = true; return e }
+		}
+		return nil
+	})
+	if err != nil {
+		if persistenceFailed { writeError(w,http.StatusInternalServerError,"brain persistence failed: "+err.Error()); return }
+		writeError(w, runtimeWriteErrorStatus(err), err.Error())
+		return
+	}
 	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs})
 }
 
@@ -190,10 +273,31 @@ func (s *Server) outcomes(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close(); r.Body=http.MaxBytesReader(w,r.Body,s.cfg.MaxPayloadBytes)
 	var outcome runtime.OutcomeEvent
 	if err:=json.NewDecoder(r.Body).Decode(&outcome); err!=nil { writeError(w,http.StatusBadRequest,"invalid outcome: "+err.Error()); return }
-	seq,err:=s.runtime.ObserveOutcome(outcome)
-	if err!=nil { writeError(w,http.StatusUnprocessableEntity,err.Error()); return }
-	if s.cfg.BrainMemoryPath!="" { if err:=s.runtime.SaveBrain(s.cfg.BrainMemoryPath); err!=nil { writeError(w,http.StatusInternalServerError,"brain persistence failed: "+err.Error()); return } }
+
+	var seq uint64
+	var persistenceFailed bool
+	err := s.withRuntime(func(active *runtime.BrainRuntime) error {
+		var e error
+		seq, e = active.ObserveOutcome(outcome)
+		if e != nil { return e }
+		if s.cfg.BrainMemoryPath != "" {
+			if e = active.SaveBrain(s.cfg.BrainMemoryPath); e != nil { persistenceFailed = true; return e }
+		}
+		return nil
+	})
+	if err != nil {
+		if persistenceFailed { writeError(w,http.StatusInternalServerError,"brain persistence failed: "+err.Error()); return }
+		writeError(w, runtimeWriteErrorStatus(err), err.Error())
+		return
+	}
 	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"request_id":outcome.RequestID,"state_revision":seq})
+}
+
+func runtimeWriteErrorStatus(err error) int {
+	if errors.Is(err, runtime.ErrRuntimeRecoveryRequired) || errors.Is(err, runtime.ErrRuntimeRetired) {
+		return http.StatusServiceUnavailable
+	}
+	return http.StatusUnprocessableEntity
 }
 
 func (s *Server) withAuth(next http.Handler) http.Handler {
