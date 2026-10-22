@@ -121,6 +121,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		r := o.Runtime
 		r.mu.Lock()
 		defer r.mu.Unlock()
+		if err := r.ensureWritableLocked(); err != nil { return processedSensor{}, err }
 
 		if !r.lastObservationAt.IsZero() && sensor.Timestamp.Before(r.lastObservationAt) {
 			return processedSensor{}, fmt.Errorf("%w: timestamp %s precedes last observation %s", ErrInvalidSensorObservation, sensor.Timestamp.UTC().Format(time.RFC3339Nano), r.lastObservationAt.UTC().Format(time.RFC3339Nano))
@@ -129,12 +130,38 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 			return processedSensor{}, fmt.Errorf("duplicate sensor sample ID %q", sensor.SampleID)
 		}
 
+		// Write the replayable sensor intent before mutating the neural substrate.
+		// A failed/uncertain journal append poisons this runtime until recovery.
+		journaled := r.eventLog != nil
+		var intentHash string
+		if journaled {
+			intentEvent := Event{
+				ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
+				Timestamp: sensor.Timestamp.UTC(), Cycles: 1, SensorObservation: &sensor,
+			}
+			intent := LoggedEvent{
+				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+				Sequence: r.seq + 1, Type: EventTypeSensorIntent,
+				Timestamp: sensor.Timestamp.UTC(), Event: cloneEvent(intentEvent),
+			}
+			intentHash, err = sensorIntentHash(intent)
+			if err != nil {
+				return processedSensor{}, err
+			}
+			if err := r.eventLog.Append(intent); err != nil {
+				r.recoveryRequired = true
+				return processedSensor{}, fmt.Errorf("%w: append sensor intent: %v", ErrRuntimeRecoveryRequired, err)
+			}
+		}
+
 		population, err := r.brain.ProjectVectorPopulationAt(vector, GroundingThreshold, 4, sensor.Timestamp)
 		if err != nil {
-			return processedSensor{}, err
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor projection: %v", ErrRuntimeRecoveryRequired, err)
 		}
 		if len(population.Units) == 0 {
-			return processedSensor{}, errors.New("sensor projection produced no neural population")
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor projection produced no neural population", ErrRuntimeRecoveryRequired)
 		}
 		ids := make([]knowledge.NodeID, 0, len(population.Units))
 		for _, unit := range population.Units {
@@ -145,12 +172,32 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 			Timestamp: sensor.Timestamp.UTC(), Cycles: 1,
 			StimulusNodeIDs: ids, SensorObservation: &sensor,
 		}
-		output, err := r.cognitiveProcessLocked(event)
+		// The durable process record for journaled sensor input is the
+		// intent/commit pair, not a second standalone process record.
+		output, err := r.cognitiveProcessWithPersistenceLocked(event, !journaled)
 		if err != nil {
-			return processedSensor{}, err
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor cognition: %v", ErrRuntimeRecoveryRequired, err)
 		}
 		if err := r.learnObservedTransitionLocked(ids, event.Timestamp); err != nil {
-			return processedSensor{}, err
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor temporal learning: %v", ErrRuntimeRecoveryRequired, err)
+		}
+		if journaled {
+			commit := LoggedEvent{
+				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+				Sequence: output.Sequence, Type: EventTypeSensorCommit,
+				Timestamp: sensor.Timestamp.UTC(), IntentHash: intentHash,
+			}
+			if err := r.eventLog.Append(commit); err != nil {
+				r.recoveryRequired = true
+				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)
+			}
+			// Do not expose the process event to telemetry before the commit
+			// marker is durable; a failed transaction remains internal.
+			if r.telemetry != nil {
+				r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
+			}
 		}
 		return processedSensor{output: output, ids: ids, similarity: population.Units[0].Activation}, nil
 	}()
