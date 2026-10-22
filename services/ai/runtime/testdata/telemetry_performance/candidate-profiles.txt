@@ -1,0 +1,105 @@
+Profile: cpu
+File: h17-candidate-exact.test
+Type: cpu
+Time: Oct 20, 2026 at 8:53am (CDT)
+Duration: 1.41s, Total samples = 1450ms (102.78%)
+Showing nodes accounting for 70ms, 4.83% of 1450ms total
+Showing top 20 nodes out of 211
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%     1340ms 92.41%  testing.(*B).runN
+         0     0%     0%     1330ms 91.72%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1
+         0     0%     0%     1020ms 70.34%  testing.(*B).launch
+         0     0%     0%      800ms 55.17%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1.3
+         0     0%     0%      590ms 40.69%  github.com/project-horizon/horizon-core/services/ai/activation.(*Engine).ApplyActivityPlasticityWithDynamics
+      40ms  2.76%  2.76%      590ms 40.69%  github.com/project-horizon/horizon-core/services/ai/activation.(*Engine).applyActivityPlasticity
+         0     0%  2.76%      530ms 36.55%  github.com/project-horizon/horizon-core/services/ai/runtime.telemetryBenchmarkRuntime
+         0     0%  2.76%      440ms 30.34%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*KnowledgeBase).Load
+         0     0%  2.76%      420ms 28.97%  encoding/json.Unmarshal
+         0     0%  2.76%      410ms 28.28%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).CognitiveThink
+         0     0%  2.76%      410ms 28.28%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).cognitiveThinkAtLocked
+         0     0%  2.76%      410ms 28.28%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).runJournalCommandLocked
+         0     0%  2.76%      390ms 26.90%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).ProcessSensorObservation (inline)
+         0     0%  2.76%      390ms 26.90%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation
+         0     0%  2.76%      390ms 26.90%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation.func1
+      30ms  2.07%  4.83%      370ms 25.52%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*NeuralUnit).OutboundAll (inline)
+         0     0%  4.83%      350ms 24.14%  github.com/project-horizon/horizon-core/services/ai/knowledge.loadCanonicalBrain
+         0     0%  4.83%      320ms 22.07%  github.com/project-horizon/horizon-core/services/ai/activation.(*Engine).ActivateWith
+         0     0%  4.83%      320ms 22.07%  github.com/project-horizon/horizon-core/services/ai/activation.(*Engine).activateOrderedWith
+         0     0%  4.83%      320ms 22.07%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).cognitiveProcessWithPersistenceLocked
+
+Profile: alloc
+File: h17-candidate-exact.test
+Type: alloc_space
+Time: Oct 20, 2026 at 8:53am (CDT)
+Showing nodes accounting for 249.33MB, 96.91% of 257.29MB total
+Dropped 18 nodes (cum <= 1.29MB)
+Showing top 20 nodes out of 75
+      flat  flat%   sum%        cum   cum%
+   46.50MB 18.07% 18.07%       79MB 30.71%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*NeuralUnit).OutboundAll
+   38.36MB 14.91% 32.98%    38.36MB 14.91%  reflect.growslice
+   32.50MB 12.63% 45.62%    32.50MB 12.63%  github.com/project-horizon/horizon-core/services/ai/knowledge.SynapseList.All (inline)
+   32.35MB 12.57% 58.19%    32.35MB 12.57%  bytes.growSlice
+   23.11MB  8.98% 67.17%    27.23MB 10.59%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).applyCuriosityDrive
+   18.57MB  7.22% 74.39%    18.57MB  7.22%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*NeuralRegistry).Nodes
+   14.50MB  5.64% 80.02%    53.42MB 20.76%  github.com/project-horizon/horizon-core/services/ai/knowledge.loadCanonicalBrain
+   13.61MB  5.29% 85.31%    49.46MB 19.22%  encoding/json.Marshal
+   11.61MB  4.51% 89.83%    11.61MB  4.51%  os.ReadFile
+    4.96MB  1.93% 91.75%   118.49MB 46.05%  github.com/project-horizon/horizon-core/services/ai/runtime.telemetryBenchmarkRuntime
+    3.50MB  1.36% 93.12%     3.50MB  1.36%  time.Time.MarshalJSON
+    2.04MB  0.79% 93.91%     2.04MB  0.79%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*KnowledgeBase).RecordSensoryTrace
+    1.72MB  0.67% 94.58%     1.72MB  0.67%  runtime/pprof.StartCPUProfile
+    1.56MB  0.61% 95.18%     2.32MB   0.9%  github.com/project-horizon/horizon-core/services/ai/learning.init.0
+    1.50MB  0.58% 95.77%     1.50MB  0.58%  github.com/project-horizon/horizon-core/services/ai/activation.(*ContextState).before
+    1.04MB  0.41% 96.17%    66.07MB 25.68%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*KnowledgeBase).Load
+    0.88MB  0.34% 96.52%     1.52MB  0.59%  compress/flate.NewWriter
+    0.50MB  0.19% 96.71%     1.50MB  0.58%  github.com/project-horizon/horizon-core/services/ai/activation.(*Engine).advance
+    0.50MB  0.19% 96.91%     2.50MB  0.97%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*KnowledgeBase).AssessObservedPrediction
+         0     0% 96.91%     3.64MB  1.41%  bytes.(*Buffer).Write
+
+Profile: mutex
+File: h17-candidate-exact.test
+Type: delay
+Time: Oct 20, 2026 at 8:53am (CDT)
+Showing nodes accounting for 644.54ms, 100% of 644.54ms total
+Dropped 2 nodes (cum <= 3.22ms)
+      flat  flat%   sum%        cum   cum%
+  618.37ms 95.94% 95.94%   618.37ms 95.94%  sync.(*Mutex).Unlock
+   26.17ms  4.06%   100%    26.17ms  4.06%  runtime._LostContendedRuntimeLock
+         0     0%   100%   339.96ms 52.74%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).CognitiveThink
+         0     0%   100%   278.40ms 43.19%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).ProcessSensorObservation (inline)
+         0     0%   100%   278.40ms 43.19%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation
+         0     0%   100%   278.40ms 43.19%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation.func1
+         0     0%   100%   618.35ms 95.94%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1
+         0     0%   100%   618.35ms 95.94%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1.3
+         0     0%   100%   610.54ms 94.72%  testing.(*B).launch
+         0     0%   100%     7.81ms  1.21%  testing.(*B).run1.func1
+         0     0%   100%   618.35ms 95.94%  testing.(*B).runN
+
+Profile: block
+File: h17-candidate-exact.test
+Type: delay
+Time: Oct 20, 2026 at 8:53am (CDT)
+Showing nodes accounting for 3413.74ms, 100% of 3413.74ms total
+Dropped 10 nodes (cum <= 17.07ms)
+Showing top 20 nodes out of 25
+      flat  flat%   sum%        cum   cum%
+ 2707.16ms 79.30% 79.30%  2707.16ms 79.30%  runtime.chanrecv1
+  619.53ms 18.15% 97.45%   619.53ms 18.15%  sync.(*Mutex).Lock (inline)
+   87.04ms  2.55%   100%    87.04ms  2.55%  runtime.selectgo
+         0     0%   100%   619.48ms 18.15%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).LastSequence
+         0     0%   100%  1297.16ms 38.00%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions
+         0     0%   100%   706.53ms 20.70%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1.4
+         0     0%   100%     1410ms 41.30%  main.main
+         0     0%   100%     1410ms 41.30%  runtime.main
+         0     0%   100%   110.74ms  3.24%  runtime/pprof.StopCPUProfile
+         0     0%   100%   110.74ms  3.24%  sync.(*Once).Do (inline)
+         0     0%   100%   110.74ms  3.24%  sync.(*Once).doSlow
+         0     0%   100%  2596.41ms 76.06%  testing.(*B).Run
+         0     0%   100%   988.89ms 28.97%  testing.(*B).doBench
+         0     0%   100%   988.89ms 28.97%  testing.(*B).run
+         0     0%   100%  1607.53ms 47.09%  testing.(*B).run1
+         0     0%   100%  1297.16ms 38.00%  testing.(*B).run1.func1
+         0     0%   100%  2596.46ms 76.06%  testing.(*B).runN
+         0     0%   100%     1410ms 41.30%  testing.(*M).Run
+         0     0%   100%   110.74ms  3.24%  testing.(*M).after
+         0     0%   100%   110.74ms  3.24%  testing.(*M).after.func1

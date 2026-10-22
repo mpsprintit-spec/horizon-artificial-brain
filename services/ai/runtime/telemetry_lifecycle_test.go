@@ -54,6 +54,10 @@ func TestTelemetryConcurrentPublishAndSubscriptionShutdown(t *testing.T) {
 			<-start
 			for revision := 0; revision < 100; revision++ {
 				subscriber := hub.Subscribe()
+				if worker%2 != 0 {
+					hub.Unsubscribe(subscriber)
+					subscriber = hub.SubscribeRevisions()
+				}
 				hub.Publish(TelemetryEvent{StateRevision: uint64(revision)})
 				hub.Unsubscribe(subscriber)
 				if worker == 0 && revision == 50 {

@@ -14,99 +14,147 @@ import (
 const ObservationEnvelopeSchemaVersion = 1
 
 type ObservationProvenance struct {
-	Source string `json:"source"`
-	Modality string `json:"modality"`
+	Source        string `json:"source"`
+	Modality      string `json:"modality"`
 	CaptureDevice string `json:"capture_device,omitempty"`
-	Adapter string `json:"adapter,omitempty"`
-	Synthetic bool `json:"synthetic"`
+	Adapter       string `json:"adapter,omitempty"`
+	Synthetic     bool   `json:"synthetic"`
 }
 
 type ObservationEnvelope struct {
-	SchemaVersion int `json:"schema_version"`
-	BrainIdentity string `json:"brain_identity"`
-	EventID string `json:"event_id"`
-	SessionID string `json:"session_id,omitempty"`
-	Sequence uint64 `json:"sequence"`
-	Timestamp time.Time `json:"timestamp"`
-	Modality string `json:"modality"`
-	Source string `json:"source"`
-	Provenance ObservationProvenance `json:"provenance"`
-	Payload json.RawMessage `json:"payload,omitempty"`
-	PayloadHash string `json:"payload_hash"`
-	PayloadBytes int `json:"payload_bytes"`
-	Tokens []string `json:"tokens,omitempty"`
-	ContextTokens []string `json:"context_tokens,omitempty"`
-	DataTokens []string `json:"data_tokens,omitempty"`
+	SchemaVersion int                   `json:"schema_version"`
+	BrainIdentity string                `json:"brain_identity"`
+	EventID       string                `json:"event_id"`
+	SessionID     string                `json:"session_id,omitempty"`
+	Sequence      uint64                `json:"sequence"`
+	Timestamp     time.Time             `json:"timestamp"`
+	Modality      string                `json:"modality"`
+	Source        string                `json:"source"`
+	Provenance    ObservationProvenance `json:"provenance"`
+	Payload       json.RawMessage       `json:"payload,omitempty"`
+	PayloadHash   string                `json:"payload_hash"`
+	PayloadBytes  int                   `json:"payload_bytes"`
+	Tokens        []string              `json:"tokens,omitempty"`
+	ContextTokens []string              `json:"context_tokens,omitempty"`
+	DataTokens    []string              `json:"data_tokens,omitempty"`
 }
 
 func (e ObservationEnvelope) Validate() error {
-	if e.SchemaVersion != 0 && e.SchemaVersion != ObservationEnvelopeSchemaVersion { return fmt.Errorf("unsupported observation schema version %d", e.SchemaVersion) }
-	if e.BrainIdentity != "" && e.BrainIdentity != BrainIdentity { return fmt.Errorf("observation belongs to brain %q", e.BrainIdentity) }
-	if strings.TrimSpace(e.EventID) == "" { return errors.New("observation event_id is required") }
-	if strings.TrimSpace(e.Modality) == "" { return errors.New("observation modality is required") }
-	if strings.TrimSpace(e.Source) == "" { return errors.New("observation source is required") }
-	if e.Timestamp.IsZero() { return errors.New("observation timestamp is required") }
-	if e.PayloadBytes < 0 { return errors.New("observation payload_bytes is invalid") }
+	if e.SchemaVersion != 0 && e.SchemaVersion != ObservationEnvelopeSchemaVersion {
+		return fmt.Errorf("unsupported observation schema version %d", e.SchemaVersion)
+	}
+	if e.BrainIdentity != "" && e.BrainIdentity != BrainIdentity {
+		return fmt.Errorf("observation belongs to brain %q", e.BrainIdentity)
+	}
+	if strings.TrimSpace(e.EventID) == "" {
+		return errors.New("observation event_id is required")
+	}
+	if strings.TrimSpace(e.Modality) == "" {
+		return errors.New("observation modality is required")
+	}
+	if strings.TrimSpace(e.Source) == "" {
+		return errors.New("observation source is required")
+	}
+	if e.Timestamp.IsZero() {
+		return errors.New("observation timestamp is required")
+	}
+	if e.PayloadBytes < 0 {
+		return errors.New("observation payload_bytes is invalid")
+	}
 	if len(e.Payload) > 0 {
 		sum := sha256.Sum256(e.Payload)
 		expected := "sha256:" + hex.EncodeToString(sum[:])
-		if e.PayloadHash != "" && e.PayloadHash != expected { return errors.New("observation payload hash mismatch") }
+		if e.PayloadHash != "" && e.PayloadHash != expected {
+			return errors.New("observation payload hash mismatch")
+		}
 	}
 	return nil
 }
 
 func NormalizeObservationEnvelope(e ObservationEnvelope) (ObservationEnvelope, error) {
-	if e.SchemaVersion == 0 { e.SchemaVersion = ObservationEnvelopeSchemaVersion }
-	if e.BrainIdentity == "" { e.BrainIdentity = BrainIdentity }
-	if e.Timestamp.IsZero() { e.Timestamp = time.Now().UTC() }
+	if e.SchemaVersion == 0 {
+		e.SchemaVersion = ObservationEnvelopeSchemaVersion
+	}
+	if e.BrainIdentity == "" {
+		e.BrainIdentity = BrainIdentity
+	}
+	if e.Timestamp.IsZero() {
+		e.Timestamp = time.Now().UTC()
+	}
 	e.Timestamp = e.Timestamp.UTC()
 	e.Modality = strings.TrimSpace(e.Modality)
 	e.Source = strings.TrimSpace(e.Source)
 	// Verify a supplied digest before normalization can replace it. Persist
 	// the same JSON representation that encoding/json writes to the journal.
-	if err := e.Validate(); err != nil { return ObservationEnvelope{}, err }
+	if err := e.Validate(); err != nil {
+		return ObservationEnvelope{}, err
+	}
 	if len(e.Payload) > 0 {
 		payload, err := json.Marshal(e.Payload)
-		if err != nil { return ObservationEnvelope{}, fmt.Errorf("invalid observation payload: %w", err) }
+		if err != nil {
+			return ObservationEnvelope{}, fmt.Errorf("invalid observation payload: %w", err)
+		}
 		e.Payload = payload
 		sum := sha256.Sum256(e.Payload)
 		e.PayloadHash = "sha256:" + hex.EncodeToString(sum[:])
 		e.PayloadBytes = len(e.Payload)
 	}
-	if err := e.Validate(); err != nil { return ObservationEnvelope{}, err }
+	if err := e.Validate(); err != nil {
+		return ObservationEnvelope{}, err
+	}
 	return e, nil
 }
 
 type TelemetryEvent struct {
-	Type string `json:"type"`
-	BrainIdentity string `json:"brain_identity"`
-	StateRevision uint64 `json:"state_revision"`
-	Timestamp time.Time `json:"timestamp"`
-	EventHash string `json:"event_hash"`
-	CanonicalStateHash string `json:"canonical_state_hash"`
-	Event *Event `json:"event,omitempty"`
-	Observation *ObservationEnvelope `json:"observation,omitempty"`
-	Outcome *OutcomeEvent `json:"outcome,omitempty"`
-	StateDelta *CognitiveStateDelta `json:"state_delta,omitempty"`
-	PredictionError *float64 `json:"prediction_error,omitempty"`
-	Plasticity map[string]float64 `json:"plasticity,omitempty"`
+	SchemaVersion      int                  `json:"schema_version,omitempty"`
+	Type               string               `json:"type"`
+	BrainIdentity      string               `json:"brain_identity"`
+	StateRevision      uint64               `json:"state_revision"`
+	Timestamp          time.Time            `json:"timestamp"`
+	EventHash          string               `json:"event_hash"`
+	CanonicalStateHash string               `json:"canonical_state_hash,omitempty"`
+	Event              *Event               `json:"event,omitempty"`
+	Observation        *ObservationEnvelope `json:"observation,omitempty"`
+	Outcome            *OutcomeEvent        `json:"outcome,omitempty"`
+	StateDelta         *CognitiveStateDelta `json:"state_delta,omitempty"`
+	PredictionError    *float64             `json:"prediction_error,omitempty"`
+	Plasticity         map[string]float64   `json:"plasticity,omitempty"`
 }
 
-type TelemetrySubscriber struct { ch chan TelemetryEvent; once sync.Once }
+type TelemetrySubscriber struct {
+	ch            chan TelemetryEvent
+	once          sync.Once
+	revisionsOnly bool
+}
+
 func (s *TelemetrySubscriber) C() <-chan TelemetryEvent { return s.ch }
-func (s *TelemetrySubscriber) close() { s.once.Do(func(){ close(s.ch) }) }
+func (s *TelemetrySubscriber) close()                   { s.once.Do(func() { close(s.ch) }) }
 
 type TelemetryHub struct {
-	mu sync.RWMutex
+	mu          sync.RWMutex
 	subscribers map[*TelemetrySubscriber]struct{}
-	capacity int
-	closed bool
+	capacity    int
+	closed      bool
 }
+
 func NewTelemetryHub(capacity int) *TelemetryHub {
-	if capacity < 1 { capacity = 64 }
+	if capacity < 1 {
+		capacity = 64
+	}
 	return &TelemetryHub{subscribers: make(map[*TelemetrySubscriber]struct{}), capacity: capacity}
 }
 func (h *TelemetryHub) Subscribe() *TelemetrySubscriber {
+	return h.subscribe(false)
+}
+
+// SubscribeRevisions selects v2 telemetry. Events carry committed revisions
+// and cognitive deltas; full neural-state hashes are available at snapshot
+// boundaries. Subscribe retains the legacy full canonical hash per event.
+func (h *TelemetryHub) SubscribeRevisions() *TelemetrySubscriber {
+	return h.subscribe(true)
+}
+
+func (h *TelemetryHub) subscribe(revisionsOnly bool) *TelemetrySubscriber {
 	if h == nil {
 		return nil
 	}
@@ -115,36 +163,23 @@ func (h *TelemetryHub) Subscribe() *TelemetrySubscriber {
 	if h.closed {
 		return nil
 	}
-	s := &TelemetrySubscriber{ch: make(chan TelemetryEvent, h.capacity)}
+	s := &TelemetrySubscriber{ch: make(chan TelemetryEvent, h.capacity), revisionsOnly: revisionsOnly}
 	h.subscribers[s] = struct{}{}
 	return s
 }
 func (h *TelemetryHub) Unsubscribe(s *TelemetrySubscriber) {
-	if h == nil || s == nil { return }
+	if h == nil || s == nil {
+		return
+	}
 	h.mu.Lock()
-	if _, ok := h.subscribers[s]; ok { delete(h.subscribers,s); s.close() }
+	if _, ok := h.subscribers[s]; ok {
+		delete(h.subscribers, s)
+		s.close()
+	}
 	h.mu.Unlock()
 }
 func (h *TelemetryHub) Publish(event TelemetryEvent) {
-	if h == nil {
-		return
-	}
-	// Sending and closing share this lock. Copying subscribers and releasing
-	// it before sending permits Unsubscribe/Close to close a channel in use.
-	// Sends stay nonblocking; a full subscriber is removed under the lock.
-	h.mu.Lock()
-	defer h.mu.Unlock()
-	if h.closed {
-		return
-	}
-	for s := range h.subscribers {
-		select {
-		case s.ch <- event:
-		default:
-			delete(h.subscribers, s)
-			s.close()
-		}
-	}
+	h.publishBuilt(func(bool) (TelemetryEvent, error) { return event, nil })
 }
 
 // Close stops publication and subscription and releases all subscribers.
@@ -170,38 +205,46 @@ func (r *BrainRuntime) ProcessObservationEnvelope(envelope ObservationEnvelope) 
 		return CognitiveInterpretation{}, errors.New("brain runtime is not initialized")
 	}
 	normalized, err := NormalizeObservationEnvelope(envelope)
-	if err != nil { return CognitiveInterpretation{}, err }
+	if err != nil {
+		return CognitiveInterpretation{}, err
+	}
 	tokens := append([]string(nil), normalized.Tokens...)
 	if len(tokens) == 0 {
 		token := normalized.PayloadHash
 		if token == "" {
-			data, _ := json.Marshal(struct{ Modality string `json:"modality"`; Source string `json:"source"`; Payload json.RawMessage `json:"payload"` }{normalized.Modality, normalized.Source, normalized.Payload})
+			data, _ := json.Marshal(struct {
+				Modality string          `json:"modality"`
+				Source   string          `json:"source"`
+				Payload  json.RawMessage `json:"payload"`
+			}{normalized.Modality, normalized.Source, normalized.Payload})
 			sum := sha256.Sum256(data)
 			token = "sha256:" + hex.EncodeToString(sum[:])
 		}
 		tokens = []string{"observation:" + strings.ToLower(normalized.Modality) + ":" + token}
 	}
 	event := Event{
-		ID: normalized.EventID,
- EpisodeID: normalized.SessionID,
-		Stimulus: tokens,
-		Source: normalized.Source,
-		Modality: normalized.Modality,
+		ID:            normalized.EventID,
+		EpisodeID:     normalized.SessionID,
+		Stimulus:      tokens,
+		Source:        normalized.Source,
+		Modality:      normalized.Modality,
 		ContextTokens: append([]string(nil), normalized.ContextTokens...),
-		DataTokens: append([]string(nil), normalized.DataTokens...),
-		Cycles: 1,
-		Timestamp: normalized.Timestamp,
-		Observation: &normalized,
+		DataTokens:    append([]string(nil), normalized.DataTokens...),
+		Cycles:        1,
+		Timestamp:     normalized.Timestamp,
+		Observation:   &normalized,
 	}
 	orchestrator := NewCognitiveOrchestrator(r)
 	cognitive, _, err := orchestrator.ProcessObservation(event, ObservationInput{
-		Source: normalized.Source,
-		Modality: normalized.Modality,
-		Tokens: tokens,
+		Source:        normalized.Source,
+		Modality:      normalized.Modality,
+		Tokens:        tokens,
 		ContextTokens: normalized.ContextTokens,
-		DataTokens: normalized.DataTokens,
+		DataTokens:    normalized.DataTokens,
 	}, nil)
-	if err != nil { return CognitiveInterpretation{}, err }
+	if err != nil {
+		return CognitiveInterpretation{}, err
+	}
 
 	return cognitive, nil
 }

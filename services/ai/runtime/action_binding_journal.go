@@ -62,7 +62,7 @@ func (r *BrainRuntime) registerActionBindingLocked(binding ActionBinding) error 
 	}
 	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeActionBinding, Timestamp: r.nowLocked(), ActionBinding: &binding}, func() error { r.actions[binding.RequestID] = binding; r.seq++; return nil })
 	if err == nil && r.telemetry != nil {
-		r.telemetry.Publish(r.telemetryEventLocked(EventTypeActionBinding, r.nowLocked(), nil, nil, nil))
+		r.publishTelemetryLocked(EventTypeActionBinding, r.nowLocked(), nil, nil, nil, nil, nil)
 	}
 	return err
 }

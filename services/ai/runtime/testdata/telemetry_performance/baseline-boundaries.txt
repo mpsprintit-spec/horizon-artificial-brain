@@ -1,0 +1,8 @@
+goos: linux
+goarch: amd64
+pkg: github.com/project-horizon/horizon-core/services/ai/runtime
+cpu: AMD EPYC 9V74 80-Core Processor
+BenchmarkTelemetryReadBoundary/snapshot-9         	      10	 183694524 ns/op	74121622 B/op	  104151 allocs/op
+BenchmarkTelemetryReadBoundary/handshake-9        	      10	 180488650 ns/op	75799808 B/op	  104156 allocs/op
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	5.001s

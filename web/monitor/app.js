@@ -1,5 +1,6 @@
 import { HorizonStore } from "./lib/horizon-store.js";
 import { extractVisionFields, extractAudioFields, extractMotionFields, browserSensorProfile } from "./sensor-adapters.js";
+import { createSnapshotScheduler } from "./snapshot-scheduler.js";
 
 const $ = id => document.getElementById(id);
 const store = new HorizonStore();
@@ -19,7 +20,8 @@ let observationQueue = Promise.resolve();
 let audioContext = null;
 let analyser = null;
 let waveFrame = null;
-let snapshotRefresh = Promise.resolve();
+let revisionTelemetry = false;
+const snapshotRefresh = createSnapshotScheduler({load:()=>get("/v1/brain/snapshot"),apply:snapshot=>{store.setSnapshot(snapshot);render();}});
 
 const savedBridge = sessionStorage.getItem("horizon.bridge");
 const savedToken = sessionStorage.getItem("horizon.token");
@@ -37,6 +39,7 @@ function browserSessionId() {
 }
 function bridgeWsUrl() {
   const u=new URL(baseUrl()); u.protocol=u.protocol==="https:"?"wss:":"ws:"; u.pathname="/v1/brain/stream"; u.searchParams.set("after",String(store.revision));
+  if(revisionTelemetry) u.searchParams.set("telemetry","revisions");
   const token=$("token").value.trim(); if(token) u.searchParams.set("token",token); return u.toString();
 }
 async function get(path) {
@@ -199,18 +202,12 @@ function renderInspectableState(s){
   add("plasticity state",s.brain_state?.plasticity||{},"plasticity");
 }
 async function refreshSnapshotForEvent(event){
-  snapshotRefresh=snapshotRefresh.then(async()=>{
-    const snapshot=await get("/v1/brain/snapshot");
-    if(Number(snapshot.state_revision)<Number(event.state_revision))throw new Error("snapshot revision is behind telemetry event");
-    if(Number(snapshot.state_revision)===Number(event.state_revision) && event.canonical_state_hash && snapshot.canonical_state_hash!==event.canonical_state_hash)throw new Error("telemetry canonical hash mismatch");
-    store.setSnapshot(snapshot); render();
-  });
-  return snapshotRefresh;
+  return snapshotRefresh.request(event);
 }
-async function resync(){store.setStatus("resyncing");try{const s=await get("/v1/brain/snapshot");store.setSnapshot(s);$("streamState").textContent="snapshot resynced";openStream();}catch(error){status("ERROR","error");$("source").textContent=error.message;}}
+async function resync(){snapshotRefresh.reset();store.setStatus("resyncing");try{const s=await get("/v1/brain/snapshot");store.setSnapshot(s);$("streamState").textContent="snapshot resynced";openStream();}catch(error){status("ERROR","error");$("source").textContent=error.message;}}
 function openStream(){if(socket)socket.close();if(!baseUrl())return;store.clearForReconnect();socket=new WebSocket(bridgeWsUrl());socket.onopen=()=>{store.setStatus("connected");$("streamState").textContent="live WebSocket";status("CONNECTED","connected");};socket.onmessage=async event=>{try{const payload=JSON.parse(event.data);if(payload.type==="brain.handshake"){$("commit").textContent=payload.runtime_commit||"unavailable";return;}const result=store.applyEvent(payload);if(result==="gap")await resync();else if(result==="applied")await refreshSnapshotForEvent(payload);else render();}catch(error){store.setStatus("error");$("streamState").textContent=error.message;status("ERROR","error");}};socket.onerror=()=>{store.setStatus("error");$("streamState").textContent="stream error";};socket.onclose=()=>{if(store.status!=="resyncing"){store.setStatus("stale");$("streamState").textContent="reconnecting";reconnectTimer=setTimeout(openStream,2000);}};}
-async function connect(){if(!baseUrl())return;sessionStorage.setItem("horizon.bridge",baseUrl());if($("token").value.trim())sessionStorage.setItem("horizon.token",$("token").value.trim());status("CONNECTING","stale");try{const handshake=await get("/v1/brain/handshake");$("commit").textContent=handshake.runtime_commit||"unavailable";const snapshot=await get("/v1/brain/snapshot");if(handshake.canonical_state_hash!==snapshot.canonical_state_hash||handshake.state_revision!==snapshot.state_revision)throw new Error("handshake/snapshot revision or hash mismatch");store.setSnapshot(snapshot);$("source").textContent="Horizon Bridge canonical runtime";render();openStream();}catch(error){store.setStatus("error");status("ERROR","error");$("source").textContent=error.message;}}
-function disconnect(){if(reconnectTimer)clearTimeout(reconnectTimer);if(socket)socket.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");}
+async function connect(){if(!baseUrl())return;snapshotRefresh.reset();sessionStorage.setItem("horizon.bridge",baseUrl());if($("token").value.trim())sessionStorage.setItem("horizon.token",$("token").value.trim());status("CONNECTING","stale");try{const handshake=await get("/v1/brain/handshake");revisionTelemetry=handshake.capabilities?.includes("revision_stream")===true;$("commit").textContent=handshake.runtime_commit||"unavailable";const snapshot=await get("/v1/brain/snapshot");if(handshake.canonical_state_hash!==snapshot.canonical_state_hash||handshake.state_revision!==snapshot.state_revision)throw new Error("handshake/snapshot revision or hash mismatch");store.resetForConnection();store.setSnapshot(snapshot);$("source").textContent="Horizon Bridge canonical runtime";render();openStream();}catch(error){store.setStatus("error");status("ERROR","error");$("source").textContent=error.message;}}
+function disconnect(){snapshotRefresh.reset();if(reconnectTimer)clearTimeout(reconnectTimer);if(socket)socket.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");}
 $("connect").onclick=connect;$("disconnect").onclick=disconnect;store.subscribe(render);
 
 

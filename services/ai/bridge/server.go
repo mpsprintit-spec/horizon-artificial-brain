@@ -61,10 +61,10 @@ func (s *Server) Handler() http.Handler {
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	var snapshot runtime.MonitorSnapshot
+	var snapshot runtime.MonitorHandshake
 	err := s.withRuntime(func(rt *runtime.BrainRuntime) error {
 		var err error
-		snapshot, err = rt.MonitorSnapshot()
+		snapshot, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
 		return err
 	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
@@ -134,6 +134,8 @@ func (s *Server) readEvents(after uint64) ([]replayEvent,error) {
 }
 
 func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
+	mode := r.URL.Query().Get("telemetry")
+	if mode != "" && mode != "canonical" && mode != "revisions" { writeError(w,http.StatusBadRequest,"unsupported telemetry mode"); return }
 	if !websocketRequested(r) { writeError(w,http.StatusBadRequest,"websocket upgrade required"); return }
 	if !originAllowed(r.Header.Get("Origin"),s.cfg.AllowedOrigins) { writeError(w,http.StatusForbidden,"origin is not allowed"); return }
 
@@ -145,11 +147,12 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	var handshake runtime.MonitorHandshake
 	err := s.withRuntimeEpoch(func(rt *runtime.BrainRuntime, invalidated <-chan struct{}) error {
 		hub = rt.Telemetry()
-		sub = hub.Subscribe()
+		if mode == "revisions" { sub = hub.SubscribeRevisions() } else { sub = hub.Subscribe() }
 		if sub == nil { return errors.New("telemetry hub is not initialized") }
 		var err error
 		handshake, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
 		if err != nil { hub.Unsubscribe(sub); sub = nil; return err }
+		handshake.TelemetryMode = mode
 		epoch = invalidated
 		return nil
 	})

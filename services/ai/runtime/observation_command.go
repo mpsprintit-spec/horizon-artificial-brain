@@ -112,10 +112,7 @@ func (r *BrainRuntime) processObservationCommand(event Event, command Observatio
 		return CognitiveInterpretation{}, false, err
 	}
 	if r.telemetry != nil {
-		e := r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, nil)
-		e.StateDelta = &cognitive.ChangeAwareness.StateDelta
-		e.PredictionError = &cognitive.State.PredictionError
-		r.telemetry.Publish(e)
+		r.publishTelemetryLocked(EventTypeProcess, event.Timestamp, &event, event.Observation, nil, &cognitive.ChangeAwareness.StateDelta, &cognitive.State.PredictionError)
 	}
 	return cognitive, learned, nil
 }
