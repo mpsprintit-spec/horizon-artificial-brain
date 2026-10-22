@@ -6,6 +6,7 @@ export interface BrainSnapshot {
   state_revision: number;
   captured_at: string;
   canonical_state_hash: string;
+  inspection_epoch?: string;
   counts: Record<string, number>;
   neural_units: unknown[];
   populations: unknown[];
@@ -59,6 +60,7 @@ export class HorizonStore {
   setSnapshot(snapshot: BrainSnapshot): void {
     if (snapshot.type !== "brain.snapshot") throw new Error("invalid brain snapshot type");
     if (!Number.isFinite(snapshot.state_revision)) throw new Error("invalid snapshot revision");
+    if (snapshot.inspection_epoch && this.snapshotValue?.inspection_epoch && snapshot.inspection_epoch !== this.snapshotValue.inspection_epoch) this.resetForConnection();
     if (this.snapshotValue && snapshot.state_revision < this.snapshotValue.state_revision) return;
     if (this.expectedCanonicalHash && snapshot.state_revision === this.revisionValue && snapshot.canonical_state_hash !== this.expectedCanonicalHash) {
       this.statusValue = "error";

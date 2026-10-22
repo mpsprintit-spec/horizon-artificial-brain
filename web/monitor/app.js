@@ -1,6 +1,7 @@
 import { HorizonStore } from "./lib/horizon-store.js";
 import { extractVisionFields, extractAudioFields, extractMotionFields, browserSensorProfile } from "./sensor-adapters.js";
 import { createSnapshotScheduler } from "./snapshot-scheduler.js";
+import { verifyInspectionPage, inspectionGraph, readInspectionText } from "./inspection-page.js";
 
 const $ = id => document.getElementById(id);
 const store = new HorizonStore();
@@ -21,7 +22,12 @@ let audioContext = null;
 let analyser = null;
 let waveFrame = null;
 let revisionTelemetry = false;
-const snapshotRefresh = createSnapshotScheduler({load:()=>get("/v1/brain/snapshot"),apply:snapshot=>{store.setSnapshot(snapshot);render();}});
+let boundedInspection = false;
+let graphCursor = "";
+let inspectorPage = null;
+let monitorReadSerial=0, inspectorReadSerial=0;
+const monitorReads=new WeakMap();
+const snapshotRefresh = createSnapshotScheduler({load:()=>loadMonitorView(),apply:applyMonitorView});
 
 const savedBridge = sessionStorage.getItem("horizon.bridge");
 const savedToken = sessionStorage.getItem("horizon.token");
@@ -40,11 +46,38 @@ function browserSessionId() {
 function bridgeWsUrl() {
   const u=new URL(baseUrl()); u.protocol=u.protocol==="https:"?"wss:":"ws:"; u.pathname="/v1/brain/stream"; u.searchParams.set("after",String(store.revision));
   if(revisionTelemetry) u.searchParams.set("telemetry","revisions");
+  if(boundedInspection) u.searchParams.set("inspection","bounded");
   const token=$("token").value.trim(); if(token) u.searchParams.set("token",token); return u.toString();
 }
 async function get(path) {
   const response=await fetch(baseUrl()+path,{headers:authHeaders(),cache:"no-store"});
   const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
+}
+async function readInspection(section="neural_units",cursor="",order="id") {
+  const query=new URLSearchParams({section,limit:"256",order});if(cursor)query.set("cursor",cursor);
+  const response=await fetch(baseUrl()+"/v1/brain/inspection?"+query,{headers:authHeaders(),cache:"no-store"});
+  const text=await readInspectionText(response);
+  if(!response.ok){let message;try{message=JSON.parse(text).error;}catch{}const error=new Error(message||("HTTP "+response.status));error.status=response.status;throw error;}
+  return verifyInspectionPage(text,hashBuffer);
+}
+async function loadMonitorView(cursor="") {
+  const serial=++monitorReadSerial;
+  const snapshot=boundedInspection?inspectionGraph(await readInspection("neural_units",cursor,"activity")):await get("/v1/brain/snapshot");
+  monitorReads.set(snapshot,serial);return snapshot;
+}
+function applyMonitorView(snapshot){
+  if(monitorReads.has(snapshot)&&monitorReads.get(snapshot)!==monitorReadSerial)return;
+  store.setSnapshot(snapshot);render();
+}
+async function loadInspector(cursor="") {
+  const serial=++inspectorReadSerial;
+  try {
+    const page=await readInspection($("inspectSection").value,cursor);
+    if(serial!==inspectorReadSerial)return;
+    inspectorPage=page;
+    $("inspector").textContent=JSON.stringify({section:page.data.section,revision:page.state_revision,inspection_epoch:page.inspection_epoch,page_hash:page.page_hash,loaded:page.data.items.length,total:page.data.total,next_page:Boolean(page.next_cursor),items:page.data.items},null,2);
+    $("inspectNext").disabled=!page.next_cursor;
+  } catch(error){if(serial!==inspectorReadSerial)return;inspectorPage=null;$("inspectNext").disabled=true;$("inspector").textContent=error.message;}
 }
 async function postObservation(envelope) {
   return enqueueObservation(async()=>{
@@ -88,7 +121,11 @@ async function sendEnvelope(envelope, uiStatus) {
 }
 function render() {
   const s=store.snapshot; if(!s)return;
-  $("brain").textContent=s.brain_identity||"unavailable"; $("revision").textContent=String(s.state_revision); $("hash").textContent=s.canonical_state_hash||"unavailable";
+  $("brain").textContent=s.brain_identity||"unavailable"; $("revision").textContent=String(s.state_revision); $("hash").textContent=s.page_hash||s.canonical_state_hash||"unavailable";
+  $("hashLabel").textContent=s.inspection?"Page hash":"Snapshot hash";
+  $("inspectionWindow").textContent=s.inspection?"Loaded "+s.neural_units.length+" of "+s.counts.neural_units+" units · "+s.synapses.length+" of "+(s.inspection.data.related_total??0)+" connections within this window · state preview ≤16 entries per map":"Full snapshot view";
+  graphCursor=s.inspection?.next_cursor||"";
+  $("graphNext").disabled=!graphCursor;
   $("units").textContent=String(s.counts?.neural_units??"unavailable"); $("populations").textContent=String(s.counts?.populations??"unavailable"); $("synapses").textContent=String(s.counts?.synapses??"unavailable");
   $("prediction").textContent=JSON.stringify(s.brain_state?.prediction||{},null,2); $("error").textContent=JSON.stringify(s.brain_state?.error||{},null,2); $("memory").textContent=JSON.stringify(s.brain_state?.memory||{},null,2); $("plasticity").textContent=JSON.stringify(s.brain_state?.plasticity||{},null,2); $("curiosity").textContent=JSON.stringify(s.brain_state?.curiosity||{},null,2); $("provenance").textContent=JSON.stringify({provenance:s.provenance||[],episodes:s.episodes||[],bootstrap_experiences:s.bootstrap_experiences||[]},null,2); renderCognitivePanel(s);
   renderGraph(s); renderEvents(); renderInspectableState(s);
@@ -188,7 +225,7 @@ function renderCognitivePanel(s){
   const last=store.events[store.events.length-1],obs=last?.observation||last?.Observation;
   $("ioOutput").textContent=JSON.stringify({runtime_event:last?.type||null,state_revision:s.state_revision,canonical_state_hash:s.canonical_state_hash,observation:obs||null},null,2);
   const active=(s.neural_units||[]).filter(u=>Number(u.activation||0)>.5).sort((a,b)=>Number(b.activation||0)-Number(a.activation||0)).slice(0,12);
-  $("thoughtState").textContent=JSON.stringify({status:"neural-state view",note:"Kata hanya ditampilkan sebagai pikiran aktual jika runtime mengekspos aktivasi simbolik. Saat ini panel menunjukkan keadaan neural aktif, prediksi, error, dan plasticity.",active_neural_units:active.map(u=>({id:u.id,activation:u.activation})),prediction:s.brain_state?.prediction||{},error:s.brain_state?.error||{},plasticity:s.brain_state?.plasticity||{},communication_bootstrap_words:s.brain_state?.memory?.communication_lexicon_words||0,state_revision:s.state_revision},null,2);
+  $("thoughtState").textContent=JSON.stringify({status:"neural-state view",note:"Kata hanya ditampilkan sebagai pikiran aktual jika runtime mengekspos aktivasi simbolik. Saat ini panel menunjukkan keadaan neural aktif, prediksi, error, dan plasticity.",active_neural_units:active.map(u=>({id:u.id,activation:u.activation})),prediction:s.brain_state?.prediction||{},error:s.brain_state?.error||{},plasticity:s.brain_state?.plasticity||{},communication_bootstrap_words:s.brain_state?.memory?.communication_lexicon_words??(s.inspection?null:0),state_revision:s.state_revision},null,2);
 }
 function renderInspectableState(s){
   const root=$("inspectList"); if(!root)return; root.textContent="";
@@ -204,10 +241,65 @@ function renderInspectableState(s){
 async function refreshSnapshotForEvent(event){
   return snapshotRefresh.request(event);
 }
-async function resync(){snapshotRefresh.reset();store.setStatus("resyncing");try{const s=await get("/v1/brain/snapshot");store.setSnapshot(s);$("streamState").textContent="snapshot resynced";openStream();}catch(error){status("ERROR","error");$("source").textContent=error.message;}}
-function openStream(){if(socket)socket.close();if(!baseUrl())return;store.clearForReconnect();socket=new WebSocket(bridgeWsUrl());socket.onopen=()=>{store.setStatus("connected");$("streamState").textContent="live WebSocket";status("CONNECTED","connected");};socket.onmessage=async event=>{try{const payload=JSON.parse(event.data);if(payload.type==="brain.handshake"){$("commit").textContent=payload.runtime_commit||"unavailable";return;}const result=store.applyEvent(payload);if(result==="gap")await resync();else if(result==="applied")await refreshSnapshotForEvent(payload);else render();}catch(error){store.setStatus("error");$("streamState").textContent=error.message;status("ERROR","error");}};socket.onerror=()=>{store.setStatus("error");$("streamState").textContent="stream error";};socket.onclose=()=>{if(store.status!=="resyncing"){store.setStatus("stale");$("streamState").textContent="reconnecting";reconnectTimer=setTimeout(openStream,2000);}};}
-async function connect(){if(!baseUrl())return;snapshotRefresh.reset();sessionStorage.setItem("horizon.bridge",baseUrl());if($("token").value.trim())sessionStorage.setItem("horizon.token",$("token").value.trim());status("CONNECTING","stale");try{const handshake=await get("/v1/brain/handshake");revisionTelemetry=handshake.capabilities?.includes("revision_stream")===true;$("commit").textContent=handshake.runtime_commit||"unavailable";const snapshot=await get("/v1/brain/snapshot");if(handshake.canonical_state_hash!==snapshot.canonical_state_hash||handshake.state_revision!==snapshot.state_revision)throw new Error("handshake/snapshot revision or hash mismatch");store.resetForConnection();store.setSnapshot(snapshot);$("source").textContent="Horizon Bridge canonical runtime";render();openStream();}catch(error){store.setStatus("error");status("ERROR","error");$("source").textContent=error.message;}}
-function disconnect(){snapshotRefresh.reset();if(reconnectTimer)clearTimeout(reconnectTimer);if(socket)socket.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");}
+async function resync(){snapshotRefresh.reset();store.setStatus("resyncing");try{const s=await loadMonitorView();applyMonitorView(s);$("streamState").textContent="snapshot resynced";openStream();}catch(error){status("ERROR","error");$("source").textContent=error.message;}}
+function openStream(){
+  if(socket){const previous=socket;socket=null;previous.close();}
+  if(!baseUrl())return;
+  store.clearForReconnect();
+  const connection=new WebSocket(bridgeWsUrl());socket=connection;
+  connection.onopen=()=>{if(socket!==connection)return;store.setStatus("connected");$("streamState").textContent="live WebSocket";status("CONNECTED","connected");};
+  connection.onmessage=async event=>{
+    if(socket!==connection)return;
+    try{
+      const payload=JSON.parse(event.data);
+      if(payload.type==="brain.handshake"){
+        $("commit").textContent=payload.runtime_commit||"unavailable";
+        if(boundedInspection&&store.snapshot?.inspection_epoch&&payload.inspection_epoch!==store.snapshot.inspection_epoch)await resync();
+        return;
+      }
+      const result=store.applyEvent(payload);
+      if(result==="gap")await resync();else if(result==="applied")await refreshSnapshotForEvent(payload);else render();
+    }catch(error){if(socket!==connection)return;store.setStatus("error");$("streamState").textContent=error.message;status("ERROR","error");}
+  };
+  connection.onerror=()=>{if(socket!==connection)return;store.setStatus("error");$("streamState").textContent="stream error";};
+  connection.onclose=()=>{if(socket!==connection)return;socket=null;if(store.status!=="resyncing"&&store.status!=="disconnected"){store.setStatus("stale");$("streamState").textContent="reconnecting";reconnectTimer=setTimeout(openStream,2000);}};
+}
+
+async function connect(){
+  if(!baseUrl())return;
+  snapshotRefresh.reset();++monitorReadSerial;++inspectorReadSerial;graphCursor="";inspectorPage=null;
+  if(socket){const previous=socket;socket=null;previous.close();}
+  sessionStorage.setItem("horizon.bridge",baseUrl());if($("token").value.trim())sessionStorage.setItem("horizon.token",$("token").value.trim());
+  status("CONNECTING","stale");
+  try {
+    let snapshot;
+    try {
+      const page=await readInspection("neural_units","","activity");
+      boundedInspection=true;revisionTelemetry=true;graphCursor=page.next_cursor||"";
+      snapshot=inspectionGraph(page);$("commit").textContent=page.runtime_commit||"unavailable";
+    } catch(error) {
+      if(error.status!==404)throw error;
+      boundedInspection=false;
+      const handshake=await get("/v1/brain/handshake");revisionTelemetry=handshake.capabilities?.includes("revision_stream")===true;
+      $("commit").textContent=handshake.runtime_commit||"unavailable";
+      snapshot=await get("/v1/brain/snapshot");
+      if(handshake.canonical_state_hash!==snapshot.canonical_state_hash||handshake.state_revision!==snapshot.state_revision)throw new Error("handshake/snapshot revision or hash mismatch");
+    }
+    store.resetForConnection();store.setSnapshot(snapshot);
+    $("source").textContent=boundedInspection?"Horizon Bridge · bounded live inspection":"Horizon Bridge canonical runtime";
+    render();openStream();
+  }catch(error){store.setStatus("error");status("ERROR","error");$("source").textContent=error.message;}
+}
+
+function disconnect(){
+  ++monitorReadSerial;++inspectorReadSerial;snapshotRefresh.reset();if(reconnectTimer)clearTimeout(reconnectTimer);
+  const previous=socket;socket=null;previous?.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");
+}
+
+$("graphNext").onclick=async()=>{try{snapshotRefresh.reset();applyMonitorView(await loadMonitorView(graphCursor));}catch(error){$("inspectionWindow").textContent=error.message+" · refresh the live view";}};
+$("graphRefresh").onclick=async()=>{try{snapshotRefresh.reset();applyMonitorView(await loadMonitorView());}catch(error){$("inspectionWindow").textContent=error.message;}};
+$("inspectLoad").onclick=()=>loadInspector();
+$("inspectNext").onclick=()=>loadInspector(inspectorPage?.next_cursor||"");
 $("connect").onclick=connect;$("disconnect").onclick=disconnect;store.subscribe(render);
 
 

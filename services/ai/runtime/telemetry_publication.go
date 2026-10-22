@@ -74,12 +74,11 @@ func (r *BrainRuntime) publishTelemetryLocked(eventType string, at time.Time, ev
 		eh := sha256.Sum256(data)
 		e := TelemetryEvent{Type: eventType, BrainIdentity: BrainIdentity, StateRevision: r.seq, Timestamp: at.UTC(), EventHash: "sha256:" + hex.EncodeToString(eh[:]), Event: event, Observation: observation, Outcome: outcome, StateDelta: delta, PredictionError: predictionError}
 		if canonicalHash {
-			brain, err := r.brain.CanonicalJSON()
+			hash, err := r.brain.CanonicalHash()
 			if err != nil {
 				return TelemetryEvent{}, err
 			}
-			bh := sha256.Sum256(brain)
-			e.CanonicalStateHash = "sha256:" + hex.EncodeToString(bh[:])
+			e.CanonicalStateHash = hash
 		}
 		r.brain.RLock()
 		e.Plasticity = cloneMonitorFloatMap(r.brain.BrainState.PlasticityState)

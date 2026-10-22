@@ -136,14 +136,42 @@ func TestPhysicalMemoryCheckpointRejectsInvalidClockBeforeMutation(t *testing.T)
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Mutate the semantic clock, independently of pretty/compact checkpoint
+	// formatting. Assert the field exists so a future format change cannot
+	// silently turn a negative test into an unchanged valid checkpoint.
+	changeClock := func(field, value string) func(*BrainSnapshot) {
+		return func(s *BrainSnapshot) {
+			var document map[string]json.RawMessage
+			if err := json.Unmarshal(s.Brain, &document); err != nil {
+				t.Fatal(err)
+			}
+			var clock map[string]any
+			if err := json.Unmarshal(document["memory_decay"], &clock); err != nil {
+				t.Fatal(err)
+			}
+			if _, exists := clock[field]; !exists {
+				t.Fatalf("clock field %s missing", field)
+			}
+			clock[field] = value
+			changed, err := json.Marshal(clock)
+			if err != nil {
+				t.Fatal(err)
+			}
+			document["memory_decay"] = changed
+			changed, err = json.Marshal(document)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if bytes.Equal(changed, s.Brain) {
+				t.Fatal("invalid clock mutation was a no-op")
+			}
+			s.Brain = changed
+		}
+	}
 	for _, mutate := range []func(*BrainSnapshot){
 		func(s *BrainSnapshot) { s.SchemaVersion = recurrentBrainSnapshotSchemaVersion },
-		func(s *BrainSnapshot) {
-			s.Brain = bytes.Replace(s.Brain, []byte(`"applied_at": "2026-10-20T00:00:00.000000123Z"`), []byte(`"applied_at": "0001-01-01T00:00:00Z"`), 1)
-		},
-		func(s *BrainSnapshot) {
-			s.Brain = bytes.Replace(s.Brain, []byte(`"encoding": "physical-memory-v1"`), []byte(`"encoding": "future"`), 1)
-		},
+		changeClock("applied_at", "0001-01-01T00:00:00Z"),
+		changeClock("encoding", "future"),
 	} {
 		changed := snapshot
 		mutate(&changed)

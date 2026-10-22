@@ -72,3 +72,12 @@ test("in-flight snapshots cannot rewind event continuity or the displayed graph"
   assert.equal(store.revision,1);assert.equal(store.snapshot.state_revision,1);
   assert.equal(store.applyEvent({type:"process",state_revision:2,timestamp:"",schema_version:2}),"applied");
 });
+
+test("new inspection runtime epochs reset the cursor after recovery",()=>{
+  const store=new HorizonStore();
+  const page=(epoch,revision)=>({type:"brain.snapshot",brain_identity:"horizon-primary-brain",state_revision:revision,inspection_epoch:epoch,captured_at:"",canonical_state_hash:"",counts:{},neural_units:[],populations:[],synapses:[],temporal_patterns:[],experience_traces:[],brain_state:{}});
+  store.setSnapshot(page("before-recovery",9));
+  store.applyEvent({type:"think",state_revision:10,timestamp:"",schema_version:2});
+  store.setSnapshot(page("after-recovery",4));
+  assert.equal(store.revision,4);assert.equal(store.snapshot.inspection_epoch,"after-recovery");assert.equal(store.events.length,0);
+});

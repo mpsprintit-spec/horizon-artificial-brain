@@ -612,15 +612,13 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.RLock()
 	defer k.mu.RUnlock()
-	b, e := marshalCanonicalBrain(k)
-	if e != nil { return e }
-	dir := filepath.Dir(path)
+		dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil { return err }
 	tmp, err := os.CreateTemp(dir, ".brain-memory-*.tmp")
 	if err != nil { return err }
 	tmpName := tmp.Name()
 	defer os.Remove(tmpName)
-	if _, err := tmp.Write(b); err != nil { _ = tmp.Close(); return err }
+	if err := writeCanonicalBrain(tmp,k,true,""); err != nil { _ = tmp.Close(); return err }
 	if err := tmp.Sync(); err != nil { _ = tmp.Close(); return err }
 	if err := tmp.Close(); err != nil { return err }
 	return os.Rename(tmpName, path)

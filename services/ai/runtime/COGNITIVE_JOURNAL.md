@@ -169,3 +169,7 @@ could start another cycle after a callback cancelled its context and eventually
 block an additional callback. The service now checks cancellation before each
 cycle and immediately after the completed transaction's callback. It never
 interrupts an in-progress journal transition halfway through application.
+
+Current bounded monitor reads and complete streamed persistence are described in
+[BOUNDED_INSPECTION.md](BOUNDED_INSPECTION.md); earlier measurements above retain
+their original baseline scope.
