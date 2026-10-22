@@ -1,6 +1,7 @@
 # Observation, simulation and outcome feedback (H12)
 
-Serving uses `observed-feedback-v1`, retaining ordered observations, bounded
+The observation/feedback law is retained by current `evidence-uncertainty-v1`
+serving (see [EVIDENCE_UNCERTAINTY.md](EVIDENCE_UNCERTAINTY.md)), retaining ordered observations, bounded
 context, physical-time retention and local activity from the preceding contracts.
 All learning operates on the existing synapses and pattern index of one Brain.
 No semantic parser, external model, answer table or second knowledge store is
@@ -115,7 +116,8 @@ These controls support the identified mechanisms on these tasks. They do not
 establish a universal optimal adaptation rate or show that self reinforcement
 was the sole cause of every historical H12 case. Partial observations, ambiguous
 outcomes, broad task interference and longer delays require further evaluation.
-H13 uncertainty calibration and H23 independent generalization remain open.
+Bounded H13 predictive calibration is addressed in EVIDENCE_UNCERTAINTY.md;
+H23 independent generalization remains open.
 
 ## Persistence and recovery
 

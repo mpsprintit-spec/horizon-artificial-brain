@@ -198,7 +198,8 @@ func (r *BrainRuntime) cognitiveKnowledgeExposureLocked(event Event) (CognitiveO
 	})
 	output := cognitiveOutputFromResult(BrainIdentity, r.seq, event.Timestamp, result)
 	output.Prediction = r.activation.PredictionSnapshot()
-	if r.dynamicsEncoding != knowledge.ObservedFeedbackDynamics || result.ObservedInput {
+	output.PredictionAssessment = r.activation.PredictionAssessment(event.Timestamp, r.dynamicsEncoding)
+	if !r.dynamicsEncoding.HasObservedFeedback() || result.ObservedInput {
 		r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
 	}
 	r.brain.ApplyMemoryDynamicsWithEncoding(event.Timestamp, r.dynamicsEncoding)

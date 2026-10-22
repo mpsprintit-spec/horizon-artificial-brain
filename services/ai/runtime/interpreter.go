@@ -16,14 +16,15 @@ type CognitiveInterpreter interface {
 // Interpretation is deliberately substrate-oriented. It exposes the neural
 // result without assigning hard-coded semantic relations to nodes.
 type Interpretation struct {
-	BrainIdentity   string
-	Sequence        uint64
-	RankedNodeIDs   []knowledge.NodeID
-	Activations     map[knowledge.NodeID]float64
-	Confidence      map[knowledge.NodeID]float64
-	Resonance       float64
-	PredictionError float64
-	Source          string
+	PredictionAssessment *knowledge.PredictionAssessment `json:"prediction_assessment,omitempty"`
+	BrainIdentity        string
+	Sequence             uint64
+	RankedNodeIDs        []knowledge.NodeID
+	Activations          map[knowledge.NodeID]float64
+	Confidence           map[knowledge.NodeID]float64
+	Resonance            float64
+	PredictionError      float64
+	Source               string
 }
 
 // NeuralInterpreter is the default Gate-4 interpreter. It accepts only the
@@ -35,14 +36,15 @@ func (NeuralInterpreter) Interpret(output CognitiveOutput) (Interpretation, erro
 		return Interpretation{}, errors.New("cognitive output has no brain identity")
 	}
 	return Interpretation{
-		BrainIdentity:   output.BrainIdentity,
-		Sequence:        output.Sequence,
-		RankedNodeIDs:   append([]knowledge.NodeID(nil), output.RankedNodeIDs...),
-		Activations:     cloneNodeValues(output.Activations),
-		Confidence:      cloneNodeValues(output.Confidence),
-		Resonance:       output.Resonance,
-		PredictionError: output.PredictionError,
-		Source:          "neural",
+		BrainIdentity:        output.BrainIdentity,
+		Sequence:             output.Sequence,
+		RankedNodeIDs:        append([]knowledge.NodeID(nil), output.RankedNodeIDs...),
+		Activations:          cloneNodeValues(output.Activations),
+		Confidence:           cloneNodeValues(output.Confidence),
+		Resonance:            output.Resonance,
+		PredictionError:      output.PredictionError,
+		Source:               "neural",
+		PredictionAssessment: output.PredictionAssessment.Clone(),
 	}, nil
 }
 

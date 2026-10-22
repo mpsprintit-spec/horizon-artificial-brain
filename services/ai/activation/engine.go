@@ -44,8 +44,10 @@ func (e *Engine) Think(cycles int) Result { return e.ThinkWithPrediction(cycles)
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkWithPredictionAt(cycles,time.Now().UTC()) }
 
 func (e *Engine) ActivateWith(req Request) Result {
-	if req.DynamicsEncoding==nil || *req.DynamicsEncoding!=knowledge.ObservedFeedbackDynamics {
-		e.mu.Lock();e.observationPrediction=nil;e.mu.Unlock()
+	if req.DynamicsEncoding == nil || !req.DynamicsEncoding.HasObservedFeedback() {
+		e.mu.Lock()
+		e.observationPrediction = nil
+		e.mu.Unlock()
 	}
 	if req.DynamicsEncoding == nil || *req.DynamicsEncoding == knowledge.LegacyDynamics { return e.activateLegacyWith(req) }
 	return e.activateOrderedWith(req)

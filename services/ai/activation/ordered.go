@@ -54,7 +54,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	context := e.contextState.Clone()
 	previousObservation := e.observationPrediction.Clone()
 	e.mu.RUnlock()
-	observedFeedback := req.DynamicsEncoding != nil && *req.DynamicsEncoding == knowledge.ObservedFeedbackDynamics
+	observedFeedback := req.DynamicsEncoding != nil && req.DynamicsEncoding.HasObservedFeedback()
 	recurrent := req.DynamicsEncoding != nil && req.DynamicsEncoding.HasRecurrentContext()
 	resetContext := false
 	if recurrent {
