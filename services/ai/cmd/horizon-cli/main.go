@@ -40,7 +40,6 @@ type cli struct {
 	brainLive bool
 	brainStop chan struct{}
 	brainWG sync.WaitGroup
-	outputMu sync.Mutex
 }
 
 type pipelineResult struct {
@@ -83,7 +82,7 @@ func newCLI(input io.Reader, output io.Writer, memoryPath string) *cli {
 	return &cli{
 		horizon:    horizon,
 		in:         bufio.NewScanner(input),
-		out:        output,
+		out:        &cliOutput{writer: output},
 		startedAt:  time.Now(),
 		memoryPath: memoryPath,
 		roleCatalog:     &evolution.RoleCatalog{},
@@ -457,14 +456,10 @@ func (c *cli) printBrainState(output runtime.CognitiveOutput) {
 }
 
 func (c *cli) safePrintf(format string, args ...interface{}) {
-	c.outputMu.Lock()
-	defer c.outputMu.Unlock()
 	fmt.Fprintf(c.out, format, args...)
 }
 
 func (c *cli) safePrintln(value string) {
-	c.outputMu.Lock()
-	defer c.outputMu.Unlock()
 	fmt.Fprintln(c.out, value)
 }
 

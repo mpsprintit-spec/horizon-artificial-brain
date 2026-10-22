@@ -12,16 +12,16 @@ import (
 func TestCLIInspectionCommandsUseDetachedCurrentBrainAfterHandover(t *testing.T) {
 	var output bytes.Buffer
 	app:=newCLI(strings.NewReader(""),&output,filepath.Join(t.TempDir(),"brain.json"))
-	initial:=app.horizon.Runtime
+	initial:=runtimeForCLITest(t,app.horizon)
 	log,err:=runtime.OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
 	if err!=nil {t.Fatal(err)}
 	defer log.Close()
-	initial.SetEventLog(log)
+	if err:=app.horizon.Supervisor().AttachEventLog(log);err!=nil {t.Fatal(err)}
 	before,err:=app.horizon.InspectActiveBrain()
 	if err!=nil {t.Fatal(err)}
 	cp:=filepath.Join(t.TempDir(),"checkpoint.json")
 	if err:=initial.Checkpoint(cp);err!=nil {t.Fatal(err)}
-	if err:=app.horizon.Supervisor.RecoverFromCheckpoint(log,cp);err!=nil {t.Fatal(err)}
+	if err:=app.horizon.Supervisor().RecoverFromCheckpoint(log,cp);err!=nil {t.Fatal(err)}
 	// All queries, including the more expensive statistics and clustering,
 	// must work without passing a mutable *knowledge.Brain to the CLI.
 	for _,cmd:=range []string{
@@ -44,7 +44,7 @@ func TestCLIInspectionCommandsUseDetachedCurrentBrainAfterHandover(t *testing.T)
 		t.Fatal("CLI read-only inspection mutated neural state")
 	}
 	if !initial.RecoveryRequired() {t.Fatal("legacy CLI runtime remained writable")}
-	if err:=app.horizon.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=app.horizon.Supervisor().Close();err!=nil {t.Fatal(err)}
 	output.Reset()
 	if !app.handleCommand("clusters") || !strings.Contains(output.String(),"Brain command unavailable:") {
 		t.Fatalf("closed supervisor exposed brain to CLI inspector: %s",output.String())
@@ -78,7 +78,7 @@ func TestCLIOrdinaryInputAndHelpDoNotNeedNeuralSnapshot(t *testing.T) {
 	if allocations>10 {
 		t.Fatalf("ordinary input command check allocated %.0f objects; possible neural snapshot in hot path",allocations)
 	}
-	if err:=app.horizon.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=app.horizon.Supervisor().Close();err!=nil {t.Fatal(err)}
 	if !app.handleCommand("help") || !strings.Contains(output.String(),"Commands:") {
 		t.Fatalf("help unexpectedly requires an active brain: %s",output.String())
 	}
