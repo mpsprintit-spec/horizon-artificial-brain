@@ -95,62 +95,126 @@ func (s SensorObservation) NeuralVector() (knowledge.NeuralVector, error) {
 // canonical neural substrate. It deliberately bypasses lexical grounding:
 // numeric sensor channels must not be collapsed into a synthetic token.
 func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservation) (CognitiveInterpretation, error) {
-	if o == nil || o.Runtime == nil {
+	if o == nil || o.Runtime == nil || o.Runtime.brain == nil {
 		return CognitiveInterpretation{}, errors.New("cognitive orchestrator is not initialized")
 	}
-	o.Runtime.sensorMu.Lock()
-	defer o.Runtime.sensorMu.Unlock()
 	sensor = sensor.Clone()
 	if err := sensor.Validate(); err != nil {
 		return CognitiveInterpretation{}, err
-	}
-	// Reject time-reversed samples before projection can mutate the canonical brain.
-	o.Runtime.mu.Lock()
-	lastObservationAt := o.Runtime.lastObservationAt
-	o.Runtime.mu.Unlock()
-	if !lastObservationAt.IsZero() && sensor.Timestamp.Before(lastObservationAt) {
-		return CognitiveInterpretation{}, fmt.Errorf("%w: timestamp %s precedes last observation %s", ErrInvalidSensorObservation, sensor.Timestamp.UTC().Format(time.RFC3339Nano), lastObservationAt.UTC().Format(time.RFC3339Nano))
-	}
-	if o.Runtime.HasProcessedEvent(sensor.SampleID) {
-		return CognitiveInterpretation{}, fmt.Errorf("duplicate sensor sample ID %q", sensor.SampleID)
 	}
 	vector, err := sensor.NeuralVector()
 	if err != nil {
 		return CognitiveInterpretation{}, err
 	}
-	population, err := o.Runtime.brain.ProjectVectorPopulationAt(vector, GroundingThreshold, 4, sensor.Timestamp)
+
+	type processedSensor struct {
+		output     CognitiveOutput
+		ids        []knowledge.NodeID
+		similarity float64
+	}
+	// The runtime lock protects the entire canonical sensor mutation:
+	// timestamp/duplicate validation, projection, cognition and temporal
+	// reinforcement. Independent Process/Think/Learn calls cannot interleave.
+	// Durable crash recovery remains a separate concern: an event-log failure
+	// after projection can still require recovery from a known checkpoint.
+	result, err := func() (processedSensor, error) {
+		r := o.Runtime
+		r.mu.Lock()
+		defer r.mu.Unlock()
+		if err := r.ensureWritableLocked(); err != nil { return processedSensor{}, err }
+
+		if !r.lastObservationAt.IsZero() && sensor.Timestamp.Before(r.lastObservationAt) {
+			return processedSensor{}, fmt.Errorf("%w: timestamp %s precedes last observation %s", ErrInvalidSensorObservation, sensor.Timestamp.UTC().Format(time.RFC3339Nano), r.lastObservationAt.UTC().Format(time.RFC3339Nano))
+		}
+		if _, exists := r.processedEvents[sensor.SampleID]; exists {
+			return processedSensor{}, fmt.Errorf("duplicate sensor sample ID %q", sensor.SampleID)
+		}
+
+		// Write the replayable sensor intent before mutating the neural substrate.
+		// A failed/uncertain journal append poisons this runtime until recovery.
+		journaled := r.eventLog != nil
+		var intentHash string
+		if journaled {
+			intentEvent := Event{
+				ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
+				Timestamp: sensor.Timestamp.UTC(), Cycles: 1, SensorObservation: &sensor,
+			}
+			intent := LoggedEvent{
+				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+				Sequence: r.seq + 1, Type: EventTypeSensorIntent,
+				Timestamp: sensor.Timestamp.UTC(), Event: cloneEvent(intentEvent),
+			}
+			intentHash, err = sensorIntentHash(intent)
+			if err != nil {
+				return processedSensor{}, err
+			}
+			if err := r.eventLog.Append(intent); err != nil {
+				r.recoveryRequired = true
+				return processedSensor{}, fmt.Errorf("%w: append sensor intent: %v", ErrRuntimeRecoveryRequired, err)
+			}
+		}
+
+		population, err := r.brain.ProjectVectorPopulationAt(vector, GroundingThreshold, 4, sensor.Timestamp)
+		if err != nil {
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor projection: %v", ErrRuntimeRecoveryRequired, err)
+		}
+		if len(population.Units) == 0 {
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor projection produced no neural population", ErrRuntimeRecoveryRequired)
+		}
+		ids := make([]knowledge.NodeID, 0, len(population.Units))
+		for _, unit := range population.Units {
+			ids = append(ids, unit.NodeID)
+		}
+		event := Event{
+			ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
+			Timestamp: sensor.Timestamp.UTC(), Cycles: 1,
+			StimulusNodeIDs: ids, SensorObservation: &sensor,
+		}
+		// The durable process record for journaled sensor input is the
+		// intent/commit pair, not a second standalone process record.
+		output, err := r.cognitiveProcessWithPersistenceLocked(event, !journaled)
+		if err != nil {
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor cognition: %v", ErrRuntimeRecoveryRequired, err)
+		}
+		if err := r.learnObservedTransitionLocked(ids, event.Timestamp); err != nil {
+			r.recoveryRequired = true
+			return processedSensor{}, fmt.Errorf("%w: sensor temporal learning: %v", ErrRuntimeRecoveryRequired, err)
+		}
+		if journaled {
+			commit := LoggedEvent{
+				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity,
+				Sequence: output.Sequence, Type: EventTypeSensorCommit,
+				Timestamp: sensor.Timestamp.UTC(), IntentHash: intentHash,
+			}
+			if err := r.eventLog.Append(commit); err != nil {
+				r.recoveryRequired = true
+				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)
+			}
+			// Do not expose the process event to telemetry before the commit
+			// marker is durable; a failed transaction remains internal.
+			if r.telemetry != nil {
+				r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
+			}
+		}
+		return processedSensor{output: output, ids: ids, similarity: population.Units[0].Activation}, nil
+	}()
 	if err != nil {
 		return CognitiveInterpretation{}, err
 	}
-	if len(population.Units) == 0 {
-		return CognitiveInterpretation{}, errors.New("sensor projection produced no neural population")
-	}
-	ids := make([]knowledge.NodeID, 0, len(population.Units))
-	for _, unit := range population.Units {
-		ids = append(ids, unit.NodeID)
-	}
-	event := Event{
-		ID: sensor.SampleID, Source: sensor.Source, Modality: sensor.Modality,
-		Timestamp: sensor.Timestamp.UTC(), Cycles: 1,
-		StimulusNodeIDs: ids, SensorObservation: &sensor,
-	}
-	output, err := o.Runtime.CognitiveProcess(event)
-	if err != nil {
-		return CognitiveInterpretation{}, err
-	}
-	if err := o.Runtime.LearnObservedTransition(ids, event.Timestamp); err != nil {
-		return CognitiveInterpretation{}, err
-	}
-	interpretation, err := o.Runtime.InterpretCognitive(output, Observation{
+
+	interpretation, err := o.Runtime.InterpretCognitive(result.output, Observation{
 		Source: sensor.Source, Modality: sensor.Modality,
 	})
 	if err != nil {
 		return CognitiveInterpretation{}, err
 	}
 	interpretation.GroundedRepresentations = []knowledge.GroundedRepresentation{{
-		NodeID: ids[0], Population: append([]knowledge.NodeID(nil), ids...),
-		Similarity: population.Units[0].Activation, Status: knowledge.GroundingCandidate,
-		Source: sensor.Source, Modality: sensor.Modality, Timestamp: event.Timestamp,
+		NodeID: result.ids[0], Population: append([]knowledge.NodeID(nil), result.ids...),
+		Similarity: result.similarity, Status: knowledge.GroundingCandidate,
+		Source: sensor.Source, Modality: sensor.Modality, Timestamp: sensor.Timestamp.UTC(),
 	}}
 	return interpretation, nil
 }

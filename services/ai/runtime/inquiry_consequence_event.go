@@ -20,6 +20,9 @@ type InquiryConsequenceEvent struct {
 // records the exact preference update in the durable event log.
 func (r *BrainRuntime) RecordInquiryConsequenceEvent(event InquiryConsequenceEvent, at time.Time) (uint64, error) {
 	if r == nil || event.Action == "" { return 0, nil }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return r.seq, err }
 	event.Valence = clampSigned(event.Valence)
 	event.InformationGain = clamp01(event.InformationGain)
 	event.PredictionError = clamp01(event.PredictionError)
@@ -29,7 +32,6 @@ func (r *BrainRuntime) RecordInquiryConsequenceEvent(event InquiryConsequenceEve
 	}
 	event.TargetNodeIDs = append([]knowledge.NodeID(nil), event.TargetNodeIDs...)
 	event.OutcomeNodeIDs = append([]knowledge.NodeID(nil), event.OutcomeNodeIDs...)
-	r.mu.Lock(); defer r.mu.Unlock()
 	if r.inquiryValence == nil { r.inquiryValence = make(map[InquiryAction]float64) }
 	previous := r.inquiryValence[event.Action]
 	if r.learning != nil && len(event.TargetNodeIDs) > 0 && len(event.OutcomeNodeIDs) > 0 {

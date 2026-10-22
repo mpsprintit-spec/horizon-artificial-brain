@@ -11,9 +11,11 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-const BrainSnapshotSchemaVersion = 4
+const BrainSnapshotSchemaVersion = 5
+const legacyBrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
 	SchemaVersion int                      `json:"schema_version"`
@@ -25,6 +27,12 @@ type BrainSnapshot struct {
 	Activation    activation.StateSnapshot `json:"activation"`
 	CognitiveState CognitiveState `json:"cognitive_state"`
 	InquiryValence map[InquiryAction]float64 `json:"inquiry_valence"`
+	// Snapshot v5: temporal predecessor and dedup state must survive a restart.
+	LastObservationPopulation []knowledge.NodeID `json:"last_observation_population,omitempty"`
+	LastObservationAt time.Time `json:"last_observation_at,omitempty"`
+	ProcessedEvents map[string]uint64 `json:"processed_events,omitempty"`
+	// Empty for standalone checkpoints. Required for journal-offset recovery.
+	JournalPrefixHash string `json:"journal_prefix_hash,omitempty"`
 }
 
 type checkpointPayload struct {
@@ -60,6 +68,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return err }
 
 	brainPath := path + ".brain.tmp"
 	if err := saveDeterministicBrain(r.brain, brainPath); err != nil {
@@ -75,20 +84,29 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	activationState := r.activation.SnapshotState()
 	cognitiveState := cloneCognitiveState(r.lastCognitiveState)
 	inquiryValence := cloneInquiryValence(r.inquiryValence)
-	checksum, err := checkpointChecksum(brainBytes, activationState, cognitiveState, inquiryValence)
+	// Journal anchoring is evaluated under the runtime lock, so no event may
+	// advance r.seq between the snapshot and its durable prefix digest.
+	journalHash, err := r.checkpointJournalPrefixLocked()
 	if err != nil {
-		return fmt.Errorf("checksum checkpoint: %w", err)
+		return fmt.Errorf("anchor checkpoint to committed journal: %w", err)
 	}
 	snapshot := BrainSnapshot{
 		SchemaVersion: BrainSnapshotSchemaVersion,
 		BrainIdentity: BrainIdentity,
 		Sequence:      r.seq,
 		Timestamp:     r.nowLocked(),
-		Checksum:      checksum,
 		Brain:         json.RawMessage(brainBytes),
 		Activation:     activationState,
 		CognitiveState: cognitiveState,
 		InquiryValence: inquiryValence,
+		LastObservationPopulation: append([]knowledge.NodeID(nil), r.lastObservationPopulation...),
+		LastObservationAt: r.lastObservationAt,
+		ProcessedEvents: cloneProcessedEventIndex(r.processedEvents),
+		JournalPrefixHash: journalHash,
+	}
+	snapshot.Checksum, err = checkpointChecksumV5(snapshot)
+	if err != nil {
+		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
 	data, err := json.MarshalIndent(snapshot, "", "  ")
 	if err != nil {
@@ -137,22 +155,40 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}
-	checksum, err := checkpointChecksum(snapshot.Brain, snapshot.Activation, snapshot.CognitiveState, snapshot.InquiryValence)
+	var checksum string
+	if snapshot.SchemaVersion == legacyBrainSnapshotSchemaVersion {
+		checksum, err = checkpointChecksum(snapshot.Brain, snapshot.Activation, snapshot.CognitiveState, snapshot.InquiryValence)
+	} else {
+		checksum, err = checkpointChecksumV5(snapshot)
+	}
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
 	if checksum != snapshot.Checksum {
 		return errors.New("checkpoint checksum mismatch")
 	}
+	if snapshot.SchemaVersion == BrainSnapshotSchemaVersion {
+		if (len(snapshot.LastObservationPopulation) == 0) != snapshot.LastObservationAt.IsZero() {
+			return errors.New("checkpoint temporal population and timestamp disagree")
+		}
+		for id, seq := range snapshot.ProcessedEvents {
+			if id == "" || seq == 0 || seq > snapshot.Sequence {
+				return fmt.Errorf("checkpoint processed event index invalid for %q", id)
+			}
+		}
+	}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
+	// A poisoned runtime may have mutated neural state or runtime caches that
+	// a checkpoint restore cannot safely unwind. Always use a new runtime.
+	if err := r.ensureWritableLocked(); err != nil { return err }
 	brainPath := path + ".restore.tmp"
 	if err := os.WriteFile(brainPath, snapshot.Brain, 0600); err != nil {
 		return fmt.Errorf("stage brain restore: %w", err)
@@ -165,6 +201,9 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	r.lastCognitiveState = cloneCognitiveState(snapshot.CognitiveState)
 	r.inquiryValence = cloneInquiryValence(snapshot.InquiryValence)
 	r.seq = snapshot.Sequence
+	r.lastObservationPopulation = append([]knowledge.NodeID(nil), snapshot.LastObservationPopulation...)
+	r.lastObservationAt = snapshot.LastObservationAt
+	r.processedEvents = cloneProcessedEventIndex(snapshot.ProcessedEvents)
 	return nil
 }
 
