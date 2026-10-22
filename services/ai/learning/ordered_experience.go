@@ -66,7 +66,7 @@ func (l *LearningUnit) LearnExperienceWithDynamics(experience Experience, now ti
 		}
 		// Conditional counterevidence belongs to the full learned pattern,
 		// not the shared context-free projection of a later sequence step.
-		if dynamics == knowledge.ObservedFeedbackDynamics && previous != nil && i == 1 && len(context)+len(data) == 0 {
+		if dynamics.HasObservedFeedback() && previous != nil && i == 1 && len(context)+len(data) == 0 {
 			l.Kb.ApplyObservedAssociationFeedback(sequence[i-1], sequence[i], confidence, now)
 		}
 		for _, id := range targets {
@@ -74,7 +74,7 @@ func (l *LearningUnit) LearnExperienceWithDynamics(experience Experience, now ti
 		}
 	}
 	trace := &knowledge.ObservationTrace{Stimulus: sequence, Context: context, Data: data}
-	if dynamics == knowledge.ObservedFeedbackDynamics && len(sequence) > 1 {
+	if dynamics.HasObservedFeedback() && len(sequence) > 1 {
 		cue := &knowledge.ObservationTrace{Stimulus: sequence[:len(sequence)-1], Context: context, Data: data}
 		channels := l.Kb.Patterns.PredictRecurrent(cue, nil, now)
 		actual := map[knowledge.NodeID]float64{}

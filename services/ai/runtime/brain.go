@@ -479,7 +479,19 @@ func (r *BrainRuntime) thinkAtWithContextPersistenceLocked(cycles int, context m
 	return thought, r.seq, nil
 }
 
-type CognitiveOutput struct { BrainIdentity string; Sequence uint64; Timestamp time.Time; RankedNodeIDs []knowledge.NodeID; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; Resonance float64; PredictionError float64; Prediction activation.Prediction; StateDelta CognitiveStateDelta }
+type CognitiveOutput struct {
+	PredictionAssessment *knowledge.PredictionAssessment `json:"prediction_assessment,omitempty"`
+	BrainIdentity        string
+	Sequence             uint64
+	Timestamp            time.Time
+	RankedNodeIDs        []knowledge.NodeID
+	Activations          map[knowledge.NodeID]float64
+	Confidence           map[knowledge.NodeID]float64
+	Resonance            float64
+	PredictionError      float64
+	Prediction           activation.Prediction
+	StateDelta           CognitiveStateDelta
+}
 func (r *BrainRuntime) CognitiveProcess(event Event) (CognitiveOutput, error) {
 	if r == nil || r.brain == nil || r.activation == nil {
 		return CognitiveOutput{}, errors.New("brain runtime is not initialized")
@@ -538,7 +550,8 @@ func (r *BrainRuntime) cognitiveProcessWithPersistenceLocked(event Event, persis
 	}
 	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
 	output.Prediction = r.activation.PredictionSnapshot()
-	if r.dynamicsEncoding != knowledge.ObservedFeedbackDynamics || result.ObservedInput {
+	output.PredictionAssessment = r.activation.PredictionAssessment(event.Timestamp, r.dynamicsEncoding)
+	if !r.dynamicsEncoding.HasObservedFeedback() || result.ObservedInput {
 		r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
 	}
 	r.brain.ApplyMemoryDynamicsWithEncoding(event.Timestamp, r.dynamicsEncoding)
@@ -583,7 +596,8 @@ func (r *BrainRuntime) cognitiveThinkAtLocked(cycles int, now time.Time, persist
 		return CognitiveOutput{}, err
 	}
 	output := CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: now, RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}
-	if r.dynamicsEncoding != knowledge.ObservedFeedbackDynamics {
+	output.PredictionAssessment = r.activation.PredictionAssessment(now, r.dynamicsEncoding)
+	if !r.dynamicsEncoding.HasObservedFeedback() {
 		r.brain.RecordLearningSignal(output.PredictionError, now)
 	}
 	r.brain.ApplyMemoryDynamicsWithEncoding(now, r.dynamicsEncoding)

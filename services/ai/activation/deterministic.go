@@ -58,7 +58,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 
 	actualState, actualConfidence := e.advance(state, confidence, now, cycles)
 	actual := e.converge(actualState, actualConfidence, now)
-	if dynamics == knowledge.ObservedFeedbackDynamics {
+	if dynamics.HasObservedFeedback() {
 		e.ApplyActivityPlasticityWithDynamics(nil, nil, now, dynamics)
 	} else {
 		e.ApplyActivityPlasticityWithDynamics(state, actual.Activations, now, dynamics)
@@ -67,7 +67,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 	error := 0.0
 	if len(previousPrediction) > 0 {
 		error = stateDifference(previousPrediction, actual.Activations)
-		if dynamics != knowledge.ObservedFeedbackDynamics {
+		if !dynamics.HasObservedFeedback() {
 			e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction, actual.Activations, error, now, dynamics)
 		}
 	}

@@ -176,7 +176,7 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 		return CognitiveInterpretation{}, false, err
 	}
 	transitionPopulation := event.StimulusNodeIDs
-	if r.dynamicsEncoding == knowledge.ObservedFeedbackDynamics {
+	if r.dynamicsEncoding.HasObservedFeedback() {
 		transitionPopulation = nil
 		seen := map[knowledge.NodeID]bool{}
 		for _, frame := range event.NeuralTrace.Stimulus {
@@ -202,13 +202,18 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 	}
 	cognitive.GroundedRepresentations = grounded
 	if command.Inquiry != nil {
-		r.completeInquiryLocked(clamp01(command.Inquiry.Uncertainty-clamp01(cognitive.Answer.Uncertainty.Level)), output.PredictionError, event.Timestamp)
+		gain := clamp01(command.Inquiry.Uncertainty - clamp01(cognitive.Answer.Uncertainty.Level))
+		if r.dynamicsEncoding == knowledge.EvidenceUncertaintyDynamics {
+			gain = resolvedPredictionInformation(*command.Inquiry, r.activation.LastObservedPopulation())
+		}
+		r.completeInquiryLocked(gain, output.PredictionError, event.Timestamp)
 	}
 	if command.PlanInquiry {
 		agenda, err := r.planInquiryLocked(cognitive.Answer.Uncertainty.Level, event.Timestamp)
 		if err != nil {
 			return CognitiveInterpretation{}, false, err
 		}
+		agenda.PredictionAssessment = output.PredictionAssessment.Clone()
 		cognitive.InquiryAgenda = &agenda
 	}
 	cognitive.ChangeAwareness = InternalChangeAwareness{BrainIdentity: BrainIdentity, Sequence: output.Sequence, Timestamp: output.Timestamp, StateDelta: output.StateDelta, KnowledgeChanges: []KnowledgeInjectionEvent{{BrainIdentity: BrainIdentity, Sequence: output.Sequence, Timestamp: event.Timestamp, Claims: knowledgeClaimsFromGrounding(grounded, event.Timestamp), ExperienceID: experienceID(command.Experience), ChangedNodeIDs: groundedNodeIDs(grounded)}}}

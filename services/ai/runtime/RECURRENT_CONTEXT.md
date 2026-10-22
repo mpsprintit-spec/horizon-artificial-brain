@@ -3,7 +3,7 @@
 ## Mechanism and limits
 
 The recurrent context contract introduced by `recurrent-context-v1` is retained
-by current `observed-feedback-v1` serving runtimes (see [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)
+by current `evidence-uncertainty-v1` serving runtimes (see [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)
 and [MEMORY_TIME.md](MEMORY_TIME.md)). Actual observed stimulus population
 frames retain transient neural eligibility on the same persistent Brain. A
 learned ordered pattern can use eligible earlier populations to supply its
@@ -105,6 +105,6 @@ actor/role binding, arbitrary grammar, semantic answer selection, automatic
 real-world episode segmentation and long-range retrieval beyond these bounds
 remain unproven. H08 passive retention is addressed in MEMORY_TIME.md and the
 reproduced H09 interference in LOCAL_PLASTICITY.md. H12 evidence accounting is
-addressed in OBSERVED_FEEDBACK.md; H13 calibration and
+addressed in OBSERVED_FEEDBACK.md. Bounded H13 calibration is covered in EVIDENCE_UNCERTAINTY.md;
 H23 independent language/generalization evaluation retain their own acceptance
 criteria.

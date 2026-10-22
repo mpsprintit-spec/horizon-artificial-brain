@@ -4,6 +4,8 @@ import (
 	"errors"
 	"sort"
 	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 type InquiryAction string
@@ -41,6 +43,7 @@ type InquiryEvaluation struct {
 }
 
 type InquiryAgenda struct {
+	PredictionAssessment *knowledge.PredictionAssessment `json:"prediction_assessment,omitempty"`
 	BrainIdentity string
 	Sequence uint64
 	CreatedAt time.Time
@@ -139,6 +142,7 @@ func BuildInquiryAgendaFromCognition(interpretation CognitiveInterpretation, at 
 		return InquiryAgenda{}, err
 	}
 	agenda.Uncertainty = uncertainty
+	agenda.PredictionAssessment = interpretation.Answer.PredictionAssessment.Clone()
 	return agenda, nil
 }
 
