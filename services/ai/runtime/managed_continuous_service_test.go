@@ -10,68 +10,102 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-func TestManagedContinuousServiceFollowsRuntimeHandover(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "events.jsonl")
-	checkpoint := filepath.Join(t.TempDir(), "checkpoint.json")
-	log, err := OpenEventLog(path)
+func TestManagedContinuousServiceResolvesRuntimeAfterHandover(t *testing.T) {
+	log, err := OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
 	if err != nil { t.Fatal(err) }
 	defer log.Close()
-	old := NewBrainRuntime(knowledge.NewBootstrapBrain())
-	old.SetEventLog(log)
-	owner, err := NewRuntimeOwner(old, log)
-	if err != nil { t.Fatal(err) }
-	if err := old.Checkpoint(checkpoint); err != nil { t.Fatalf("initial checkpoint: %v", err) }
+	original := NewBrainRuntime(knowledge.NewBootstrapBrain())
+	original.SetEventLog(log)
+	at := time.Date(2026,10,17,12,0,0,0,time.UTC)
+	if _,_,err:=original.Process(Event{ID:"seed",Stimulus:[]string{"saya"},Cycles:1,Timestamp:at});err!=nil { t.Fatal(err) }
+	checkpointPath := filepath.Join(t.TempDir(),"checkpoint.json")
+	if err:=original.Checkpoint(checkpointPath);err!=nil { t.Fatal(err) }
+	supervisor,err:=NewRuntimeSupervisor(original)
+	if err!=nil { t.Fatal(err) }
+	service,err:=NewManagedContinuousService(supervisor,10*time.Millisecond,1)
+	if err!=nil { t.Fatal(err) }
+	if service.Runtime != nil { t.Fatal("managed loop cached raw runtime") }
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx,cancel:=context.WithCancel(context.Background())
 	defer cancel()
-	service := NewManagedContinuousService(owner, 10*time.Millisecond, 1)
-	outputs := make(chan CognitiveOutput, 256)
-	errorsCh := make(chan error, 256)
-	done := make(chan error, 1)
+	outputs := make(chan error,3)
+	done := make(chan error,1)
 	go func() {
-		done <- service.Run(ctx, func(out CognitiveOutput, err error) {
-			if err != nil { errorsCh <- err; return }
-			outputs <- out
+		count:=0
+		done<-service.Run(ctx,func(output CognitiveOutput,err error){
+			if err!=nil { outputs<-err;cancel();return }
+			count++
+			if count==1 {
+				if recoverErr:=supervisor.RecoverFromCheckpoint(log,checkpointPath);recoverErr!=nil {
+					outputs<-recoverErr;cancel();return
+				}
+			}
+			if count==2 { cancel() }
+			outputs<-nil
 		})
 	}()
-	select {
-	case out := <-outputs:
-		if out.Sequence == 0 { t.Fatal("first cycle did not advance runtime") }
-	case err := <-errorsCh:
-		t.Fatalf("initial managed cycle failed: %v", err)
-	case <-time.After(3*time.Second):
-		t.Fatal("managed service did not run initial cycle")
-	}
-
-	if err := owner.RecoverFromCheckpoint(checkpoint); err != nil {
-		t.Fatalf("recover live continuous service: %v", err)
-	}
-	if !old.Retired() { t.Fatal("continuous service old runtime was not retired") }
-	seqAfterHandover := uint64(0)
-	if err := owner.WithRuntime(func(r *BrainRuntime) error {
-		seqAfterHandover = r.LastSequence()
-		return nil
-	}); err != nil { t.Fatal(err) }
-	found := false
-	timeout := time.After(3*time.Second)
-	for !found {
+	for i:=0;i<2;i++ {
 		select {
-		case out := <-outputs:
-			if out.Sequence > seqAfterHandover { found = true }
-		case err := <-errorsCh:
-			t.Fatalf("managed continuous service failed after handover: %v", err)
-		case <-timeout:
-			t.Fatal("managed continuous service did not continue with new runtime")
+		case err:= <-outputs:
+			if err!=nil { t.Fatalf("managed cognition/hand-over failed: %v",err) }
+		case <-time.After(5*time.Second):
+			t.Fatal("continuous service deadlocked on runtime handover")
 		}
 	}
-	cancel()
 	select {
-	case err := <-done:
-		if !errors.Is(err, context.Canceled) { t.Fatalf("service exit: %v", err) }
-	case <-time.After(3*time.Second):
-		t.Fatal("managed service failed to stop")
+	case err:= <-done:
+		if !errors.Is(err,context.Canceled) { t.Fatalf("service returned %v",err) }
+	case <-time.After(5*time.Second):t.Fatal("continuous service failed to stop")
 	}
-	if _, err := old.CognitiveThink(1); !errors.Is(err, ErrRuntimeRetired) {
-		t.Fatalf("retired runtime accepted a direct cognitive cycle: %v", err)
+	if !original.RecoveryRequired() { t.Fatal("retired runtime still writable") }
+	if err:=supervisor.With(func(r *BrainRuntime) error {
+		if r==original { t.Fatal("service still uses old runtime") }
+		if r.LastSequence()<3 { t.Fatalf("cognitive loop did not advance new runtime, seq=%d",r.LastSequence()) }
+		return nil
+	});err!=nil { t.Fatal(err) }
+}
+
+func TestManagedContinuousServiceClosesWithSupervisor(t *testing.T) {
+	rt:=NewBrainRuntime(nil)
+	supervisor,err:=NewRuntimeSupervisor(rt)
+	if err!=nil {t.Fatal(err)}
+	svc,err:=NewManagedContinuousService(supervisor,time.Hour,1)
+	if err!=nil {t.Fatal(err)}
+	if err:=supervisor.Close();err!=nil {t.Fatal(err)}
+	err=svc.Run(context.Background(),nil)
+	if !errors.Is(err,ErrRuntimeSupervisorClosed) {
+		t.Fatalf("managed loop ignored closed supervisor: %v",err)
 	}
+}
+
+func TestManagedContinuousServiceRejectsUnavailableSupervisor(t *testing.T) {
+	if _,err:=NewManagedContinuousService(nil,time.Second,1);err==nil {t.Fatal("nil supervisor accepted")}
+	supervisor,err:=NewRuntimeSupervisor(NewBrainRuntime(nil))
+	if err!=nil {t.Fatal(err)}
+	if err:=supervisor.Close();err!=nil {t.Fatal(err)}
+	if _,err:=NewManagedContinuousService(supervisor,time.Second,1);!errors.Is(err,ErrRuntimeSupervisorClosed) {
+		t.Fatalf("closed supervisor accepted: %v",err)
+	}
+}
+
+func TestSupervisorEpochInvalidatesOldClients(t *testing.T) {
+	log,err:=OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
+	if err!=nil {t.Fatal(err)}
+	defer log.Close()
+	rt:=NewBrainRuntime(nil)
+	rt.SetEventLog(log)
+	checkpoint:=filepath.Join(t.TempDir(),"checkpoint.json")
+	if err:=rt.Checkpoint(checkpoint);err!=nil {t.Fatal(err)}
+	sup,err:=NewRuntimeSupervisor(rt)
+	if err!=nil {t.Fatal(err)}
+	var initial <-chan struct{}
+	if err:=sup.WithEpoch(func(_ *BrainRuntime,epoch <-chan struct{}) error {initial=epoch;return nil});err!=nil {t.Fatal(err)}
+	if err:=sup.RecoverFromCheckpoint(log,checkpoint);err!=nil {t.Fatal(err)}
+	select {case <-initial:default:t.Fatal("old epoch not closed by handover")}
+	var next <-chan struct{}
+	if err:=sup.WithEpoch(func(_ *BrainRuntime,epoch <-chan struct{}) error {next=epoch;return nil});err!=nil {t.Fatal(err)}
+	if next==initial {t.Fatal("handover reused epoch channel")}
+	select {case <-next:t.Fatal("new epoch closed too early");default:}
+	if err:=sup.Close();err!=nil {t.Fatal(err)}
+	select {case <-next:default:t.Fatal("shutdown did not close current epoch")}
 }
