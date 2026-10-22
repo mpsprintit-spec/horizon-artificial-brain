@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -93,12 +94,12 @@ func newCLI(input io.Reader, output io.Writer, memoryPath string) *cli {
 
 func (c *cli) startup() error {
 	c.printBanner()
-	err := c.horizon.Knowledge.Load(c.memoryPath)
+	err := c.horizon.LoadActiveBrain(c.memoryPath)
 	if os.IsNotExist(err) {
 		// One-time migration path for older local checkouts. The canonical
 		// runtime store remains services/ai/brain_memory.json.
-		if legacyErr := c.horizon.Knowledge.Load("brain_memory.json"); legacyErr == nil {
-			if saveErr := c.horizon.Knowledge.Save(c.memoryPath); saveErr != nil {
+		if legacyErr := c.horizon.LoadActiveBrain("brain_memory.json"); legacyErr == nil {
+			if saveErr := c.horizon.SaveActiveBrain(c.memoryPath); saveErr != nil {
 				fmt.Fprintf(c.out, "! Memory migration save skipped: %v\n", saveErr)
 			}
 			err = nil
@@ -108,7 +109,7 @@ func (c *cli) startup() error {
 		fmt.Fprintf(c.out, "! Memory load skipped: %v\n", err)
 	}
 	if err == nil {
-		if _, activationErr := c.horizon.Runtime.ActivateBootstrap(time.Now().UTC()); activationErr != nil {
+		if _, activationErr := c.horizon.ActivateActiveBootstrap(); activationErr != nil {
 			fmt.Fprintf(c.out, "! Bootstrap activation skipped: %v\n", activationErr)
 		}
 	}
@@ -165,7 +166,7 @@ func (c *cli) run(ctx context.Context) {
 		fmt.Fprintln(c.out, result.Answer)
 	}
 	c.stopBrainMonitor()
-	if err := c.horizon.Knowledge.Save(c.memoryPath); err != nil {
+	if err := c.horizon.SaveActiveBrain(c.memoryPath); err != nil {
 		fmt.Fprintf(c.out, "Shutdown save warning: %v\n", err)
 	}
 	if err := c.roleCatalog.Save(c.roleCatalogPath); err != nil {
@@ -179,19 +180,11 @@ func (c *cli) run(ctx context.Context) {
 // satu-satunya jalur resmi otak Horizon.
 func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	_ = ctx // canonical Pulse owns the cognitive pipeline and does not accept a legacy context argument.
-	result, err := c.horizon.Pulse(input)
+	result, concepts, err := c.horizon.PulseWithLabels(input)
 	if err != nil {
 		return pipelineResult{Input: input, Answer: "Input tidak dapat diproses: " + err.Error()}
 	}
 
-	concepts := make([]string, 0, len(result.Interpretation.RankedNodeIDs))
-	for _, id := range result.Interpretation.RankedNodeIDs {
-		if node := c.horizon.Knowledge.Registry.GetByID(id); node != nil {
-			label := c.horizon.Knowledge.SurfaceForNode(id, "language")
-			if label == "" { label = fmt.Sprintf("node:%d", node.ID) }
-			if !containsString(concepts, label) { concepts = append(concepts, label) }
-		}
-	}
 	c.context = deriveContext(nil, concepts)
 	answer := strings.Join(concepts, ", ")
 	if answer == "" {
@@ -203,7 +196,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 		Answer: answer,
 		Path: "neural_runtime",
 		Confidence: result.Answer.Confidence,
-		Activation: rankedTokens(c.horizon),
+		Activation: activeNodeTokens(result.State.ActiveNodeIDs),
 		Understanding: strings.Join(concepts, ", "),
 		Reasoning: answer,
 		Context: c.context,
@@ -216,25 +209,57 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	}
 }
 
+// handleCommand routes all brain-inspection commands through a supervised
+// snapshot visit. Save/load and autonomous-loop toggling are kept outside
+// the view callback to avoid recursive supervisor acquisition and deadlocks.
 func (c *cli) handleCommand(input string) bool {
+	switch strings.ToLower(input) {
+	case "brain":
+		c.toggleBrainMonitor()
+		return true
+	case "save":
+		if err := c.horizon.SaveActiveBrain(c.memoryPath); err != nil {
+			fmt.Fprintf(c.out, "Save failed: %v\n", err)
+		} else {
+			fmt.Fprintln(c.out, "Memory saved.")
+		}
+		return true
+	case "load":
+		if err := c.horizon.LoadActiveBrain(c.memoryPath); err != nil {
+			fmt.Fprintf(c.out, "Load failed: %v\n", err)
+		} else {
+			fmt.Fprintln(c.out, "Memory loaded.")
+		}
+		return true
+	}
+	var handled bool
+	if err := c.horizon.WithActiveBrain(func(brain *knowledge.Brain) error {
+		handled = c.handleCommandWithBrain(input, brain)
+		return nil
+	}); err != nil {
+		fmt.Fprintf(c.out, "Brain command unavailable: %v\n", err)
+		return true
+	}
+	return handled
+}
+
+func (c *cli) handleCommandWithBrain(input string, brain *knowledge.Brain) bool {
 	switch strings.ToLower(input) {
 	case "help":
 		fmt.Fprintln(c.out, "Commands: help, exit, quit, brain, memory, nodes, synapses, activation, context, history, clear, save, load, debug on, debug off")
 	case "exit", "quit":
 		fmt.Fprintln(c.out, "Shutting down Horizon...")
-	case "brain":
-		c.toggleBrainMonitor()
 	case "memory":
-		fmt.Fprintf(c.out, "Memory: %d nodes, %d synapses\n", c.nodeCount(), c.synapseCount())
+		fmt.Fprintf(c.out, "Memory: %d nodes, %d synapses\n", len(brain.Registry.Nodes()), countBrainSynapses(brain))
 	case "":
 	case "nodes":
 		var tokens []string
-		for _, n := range c.horizon.Knowledge.Registry.Nodes() {
+		for _, n := range brain.Registry.Nodes() {
 			tokens = append(tokens, fmt.Sprintf("node:%d", n.ID))
 		}
 		fmt.Fprintf(c.out, "Nodes (%d): %s\n", len(tokens), strings.Join(tokens, ", "))
 	case "synapses":
-		fmt.Fprintf(c.out, "Synapses: %d\n", c.synapseCount())
+		fmt.Fprintf(c.out, "Synapses: %d\n", countBrainSynapses(brain))
 	case "activation":
 		fmt.Fprintf(c.out, "Activation: %s\n", strings.Join(c.last.Activation, ", "))
 	case "context":
@@ -243,27 +268,15 @@ func (c *cli) handleCommand(input string) bool {
 		fmt.Fprintln(c.out, strings.Join(c.history, "\n"))
 	case "clear":
 		fmt.Fprint(c.out, "\033[H\033[2J")
-	case "save":
-		if err := c.horizon.Knowledge.Save(c.memoryPath); err != nil {
-			fmt.Fprintf(c.out, "Save failed: %v\n", err)
-		} else {
-			fmt.Fprintln(c.out, "Memory saved.")
-		}
-	case "load":
-		if err := c.horizon.Knowledge.Load(c.memoryPath); err != nil {
-			fmt.Fprintf(c.out, "Load failed: %v\n", err)
-		} else {
-			fmt.Fprintln(c.out, "Memory loaded.")
-		}
 	case "debug on":
 		c.debug = true
 		fmt.Fprintln(c.out, "Debug enabled.")
 	case "clusters":
-		clusters := evolution.ClusterNodes(c.horizon.Knowledge)
+		clusters := evolution.ClusterNodes(brain)
 		for _, cl := range clusters {
 			var words []string
 			for _, id := range cl.Members {
-				if n := c.horizon.Knowledge.Registry.GetByID(id); n != nil {
+				if n := brain.Registry.GetByID(id); n != nil {
 					words = append(words, fmt.Sprintf("node:%d", n.ID))
 				}
 			}
@@ -283,19 +296,19 @@ func (c *cli) handleCommand(input string) bool {
 	default:
 		if strings.HasPrefix(strings.ToLower(input),"stats ") {
 			word := strings.TrimSpace(input[len("stats "):])
-			node := c.horizon.Knowledge.Fetch(word)
+			node := brain.Fetch(word)
 			if node == nil {
 				fmt.Fprintf(c.out, "Node %q belum ada.\n", word)
 				return true
 			}
-			s := evolution.ComputeStats(c.horizon.Knowledge, node)
+			s := evolution.ComputeStats(brain, node)
 			fmt.Fprintf(c.out, "Stats %q: IsA-masuk=%d IsA-keluar=%d Deskriptif-masuk=%d JenisRelasi=%d Keluar=%d Masuk=%d RataConfidence=%.2f\n",
 				word, s.IsAIncoming, s.IsAOutgoing, s.DescriptiveIncoming, s.DistinctRelationKinds, s.OutDegree, s.InDegree, s.AverageConfidence)
 			return true
 		}
 		if strings.HasPrefix(strings.ToLower(input), "relations ") {
 			word := strings.TrimSpace(input[len("relations "):])
-			node := c.horizon.Knowledge.Fetch(word)
+			node := brain.Fetch(word)
 			if node == nil {
 				fmt.Fprintf(c.out, "Node %q belum ada.\n", word)
 				return true
@@ -303,7 +316,7 @@ func (c *cli) handleCommand(input string) bool {
 			fmt.Fprintf(c.out, "Keluar dari %q:\n", word)
 			for _, s := range node.OutboundAll() {
 				id := s.TargetID
-				target := c.horizon.Knowledge.Registry.GetByID(id)
+				target := brain.Registry.GetByID(id)
 				name := "?"
 				if target != nil {
 					name = fmt.Sprintf("node:%d", target.ID)
@@ -311,7 +324,7 @@ func (c *cli) handleCommand(input string) bool {
 				fmt.Fprintf(c.out, "  --[%s]--> %s (weight=%.2f confidence=%.2f)\n", s.Kind, name, s.Weight, s.Confidence)
 			}
 			fmt.Fprintf(c.out, "Masuk ke %q:\n", word)
-			for _, other := range c.horizon.Knowledge.Registry.Nodes() {
+			for _, other := range brain.Registry.Nodes() {
 				if other.ID == node.ID {
 					continue
 				}
@@ -331,7 +344,7 @@ func (c *cli) handleCommand(input string) bool {
 			var id int
 			fmt.Sscanf(parts[0], "%d", &id)
 			label := parts[1]
-			clusters := evolution.ClusterNodes(c.horizon.Knowledge)
+			clusters := evolution.ClusterNodes(brain)
 			for _, cl := range clusters {
 				if cl.ID == id {
 					if len(cl.Members) < evolution.StabilityThreshold {
@@ -347,15 +360,15 @@ func (c *cli) handleCommand(input string) bool {
 			return true
 		}
 		if strings.ToLower(strings.TrimSpace(input)) == "patterns" {
-			for _, ps := range c.horizon.Knowledge.Patterns.All() {
+			for _, ps := range brain.Patterns.All() {
 				var words []string
 				for _, id := range ps.Members {
-					if n := c.horizon.Knowledge.Registry.GetByID(id); n != nil {
+					if n := brain.Registry.GetByID(id); n != nil {
 						words = append(words, fmt.Sprintf("node:%d", n.ID))
 					}
 				}
 				resultWord := "?"
-				if n := c.horizon.Knowledge.Registry.GetByID(ps.Result); n != nil {
+				if n := brain.Registry.GetByID(ps.Result); n != nil {
 					resultWord = fmt.Sprintf("node:%d", n.ID)
 				}
 				fmt.Fprintf(c.out, "{%s} -> %s (weight=%.2f confidence=%.2f freq=%d)\n",
@@ -407,9 +420,12 @@ func (c *cli) runBrainMonitor(stop <-chan struct{}) {
 		case <-stop:
 			return
 		case <-ticker.C:
-			output, err := c.horizon.Runtime.CognitiveThink(1)
+			output, err := c.horizon.ThinkActive(1)
 			if err != nil {
 				c.safePrintf("[BRAIN] error: %v\n", err)
+				if errors.Is(err, runtime.ErrRuntimeRecoveryRequired) || errors.Is(err, runtime.ErrRuntimeSupervisorClosed) {
+					return
+				}
 				continue
 			}
 			c.printBrainState(output)
@@ -483,13 +499,35 @@ func (c *cli) printDebug(r pipelineResult) {
 func (c *cli) printSessionStats() {
 	fmt.Fprintf(c.out, "Session: %d inputs, %d nodes, %d synapses, %s uptime\n", len(c.history), c.nodeCount(), c.synapseCount(), time.Since(c.startedAt).Round(time.Millisecond))
 }
-func (c *cli) nodeCount() int { return len(c.horizon.Knowledge.Registry.Nodes()) }
+func (c *cli) nodeCount() int {
+	count := 0
+	_ = c.horizon.WithActiveBrain(func(brain *knowledge.Brain) error {
+		count = len(brain.Registry.Nodes())
+		return nil
+	})
+	return count
+}
+
 func (c *cli) synapseCount() int {
+	count := 0
+	_ = c.horizon.WithActiveBrain(func(brain *knowledge.Brain) error {
+		count = countBrainSynapses(brain)
+		return nil
+	})
+	return count
+}
+
+func countBrainSynapses(brain *knowledge.Brain) int {
 	total := 0
-	for _, n := range c.horizon.Knowledge.Registry.Nodes() {
-		total += len(n.Synapses)
-	}
+	for _, node := range brain.Registry.Nodes() { total += len(node.Synapses) }
 	return total
+}
+
+func activeNodeTokens(ids []knowledge.NodeID) []string {
+	out := make([]string, 0, len(ids))
+	for _, id := range ids { out = append(out, fmt.Sprintf("node:%d", id)) }
+	sort.Strings(out)
+	return out
 }
 
 var contextNoise = map[string]bool{
@@ -514,19 +552,6 @@ func deriveContext(tokens, concepts []string) []string {
 	if len(out) > 5 {
 		return out[:5]
 	}
-	return out
-}
-func rankedTokens(h *core.HorizonEngine) []string {
-	nodes := h.Thinking.LastState.ActivationHistory
-	if len(nodes) == 0 {
-		return nil
-	}
-	ranked := nodes[len(nodes)-1].RankedNodes
-	out := make([]string, 0, len(ranked))
-	for _, n := range ranked {
-		out = append(out, fmt.Sprintf("node:%d", n.ID))
-	}
-	sort.Strings(out)
 	return out
 }
 func hypothesisSummary(hyps []thinking.Hypothesis) []string {
