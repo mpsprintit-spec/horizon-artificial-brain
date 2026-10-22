@@ -94,6 +94,9 @@ type BrainRuntime struct {
 	// Monotonic ownership claim. Managed runtime lifetime and journal binding
 	// can only be changed by its supervisor, not by cached runtime references.
 	supervised bool
+	// Replay selects the recorded adapter contract on a private runtime.
+	// Serving runtimes use WrittenTextEncoding; this is not persistent Brain state.
+	surfaceEncoding knowledge.SurfaceEncoding
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
@@ -108,7 +111,7 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if !brain.BindRuntime() { return nil }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
-	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64)}
+	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64), surfaceEncoding: knowledge.WrittenTextEncoding}
 }
 func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
 	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
@@ -191,7 +194,7 @@ func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
 	index := make(map[string]uint64)
 	expected := uint64(1)
 	for _, event := range events {
-		if event.SchemaVersion != EventLogSchemaVersion || event.BrainIdentity != BrainIdentity {
+		if !supportedEventLogSchema(event.SchemaVersion) || event.BrainIdentity != BrainIdentity {
 			return errors.New("event index contains incompatible brain or schema")
 		}
 		if event.Sequence != expected {
@@ -228,7 +231,7 @@ func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowle
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return knowledge.GroundedRepresentation{}, err }
 	if r.eventLog != nil { return knowledge.GroundedRepresentation{}, errors.New("standalone grounding is forbidden with an attached journal; use ProcessObservation") }
-	return r.brain.GroundObservationAt(token, source, modality, GroundingThreshold, r.nowLocked())
+	return r.brain.GroundObservationWithEncodingAt(token, source, modality, GroundingThreshold, r.nowLocked(), r.surfaceEncoding)
 }
 
 // ActivateBootstrap rehydrates the persistent bootstrap populations into the
@@ -337,6 +340,7 @@ func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (
 	}
 	nextSeq := r.seq + 1
 	result := r.activation.ActivateWith(activation.Request{
+		SurfaceEncoding: &r.surfaceEncoding,
 		StimulusTokens:     append([]string(nil), event.Stimulus...),
 		StimulusNodeIDs:    append([]knowledge.NodeID(nil), event.StimulusNodeIDs...),
 		ContextBoosts:      cloneContext(event.Context),
@@ -412,7 +416,7 @@ func (r *BrainRuntime) LearnExperience(experience learning.Experience, now time.
 	}
 	now = now.UTC()
 	err := r.runJournalCommandLocked(LoggedEvent{Type: EventTypeLearn, Timestamp: now, Experience: &experience}, func() error {
-		r.learning.LearnExperience(experience, now)
+		r.learning.LearnExperienceWithEncoding(experience, now, r.surfaceEncoding)
 		r.seq++
 		return nil
 	})

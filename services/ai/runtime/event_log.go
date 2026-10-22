@@ -17,9 +17,13 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-const EventLogSchemaVersion = 1
+const EventLogSchemaVersion = 2
+
+func supportedEventLogSchema(version int) bool { return version == 1 || version == EventLogSchemaVersion }
 
 type LoggedEvent struct {
+	SurfaceRebinding *WrittenSurfaceRebinding `json:"surface_rebinding,omitempty"`
+	SurfaceEncoding knowledge.SurfaceEncoding `json:"surface_encoding,omitempty"`
 	InquiryOutcome *InquiryOutcomeCommand `json:"inquiry_outcome,omitempty"`
 	ObservationCommand *ObservationCommand `json:"observation_command,omitempty"`
 	ActionBinding *ActionBinding `json:"action_binding,omitempty"`
@@ -174,13 +178,14 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if err := json.Unmarshal(raw, &event); err != nil {
 			return "", fmt.Errorf("cannot repair malformed event at line %d: %w", lineNumber, err)
 		}
-		if event.SchemaVersion != EventLogSchemaVersion {
+		if !supportedEventLogSchema(event.SchemaVersion) {
 			return "", fmt.Errorf("cannot repair unsupported schema version %d at line %d", event.SchemaVersion, lineNumber)
 		}
+		if err := validateJournalPayload(event); err != nil { return "", fmt.Errorf("cannot repair invalid payload at line %d: %w", lineNumber, err) }
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome {
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -329,7 +334,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		if err := json.Unmarshal(line, &event); err != nil {
 			return nil, fmt.Errorf("decode event log at line %d: %w", lineNumber, err)
 		}
-		if event.SchemaVersion != EventLogSchemaVersion {
+		if !supportedEventLogSchema(event.SchemaVersion) {
 			return nil, fmt.Errorf("unsupported event log schema version %d at line %d", event.SchemaVersion, lineNumber)
 		}
 		if event.BrainIdentity != BrainIdentity {
@@ -353,6 +358,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		}
 
 		if pending != nil {
+			if err := validateJournalPayload(event); err != nil { return nil, fmt.Errorf("invalid sensor commit at line %d: %w", lineNumber, err) }
 			if event.Type != EventTypeSensorCommit {
 				return nil, fmt.Errorf("%w: sensor intent at sequence %d interrupted by %q at line %d", ErrUncommittedSensorTransaction, expected, event.Type, lineNumber)
 			}
@@ -376,6 +382,10 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			return nil, fmt.Errorf("invalid journal payload at line %d: %w", lineNumber, err)
 		}
 		switch event.Type {
+		case EventTypeSurfaceRebinding:
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
 		case EventTypeInquiryOutcome:
 			if event.Timestamp.IsZero() || event.Event == nil || !event.Event.Timestamp.Equal(event.Timestamp) || event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.IntentHash != "" {
 				return nil, fmt.Errorf("invalid inquiry outcome command at line %d", lineNumber)
@@ -429,7 +439,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				event.Timestamp.IsZero() {
 				return nil, fmt.Errorf("invalid knowledge import record at line %d", lineNumber)
 			}
-			if _, err := knowledge.CompileKnowledgeDocument(*event.KnowledgeDocument, event.Timestamp); err != nil {
+			if _, err := knowledge.CompileKnowledgeDocumentWithEncoding(*event.KnowledgeDocument, event.Timestamp, event.SurfaceEncoding); err != nil {
 				return nil, fmt.Errorf("invalid knowledge import document at line %d: %w", lineNumber, err)
 			}
 			seen[key] = canonical
@@ -500,11 +510,13 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	brainRuntime.mu.Lock()
 	if brainRuntime.supervised { brainRuntime.mu.Unlock(); return ErrManagedRuntimeAccess }
 	originalLog := brainRuntime.eventLog
+	originalEncoding := brainRuntime.surfaceEncoding
 	brainRuntime.eventLog = nil
 	brainRuntime.mu.Unlock()
 	defer func() {
 		brainRuntime.mu.Lock()
 		brainRuntime.eventLog = originalLog
+		brainRuntime.surfaceEncoding = originalEncoding
 		brainRuntime.mu.Unlock()
 	}()
 
@@ -513,14 +525,19 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		if logged.BrainIdentity != BrainIdentity {
 			return fmt.Errorf("cannot replay event for brain %q", logged.BrainIdentity)
 		}
-		if logged.SchemaVersion != EventLogSchemaVersion {
+		if !supportedEventLogSchema(logged.SchemaVersion) {
 			return fmt.Errorf("unsupported event log schema version %d", logged.SchemaVersion)
 		}
 		if logged.Sequence != expected {
 			return fmt.Errorf("replay sequence discontinuity: got %d want %d", logged.Sequence, expected)
 		}
 		expected++
+		brainRuntime.mu.Lock()
+		brainRuntime.surfaceEncoding = logged.SurfaceEncoding
+		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeSurfaceRebinding:
+			if err := brainRuntime.ApplyWrittenSurfaceRebinding(*logged.SurfaceRebinding, logged.Timestamp); err != nil { return err }
 		case EventTypeVectorGround:
 			if logged.Vector == nil {
 				return errors.New("numeric grounding record has no vector")

@@ -83,7 +83,7 @@ func (s BrainReadSnapshot) SurfaceForNode(id NodeID,modality string) string {
 	best:=""
 	var seen time.Time
 	for _,a:=range s.annotations {
-		if modality!="" && modality!=a.Modality {continue}
+		if modality!="" && CanonicalSurfaceModality(modality)!=CanonicalSurfaceModality(a.Modality) {continue}
 		if a.NodeID!=id {
 			found:=false
 			for _,member:=range a.Population {

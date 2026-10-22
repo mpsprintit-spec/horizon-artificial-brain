@@ -27,6 +27,7 @@ func (k *KnowledgeBase) RestoreSurfaceAnnotations(annotations []SurfaceAnnotatio
 	if k == nil || k.Registry == nil { return errors.New("brain is not initialized") }
 	copyAnnotations := make([]SurfaceAnnotation, len(annotations))
 	for i, annotation := range annotations {
+		if err := annotation.Encoding.Validate(); err != nil { return err }
 		if annotation.NodeID != 0 && k.Registry.GetByID(annotation.NodeID) == nil {
 			return fmt.Errorf("surface annotation %d has unknown node %d", i, annotation.NodeID)
 		}

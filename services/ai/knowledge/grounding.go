@@ -35,6 +35,9 @@ type GroundedRepresentation struct {
 // surface form and the neural population that produced it. It is not neural
 // identity and does not assign semantic meaning to a unit.
 type SurfaceAnnotation struct {
+	Encoding SurfaceEncoding `json:"surface_encoding,omitempty"`
+	ReboundFrom string `json:"rebound_from,omitempty"`
+	ReferenceHash string `json:"reference_hash,omitempty"`
 	Surface     string   `json:"surface"`
 	Modality    string   `json:"modality"`
 	NodeID      NodeID  `json:"node_id"`
@@ -54,15 +57,26 @@ func (k *KnowledgeBase) GroundObservation(token, source, modality string, thresh
 // supplies event time so persisted observation provenance does not depend on
 // wall-clock time during event replay.
 func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, threshold float64, now time.Time) (GroundedRepresentation, error) {
+	return k.GroundObservationWithEncodingAt(token, source, modality, threshold, now, WrittenTextEncoding)
+}
+
+// GroundObservationWithEncodingAt keeps historical journal transitions exact
+// while new text/language inputs share one written representation contract.
+func (k *KnowledgeBase) GroundObservationWithEncodingAt(token, source, modality string, threshold float64, now time.Time, encoding SurfaceEncoding) (GroundedRepresentation, error) {
 	if k == nil {
 		return GroundedRepresentation{}, errors.New("brain is nil")
 	}
+	if err := encoding.Validate(); err != nil { return GroundedRepresentation{}, err }
 	canonical := strings.TrimSpace(token)
+	annotationModality := modality
+	written := encoding == WrittenTextEncoding && CanonicalSurfaceModality(modality) == "language"
+	if written { canonical, annotationModality = canonicalToken(token), "language" }
+	if written && now.IsZero() { now = time.Now().UTC() }
 	if canonical == "" {
 		return GroundedRepresentation{}, errors.New("observation token is empty")
 	}
 
-	vector := observationVector(canonical, modality)
+	vector := observationVectorWithEncoding(canonical, modality, encoding)
 
 	// A repeated observation can recover its previously learned distributed
 	// population through adapter provenance even after plasticity has moved the
@@ -70,12 +84,15 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	// not make the surface form a neural identity: the annotation only points
 	// to an already materialized population, while the population itself
 	// remains the mutable neural substrate.
-	if population, ok := k.populationForSurface(canonical, modality, vector, now); ok {
+	lookup := k.populationForSurface
+	if written { lookup = func(surface, _ string, vector NeuralVector, at time.Time) (ProjectionPopulation, bool) { return k.populationForWrittenSurface(surface, vector, at) } }
+	if population, ok := lookup(canonical, annotationModality, vector, now); ok {
 		populationIDs := make([]NodeID, 0, len(population.Units))
 		for _, unit := range population.Units {
 			populationIDs = append(populationIDs, unit.NodeID)
 		}
 		if len(populationIDs) > 0 {
+			if written { k.recordEncodedSurfaceAnnotation(canonical, annotationModality, populationIDs[0], populationIDs, now, encoding) }
 			return GroundedRepresentation{
 				NodeID: populationIDs[0], Population: populationIDs,
 				Similarity: population.Units[0].Activation,
@@ -111,7 +128,7 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 	} else {
 		now = now.UTC()
 	}
-	k.recordSurfaceAnnotation(canonical, modality, anchor, populationIDs, now)
+	k.recordEncodedSurfaceAnnotation(canonical, annotationModality, anchor, populationIDs, now, encoding)
 	return GroundedRepresentation{
 		NodeID: anchor, Population: populationIDs, Similarity: population.Units[0].Activation,
 		Status: status, Source: source, Modality: modality,
@@ -121,7 +138,8 @@ func (k *KnowledgeBase) GroundObservationAt(token, source, modality string, thre
 
 // observationVector is a deterministic numeric encoder used only to bridge
 // raw observations into the substrate. It does not assign semantic labels.
-// A stable hash makes repeated identical observations reproducible while the
+// This is the unchanged historical encoder used by versioned replay. A stable
+// hash makes repeated identical observations reproducible while the
 // brain remains responsible for deciding whether the resulting pattern matches
 // an existing representation.
 func observationVector(token, modality string) NeuralVector {
@@ -148,10 +166,10 @@ func observationVector(token, modality string) NeuralVector {
 
 // EncodeObservation is the boundary encoder for language and sensor inputs.
 // It produces a numeric surface representation. The lexical or sensor surface
-// form is not retained by the neural substrate; modality remains an encoder
-// dimension so different surfaces can be linked without being collapsed.
+// form is not retained by the neural substrate. Written text/language aliases
+// share the established language namespace; physical modalities remain distinct.
 func EncodeObservation(value, modality string) NeuralVector {
-	return observationVector(value, modality)
+	return observationVectorWithEncoding(value, modality, WrittenTextEncoding)
 }
 
 
@@ -203,7 +221,11 @@ func (k *KnowledgeBase) populationForSurface(surface, modality string, vector Ne
 	if len(ids) == 0 {
 		return ProjectionPopulation{}, false
 	}
+	return k.activateSurfacePopulation(ids, vector, now)
+}
 
+func (k *KnowledgeBase) activateSurfacePopulation(ids []NodeID, vector NeuralVector, now time.Time) (ProjectionPopulation, bool) {
+	if len(ids) == 0 { return ProjectionPopulation{}, false }
 	population := ProjectionPopulation{Units: make([]PopulationUnit, 0, len(ids))}
 	for _, id := range ids {
 		node := k.Registry.GetByID(id)

@@ -291,7 +291,7 @@ func (k *KnowledgeBase) SurfaceForNode(id NodeID, modality string) string {
 	best := ""
 	var bestSeen time.Time
 	for _, annotation := range k.SurfaceAnnotations {
-		if modality != "" && annotation.Modality != modality { continue }
+		if modality != "" && CanonicalSurfaceModality(annotation.Modality) != CanonicalSurfaceModality(modality) { continue }
 		match := annotation.NodeID == id
 		if !match {
 			for _, member := range annotation.Population {

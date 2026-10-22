@@ -54,6 +54,11 @@ type KnowledgeCompilation struct {
 // into the canonical developmental schema. Compilation is not proof of truth
 // and does not by itself constitute runtime learning.
 func CompileKnowledgeDocument(document KnowledgeDocument, at time.Time) (KnowledgeCompilation, error) {
+	return CompileKnowledgeDocumentWithEncoding(document, at, WrittenTextEncoding)
+}
+
+func CompileKnowledgeDocumentWithEncoding(document KnowledgeDocument, at time.Time, encoding SurfaceEncoding) (KnowledgeCompilation, error) {
+	if err := encoding.Validate(); err != nil { return KnowledgeCompilation{}, err }
 	document.ID = strings.TrimSpace(document.ID)
 	document.Domain = strings.TrimSpace(document.Domain)
 	document.Source = strings.TrimSpace(document.Source)
@@ -77,11 +82,11 @@ func CompileKnowledgeDocument(document KnowledgeDocument, at time.Time) (Knowled
 		if id == "" { id = fmt.Sprintf("%s-experience-%03d", document.ID, i+1) }
 		if seen[id] { return KnowledgeCompilation{}, fmt.Errorf("duplicate experience id %q", id) }
 		seen[id] = true
-		before, be, err := compileKnowledgeData(in.Before, "before", in.Confidence)
+		before, be, err := compileKnowledgeData(in.Before, "before", in.Confidence, encoding)
 		if err != nil { return KnowledgeCompilation{}, fmt.Errorf("%s before: %w", id, err) }
-		changes, ce, err := compileKnowledgeData(in.Changes, "transition", in.Confidence)
+		changes, ce, err := compileKnowledgeData(in.Changes, "transition", in.Confidence, encoding)
 		if err != nil { return KnowledgeCompilation{}, fmt.Errorf("%s changes: %w", id, err) }
-		after, ae, err := compileKnowledgeData(in.After, "after", in.Confidence)
+		after, ae, err := compileKnowledgeData(in.After, "after", in.Confidence, encoding)
 		if err != nil { return KnowledgeCompilation{}, fmt.Errorf("%s after: %w", id, err) }
 		if len(before)+len(changes)+len(after) == 0 { return KnowledgeCompilation{}, fmt.Errorf("%s has no experience data", id) }
 		confidence := in.Confidence
@@ -109,8 +114,12 @@ func CompileKnowledgeDocument(document KnowledgeDocument, at time.Time) (Knowled
 // Importing the same experience ID twice is idempotent; it does not create
 // synapses or claim that the runtime has learned the imported content.
 func (k *KnowledgeBase) ImportKnowledgeDocument(document KnowledgeDocument, at time.Time) (KnowledgeCompilation, error) {
+	return k.ImportKnowledgeDocumentWithEncoding(document, at, WrittenTextEncoding)
+}
+
+func (k *KnowledgeBase) ImportKnowledgeDocumentWithEncoding(document KnowledgeDocument, at time.Time, encoding SurfaceEncoding) (KnowledgeCompilation, error) {
 	if k == nil { return KnowledgeCompilation{}, ErrNilBrain }
-	compiled, err := CompileKnowledgeDocument(document, at)
+	compiled, err := CompileKnowledgeDocumentWithEncoding(document, at, encoding)
 	if err != nil { return KnowledgeCompilation{}, err }
 	k.mu.Lock()
 	defer k.mu.Unlock()
@@ -125,7 +134,7 @@ func (k *KnowledgeBase) ImportKnowledgeDocument(document KnowledgeDocument, at t
 	return compiled, nil
 }
 
-func compileKnowledgeData(data []KnowledgeDatum, position string, fallback float64) ([][]float64, []SymbolExposure, error) {
+func compileKnowledgeData(data []KnowledgeDatum, position string, fallback float64, encoding SurfaceEncoding) ([][]float64, []SymbolExposure, error) {
 	vectors := make([][]float64, 0, len(data))
 	exposures := make([]SymbolExposure, 0, len(data))
 	for i, item := range data {
@@ -136,7 +145,7 @@ func compileKnowledgeData(data []KnowledgeDatum, position string, fallback float
 		if confidence == 0 { confidence = fallback }
 		if confidence == 0 { confidence = 0.15 }
 		if confidence < 0 || confidence > 1 { return nil, nil, fmt.Errorf("datum %d confidence outside [0,1]", i) }
-		vector := EncodeObservation(value, modality).Values
+		vector := observationVectorWithEncoding(value, modality, encoding).Values
 		vectors = append(vectors, append([]float64(nil), vector...))
 		relative := strings.TrimSpace(item.RelativePosition)
 		if relative == "" { relative = position }
