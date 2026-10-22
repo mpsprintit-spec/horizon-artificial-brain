@@ -36,6 +36,19 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	if err != nil {
 		return KnowledgeProcessingResult{}, err
 	}
+	// Import and all exposure processing mutate one canonical substrate. A
+	// single lock excludes concurrent thought/checkpoint/recovery during the
+	// entire document, rather than just each individual event.
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return KnowledgeProcessingResult{}, err }
+	// A knowledge import modifies the brain before its first process event.
+	// There is no durable journal record for ImportKnowledgeDocument or the
+	// source transition. Refuse this path when journaling until an explicit
+	// transactional knowledge-import protocol is implemented.
+	if r.eventLog != nil {
+		return KnowledgeProcessingResult{}, errors.New("knowledge document import requires a transactional journal protocol; writer-attached runtime cannot import directly")
+	}
 	if _, err := r.brain.ImportKnowledgeDocument(document, at); err != nil {
 		return KnowledgeProcessingResult{}, err
 	}
@@ -84,11 +97,11 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 			if len(nodeIDs) == 0 {
 				continue
 			}
-			if err := r.LearnObservedTransition(nodeIDs, eventAt); err != nil {
+			if err := r.learnObservedTransitionLocked(nodeIDs, eventAt); err != nil {
 				return result, fmt.Errorf("learn transition for experience %q exposure %d: %w", experience.ID, exposure.SequencePosition, err)
 			}
 			eventID := fmt.Sprintf("knowledge-import:%s:%s:%03d", document.ID, experience.ID, step-1)
-			output, err := r.CognitiveProcess(Event{
+			output, err := r.cognitiveProcessLocked(Event{
 				ID: eventID,
 				StimulusNodeIDs: nodeIDs,
 				Source: "knowledge-import:" + document.Source,

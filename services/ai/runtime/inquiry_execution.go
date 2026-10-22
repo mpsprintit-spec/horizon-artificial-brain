@@ -156,11 +156,14 @@ func (r *BrainRuntime) CaptureInquiryPrediction(execution InquiryExecution, at t
 	if r == nil || r.activation == nil {
 		return InquiryExecution{}, errors.New("brain runtime is not initialized")
 	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return InquiryExecution{}, err }
 	if err := ValidateInquiryExecution(execution, at); err != nil {
 		return InquiryExecution{}, err
 	}
 	if at.IsZero() {
-		at = time.Now().UTC()
+		at = r.nowLocked()
 	}
 	execution.Prediction = r.activation.PredictionSnapshot()
 	execution.PredictionCapturedAt = at.UTC()
