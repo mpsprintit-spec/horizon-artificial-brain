@@ -143,6 +143,7 @@ type InquiryState struct {
 }
 
 type BrainState struct {
+	SensoryTraces []SensoryExperienceTrace `json:"sensory_traces,omitempty"`
 	AttentionState map[string]float64 `json:"attention_state,omitempty"`
 	CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`
 	PredictionState map[string]float64 `json:"prediction_state,omitempty"`

@@ -52,6 +52,19 @@ test -s "${tmp_dir}/brain_memory.json"
 grep -q '"neural_units"' "${tmp_dir}/brain_memory.json"
 grep -q '"synapses"' "${tmp_dir}/brain_memory.json"
 
-echo "Bridge smoke: health, handshake, snapshot, observation, persistence and event replay passed"
+sensor_id="${event_id}-fields"
+sensor_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+curl -fsS -X POST "${base}/v1/sensor-observations" \
+  -H "Authorization: Bearer ${token}" \
+  -H "Content-Type: application/json" \
+  --data-binary @- <<JSON >"${tmp_dir}/sensor-response.json"
+{"modality":"vision","source":"ci-numeric-camera","sample_id":"${sensor_id}","timestamp":"${sensor_at}","confidence":0.5,"provenance":{"adapter":"ci-numeric-v1","calibration_id":"uncalibrated-relative-v1"},"fields":[{"field_id":"left:rgb","group_id":"left","kind":"light.rgb-v1","values":[0.8,-0.4,0.2],"coordinates":[-1,-1,0,1]},{"field_id":"right:rgb","group_id":"right","kind":"light.rgb-v1","values":[0.8,-0.4,0.2],"coordinates":[0,-1,1,1]}]}
+JSON
+jq -e '.sensor_bindings | length==2 and (.[0].population==.[1].population) and (.[0].group_id!=.[1].group_id)' "${tmp_dir}/sensor-response.json" >/dev/null
+curl -fsS "${base}/v1/brain/snapshot" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id and (.fields | length==2))' >/dev/null
+jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id)' "${tmp_dir}/brain_memory.json" >/dev/null
+curl -fsS "${base}/v1/brain/events?after=0" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.events | any(.[]; .event.sensor_observation.sample_id==$id and (.event.sensor_observation.fields | length==2))' >/dev/null
+
+echo "Bridge smoke: health, handshake, snapshot, legacy/numeric observations, persistence and event replay passed"
 echo "revision: ${before_revision} -> ${after_revision}"
 echo "hash: ${before_hash} -> ${after_hash}"

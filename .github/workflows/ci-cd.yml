@@ -19,7 +19,7 @@ jobs:
       - name: Build Go runtime
         run: make build
       - name: Race-test runtime and adapter concurrency
-        run: go test -race ./services/ai/runtime ./services/ai/bridge ./services/ai/core
+        run: go test -race ./services/ai/knowledge ./services/ai/runtime ./services/ai/bridge ./services/ai/core
       - name: Live Bridge integration smoke
         run: make bridge-smoke
 

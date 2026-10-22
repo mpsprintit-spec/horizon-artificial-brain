@@ -20,6 +20,7 @@ type MonitorHandshake struct {
 }
 
 type MonitorSnapshot struct {
+	SensoryTraces []json.RawMessage `json:"sensory_traces,omitempty"`
 	Type string `json:"type"`
 	BrainIdentity string `json:"brain_identity"`
 	StateRevision uint64 `json:"state_revision"`
@@ -55,6 +56,7 @@ type MonitorBrainState struct {
 }
 
 type monitorCanonicalBrain struct {
+	SensoryTraces []json.RawMessage `json:"sensory_traces,omitempty"`
 	NeuralUnits []json.RawMessage `json:"neural_units"`
 	Populations []json.RawMessage `json:"populations"`
 	Synapses []json.RawMessage `json:"synapses"`
@@ -97,6 +99,7 @@ func (r *BrainRuntime) MonitorSnapshot() (MonitorSnapshot, error) {
 
 	return MonitorSnapshot{
 		Type: "brain.snapshot",
+		SensoryTraces: brain.SensoryTraces,
 		BrainIdentity: BrainIdentity,
 		StateRevision: sequence,
 		CapturedAt: now.Format("2006-01-02T15:04:05.000Z07:00"),
@@ -139,7 +142,7 @@ func (r *BrainRuntime) MonitorHandshake(runtimeCommit string) (MonitorHandshake,
 		RuntimeCommit: runtimeCommit,
 		StateRevision: snapshot.StateRevision,
 		CanonicalStateHash: snapshot.CanonicalStateHash,
-		Capabilities: []string{"snapshot", "recurrent_state", "plasticity", "checkpoint", "inquiry", "observation", "vision", "audio", "motion", "outcomes", "stream"},
+		Capabilities: []string{"snapshot", "recurrent_state", "plasticity", "checkpoint", "inquiry", "observation", "vision", "audio", "motion", "outcomes", "stream", "sensor_states", "factorized_sensor_fields"},
 	}, nil
 }
 

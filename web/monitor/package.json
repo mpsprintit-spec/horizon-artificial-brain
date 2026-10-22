@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "check": "tsc --noEmit",
-    "test": "tsc && node --test test/store.test.js",
+    "test": "tsc && node --test test/*.test.js",
     "build": "node scripts/build.mjs"
   },
   "devDependencies": {

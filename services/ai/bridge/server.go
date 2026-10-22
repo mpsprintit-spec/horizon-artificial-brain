@@ -42,7 +42,7 @@ type rateBucket struct { started time.Time; count int }
 func New(brainRuntime *runtime.BrainRuntime, cfg Config) (*Server, error) {
 	if brainRuntime == nil { return nil, errors.New("brain runtime is required") }
 	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
-	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
+	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 600 }
 	return &Server{runtime: brainRuntime, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
 }
 
@@ -54,6 +54,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/brain/events", s.events)
 	mux.HandleFunc("/v1/brain/stream", s.stream)
 	mux.HandleFunc("/v1/observations", s.observations)
+	mux.HandleFunc("/v1/sensor-observations", s.sensorObservations)
 	mux.HandleFunc("/v1/outcomes", s.outcomes)
 	return s.withCORS(s.withAuth(s.withRateLimit(mux)))
 }

@@ -12,6 +12,7 @@ export interface BrainSnapshot {
   synapses: unknown[];
   temporal_patterns: unknown[];
   experience_traces: unknown[];
+  sensory_traces?: unknown[];
   brain_state: Record<string, unknown>;
 }
 
