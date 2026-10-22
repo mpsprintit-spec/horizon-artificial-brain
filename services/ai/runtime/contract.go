@@ -2,7 +2,9 @@ package runtime
 
 import (
 	"errors"
+	"maps"
 	"math"
+	"slices"
 	"strings"
 	"time"
 
@@ -38,12 +40,14 @@ type CognitiveStateDelta struct {
 
 func cloneCognitiveState(in CognitiveState) CognitiveState {
 	return CognitiveState{
-		BrainIdentity:   in.BrainIdentity,
-		Sequence:        in.Sequence,
-		Timestamp:       in.Timestamp,
-		ActiveNodeIDs:   append([]knowledge.NodeID(nil), in.ActiveNodeIDs...),
-		Activations:     cloneNodeValues(in.Activations),
-		Confidence:      cloneNodeValues(in.Confidence),
+		BrainIdentity: in.BrainIdentity,
+		Sequence:      in.Sequence,
+		Timestamp:     in.Timestamp,
+		// Preserve nil vs allocated-empty state as well as values. A codec
+		// can be trained/checkpointed before the first cognitive transition.
+		ActiveNodeIDs:   slices.Clone(in.ActiveNodeIDs),
+		Activations:     maps.Clone(in.Activations),
+		Confidence:      maps.Clone(in.Confidence),
 		Resonance:       in.Resonance,
 		PredictionError: in.PredictionError,
 	}

@@ -34,6 +34,7 @@ revisions/deltas and reserves full neural hashes for explicit snapshot boundarie
 | `vector_ground`, `knowledge_import` | Existing numeric grounding and complete document import |
 | `sensor_intent` + `sensor_commit` | Existing two-record numeric sensor protocol, interpreted as one revision |
 | `surface_rebinding` | Explicit adapter-only selection of an existing written population, with a verified revision/state reference |
+| `spelling_exposure` | Explicit bounded numeric I/O supervision for shared synaptic output cells; see [learned spelling](LEARNED_SPELLING_READOUT.md) |
 
 New records use journal schema 3 with explicit written surface and neural
 dynamics encodings. Schemas 1 and 2 replay with their original dynamics.

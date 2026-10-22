@@ -80,6 +80,11 @@ generalization or learned spelling. The separate
 A learned numeric character/phoneme decoder and generalization/causal grounding
 remain subsequent P0 work. Main language training is still blocked.
 
+The subsequent [experimental synaptic spelling codec](LEARNED_SPELLING_READOUT.md)
+adds an explicitly supervised numerical I/O readout on the same Brain. It does
+not automatically enable normal CLI language replies or close the semantic,
+generalization or scaling gates here.
+
 Reproduce the focused checks:
 
 ```sh

@@ -1,0 +1,8 @@
+{
+  "schema": 12,
+  "cognitive_activation_map_is_nil": true,
+  "cognitive_confidence_map_is_nil": true,
+  "old_h18_restore_matches_backup_brain": true,
+  "old_h18_reader_sha256": "c3ca051a1642c318518547b0e75a187c5067c706bdac805ae6d5639e96a6d989",
+  "backup_sha256": "78912d144b7cc487ba6331d3555ea1f0cb26bba2ffe52c8115499dbbaf753fd5"
+}
