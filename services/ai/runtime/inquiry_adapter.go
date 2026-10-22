@@ -71,7 +71,7 @@ func (r *BrainRuntime) BuildInquiryRequest(agenda InquiryAgenda) (InquiryRequest
 		TargetNodeIDs:           targets,
 		CreatedAt:               agenda.CreatedAt.UTC(),
 	}
-	if r.dynamicsEncoding == knowledge.EvidenceUncertaintyDynamics && agenda.Sequence == r.seq {
+	if r.dynamicsEncoding.HasEvidenceUncertainty() && agenda.Sequence == r.seq {
 		request.PredictionAssessment = agenda.PredictionAssessment.Clone()
 	}
 	return request, nil

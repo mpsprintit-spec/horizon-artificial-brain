@@ -23,6 +23,9 @@ func validateJournalPayload(event LoggedEvent) error {
 		return errors.New("ordered neural dynamics require journal schema 3")
 	}
 	if event.Event != nil {
+		if sensor := event.Event.SensorObservation; sensor != nil && sensor.NoiseTolerance > 0 && !event.DynamicsEncoding.HasStableProjection() {
+			return errors.New("measurement tolerance requires stable projection dynamics")
+		}
 		if event.Event.NeuralTrace != nil && !event.DynamicsEncoding.HasOrderedObservations() {
 			return errors.New("neural trace requires ordered dynamics")
 		}

@@ -203,7 +203,7 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 	cognitive.GroundedRepresentations = grounded
 	if command.Inquiry != nil {
 		gain := clamp01(command.Inquiry.Uncertainty - clamp01(cognitive.Answer.Uncertainty.Level))
-		if r.dynamicsEncoding == knowledge.EvidenceUncertaintyDynamics {
+		if r.dynamicsEncoding.HasEvidenceUncertainty() {
 			gain = resolvedPredictionInformation(*command.Inquiry, r.activation.LastObservedPopulation())
 		}
 		r.completeInquiryLocked(gain, output.PredictionError, event.Timestamp)

@@ -151,7 +151,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 			predictionError = stateDifference(previousPrediction, actualEvidence)
 		}
 		if predictionError > 0 {
-			e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction, actualEvidence, predictionError, .20, req.Now)
+			e.Memory.ApplyPredictionErrorRepresentationPlasticityWithDynamics(previousPrediction, actualEvidence, predictionError, .20, req.Now, *req.DynamicsEncoding)
 		}
 	} else if len(previousPrediction) > 0 {
 		predictionError = stateDifference(previousPrediction, result.Activations)
