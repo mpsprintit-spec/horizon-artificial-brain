@@ -39,6 +39,17 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion {
 		return nil, fmt.Errorf("checkpoint schema %d cannot support journal offset replay", snapshot.SchemaVersion)
 	}
+	// Earlier v5 checkpoints used a graph-only legacy Brain encoding that
+	// omitted developmental episodes, experience traces, policy state and
+	// surface metadata. A checksum can authenticate such an incomplete file,
+	// but cannot reconstruct the omitted memory. Fail closed for offset replay.
+	var brainFormat struct{ SchemaVersion int `json:"schema_version"` }
+	if err := json.Unmarshal(snapshot.Brain, &brainFormat); err != nil {
+		return nil, fmt.Errorf("decode checkpoint canonical brain header: %w", err)
+	}
+	if brainFormat.SchemaVersion != 2 {
+		return nil, errors.New("checkpoint brain format is incomplete for journal offset recovery; create a new canonical checkpoint")
+	}
 	if snapshot.JournalPrefixHash == "" {
 		return nil, errors.New("checkpoint was not anchored to a committed journal")
 	}

@@ -12,11 +12,11 @@ func (k *KnowledgeBase) LearnVectorTransition(previous, current NeuralVector, th
 	if now.IsZero() {
 		now = time.Now().UTC()
 	}
-	before, err := k.ProjectVectorPopulation(previous, threshold, populationSize)
+	before, err := k.ProjectVectorPopulationAt(previous, threshold, populationSize, now)
 	if err != nil {
 		return err
 	}
-	after, err := k.ProjectVectorPopulation(current, threshold, populationSize)
+	after, err := k.ProjectVectorPopulationAt(current, threshold, populationSize, now)
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (k *KnowledgeBase) LearnVectorTransition(previous, current NeuralVector, th
 			if strength <= 0 {
 				continue
 			}
-			k.Connect(from, to, strength, strength, false)
+			k.ConnectAt(from, to, strength, strength, false, now)
 		}
 	}
 	return nil

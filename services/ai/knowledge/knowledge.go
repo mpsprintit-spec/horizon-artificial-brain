@@ -1,6 +1,7 @@
 package knowledge
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -354,10 +355,26 @@ func (k *KnowledgeBase) Load(path string) error {
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	b, err := os.ReadFile(path); if err != nil { return err }
+	var envelope struct { SchemaVersion int `json:"schema_version"` }
+	if err := json.Unmarshal(b, &envelope); err != nil { return err }
+	// Legacy graph files need dynamic-state hydration. Canonical v2 already
+	// persists exact dynamic AND legacy fields; hydration changes their values
+	// and makes deterministic checkpoint continuation diverge.
+	legacy := envelope.SchemaVersion < 2
 	nodes, patterns, populations, state, err := loadCanonicalBrain(b)
 	if err != nil { return err }
 	registry := NewTokenRegistry(); var maxID NodeID
-	for _, node := range nodes { if node == nil { continue }; if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.ID > maxID { maxID = node.ID } }
+	for _, node := range nodes {
+		if node == nil { continue }
+		if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }
+		if legacy {
+			for _, synapses := range node.Synapses {
+				for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) }
+			}
+		}
+		registry.byID[node.ID] = node
+		if node.ID > maxID { maxID = node.ID }
+	}
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), populations...); k.projectionMu.Unlock()
