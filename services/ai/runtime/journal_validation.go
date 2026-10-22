@@ -78,6 +78,8 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	var required []string
 	switch event.Type {
+	case EventTypeSpellingExposure:
+		required = []string{"spelling_exposure"}
 	case EventTypeWrittenGroundingMigration:
 		required = []string{"written_grounding_migration"}
 	case EventTypeSurfaceRebinding:
@@ -107,6 +109,7 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	present := map[string]bool{"event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
 	present["written_grounding_migration"] = event.WrittenGroundingMigration != nil
+	present["spelling_exposure"] = event.SpellingExposure != nil
 	for _, field := range required {
 		if !present[field] {
 			return fmt.Errorf("%s record requires %s", event.Type, field)
@@ -119,6 +122,9 @@ func validateJournalPayload(event LoggedEvent) error {
 		}
 	}
 	switch event.Type {
+	case EventTypeSpellingExposure:
+		if event.SchemaVersion < 3 || event.Timestamp.IsZero() { return errors.New("spelling supervision requires schema 3 and event time") }
+		if err := event.SpellingExposure.Validate(); err != nil { return err }
 	case EventTypeWrittenGroundingMigration:
 		if event.SurfaceEncoding != knowledge.WrittenTextEncoding || event.SchemaVersion < 3 || event.Timestamp.IsZero() { return errors.New("numeric written migration requires schema 3 and event time") }
 		if err := event.WrittenGroundingMigration.validateShape(); err != nil { return err }

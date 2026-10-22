@@ -1,0 +1,24 @@
+{
+  "after_thought_sha256": "491cabe41926e9a92a25422a8a706d1aed5027ee50eca67600faa675e2a996af",
+  "before_thought_sha256": "8b0b39c684a22ae75d61b0bcc9e2fb9a3ec0df9d29b991d3f8fe6aa1496f16ba",
+  "codec": "unicode-synaptic-v1",
+  "next_thought_at": "1970-01-01T00:01:44Z",
+  "next_thought_sha256": "7b32263f644e6adf581a8bae56ac7fa131bb3795d0c2e1b714ec60b4fdefd53e",
+  "population": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "spelling": {
+    "status": "decoded",
+    "text": "A🌌",
+    "scalars": [
+      65,
+      127756
+    ],
+    "min_margin": 1,
+    "conductance": 0.79871400299679,
+    "position": 2
+  }
+}

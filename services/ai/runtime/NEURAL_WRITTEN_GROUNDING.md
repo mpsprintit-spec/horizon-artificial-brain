@@ -166,6 +166,11 @@ The next [neural answer readout step](NEURAL_ANSWER_READOUT.md) exposes the nati
 selected forecast separately from activity ranking. It does not supply the
 learned decoder or close the generalization/grounding gates above.
 
+A later [bounded synaptic spelling experiment](LEARNED_SPELLING_READOUT.md) learns
+numeric I/O through ordinary shared-Brain synapses. The migration itself still
+uses the original fingerprint encoder; semantic/causal and scaling gates remain
+open. No user memory or main language curriculum is automatically trained.
+
 ## Small routing-cost measurements
 
 Linux/amd64, Go 1.22.12, AMD EPYC 9V74, GOMAXPROCS=4. The same candidate binary
