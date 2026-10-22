@@ -395,6 +395,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				event.IntentHash != "" || event.KnowledgeDocument != nil || event.Vector != nil {
 				return nil, fmt.Errorf("invalid sensor intent payload at line %d", lineNumber)
 			}
+			if err := event.Event.SensorObservation.Validate(); err != nil { return nil, fmt.Errorf("invalid sensor state at line %d: %w", lineNumber, err) }
 			digest, err := sensorIntentHash(event)
 			if err != nil { return nil, fmt.Errorf("hash sensor intent at line %d: %w", lineNumber, err) }
 			pending = &event

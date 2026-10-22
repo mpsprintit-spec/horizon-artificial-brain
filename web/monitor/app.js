@@ -1,4 +1,5 @@
 import { HorizonStore } from "./lib/horizon-store.js";
+import { extractVisionFields, extractAudioFields } from "./sensor-adapters.js";
 
 const $ = id => document.getElementById(id);
 const store = new HorizonStore();
@@ -9,7 +10,10 @@ let reconnectTimer = null;
 let cameraStream = null;
 let cameraTimer = null;
 let audioStream = null;
-let recorder = null;
+let audioTimer = null;
+let cameraGeneration = 0;
+let audioGeneration = 0;
+let sensorQueue = Promise.resolve();
 let audioContext = null;
 let analyser = null;
 let waveFrame = null;
@@ -24,6 +28,11 @@ function status(text, cls) { $("status").textContent=text; $("status").className
 function baseUrl() { return $("bridge").value.trim().replace(/\/$/,""); }
 function authHeaders() { const token=$("token").value.trim(); return token ? {Authorization:"Bearer "+token} : {}; }
 function nextId(prefix) { sessionSequence += 1; return prefix+"-"+sessionSequence+"-"+crypto.randomUUID(); }
+function browserSessionId() {
+  let id = sessionStorage.getItem("horizon.session");
+  if (!id) { id = "browser-"+crypto.randomUUID(); sessionStorage.setItem("horizon.session", id); }
+  return id;
+}
 function bridgeWsUrl() {
   const u=new URL(baseUrl()); u.protocol=u.protocol==="https:"?"wss:":"ws:"; u.pathname="/v1/brain/stream"; u.searchParams.set("after",String(store.revision));
   const token=$("token").value.trim(); if(token) u.searchParams.set("token",token); return u.toString();
@@ -39,12 +48,26 @@ async function postObservation(envelope) {
   const response=await fetch(baseUrl()+"/v1/observations",{method:"POST",headers:{"Content-Type":"application/json",...authHeaders()},body:JSON.stringify(envelope)});
   const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
 }
-function binaryToBase64(buffer) { const bytes=new Uint8Array(buffer); let out=""; const step=0x8000; for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,Math.min(i+step,bytes.length))); return btoa(out); }
+function makeSensorObservation(modality, source, fields, parents = []) {
+  return {modality, source:source+":"+browserSessionId(), timestamp:new Date().toISOString(), sample_id:nextId(modality), fields, confidence:.5,
+    provenance:{adapter:"browser-numeric-v1", calibration_id:"uncalibrated-relative-v1", parent_sample_ids:parents}};
+}
+function postSensorObservation(sensor, current) {
+  const send = async () => {
+    if (!current()) throw new Error("capture stopped");
+    const response = await fetch(baseUrl()+"/v1/sensor-observations", {method:"POST", headers:{"Content-Type":"application/json", ...authHeaders()}, body:JSON.stringify(sensor)});
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || ("HTTP "+response.status));
+    return body;
+  };
+  const result = sensorQueue.then(send, send);
+  sensorQueue = result.catch(() => {});
+  return result;
+}
 function rawPayload(value) { return new TextEncoder().encode(value); }
 async function hashBuffer(buffer) { const hash=await crypto.subtle.digest("SHA-256",buffer); return "sha256:"+Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join(""); }
 function makeEnvelope(modality, source, payload, extra={}) {
-  const sessionId=sessionStorage.getItem("horizon.session")||"browser-"+crypto.randomUUID();
-  sessionStorage.setItem("horizon.session",sessionId);
+  const sessionId=browserSessionId();
   const eventId=nextId(modality);
   return {schema_version:1,brain_identity:"horizon-primary-brain",event_id:eventId,session_id:sessionId,sequence:sessionSequence,timestamp:new Date().toISOString(),modality,source,provenance:{source,modality,capture_device:extra.capture_device||"",adapter:"github-pages-browser",synthetic:Boolean(extra.synthetic)},payload,...extra.payloadMeta};
 }
@@ -162,6 +185,7 @@ function renderInspectableState(s){
   (s.populations||[]).forEach((value,i)=>add("population "+i,value,"population"));
   (s.temporal_patterns||[]).forEach((value,i)=>add("temporal trace "+i,value,"temporal_trace"));
   (s.experience_traces||[]).forEach((value,i)=>add("experience trace "+i,value,"experience_trace"));
+  (s.sensory_traces||[]).forEach((value,i)=>add("sensor trace "+i,value,"sensor_trace"));
   (s.provenance||[]).forEach((value,i)=>add("provenance "+i,value,"provenance"));
   add("prediction state",s.brain_state?.prediction||{},"prediction_error");
   add("plasticity state",s.brain_state?.plasticity||{},"plasticity");
@@ -184,10 +208,92 @@ $("connect").onclick=connect;$("disconnect").onclick=disconnect;store.subscribe(
 
 $("ioSend").onclick=async()=>{const text=$("ioInput").value.trim();if(!text)return;$("ioStatus").textContent="sending...";try{const payload=rawPayload(text),env=makeEnvelope("text","web-test-input",{raw:text},{synthetic:true,payloadMeta:{payload_hash:await hashBuffer(payload)}}),response=await postObservation(env);$("ioStatus").textContent="accepted revision "+response.state_revision;$("ioInput").value="";await refreshSnapshotForEvent({state_revision:Number(response.state_revision),canonical_state_hash:response.canonical_state_hash});}catch(error){$("ioStatus").textContent="failed: "+error.message;}};
 $("simSend").onclick=async()=>{const text=$("simText").value;if(!text)return;const payload=rawPayload(text);const envelope=makeEnvelope($("simModality").value,"browser-simulator",{raw:text},{synthetic:true,payloadMeta:{payload_hash:await hashBuffer(payload)}});await sendEnvelope(envelope,$("simStatus"));};
-$("cameraStart").onclick=async()=>{try{cameraStream=await navigator.mediaDevices.getUserMedia({video:true});$("video").srcObject=cameraStream;const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");cameraTimer=setInterval(async()=>{canvas.width=$("video").videoWidth||320;canvas.height=$("video").videoHeight||240;ctx.drawImage($("video"),0,0,canvas.width,canvas.height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.65));if(!blob)return;const data=await blob.arrayBuffer();const envelope=makeEnvelope("vision","github-pages-camera",{encoding:"image/jpeg;base64",data:binaryToBase64(data)},{capture_device:"browser-camera",payloadMeta:{payload_hash:await hashBuffer(data)}});sendEnvelope(envelope,$("cameraStatus")).catch(()=>{});},1000);$("cameraStatus").textContent="captured";}catch(error){$("cameraStatus").textContent="failed: "+error.message;}};
-$("cameraStop").onclick=()=>{if(cameraTimer)clearInterval(cameraTimer);if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;$("cameraStatus").textContent="stopped";};
-$("audioStart").onclick=async()=>{try{audioStream=await navigator.mediaDevices.getUserMedia({audio:true});audioContext=new AudioContext();const source=audioContext.createMediaStreamSource(audioStream);analyser=audioContext.createAnalyser();analyser.fftSize=256;source.connect(analyser);const draw=()=>{if(!analyser)return;const data=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(data);const ctx=$("wave").getContext("2d");ctx.clearRect(0,0,360,80);ctx.beginPath();data.forEach((v,i)=>{const x=i*360/data.length,y=(v/255)*80;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();waveFrame=requestAnimationFrame(draw);};draw();recorder=new MediaRecorder(audioStream);recorder.ondataavailable=async e=>{if(!e.data.size)return;const data=await e.data.arrayBuffer();const envelope=makeEnvelope("audio","github-pages-microphone",{encoding:e.data.type,data:binaryToBase64(data)},{capture_device:"browser-microphone",payloadMeta:{payload_hash:await hashBuffer(data)}});sendEnvelope(envelope,$("audioStatus")).catch(()=>{});};recorder.start(1000);$("audioStatus").textContent="captured";}catch(error){$("audioStatus").textContent="failed: "+error.message;}};
-$("audioStop").onclick=()=>{if(recorder)recorder.stop();if(audioStream)audioStream.getTracks().forEach(t=>t.stop());if(audioContext)audioContext.close();if(waveFrame)cancelAnimationFrame(waveFrame);recorder=null;audioStream=null;$("audioStatus").textContent="stopped";};
+function stopCamera() {
+  cameraGeneration++;
+  if (cameraTimer) clearInterval(cameraTimer);
+  if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+  cameraTimer = null; cameraStream = null; $("video").srcObject = null;
+}
+$("cameraStart").onclick=async()=>{
+  stopCamera();
+  const generation = cameraGeneration;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:true});
+    if (generation !== cameraGeneration) { stream.getTracks().forEach(track => track.stop()); return; }
+    cameraStream = stream; $("video").srcObject = stream;
+    const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+    let busy = false, previous = null, previousAt = 0, parent = null;
+    cameraTimer = setInterval(async () => {
+      if (busy || generation !== cameraGeneration || !$("video").videoWidth) return;
+      busy = true;
+      try {
+        const ratio = Math.min(160/$("video").videoWidth, 120/$("video").videoHeight);
+        canvas.width = Math.max(4, Math.round($("video").videoWidth*ratio));
+        canvas.height = Math.max(4, Math.round($("video").videoHeight*ratio));
+        ctx.drawImage($("video"), 0, 0, canvas.width, canvas.height);
+        const capturedAt = performance.now(), elapsedNS = previous ? Math.round((capturedAt-previousAt)*1e6) : 0;
+        const measured = extractVisionFields(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, previous, elapsedNS);
+        const sensor = makeSensorObservation("vision", "github-pages-camera", measured.fields, parent ? [parent] : []);
+        const response = await postSensorObservation(sensor, () => generation === cameraGeneration);
+        if (generation === cameraGeneration) {
+          previous = measured.state; previousAt = capturedAt; parent = sensor.sample_id;
+          $("cameraStatus").textContent = "acknowledged r"+response.state_revision;
+        }
+      } catch (error) { if (generation === cameraGeneration) $("cameraStatus").textContent = "failed: "+error.message; }
+      finally { busy = false; }
+    }, 1000);
+    $("cameraStatus").textContent = "capturing";
+  } catch (error) { if (generation === cameraGeneration) { stopCamera(); $("cameraStatus").textContent = "failed: "+error.message; } }
+};
+$("cameraStop").onclick=()=>{stopCamera(); $("cameraStatus").textContent="stopped";};
+function stopAudio() {
+  audioGeneration++;
+  if (audioTimer) clearInterval(audioTimer);
+  if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+  if (audioContext) void audioContext.close();
+  if (waveFrame) cancelAnimationFrame(waveFrame);
+  audioTimer = null; audioStream = null; audioContext = null; analyser = null; waveFrame = null;
+}
+$("audioStart").onclick=async()=>{
+  stopAudio();
+  const generation = audioGeneration;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    if (generation !== audioGeneration) { stream.getTracks().forEach(track => track.stop()); return; }
+    audioStream = stream; audioContext = new AudioContext();
+    const context = audioContext, source = context.createMediaStreamSource(stream);
+    analyser = context.createAnalyser(); analyser.fftSize = 16384; source.connect(analyser);
+    const capture = analyser;
+    await context.resume();
+    if (generation !== audioGeneration) return;
+    const draw = () => {
+      if (generation !== audioGeneration) return;
+      const data = new Float32Array(capture.fftSize); capture.getFloatTimeDomainData(data);
+      const ctx = $("wave").getContext("2d"); ctx.clearRect(0,0,360,80); ctx.beginPath();
+      for (let point = 0; point < 360; point++) {
+        const value = data[Math.floor(point*data.length/360)], y = (1-value)*40;
+        point ? ctx.lineTo(point,y) : ctx.moveTo(point,y);
+      }
+      ctx.stroke(); waveFrame = requestAnimationFrame(draw);
+    };
+    draw();
+    let busy = false, parent = null;
+    audioTimer = setInterval(async () => {
+      if (busy || generation !== audioGeneration) return;
+      busy = true;
+      try {
+        const samples = new Float32Array(capture.fftSize); capture.getFloatTimeDomainData(samples);
+        const fields = extractAudioFields(samples, context.sampleRate);
+        const sensor = makeSensorObservation("audio", "github-pages-microphone", fields, parent ? [parent] : []);
+        const response = await postSensorObservation(sensor, () => generation === audioGeneration);
+        if (generation === audioGeneration) { parent = sensor.sample_id; $("audioStatus").textContent = "acknowledged r"+response.state_revision; }
+      } catch (error) { if (generation === audioGeneration) $("audioStatus").textContent = "failed: "+error.message; }
+      finally { busy = false; }
+    }, 1000);
+    $("audioStatus").textContent = "capturing";
+  } catch (error) { if (generation === audioGeneration) { stopAudio(); $("audioStatus").textContent = "failed: "+error.message; } }
+};
+$("audioStop").onclick=()=>{stopAudio(); $("audioStatus").textContent="stopped";};
 let lastMotionSent=0;
 $("motionStart").onclick=async()=>{try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){const p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw new Error("motion permission denied");}const handler=e=>{const now=performance.now();if(now-lastMotionSent<250)return;lastMotionSent=now;const payload={acceleration:e.acceleration,accelerationIncludingGravity:e.accelerationIncludingGravity,rotationRate:e.rotationRate,interval:e.interval};$("motionData").textContent=JSON.stringify(payload,null,2);const envelope=makeEnvelope("motion","github-pages-motion",payload,{capture_device:"browser-motion"});sendEnvelope(envelope,$("motionStatus")).catch(()=>{});};window.addEventListener("devicemotion",handler);$("motionStatus").textContent="captured";}catch(error){$("motionStatus").textContent="failed: "+error.message;}};
 
