@@ -172,7 +172,7 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 		return r.seq, err
 	}
 	if r.telemetry != nil {
-		r.telemetry.Publish(r.telemetryEventLocked(EventTypeOutcome, outcome.ObservedAt, nil, nil, &outcome))
+		r.publishTelemetryLocked(EventTypeOutcome, outcome.ObservedAt, nil, nil, &outcome, nil, nil)
 	}
 	return r.seq, nil
 }

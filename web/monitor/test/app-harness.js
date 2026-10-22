@@ -2,6 +2,7 @@ import vm from "node:vm";
 import { readFileSync } from "node:fs";
 import { webcrypto } from "node:crypto";
 import * as adapters from "../sensor-adapters.js";
+import { createSnapshotScheduler } from "../snapshot-scheduler.js";
 
 // Execute production handlers. Only device, clock, transport and DOM surfaces
 // are deterministic fakes; sensor extraction and send/stop logic are real.
@@ -24,8 +25,8 @@ export function monitorHarness(options = {}) {
   }
   class ClockDate extends Date {constructor(...args){super(...(args.length?args:[epoch+clock.milliseconds]));}static now(){return epoch+clock.milliseconds;}}
   const reply=()=>({ok:true,json:async()=>({state_revision:requests.length,canonical_state_hash:"fixture"})});
-  const context={...adapters,
-    HorizonStore:class{snapshot=null;revision=0;subscribe(){}setSnapshot(){}},
+  const context={...adapters,createSnapshotScheduler,
+    HorizonStore:options.HorizonStore??class{snapshot=null;revision=0;subscribe(){}setSnapshot(){}resetForConnection(){}},
     document:{getElementById:element,createElement:()=>({getContext:()=>drawing})},
     sessionStorage:{getItem:key=>storage.get(key)??null,setItem:(key,value)=>storage.set(key,value)},
     navigator:{mediaDevices:{async getUserMedia(){const track={stopped:false,stop(){this.stopped=true;}};tracks.push(track);return {getTracks:()=>[track]};}}},
@@ -35,6 +36,7 @@ export function monitorHarness(options = {}) {
     crypto:{randomUUID:()=>(options.idPrefix??"fixture")+"-"+(++nextID),subtle:webcrypto.subtle},
     setInterval:callback=>{intervals.set(++nextTimer,callback);return nextTimer;},clearInterval:id=>intervals.delete(id),
     requestAnimationFrame:()=>1,cancelAnimationFrame(){},
+    setTimeout,clearTimeout,WebSocket:options.WebSocket,
     async fetch(url,settings){
       if(!settings?.body)return options.get ? options.get(url,settings) : reply();
       const request={url,body:JSON.parse(settings.body),settings};requests.push(request);
@@ -46,6 +48,7 @@ export function monitorHarness(options = {}) {
   if(options.extractAudioFields)context.extractAudioFields=(...args)=>options.extractAudioFields(clock,...args);
   vm.runInNewContext(readFileSync(new URL("../app.js",import.meta.url),"utf8").replace(/^import .*;\n/gm,""),context,{filename:"production-monitor-app.js"});
   return {element,clock,requests,listeners,intervals,tracks,storage,epoch,
+    connect:()=>context.connect(),disconnect:()=>context.disconnect(),
     async emitMotion(event){await Promise.all([...(listeners.get("devicemotion")??[])].map(handler=>handler(event)));},
   };
 }

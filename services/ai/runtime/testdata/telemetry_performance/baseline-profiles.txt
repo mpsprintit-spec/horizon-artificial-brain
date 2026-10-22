@@ -1,0 +1,102 @@
+Profile: cpu
+File: h17-baseline-exact.test
+Type: cpu
+Time: Oct 20, 2026 at 8:52am (CDT)
+Duration: 27.71s, Total samples = 32.62s (117.71%)
+Showing nodes accounting for 7.77s, 23.82% of 32.62s total
+Dropped 303 nodes (cum <= 0.16s)
+Showing top 20 nodes out of 139
+      flat  flat%   sum%        cum   cum%
+         0     0%     0%     26.75s 82.00%  testing.(*B).runN
+         0     0%     0%     26.74s 81.97%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1
+         0     0%     0%     26.20s 80.32%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1.3
+         0     0%     0%     25.55s 78.33%  testing.(*B).launch
+         0     0%     0%     25.20s 77.25%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).telemetryEventLocked
+         0     0%     0%     23.66s 72.53%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*KnowledgeBase).CanonicalJSON
+     0.11s  0.34%  0.34%     23.66s 72.53%  github.com/project-horizon/horizon-core/services/ai/knowledge.marshalCanonicalBrain
+         0     0%  0.34%     22.43s 68.76%  encoding/json.MarshalIndent
+         0     0%  0.34%     13.17s 40.37%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).CognitiveThink
+         0     0%  0.34%     13.17s 40.37%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).cognitiveThinkAtLocked
+         0     0%  0.34%     13.03s 39.94%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).ProcessSensorObservation (inline)
+         0     0%  0.34%     13.03s 39.94%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation
+         0     0%  0.34%     13.02s 39.91%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation.func1
+     7.14s 21.89% 22.23%     11.20s 34.33%  encoding/json.appendIndent
+         0     0% 22.23%     10.64s 32.62%  encoding/json.Marshal
+         0     0% 22.23%      9.82s 30.10%  encoding/json.(*encodeState).marshal
+         0     0% 22.23%      9.82s 30.10%  encoding/json.(*encodeState).reflectValue
+     0.44s  1.35% 23.57%      9.81s 30.07%  encoding/json.structEncoder.encode
+     0.08s  0.25% 23.82%      9.80s 30.04%  encoding/json.arrayEncoder.encode
+         0     0% 23.82%      9.80s 30.04%  encoding/json.sliceEncoder.encode
+
+Profile: alloc
+File: h17-baseline-exact.test
+Type: alloc_space
+Time: Oct 20, 2026 at 8:52am (CDT)
+Showing nodes accounting for 12124.40MB, 98.51% of 12307.39MB total
+Dropped 80 nodes (cum <= 61.54MB)
+Showing top 20 nodes out of 36
+      flat  flat%   sum%        cum   cum%
+ 3892.99MB 31.63% 31.63% 12060.69MB 98.00%  github.com/project-horizon/horizon-core/services/ai/knowledge.marshalCanonicalBrain
+ 3267.82MB 26.55% 58.18%  8131.88MB 66.07%  encoding/json.MarshalIndent
+ 2552.34MB 20.74% 78.92%  2552.34MB 20.74%  bytes.growSlice
+ 1646.25MB 13.38% 92.30%  4910.12MB 39.90%  encoding/json.Marshal
+  710.53MB  5.77% 98.07%   710.53MB  5.77%  time.Time.MarshalJSON
+      49MB   0.4% 98.47%    78.50MB  0.64%  github.com/project-horizon/horizon-core/services/ai/knowledge.(*NeuralUnit).OutboundAll
+    5.46MB 0.044% 98.51%      111MB   0.9%  github.com/project-horizon/horizon-core/services/ai/runtime.telemetryBenchmarkRuntime
+         0     0% 98.51%   464.51MB  3.77%  bytes.(*Buffer).Grow (inline)
+         0     0% 98.51%   458.96MB  3.73%  bytes.(*Buffer).Write
+         0     0% 98.51%   102.30MB  0.83%  bytes.(*Buffer).WriteByte
+         0     0% 98.51%  1526.57MB 12.40%  bytes.(*Buffer).WriteString
+         0     0% 98.51%  2552.34MB 20.74%  bytes.(*Buffer).grow
+         0     0% 98.51%  3263.37MB 26.52%  encoding/json.(*encodeState).marshal
+         0     0% 98.51%  3263.37MB 26.52%  encoding/json.(*encodeState).reflectValue
+         0     0% 98.51%  1175.05MB  9.55%  encoding/json.addrMarshalerEncoder
+         0     0% 98.51%  3262.87MB 26.51%  encoding/json.arrayEncoder.encode
+         0     0% 98.51%  1175.05MB  9.55%  encoding/json.condAddrEncoder.encode
+         0     0% 98.51%   411.17MB  3.34%  encoding/json.floatEncoder.encode
+         0     0% 98.51%  3262.87MB 26.51%  encoding/json.sliceEncoder.encode
+         0     0% 98.51%  3262.87MB 26.51%  encoding/json.structEncoder.encode
+
+Profile: mutex
+File: h17-baseline-exact.test
+Type: delay
+Time: Oct 20, 2026 at 8:52am (CDT)
+Showing nodes accounting for 25.64s, 100% of 25.64s total
+Dropped 2 nodes (cum <= 0.13s)
+      flat  flat%   sum%        cum   cum%
+    25.31s 98.71% 98.71%     25.31s 98.71%  sync.(*Mutex).Unlock
+     0.33s  1.29%   100%      0.33s  1.29%  runtime._LostContendedRuntimeLock
+         0     0%   100%     12.87s 50.19%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).CognitiveThink
+         0     0%   100%     12.44s 48.53%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).ProcessSensorObservation (inline)
+         0     0%   100%     12.44s 48.53%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation
+         0     0%   100%     12.44s 48.53%  github.com/project-horizon/horizon-core/services/ai/runtime.(*CognitiveOrchestrator).ProcessSensorObservation.func1
+         0     0%   100%     25.31s 98.71%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1
+         0     0%   100%     25.31s 98.71%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1.3
+         0     0%   100%     25.06s 97.74%  testing.(*B).launch
+         0     0%   100%      0.25s  0.97%  testing.(*B).run1.func1
+         0     0%   100%     25.31s 98.71%  testing.(*B).runN
+
+Profile: block
+File: h17-baseline-exact.test
+Type: delay
+Time: Oct 20, 2026 at 8:52am (CDT)
+Showing nodes accounting for 80.59s, 99.88% of 80.69s total
+Dropped 19 nodes (cum <= 0.40s)
+      flat  flat%   sum%        cum   cum%
+    55.28s 68.51% 68.51%     55.28s 68.51%  runtime.chanrecv1
+    25.31s 31.37% 99.88%     25.31s 31.37%  sync.(*Mutex).Lock (inline)
+         0     0% 99.88%     25.31s 31.37%  github.com/project-horizon/horizon-core/services/ai/runtime.(*BrainRuntime).LastSequence
+         0     0% 99.88%     27.56s 34.16%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions
+         0     0% 99.88%     25.41s 31.49%  github.com/project-horizon/horizon-core/services/ai/runtime.BenchmarkTelemetryTransitions.func1.4
+         0     0% 99.88%     27.72s 34.35%  main.main
+         0     0% 99.88%     27.72s 34.35%  runtime.main
+         0     0% 99.88%     55.13s 68.32%  testing.(*B).Run
+         0     0% 99.88%     26.30s 32.59%  testing.(*B).doBench
+         0     0% 99.88%     26.30s 32.59%  testing.(*B).run
+         0     0% 99.88%     28.83s 35.73%  testing.(*B).run1
+         0     0% 99.88%     27.56s 34.16%  testing.(*B).run1.func1
+         0     0% 99.88%     55.13s 68.32%  testing.(*B).runN
+         0     0% 99.88%     27.72s 34.35%  testing.(*M).Run
+         0     0% 99.88%     26.30s 32.59%  testing.(*benchContext).processBench
+         0     0% 99.88%     27.56s 34.16%  testing.runBenchmarks
+         0     0% 99.88%     27.56s 34.16%  testing.runBenchmarks.func1

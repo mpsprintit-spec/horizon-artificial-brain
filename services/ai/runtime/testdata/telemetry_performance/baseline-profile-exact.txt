@@ -1,0 +1,7 @@
+goos: linux
+goarch: amd64
+pkg: github.com/project-horizon/horizon-core/services/ai/runtime
+cpu: AMD EPYC 9V74 80-Core Processor
+BenchmarkTelemetryTransitions/nodes=4000/fanout=4/monitor=true/journal=false-9         	     100	 251843836 ns/op	      4004 final_units	       121.6 sensor_p50_ms	       150.2 sensor_p95_ms	         1.107 setup_s	       124.7 think_p50_ms	       160.0 think_p95_ms	118993102 B/op	  225983 allocs/op
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	27.735s

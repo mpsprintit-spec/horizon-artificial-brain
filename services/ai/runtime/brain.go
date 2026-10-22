@@ -1,8 +1,6 @@
 package runtime
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -117,15 +115,6 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if err != nil { return nil }
 	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64), surfaceEncoding: knowledge.WrittenTextEncoding, dynamicsEncoding: knowledge.CurrentDynamics}
 }
-func (r *BrainRuntime) telemetryEventLocked(eventType string, at time.Time, event *Event, observation *ObservationEnvelope, outcome *OutcomeEvent) TelemetryEvent {
-	payload := struct { Type string `json:"type"`; Sequence uint64 `json:"sequence"`; Event *Event `json:"event,omitempty"`; Observation *ObservationEnvelope `json:"observation,omitempty"`; Outcome *OutcomeEvent `json:"outcome,omitempty"` }{eventType, r.seq, event, observation, outcome}
-	data, _ := json.Marshal(payload); eh := sha256.Sum256(data)
-	brain, _ := r.brain.CanonicalJSON(); bh := sha256.Sum256(brain)
-	r.brain.RLock()
-	plasticity := cloneMonitorFloatMap(r.brain.BrainState.PlasticityState)
-	r.brain.RUnlock()
-	return TelemetryEvent{Type:eventType, BrainIdentity:BrainIdentity, StateRevision:r.seq, Timestamp:at.UTC(), EventHash:"sha256:"+hex.EncodeToString(eh[:]), CanonicalStateHash:"sha256:"+hex.EncodeToString(bh[:]), Event:event, Observation:observation, Outcome:outcome, Plasticity:plasticity}
-}
 func (r *BrainRuntime) Telemetry() *TelemetryHub {
 	if r == nil {
 		return nil
@@ -153,10 +142,7 @@ func (r *BrainRuntime) PublishObservationTelemetry(envelope ObservationEnvelope,
 		r.telemetry = NewTelemetryHub(256)
 	}
 	envelope.Sequence = output.Sequence
-	e := r.telemetryEventLocked("observation", output.Timestamp, nil, &envelope, nil)
-	e.StateDelta = &output.StateDelta
-	e.PredictionError = &output.PredictionError
-	r.telemetry.Publish(e)
+	r.publishTelemetryLocked("observation", output.Timestamp, nil, &envelope, nil, &output.StateDelta, &output.PredictionError)
 }
 func (r *BrainRuntime) SaveBrain(path string) error {
 	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
@@ -339,7 +325,7 @@ func (r *BrainRuntime) processWithPersistenceLocked(event Event, persist bool) (
 			return applyErr
 		})
 		if err == nil && r.telemetry != nil && event.Observation == nil {
-			r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
+			r.publishTelemetryLocked(EventTypeProcess, event.Timestamp, &event, nil, nil, nil, nil)
 		}
 		return result, r.seq, err
 	}
@@ -536,10 +522,7 @@ func (r *BrainRuntime) cognitiveProcessWithPersistenceLocked(event Event, persis
 			return CognitiveOutput{}, err
 		}
 		if r.telemetry != nil && event.Observation == nil {
-			e := r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil)
-			e.StateDelta = &output.StateDelta
-			e.PredictionError = &output.PredictionError
-			r.telemetry.Publish(e)
+			r.publishTelemetryLocked(EventTypeProcess, event.Timestamp, &event, nil, nil, &output.StateDelta, &output.PredictionError)
 		}
 		return output, nil
 	}
@@ -583,10 +566,7 @@ func (r *BrainRuntime) cognitiveThinkAtLocked(cycles int, now time.Time, persist
 			return CognitiveOutput{}, err
 		}
 		if r.telemetry != nil {
-			e := r.telemetryEventLocked(EventTypeThink, now, nil, nil, nil)
-			e.StateDelta = &output.StateDelta
-			e.PredictionError = &output.PredictionError
-			r.telemetry.Publish(e)
+			r.publishTelemetryLocked(EventTypeThink, now, nil, nil, nil, &output.StateDelta, &output.PredictionError)
 		}
 		return output, nil
 	}

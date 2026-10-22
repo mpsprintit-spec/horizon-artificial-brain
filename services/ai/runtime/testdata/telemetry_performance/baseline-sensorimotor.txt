@@ -1,0 +1,10 @@
+goos: linux
+goarch: amd64
+pkg: github.com/project-horizon/horizon-core/services/ai/runtime
+cpu: AMD EPYC 9V74 80-Core Processor
+BenchmarkTelemetrySensorimotor/monitor=false/journal=false-9         	      20	 426987845 ns/op	       416.1 cycle_p50_ms	       481.1 cycle_p95_ms	236176795 B/op	  393979 allocs/op
+BenchmarkTelemetrySensorimotor/monitor=false/journal=true-9          	      20	 462412932 ns/op	       452.2 cycle_p50_ms	       577.5 cycle_p95_ms	241217041 B/op	  394029 allocs/op
+BenchmarkTelemetrySensorimotor/monitor=true/journal=false-9          	      20	 435250852 ns/op	       428.9 cycle_p50_ms	       480.8 cycle_p95_ms	236177430 B/op	  393985 allocs/op
+BenchmarkTelemetrySensorimotor/monitor=true/journal=true-9           	      20	 414887742 ns/op	       409.4 cycle_p50_ms	       454.9 cycle_p95_ms	235344106 B/op	  394016 allocs/op
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	49.770s

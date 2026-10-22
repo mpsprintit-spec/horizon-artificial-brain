@@ -18,8 +18,10 @@ experience defaults does not change the caller's experience.
 Each complete command is encoded and fsynced before its first mutation. A
 successful command advances exactly one logical revision. Optional experience
 learning inside an observation no longer consumes a separate revision. Output,
-dedup index and telemetry refer to that complete revision. The telemetry hash
-is captured after the entire transition, including temporal learning.
+dedup index and telemetry refer to that complete revision. Canonical-mode
+telemetry hashes are captured after the entire transition, including temporal
+learning. The opt-in [revision stream](REVISION_TELEMETRY.md) sends committed
+revisions/deltas and reserves full neural hashes for explicit snapshot boundaries.
 
 | Journal type | Deterministic transition |
 | --- | --- |
