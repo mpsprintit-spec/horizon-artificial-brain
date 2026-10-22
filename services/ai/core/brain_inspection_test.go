@@ -104,7 +104,10 @@ func TestConcurrentSnapshotsAndCheckpointHandoverDoNotExposeRetiredBrain(t *test
 	}()
 	select {
 	case <-finished:
-	case <-time.After(6*time.Second):
+	// The race detector instruments 96 full graph copies serialized by the
+	// runtime lock. Allow that work to finish on slower CI hosts while still
+	// bounding an actual handover deadlock.
+	case <-time.After(30*time.Second):
 		t.Fatal("concurrent read snapshots deadlocked checkpoint handover")
 	}
 	close(errorsCh)

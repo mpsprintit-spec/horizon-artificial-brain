@@ -94,15 +94,23 @@ type TelemetryHub struct {
 	mu sync.RWMutex
 	subscribers map[*TelemetrySubscriber]struct{}
 	capacity int
+	closed bool
 }
 func NewTelemetryHub(capacity int) *TelemetryHub {
 	if capacity < 1 { capacity = 64 }
 	return &TelemetryHub{subscribers: make(map[*TelemetrySubscriber]struct{}), capacity: capacity}
 }
 func (h *TelemetryHub) Subscribe() *TelemetrySubscriber {
-	if h == nil { return nil }
+	if h == nil {
+		return nil
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.closed {
+		return nil
+	}
 	s := &TelemetrySubscriber{ch: make(chan TelemetryEvent, h.capacity)}
-	h.mu.Lock(); h.subscribers[s] = struct{}{}; h.mu.Unlock()
+	h.subscribers[s] = struct{}{}
 	return s
 }
 func (h *TelemetryHub) Unsubscribe(s *TelemetrySubscriber) {
@@ -112,11 +120,42 @@ func (h *TelemetryHub) Unsubscribe(s *TelemetrySubscriber) {
 	h.mu.Unlock()
 }
 func (h *TelemetryHub) Publish(event TelemetryEvent) {
-	if h == nil { return }
-	h.mu.RLock(); subs := make([]*TelemetrySubscriber,0,len(h.subscribers))
-	for s := range h.subscribers { subs=append(subs,s) }; h.mu.RUnlock()
-	for _, s := range subs {
-		select { case s.ch <- event: default: h.Unsubscribe(s) }
+	if h == nil {
+		return
+	}
+	// Sending and closing share this lock. Copying subscribers and releasing
+	// it before sending permits Unsubscribe/Close to close a channel in use.
+	// Sends stay nonblocking; a full subscriber is removed under the lock.
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.closed {
+		return
+	}
+	for s := range h.subscribers {
+		select {
+		case s.ch <- event:
+		default:
+			delete(h.subscribers, s)
+			s.close()
+		}
+	}
+}
+
+// Close stops publication and subscription and releases all subscribers.
+// It is idempotent and does not wait for consumers to drain buffered events.
+func (h *TelemetryHub) Close() {
+	if h == nil {
+		return
+	}
+	h.mu.Lock()
+	defer h.mu.Unlock()
+	if h.closed {
+		return
+	}
+	h.closed = true
+	for s := range h.subscribers {
+		delete(h.subscribers, s)
+		s.close()
 	}
 }
 

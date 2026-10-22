@@ -48,6 +48,26 @@ needed to remove these aliases and enforce complete process-wide ownership.
 - No snapshot method mutates the live substrate. Returned collections can
   be modified by callers, but this affects only their private copies.
 
+## Monitor lifetime
+
+`MonitorSnapshot` and `MonitorHandshake` refuse a retired or recovery-required
+runtime, just like `InspectBrain`. A previously captured detached snapshot
+remains valid; it cannot be used to obtain a new live view of the retired brain.
+
+Successful checkpoint or genesis handover, supervisor shutdown, and uncertain
+neural commits close the old runtime's telemetry hub. Cached hub references
+cannot publish again or accept new subscriptions. Existing subscribers may
+drain their already-buffered events before their channels report closure.
+Managed Bridge streams additionally check the supervisor epoch before sending
+each frame, so buffered events from an old runtime cannot cross a handover.
+Rejected recovery leaves a healthy active runtime and its subscribers intact.
+
+Publication, unsubscribe, overflow eviction, and hub shutdown share one lock.
+Publication never waits on a subscriber: a full queue closes that subscription
+without interrupting the others. Legacy Bridge instances bound to a raw runtime
+refuse reads after that runtime becomes unavailable; applications requiring
+handover continuity must use `bridge.NewManaged`.
+
 ## Verification
 
 The automated regression suite exercises defensive copies, lexical

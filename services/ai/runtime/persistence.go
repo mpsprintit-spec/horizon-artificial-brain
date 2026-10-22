@@ -207,7 +207,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 		return fmt.Errorf("restore brain: %w", err)
 	}
 	if err := r.brain.RestoreSurfaceAnnotations(snapshot.SurfaceAnnotations); err != nil {
-		r.recoveryRequired = true
+		r.markRecoveryRequiredLocked()
 		return fmt.Errorf("%w: restore checkpoint adapter provenance: %v", ErrRuntimeRecoveryRequired, err)
 	}
 	r.activation.RestoreState(snapshot.Activation)
