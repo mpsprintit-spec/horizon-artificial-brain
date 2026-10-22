@@ -2,8 +2,6 @@
 set -euo pipefail
 
 tmp_dir="$(mktemp -d)"
-port="18765"
-base="http://127.0.0.1:${port}"
 token="ci-smoke-token"
 event_id="ci-browser-observation-$(date +%s%N)"
 pid=""
@@ -14,15 +12,26 @@ cleanup() {
 }
 trap cleanup EXIT
 
+go build -o "${tmp_dir}/horizon-smoke" ./services/ai
+port="$(python3 - <<'PY'
+import socket
+with socket.socket() as listener:
+    listener.bind(('127.0.0.1', 0))
+    print(listener.getsockname()[1])
+PY
+)"
+base="http://127.0.0.1:${port}"
+
 HORIZON_BRAIN_MEMORY_PATH="${tmp_dir}/brain_memory.json" \
 HORIZON_EVENT_LOG_PATH="${tmp_dir}/events.jsonl" \
 HORIZON_BRIDGE_ADDRESS="127.0.0.1:${port}" \
 HORIZON_BRIDGE_TOKEN="${token}" \
 HORIZON_MONITOR_ORIGINS="http://127.0.0.1:${port}" \
-go run ./services/ai >"${tmp_dir}/runtime.log" 2>&1 &
+"${tmp_dir}/horizon-smoke" >"${tmp_dir}/runtime.log" 2>&1 &
 pid=$!
 
 for _ in {1..60}; do
+  if ! kill -0 "${pid}" 2>/dev/null; then cat "${tmp_dir}/runtime.log" >&2; exit 1; fi
   if curl -fsS "${base}/health" >"${tmp_dir}/health.json"; then break; fi
   sleep 1
 done
@@ -64,6 +73,8 @@ jq -e '.sensor_bindings | length==2 and (.[0].population==.[1].population) and (
 curl -fsS "${base}/v1/brain/snapshot" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id and (.fields | length==2))' >/dev/null
 jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id)' "${tmp_dir}/brain_memory.json" >/dev/null
 curl -fsS "${base}/v1/brain/events?after=0" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.events | any(.[]; .event.sensor_observation.sample_id==$id and (.event.sensor_observation.fields | length==2))' >/dev/null
+
+node scripts/visual_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/brain_memory.json"
 
 echo "Bridge smoke: health, handshake, snapshot, legacy/numeric observations, persistence and event replay passed"
 echo "revision: ${before_revision} -> ${after_revision}"
