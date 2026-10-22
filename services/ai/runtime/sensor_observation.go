@@ -198,7 +198,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		}
 		// The durable process record for journaled sensor input is the
 		// intent/commit pair, not a second standalone process record.
-		output, err := r.cognitiveProcessWithPersistenceLocked(event, !journaled)
+		output, err := r.cognitiveProcessWithPersistenceLocked(event, false)
 		if err != nil {
 			r.markRecoveryRequiredLocked()
 			return processedSensor{}, fmt.Errorf("%w: sensor cognition: %v", ErrRuntimeRecoveryRequired, err)
@@ -222,11 +222,13 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				r.markRecoveryRequiredLocked()
 				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)
 			}
-			// Do not expose the process event to telemetry before the commit
-			// marker is durable; a failed transaction remains internal.
-			if r.telemetry != nil {
-				r.telemetry.Publish(r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil))
-			}
+		}
+		// Publish only after the complete sensor transition (and any durable
+		// commit marker), including temporal learning, has finished.
+		if r.telemetry != nil {
+			e := r.telemetryEventLocked(EventTypeProcess, event.Timestamp, &event, nil, nil)
+			e.StateDelta, e.PredictionError = &output.StateDelta, &output.PredictionError
+			r.telemetry.Publish(e)
 		}
 		similarity := 0.0
 		if len(population.Units) > 0 {

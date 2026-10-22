@@ -20,6 +20,9 @@ import (
 const EventLogSchemaVersion = 1
 
 type LoggedEvent struct {
+	InquiryOutcome *InquiryOutcomeCommand `json:"inquiry_outcome,omitempty"`
+	ObservationCommand *ObservationCommand `json:"observation_command,omitempty"`
+	ActionBinding *ActionBinding `json:"action_binding,omitempty"`
 	SchemaVersion int                  `json:"schema_version"`
 	BrainIdentity string               `json:"brain_identity"`
 	Sequence      uint64               `json:"sequence"`
@@ -36,6 +39,11 @@ type LoggedEvent struct {
 
 const (
 	EventTypeProcess = "process"
+	EventTypeObservation = "observation"
+	EventTypeCognitiveProcess = "cognitive_process"
+	EventTypeCognitiveThink = "cognitive_think"
+	EventTypeActionBinding = "action_binding"
+	EventTypeInquiryOutcome = "inquiry_outcome"
 	EventTypeLearn = "learn"
 	EventTypeThink = "think"
 	EventTypeOutcome = "outcome"
@@ -171,7 +179,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround {
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -298,13 +306,15 @@ func sensorIntentHash(intent LoggedEvent) (string, error) {
 // observation. A caller must recover from a known-good checkpoint/log.
 func ReadEventLog(path string) ([]LoggedEvent, error) {
 	file, err := os.Open(path)
-	if err != nil { return nil, err }
+	if err != nil {
+		return nil, err
+	}
 	defer file.Close()
 
 	var events []LoggedEvent
 	var expected uint64 = 1
 	type eventKey struct {
-		sequence uint64
+		sequence  uint64
 		eventType string
 	}
 	seen := make(map[eventKey][]byte)
@@ -346,7 +356,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				return nil, fmt.Errorf("%w: sensor intent at sequence %d interrupted by %q at line %d", ErrUncommittedSensorTransaction, expected, event.Type, lineNumber)
 			}
 			if event.IntentHash == "" || event.IntentHash != pendingHash || event.Event != nil ||
-				event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil ||
+				event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.ObservationCommand != nil || event.ActionBinding != nil || event.InquiryOutcome != nil ||
 				!event.Timestamp.Equal(pending.Timestamp) {
 				return nil, fmt.Errorf("%w: sensor commit mismatch at line %d", ErrUncommittedSensorTransaction, lineNumber)
 			}
@@ -361,7 +371,44 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			continue
 		}
 
+		if err := validateJournalPayload(event); err != nil {
+			return nil, fmt.Errorf("invalid journal payload at line %d: %w", lineNumber, err)
+		}
 		switch event.Type {
+		case EventTypeInquiryOutcome:
+			if event.Timestamp.IsZero() || event.Event == nil || !event.Event.Timestamp.Equal(event.Timestamp) || event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.IntentHash != "" {
+				return nil, fmt.Errorf("invalid inquiry outcome command at line %d", lineNumber)
+			}
+			if err := validateInquiryOutcomeCommand(event.Event, event.InquiryOutcome); err != nil {
+				return nil, fmt.Errorf("invalid inquiry outcome command at line %d: %w", lineNumber, err)
+			}
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
+		case EventTypeActionBinding:
+			if event.ActionBinding == nil || event.ActionBinding.RequestID == "" || event.ActionBinding.BrainIdentity != BrainIdentity || event.Event != nil || event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.IntentHash != "" || event.Timestamp.IsZero() {
+				return nil, fmt.Errorf("invalid action binding command at line %d", lineNumber)
+			}
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
+		case EventTypeObservation:
+			if event.Timestamp.IsZero() || event.Event == nil || !event.Event.Timestamp.Equal(event.Timestamp) || event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.IntentHash != "" {
+				return nil, fmt.Errorf("invalid observation command at line %d", lineNumber)
+			}
+			if err := validateObservationCommand(event.Event, event.ObservationCommand); err != nil {
+				return nil, fmt.Errorf("invalid observation command at line %d: %w", lineNumber, err)
+			}
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
+		case EventTypeCognitiveProcess, EventTypeCognitiveThink:
+			if event.Event == nil || event.Timestamp.IsZero() || !event.Timestamp.Equal(event.Event.Timestamp) || event.Event.SensorObservation != nil || event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.IntentHash != "" {
+				return nil, fmt.Errorf("invalid cognitive command at line %d", lineNumber)
+			}
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
 		case EventTypeVectorGround:
 			if event.Vector == nil || event.Event != nil || event.Experience != nil ||
 				event.KnowledgeDocument != nil || event.Outcome != nil ||
@@ -395,9 +442,13 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				event.IntentHash != "" || event.KnowledgeDocument != nil || event.Vector != nil {
 				return nil, fmt.Errorf("invalid sensor intent payload at line %d", lineNumber)
 			}
-			if err := event.Event.SensorObservation.Validate(); err != nil { return nil, fmt.Errorf("invalid sensor state at line %d: %w", lineNumber, err) }
+			if err := event.Event.SensorObservation.Validate(); err != nil {
+				return nil, fmt.Errorf("invalid sensor state at line %d: %w", lineNumber, err)
+			}
 			digest, err := sensorIntentHash(event)
-			if err != nil { return nil, fmt.Errorf("hash sensor intent at line %d: %w", lineNumber, err) }
+			if err != nil {
+				return nil, fmt.Errorf("hash sensor intent at line %d: %w", lineNumber, err)
+			}
 			pending = &event
 			pendingHash = digest
 			seen[key] = canonical
@@ -409,7 +460,9 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			expected++
 		}
 	}
-	if err := scanner.Err(); err != nil { return nil, fmt.Errorf("read event log: %w", err) }
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("read event log: %w", err)
+	}
 	if pending != nil {
 		return nil, fmt.Errorf("%w: sensor intent sequence %d has no commit marker", ErrUncommittedSensorTransaction, pending.Sequence)
 	}
@@ -427,10 +480,21 @@ func ReplayEventLog(brainRuntime *BrainRuntime, events []LoggedEvent) error {
 // replayEventLogFromSequence is used for *isolated* checkpoint recovery.
 // The caller must not expose brainRuntime to concurrent writers during replay.
 func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent, firstSequence uint64) error {
-	if brainRuntime == nil { return errors.New("brain runtime is nil") }
-	if firstSequence == 0 { return errors.New("replay sequence must start at 1 or later") }
+	if brainRuntime == nil {
+		return errors.New("brain runtime is nil")
+	}
+	if firstSequence == 0 {
+		return errors.New("replay sequence must start at 1 or later")
+	}
 	if brainRuntime.LastSequence() != firstSequence-1 {
 		return fmt.Errorf("replay target sequence %d does not precede first event %d", brainRuntime.LastSequence(), firstSequence)
+	}
+	// Validate the entire supplied batch before applying its first command.
+	// Rebuild helpers additionally verify physical framing through ReadEventLog.
+	for _, logged := range events {
+		if err := validateJournalPayload(logged); err != nil {
+			return err
+		}
 	}
 	brainRuntime.mu.Lock()
 	originalLog := brainRuntime.eventLog
@@ -444,26 +508,80 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 
 	var expected uint64 = firstSequence
 	for _, logged := range events {
-		if logged.BrainIdentity != BrainIdentity { return fmt.Errorf("cannot replay event for brain %q", logged.BrainIdentity) }
-		if logged.SchemaVersion != EventLogSchemaVersion { return fmt.Errorf("unsupported event log schema version %d", logged.SchemaVersion) }
-		if logged.Sequence != expected { return fmt.Errorf("replay sequence discontinuity: got %d want %d", logged.Sequence, expected) }
+		if logged.BrainIdentity != BrainIdentity {
+			return fmt.Errorf("cannot replay event for brain %q", logged.BrainIdentity)
+		}
+		if logged.SchemaVersion != EventLogSchemaVersion {
+			return fmt.Errorf("unsupported event log schema version %d", logged.SchemaVersion)
+		}
+		if logged.Sequence != expected {
+			return fmt.Errorf("replay sequence discontinuity: got %d want %d", logged.Sequence, expected)
+		}
 		expected++
 		switch logged.Type {
 		case EventTypeVectorGround:
-			if logged.Vector == nil { return errors.New("numeric grounding record has no vector") }
+			if logged.Vector == nil {
+				return errors.New("numeric grounding record has no vector")
+			}
 			if _, err := brainRuntime.GroundVectorAt(*logged.Vector, logged.Timestamp); err != nil {
 				return fmt.Errorf("replay numeric grounding at sequence %d: %w", logged.Sequence, err)
 			}
 		case EventTypeKnowledgeImport:
-			if logged.KnowledgeDocument == nil { return errors.New("knowledge import event has no document") }
+			if logged.KnowledgeDocument == nil {
+				return errors.New("knowledge import event has no document")
+			}
 			if err := brainRuntime.replayKnowledgeDocument(*logged.KnowledgeDocument, logged.Timestamp); err != nil {
 				return fmt.Errorf("replay knowledge import at sequence %d: %w", logged.Sequence, err)
 			}
 		case EventTypeLearn:
-			if logged.Experience == nil { return errors.New("learn event has no experience") }
-			if _, err := brainRuntime.LearnExperience(*logged.Experience, logged.Timestamp); err != nil { return err }
+			if logged.Experience == nil {
+				return errors.New("learn event has no experience")
+			}
+			if _, err := brainRuntime.LearnExperience(*logged.Experience, logged.Timestamp); err != nil {
+				return err
+			}
+		case EventTypeInquiryOutcome:
+			if err := validateInquiryOutcomeCommand(logged.Event, logged.InquiryOutcome); err != nil {
+				return err
+			}
+			if _, _, _, err := brainRuntime.processInquiryOutcomeCommand(*logged.Event, *logged.InquiryOutcome); err != nil {
+				return err
+			}
+		case EventTypeActionBinding:
+			if logged.ActionBinding == nil {
+				return errors.New("action binding command has no binding")
+			}
+			if err := brainRuntime.RegisterActionBinding(*logged.ActionBinding); err != nil {
+				return err
+			}
+		case EventTypeObservation:
+			if err := validateObservationCommand(logged.Event, logged.ObservationCommand); err != nil {
+				return err
+			}
+			if _, _, err := brainRuntime.processObservationCommand(*logged.Event, *logged.ObservationCommand); err != nil {
+				return err
+			}
+		case EventTypeCognitiveProcess:
+			if logged.Event == nil {
+				return errors.New("cognitive process has no event")
+			}
+			if _, err := brainRuntime.CognitiveProcess(*logged.Event); err != nil {
+				return err
+			}
+		case EventTypeCognitiveThink:
+			if logged.Event == nil {
+				return errors.New("cognitive think has no event")
+			}
+			brainRuntime.mu.Lock()
+			_, err := brainRuntime.cognitiveThinkAtLocked(logged.Event.Cycles, logged.Timestamp, true)
+			brainRuntime.mu.Unlock()
+			if err != nil {
+				return err
+			}
 		case EventTypeProcess:
-			if logged.Event == nil { return errors.New("process event has no event payload") }
+			if logged.Event == nil {
+				return errors.New("process event has no event payload")
+			}
 			if logged.Event.SensorObservation != nil {
 				// Sensor processing includes deterministic projection into the canonical
 				// substrate before cognitive processing. Re-run the complete boundary,
@@ -472,18 +590,36 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 				if _, err := orchestrator.ProcessSensorObservation(*logged.Event.SensorObservation); err != nil {
 					return fmt.Errorf("replay sensor observation %q: %w", logged.Event.SensorObservation.SampleID, err)
 				}
-			} else if _, _, err := brainRuntime.Process(*logged.Event); err != nil {
-				return err
+			} else {
+				event := cloneEvent(*logged.Event)
+				if event.Timestamp.IsZero() {
+					event.Timestamp = logged.Timestamp
+				}
+				if _, _, err := brainRuntime.Process(*event); err != nil {
+					return err
+				}
 			}
 		case EventTypeThink:
-			if logged.Event == nil { return errors.New("think event has no event payload") }
-			if _, _, err := brainRuntime.ThinkAt(logged.Event.Cycles, logged.Timestamp); err != nil { return err }
+			if logged.Event == nil {
+				return errors.New("think event has no event payload")
+			}
+			if _, _, err := brainRuntime.thinkAtWithContext(logged.Event.Cycles, logged.Event.Context, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeOutcome:
-			if logged.Outcome == nil { return errors.New("outcome event has no outcome payload") }
-			if _, err := brainRuntime.ObserveOutcome(*logged.Outcome); err != nil { return err }
+			if logged.Outcome == nil {
+				return errors.New("outcome event has no outcome payload")
+			}
+			if _, err := brainRuntime.ObserveOutcome(*logged.Outcome); err != nil {
+				return err
+			}
 		case EventTypeConsequence:
-			if logged.Consequence == nil { return errors.New("consequence event has no consequence payload") }
-			if _, err := brainRuntime.RecordInquiryConsequenceEvent(*logged.Consequence, logged.Timestamp); err != nil { return err }
+			if logged.Consequence == nil {
+				return errors.New("consequence event has no consequence payload")
+			}
+			if _, err := brainRuntime.RecordInquiryConsequenceEvent(*logged.Consequence, logged.Timestamp); err != nil {
+				return err
+			}
 		default:
 			return fmt.Errorf("unknown event type %q", logged.Type)
 		}
