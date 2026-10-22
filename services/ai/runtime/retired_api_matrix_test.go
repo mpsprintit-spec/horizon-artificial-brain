@@ -84,6 +84,7 @@ func TestRetiredRuntimeSupportedMutationAndInspectionMatrix(t *testing.T) {
 		"handshake":  func() error { _, err := r.MonitorHandshake("test"); return err },
 		"written-contract": func() error { _, err := r.WrittenGroundingContract(); return err },
 		"spelling-read": func() error { _, err := r.ReadLearnedSpelling([]knowledge.NodeID{grounded.NodeID}); return err },
+		"continuation-read": func() error { _, err := r.ReadLearnedContinuation(&knowledge.ObservationTrace{Stimulus: [][]knowledge.NodeID{{grounded.NodeID}}}, 4, at); return err },
 		"spelling-learn": func() error { e, err := knowledge.NewSpellingExposure([]knowledge.NodeID{grounded.NodeID}, "probe", .8, .8); if err != nil { return err }; _, err = r.LearnSpelling(e, at); return err },
 		"written-migration-plan": func() error { _, err := r.PlanNeuralWrittenGrounding(); return err },
 		"written-migration-apply": func() error { return r.ApplyNeuralWrittenGrounding(WrittenGroundingPlan{}, filepath.Join(t.TempDir(), "backup.json"), at) },

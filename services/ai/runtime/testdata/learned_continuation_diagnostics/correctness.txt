@@ -1,0 +1,143 @@
+=== RUN   TestContinuationHypothesisOrdersOpponentsWithoutChangingLegacyState
+--- PASS: TestContinuationHypothesisOrdersOpponentsWithoutChangingLegacyState (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/activation	0.010s
+=== RUN   TestLearnedContinuationFrozenV1
+--- PASS: TestLearnedContinuationFrozenV1 (0.02s)
+=== RUN   TestLearnedContinuationComposesNumericLocalTransitions
+=== RUN   TestLearnedContinuationComposesNumericLocalTransitions/7
+    continuation_readout_test.go:152: fixture seed=7 units=167 synapses=1582 patterns=32 pretty-canonical-bytes=1084166
+    continuation_readout_test.go:171: seed=7 context=object-a/motion-a text="Bola diam." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=7 context=object-a/motion-b text="Bola jatuh." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=7 context=object-b/motion-a text="Gelas diam." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=7 context=object-b/motion-b text="Gelas jatuh." weakest-step=0.744264
+=== RUN   TestLearnedContinuationComposesNumericLocalTransitions/17
+    continuation_readout_test.go:152: fixture seed=17 units=170 synapses=1582 patterns=32 pretty-canonical-bytes=1087653
+    continuation_readout_test.go:171: seed=17 context=object-a/motion-a text="Bola diam." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=17 context=object-a/motion-b text="Bola jatuh." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=17 context=object-b/motion-a text="Gelas diam." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=17 context=object-b/motion-b text="Gelas jatuh." weakest-step=0.744264
+=== RUN   TestLearnedContinuationComposesNumericLocalTransitions/47
+    continuation_readout_test.go:152: fixture seed=47 units=173 synapses=1582 patterns=32 pretty-canonical-bytes=1091165
+    continuation_readout_test.go:171: seed=47 context=object-a/motion-a text="Bola diam." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=47 context=object-a/motion-b text="Bola jatuh." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=47 context=object-b/motion-a text="Gelas diam." weakest-step=0.744264
+    continuation_readout_test.go:171: seed=47 context=object-b/motion-b text="Gelas jatuh." weakest-step=0.744264
+--- PASS: TestLearnedContinuationComposesNumericLocalTransitions (1.22s)
+    --- PASS: TestLearnedContinuationComposesNumericLocalTransitions/7 (0.43s)
+    --- PASS: TestLearnedContinuationComposesNumericLocalTransitions/17 (0.41s)
+    --- PASS: TestLearnedContinuationComposesNumericLocalTransitions/47 (0.38s)
+=== RUN   TestLearnedContinuationRequiresLearningAndPreservesUncertainty
+--- PASS: TestLearnedContinuationRequiresLearningAndPreservesUncertainty (0.12s)
+=== RUN   TestLearnedContinuationLabelsAblationsAndLimits
+--- PASS: TestLearnedContinuationLabelsAblationsAndLimits (0.36s)
+=== RUN   TestLearnedContinuationBoundsBeforeCopyAndUnknownReferences
+--- PASS: TestLearnedContinuationBoundsBeforeCopyAndUnknownReferences (0.05s)
+=== RUN   TestLearnedContinuationMissingAmbiguousAndExpiredContext
+--- PASS: TestLearnedContinuationMissingAmbiguousAndExpiredContext (0.15s)
+=== RUN   TestLearnedContinuationRecoveryAndNativeRoundoffBound
+    continuation_readout_test.go:387: next native transition maximum relative roundoff=0 (limit 1e-14)
+    continuation_readout_test.go:388: next native transition maximum relative roundoff=0 (limit 1e-14)
+    continuation_readout_test.go:387: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:388: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:387: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:388: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:387: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:388: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:387: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+    continuation_readout_test.go:388: next native transition maximum relative roundoff=1.7585283299146488e-16 (limit 1e-14)
+--- PASS: TestLearnedContinuationRecoveryAndNativeRoundoffBound (1.00s)
+=== RUN   TestLearnedContinuationConcurrentOwnerReadsAndLearning
+--- PASS: TestLearnedContinuationConcurrentOwnerReadsAndLearning (0.26s)
+=== RUN   TestLearnedContinuationLoopsScalarAndMemberBudgets
+--- PASS: TestLearnedContinuationLoopsScalarAndMemberBudgets (0.46s)
+=== RUN   TestLearnedContinuationPreservesRepeatedPopulationOrder
+--- PASS: TestLearnedContinuationPreservesRepeatedPopulationOrder (0.03s)
+=== RUN   TestRetiredRuntimeRejectsDirectClaimPromotion
+--- PASS: TestRetiredRuntimeRejectsDirectClaimPromotion (0.01s)
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/experience
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/timed-ground
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inquiry-prediction
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/labels
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-read
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inspection
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/continuation-read
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-plan
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-process
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/ground
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/capture-prediction
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/load
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/restore
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/process
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/binding
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/consequence
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/monitor
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/observation
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/sensor
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/knowledge-import
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/claim
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/complete-inquiry
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/bootstrap
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/checkpoint
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/mutable-view
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-think
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/save
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/handshake
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-learn
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/think
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/transition
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-contract
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-apply
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/vector
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/outcome
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/plan
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/event-index
+--- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix (0.30s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/experience (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/timed-ground (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inquiry-prediction (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/labels (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-read (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inspection (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/continuation-read (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-plan (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-process (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/ground (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/capture-prediction (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/load (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/restore (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/process (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/binding (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/consequence (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/monitor (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/observation (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/sensor (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/knowledge-import (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/claim (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/complete-inquiry (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/bootstrap (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/checkpoint (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/mutable-view (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-think (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/save (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/handshake (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-learn (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/think (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/transition (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-contract (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-apply (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/vector (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/outcome (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/plan (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/event-index (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	3.981s
+=== RUN   TestManagedContinuationPreviewKeepsNativeAnswerAndCanonicalState
+--- PASS: TestManagedContinuationPreviewKeepsNativeAnswerAndCanonicalState (0.15s)
+=== RUN   TestManagedContinuationPreviewRejectsBudgetBeforePulseAndKeepsUnknown
+--- PASS: TestManagedContinuationPreviewRejectsBudgetBeforePulseAndKeepsUnknown (0.02s)
+=== RUN   TestManagedContinuationPreviewKeepsWeakNativeForecastUncertain
+--- PASS: TestManagedContinuationPreviewKeepsWeakNativeForecastUncertain (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/core	0.184s
