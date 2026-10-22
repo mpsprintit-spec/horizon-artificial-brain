@@ -117,7 +117,7 @@ func TestRestoreEventIndexRejectsPartialInvalidIndexAndAttachedWriter(t *testing
 	}
 }
 
-func TestJournalAttachedKnowledgeImportFailsWithoutNeuralMutation(t *testing.T) {
+func TestJournalAttachedKnowledgeImportIsCommittedBeforeNeuralMutation(t *testing.T) {
 	rt:=NewBrainRuntime(nil)
 	log,err:=OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
 	if err!=nil {t.Fatal(err)}
@@ -126,16 +126,18 @@ func TestJournalAttachedKnowledgeImportFailsWithoutNeuralMutation(t *testing.T) 
 	before,err:=rt.brain.CanonicalJSON()
 	if err!=nil {t.Fatal(err)}
 	now:=time.Date(2026,10,18,16,33,0,0,time.UTC)
-	if _,err:=rt.ProcessKnowledgeDocument(directMutationTestDocument(),now);err==nil || !strings.Contains(err.Error(),"transactional journal") {
-		t.Fatalf("unguarded knowledge import was accepted: %v",err)
+	if _,err:=rt.ProcessKnowledgeDocument(directMutationTestDocument(),now);err!=nil {
+		t.Fatalf("journalled knowledge import: %v",err)
 	}
 	after,err:=rt.brain.CanonicalJSON()
 	if err!=nil {t.Fatal(err)}
-	if !bytes.Equal(before,after) || rt.LastSequence()!=0 {
-		t.Fatal("failed knowledge import still mutated neural state")
+	if bytes.Equal(before,after) || rt.LastSequence()!=1 {
+		t.Fatal("committed knowledge import did not mutate neural state exactly once")
 	}
 	events,err:=ReadEventLog(log.file.Name())
-	if err!=nil || len(events)!=0 {t.Fatalf("failed knowledge import changed durable journal: events=%d err=%v",len(events),err)}
+	if err!=nil || len(events)!=1 || events[0].Type!=EventTypeKnowledgeImport {
+		t.Fatalf("knowledge import was not captured as one durable revision: events=%d err=%v",len(events),err)
+	}
 }
 
 func TestDirectGroundingAndCognitiveThinkSerializeRuntimeMutations(t *testing.T) {

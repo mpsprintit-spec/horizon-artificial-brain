@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/learning"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 const EventLogSchemaVersion = 1
@@ -26,6 +27,7 @@ type LoggedEvent struct {
 	Timestamp     time.Time            `json:"timestamp"`
 	Event         *Event               `json:"event,omitempty"`
 	Experience    *learning.Experience `json:"experience,omitempty"`
+	KnowledgeDocument *knowledge.KnowledgeDocument `json:"knowledge_document,omitempty"`
 	Outcome       *OutcomeEvent        `json:"outcome,omitempty"`
 	Consequence  *InquiryConsequenceEvent `json:"consequence,omitempty"`
 	IntentHash   string `json:"intent_hash,omitempty"`
@@ -39,6 +41,9 @@ const (
 	EventTypeConsequence = "consequence"
 	EventTypeSensorIntent = "sensor_intent"
 	EventTypeSensorCommit = "sensor_commit"
+	// A document import is one durable revision, even if it performs multiple
+	// ordered neural exposure updates in that same revision.
+	EventTypeKnowledgeImport = "knowledge_import"
 )
 
 type EventLog struct {
@@ -164,7 +169,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit {
+		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -339,7 +344,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 				return nil, fmt.Errorf("%w: sensor intent at sequence %d interrupted by %q at line %d", ErrUncommittedSensorTransaction, expected, event.Type, lineNumber)
 			}
 			if event.IntentHash == "" || event.IntentHash != pendingHash || event.Event != nil ||
-				event.Experience != nil || event.Outcome != nil || event.Consequence != nil ||
+				event.Experience != nil || event.KnowledgeDocument != nil || event.Outcome != nil || event.Consequence != nil ||
 				!event.Timestamp.Equal(pending.Timestamp) {
 				return nil, fmt.Errorf("%w: sensor commit mismatch at line %d", ErrUncommittedSensorTransaction, lineNumber)
 			}
@@ -355,12 +360,25 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		}
 
 		switch event.Type {
+		case EventTypeKnowledgeImport:
+			if event.KnowledgeDocument == nil || event.Event != nil ||
+				event.Experience != nil || event.Outcome != nil ||
+				event.Consequence != nil || event.IntentHash != "" ||
+				event.Timestamp.IsZero() {
+				return nil, fmt.Errorf("invalid knowledge import record at line %d", lineNumber)
+			}
+			if _, err := knowledge.CompileKnowledgeDocument(*event.KnowledgeDocument, event.Timestamp); err != nil {
+				return nil, fmt.Errorf("invalid knowledge import document at line %d: %w", lineNumber, err)
+			}
+			seen[key] = canonical
+			events = append(events, event)
+			expected++
 		case EventTypeSensorIntent:
 			if event.Event == nil || event.Event.SensorObservation == nil ||
 				event.Event.ID == "" || event.Event.ID != event.Event.SensorObservation.SampleID ||
 				!event.Timestamp.Equal(event.Event.Timestamp) ||
 				!event.Timestamp.Equal(event.Event.SensorObservation.Timestamp) ||
-				event.IntentHash != "" {
+				event.IntentHash != "" || event.KnowledgeDocument != nil {
 				return nil, fmt.Errorf("invalid sensor intent payload at line %d", lineNumber)
 			}
 			digest, err := sensorIntentHash(event)
@@ -416,6 +434,11 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		if logged.Sequence != expected { return fmt.Errorf("replay sequence discontinuity: got %d want %d", logged.Sequence, expected) }
 		expected++
 		switch logged.Type {
+		case EventTypeKnowledgeImport:
+			if logged.KnowledgeDocument == nil { return errors.New("knowledge import event has no document") }
+			if err := brainRuntime.replayKnowledgeDocument(*logged.KnowledgeDocument, logged.Timestamp); err != nil {
+				return fmt.Errorf("replay knowledge import at sequence %d: %w", logged.Sequence, err)
+			}
 		case EventTypeLearn:
 			if logged.Experience == nil { return errors.New("learn event has no experience") }
 			if _, err := brainRuntime.LearnExperience(*logged.Experience, logged.Timestamp); err != nil { return err }
@@ -443,6 +466,9 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 			if _, err := brainRuntime.RecordInquiryConsequenceEvent(*logged.Consequence, logged.Timestamp); err != nil { return err }
 		default:
 			return fmt.Errorf("unknown event type %q", logged.Type)
+		}
+		if got := brainRuntime.LastSequence(); got != logged.Sequence {
+			return fmt.Errorf("replay event sequence mismatch after %q: got %d want %d", logged.Type, got, logged.Sequence)
 		}
 	}
 	return nil

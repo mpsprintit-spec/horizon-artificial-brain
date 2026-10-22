@@ -49,6 +49,22 @@ func checkpointChecksumV5(snapshot BrainSnapshot) (string, error) {
 	return hex.EncodeToString(hash[:]), nil
 }
 
+// checkpointChecksumV6 binds all v5 neural and runtime metadata PLUS the
+// separate adapter surface annotations. Old v5 checksums remain readable.
+func checkpointChecksumV6(snapshot BrainSnapshot) (string, error) {
+	base, err := checkpointChecksumV5(snapshot)
+	if err != nil { return "", err }
+	annotations := snapshot.SurfaceAnnotations
+	if len(annotations) == 0 { annotations = nil }
+	data, err := json.Marshal(struct{
+		BaseDigest string `json:"base_digest"`
+		SurfaceAnnotations any `json:"surface_annotations"`
+	}{BaseDigest: base, SurfaceAnnotations: annotations})
+	if err != nil { return "", err }
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
 func cloneProcessedEventIndex(input map[string]uint64) map[string]uint64 {
 	out := make(map[string]uint64, len(input))
 	for id, seq := range input { out[id] = seq }

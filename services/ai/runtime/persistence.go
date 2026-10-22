@@ -14,7 +14,8 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-const BrainSnapshotSchemaVersion = 5
+const BrainSnapshotSchemaVersion = 6
+const priorBrainSnapshotSchemaVersion = 5
 const legacyBrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
@@ -31,6 +32,9 @@ type BrainSnapshot struct {
 	LastObservationPopulation []knowledge.NodeID `json:"last_observation_population,omitempty"`
 	LastObservationAt time.Time `json:"last_observation_at,omitempty"`
 	ProcessedEvents map[string]uint64 `json:"processed_events,omitempty"`
+	// Adapter-only provenance, stored in the checkpoint envelope rather than
+	// the lexical-identity-free canonical Brain substrate.
+	SurfaceAnnotations []knowledge.SurfaceAnnotation `json:"surface_annotations,omitempty"`
 	// Empty for standalone checkpoints. Required for journal-offset recovery.
 	JournalPrefixHash string `json:"journal_prefix_hash,omitempty"`
 }
@@ -70,16 +74,14 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return err }
 
-	brainPath := path + ".brain.tmp"
-	if err := saveDeterministicBrain(r.brain, brainPath); err != nil {
-		return fmt.Errorf("save brain: %w", err)
-	}
-	brainBytes, err := os.ReadFile(brainPath)
+	// Checkpoint v5 must persist the ENTIRE canonical substrate, including
+	// developmental experiences, bootstrap episodes, learned policy and
+	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
+	// these states and made checkpoint-offset replay diverge from live memory.
+	brainBytes, err := r.brain.CanonicalJSON()
 	if err != nil {
-		_ = os.Remove(brainPath)
-		return fmt.Errorf("read brain snapshot: %w", err)
+		return fmt.Errorf("serialize complete canonical brain: %w", err)
 	}
-	_ = os.Remove(brainPath)
 
 	activationState := r.activation.SnapshotState()
 	cognitiveState := cloneCognitiveState(r.lastCognitiveState)
@@ -102,9 +104,10 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		LastObservationPopulation: append([]knowledge.NodeID(nil), r.lastObservationPopulation...),
 		LastObservationAt: r.lastObservationAt,
 		ProcessedEvents: cloneProcessedEventIndex(r.processedEvents),
+		SurfaceAnnotations: r.brain.SurfaceAnnotationsSnapshot(),
 		JournalPrefixHash: journalHash,
 	}
-	snapshot.Checksum, err = checkpointChecksumV5(snapshot)
+	snapshot.Checksum, err = checkpointChecksumV6(snapshot)
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
 	}
@@ -155,17 +158,23 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && len(snapshot.SurfaceAnnotations) > 0 {
+		return errors.New("legacy checkpoint cannot carry unauthenticated adapter annotations")
+	}
 	var checksum string
-	if snapshot.SchemaVersion == legacyBrainSnapshotSchemaVersion {
+	switch snapshot.SchemaVersion {
+	case legacyBrainSnapshotSchemaVersion:
 		checksum, err = checkpointChecksum(snapshot.Brain, snapshot.Activation, snapshot.CognitiveState, snapshot.InquiryValence)
-	} else {
+	case priorBrainSnapshotSchemaVersion:
 		checksum, err = checkpointChecksumV5(snapshot)
+	default:
+		checksum, err = checkpointChecksumV6(snapshot)
 	}
 	if err != nil {
 		return fmt.Errorf("checksum checkpoint: %w", err)
@@ -173,7 +182,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if checksum != snapshot.Checksum {
 		return errors.New("checkpoint checksum mismatch")
 	}
-	if snapshot.SchemaVersion == BrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion >= priorBrainSnapshotSchemaVersion {
 		if (len(snapshot.LastObservationPopulation) == 0) != snapshot.LastObservationAt.IsZero() {
 			return errors.New("checkpoint temporal population and timestamp disagree")
 		}
@@ -196,6 +205,10 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	defer os.Remove(brainPath)
 	if err := r.brain.Load(brainPath); err != nil {
 		return fmt.Errorf("restore brain: %w", err)
+	}
+	if err := r.brain.RestoreSurfaceAnnotations(snapshot.SurfaceAnnotations); err != nil {
+		r.recoveryRequired = true
+		return fmt.Errorf("%w: restore checkpoint adapter provenance: %v", ErrRuntimeRecoveryRequired, err)
 	}
 	r.activation.RestoreState(snapshot.Activation)
 	r.lastCognitiveState = cloneCognitiveState(snapshot.CognitiveState)
