@@ -55,7 +55,7 @@ func FromWebSearch(source string, tokens []string, confidence float64) Perceptio
 	return PerceptionSignal{
 		Kind:       PerceptionWebSearch,
 		Source:     source,
-		Modality:   "web-search",
+		Modality:   "text",
 		RawText:    strings.Join(tokens, " "),
 		Tokens:     tokens,
 		Confidence: confidence,

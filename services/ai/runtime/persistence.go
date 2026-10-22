@@ -168,6 +168,9 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
+	for _, annotation := range snapshot.SurfaceAnnotations {
+		if err := annotation.Encoding.Validate(); err != nil { return fmt.Errorf("checkpoint adapter contract: %w", err) }
+	}
 	if snapshot.BrainIdentity != BrainIdentity {
 		return fmt.Errorf("checkpoint belongs to brain %q", snapshot.BrainIdentity)
 	}

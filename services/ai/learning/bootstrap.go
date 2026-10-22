@@ -49,6 +49,10 @@ func (e Experience) evidence(now time.Time) knowledge.ExperienceEvidence {
 }
 
 func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
+	l.LearnExperienceWithEncoding(experience, now, knowledge.WrittenTextEncoding)
+}
+
+func (l *LearningUnit) LearnExperienceWithEncoding(experience Experience, now time.Time, encoding knowledge.SurfaceEncoding) {
 	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 { return }
 	if now.IsZero() { now = time.Now().UTC() }
 	now = now.UTC()
@@ -60,7 +64,7 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 	steps := make([]knowledge.PatternStep, 0, len(experience.Sequence))
 	var previous *knowledge.ConceptNode
 	for i, token := range experience.Sequence {
-		node := l.Kb.StoreAt(token, now)
+		node := l.Kb.StoreSurfaceAt(token, now, encoding)
 		if node == nil { continue }
 		steps = append(steps, knowledge.PatternStep{NodeID: node.ID, Position: i, Activation: 1})
 		if previous != nil { l.Kb.ConnectAt(previous, node, weight, confidence, false, now) }
