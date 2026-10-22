@@ -1,6 +1,6 @@
 # Factorized sensor ingress
 
-Camera and microphone adapters can submit local physical measurements to the
+Camera, microphone and motion adapters can submit local physical measurements to the
 one canonical Brain through `POST /v1/sensor-observations`. This increment
 implements the sensor-state and factor-reuse boundary in the Horizon developer
 brief. It does not establish object recognition, depth perception, language
@@ -49,8 +49,8 @@ before the observation time and fit within the preceding minute. Omitted
 timing denotes an instantaneous measurement. Each observation retains the
 existing monotonic timestamp and duplicate-sample checks. Browser sends are
 serialized through one queue, with at most one outstanding capture per source.
-Camera and microphone sources include the browser session ID, so separate
-browser sessions do not masquerade as the same physical stream for transition
+Physical capture sources include the browser session and acquisition IDs, so separate
+sessions or capture restarts do not masquerade as the same physical stream for transition
 learning. Compatible factors can still reuse the same substrate populations.
 
 The complete multi-field observation acquires one supervisor mutation lease
@@ -117,9 +117,12 @@ phone camera/microphone acceptance session remain outstanding.
 
 Camera and microphone require the user's START action and browser permission.
 STOP closes media tracks and prevents further queued captures for that
-generation. It does not revoke an HTTP request already sent. Text, simulator,
-and motion controls still use the legacy observation-envelope route; this
-increment does not migrate those paths or complete public Brain encapsulation.
+generation. It does not revoke an HTTP request already sent. H16 additionally
+migrates motion to native-axis numerical fields, supplies ordered written tokens
+from text controls, and requires numeric JSON for the non-text simulator. See
+[BROWSER_SENSOR_STRUCTURE.md](BROWSER_SENSOR_STRUCTURE.md) for encoding, acquisition
+lifecycle, FIFO timing, the continuity probe and limits. Public Brain encapsulation
+remains a separate contract.
 
 ## Compatibility and evidence
 
