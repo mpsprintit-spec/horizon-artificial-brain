@@ -52,17 +52,37 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	previousPrediction := cloneState(e.lastPrediction)
 	previousTrace := e.lastTrace.Clone()
 	context := e.contextState.Clone()
+	previousObservation := e.observationPrediction.Clone()
 	e.mu.RUnlock()
+	observedFeedback := req.DynamicsEncoding != nil && *req.DynamicsEncoding == knowledge.ObservedFeedbackDynamics
 	recurrent := req.DynamicsEncoding != nil && req.DynamicsEncoding.HasRecurrentContext()
 	resetContext := false
 	if recurrent {
 		context, resetContext = context.prepare(req.EpisodeID, req.ResetContext, req.Now)
 		if resetContext {
 			previousPrediction = nil
+			previousObservation = nil
+		}
+	}
+	if observedFeedback && previousObservation != nil && req.Now.Before(previousObservation.At) {
+		previousObservation = nil
+		previousPrediction = nil
+		resetContext = true
+		context = &ContextState{EpisodeID: req.EpisodeID}
+	}
+	if observedFeedback {
+		previousPrediction = nil
+		if previousObservation != nil {
+			previousPrediction = cloneState(previousObservation.Prediction)
 		}
 	}
 	if req.PredictionOverride != nil {
 		previousPrediction = cloneState(req.PredictionOverride.State)
+		// Explicit action forecasts are evaluated against direct outcome input.
+		// Their bound consequence path owns causal credit, not an unrelated cue.
+		if observedFeedback {
+			previousObservation = nil
+		}
 	}
 	if !recurrent && (req.CarryPreviousContext || lexical) && len(trace.Context) == 0 && len(trace.Stimulus) > 0 && previousTrace != nil {
 		trace.Context = knowledge.ClonePopulationFrames(previousTrace.Stimulus)
@@ -71,12 +91,18 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 		if recurrent {
 			e.mu.Lock()
 			e.contextState = context
-			e.lastTrace = nil
+			if !observedFeedback || resetContext {
+				e.lastTrace = nil
+			}
 			if resetContext {
 				e.lastPrediction = nil
 				e.lastPredictionConf = nil
+				e.observationPrediction = nil
 			}
 			e.mu.Unlock()
+		}
+		if observedFeedback {
+			return e.ThinkWithContextDynamicsAt(req.Cycles, req.ContextBoosts, req.Now, *req.DynamicsEncoding).Result
 		}
 		return e.activateLegacyWith(req)
 	}
@@ -111,17 +137,41 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	pre := cloneState(state)
 	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
 	result := e.converge(state, confidence, req.Now)
-	e.ApplyActivityPlasticityWithDynamics(pre, result.Activations, req.Now, *req.DynamicsEncoding)
+	actualEvidence := observedPopulation(trace)
+	result.ObservedInput = observedFeedback && len(actualEvidence) > 0
+	if observedFeedback {
+		e.ApplyActivityPlasticityWithDynamics(actualEvidence, actualEvidence, req.Now, *req.DynamicsEncoding)
+	} else {
+		e.ApplyActivityPlasticityWithDynamics(pre, result.Activations, req.Now, *req.DynamicsEncoding)
+	}
 	predictionError := 0.0
-	if len(previousPrediction) > 0 {
+	if observedFeedback {
+		predictionError = e.applyObservedFeedback(previousObservation, previousPrediction, actualEvidence, req.Now)
+		if req.PredictionOverride != nil {
+			predictionError = stateDifference(previousPrediction, actualEvidence)
+		}
+		if predictionError > 0 {
+			e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction, actualEvidence, predictionError, .20, req.Now)
+		}
+	} else if len(previousPrediction) > 0 {
 		predictionError = stateDifference(previousPrediction, result.Activations)
 		e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction, result.Activations, predictionError, req.Now, *req.DynamicsEncoding)
 		e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction, result.Activations, predictionError, .20, req.Now)
 	}
-	e.Memory.UpdateInformationDynamics(previousPrediction, result.Activations, predictionError, req.Now)
+	if observedFeedback {
+		e.Memory.UpdateInformationDynamics(previousPrediction, actualEvidence, predictionError, req.Now)
+	} else {
+		e.Memory.UpdateInformationDynamics(previousPrediction, result.Activations, predictionError, req.Now)
+	}
 	next, nextConfidence := e.advance(result.Activations, result.Confidence, req.Now, req.Cycles)
 	next, nextConfidence = e.applyPatternPrediction(next, nextConfidence, result.Activations)
-	if recurrent {
+	var patternCredit map[knowledge.PatternID]float64
+	if observedFeedback {
+		channels := e.Memory.Patterns.PredictRecurrent(trace, context.before(req.Now, false), req.Now)
+		next, nextConfidence = e.applyPatternChannels(next, nextConfidence, channels)
+		patternCredit = channels.Credit
+		context.observe(trace, req.Now)
+	} else if recurrent {
 		next, nextConfidence = e.applyRecurrentPatternPrediction(next, nextConfidence, trace, context, req.Now, false)
 		context.observe(trace, req.Now)
 	} else {
@@ -133,6 +183,12 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	e.lastTrace = trace.Clone()
 	if recurrent {
 		e.contextState = context
+	}
+	if observedFeedback {
+		e.observationPrediction = nil
+		if len(actualEvidence) > 0 {
+			e.observationPrediction = &ObservationPrediction{EpisodeID: req.EpisodeID, At: req.Now, Source: cloneState(actualEvidence), Prediction: cloneState(next), Patterns: patternCredit}
+		}
 	}
 	e.mu.Unlock()
 	result.PredictionError = predictionError

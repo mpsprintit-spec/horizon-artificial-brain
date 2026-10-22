@@ -538,7 +538,9 @@ func (r *BrainRuntime) cognitiveProcessWithPersistenceLocked(event Event, persis
 	}
 	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
 	output.Prediction = r.activation.PredictionSnapshot()
-	r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
+	if r.dynamicsEncoding != knowledge.ObservedFeedbackDynamics || result.ObservedInput {
+		r.brain.RecordLearningSignal(output.PredictionError, event.Timestamp)
+	}
 	r.brain.ApplyMemoryDynamicsWithEncoding(event.Timestamp, r.dynamicsEncoding)
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()
@@ -581,7 +583,9 @@ func (r *BrainRuntime) cognitiveThinkAtLocked(cycles int, now time.Time, persist
 		return CognitiveOutput{}, err
 	}
 	output := CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: now, RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}
-	r.brain.RecordLearningSignal(output.PredictionError, now)
+	if r.dynamicsEncoding != knowledge.ObservedFeedbackDynamics {
+		r.brain.RecordLearningSignal(output.PredictionError, now)
+	}
 	r.brain.ApplyMemoryDynamicsWithEncoding(now, r.dynamicsEncoding)
 	output.StateDelta = output.State().Diff(r.lastCognitiveState)
 	r.lastCognitiveState = output.State()

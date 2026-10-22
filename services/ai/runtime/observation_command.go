@@ -175,7 +175,21 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 	if err != nil {
 		return CognitiveInterpretation{}, false, err
 	}
-	if err = r.learnObservedTransitionLocked(event.StimulusNodeIDs, event.Timestamp); err != nil {
+	transitionPopulation := event.StimulusNodeIDs
+	if r.dynamicsEncoding == knowledge.ObservedFeedbackDynamics {
+		transitionPopulation = nil
+		seen := map[knowledge.NodeID]bool{}
+		for _, frame := range event.NeuralTrace.Stimulus {
+			for _, id := range frame {
+				if !seen[id] {
+					seen[id] = true
+					transitionPopulation = append(transitionPopulation, id)
+				}
+			}
+		}
+		slices.Sort(transitionPopulation)
+	}
+	if err = r.learnObservedTransitionLocked(transitionPopulation, event.Timestamp); err != nil {
 		return CognitiveInterpretation{}, false, err
 	}
 	learned := command.Experience != nil && (len(command.Experience.Sequence) > 0 || len(command.Experience.NeuralSequence) > 0)

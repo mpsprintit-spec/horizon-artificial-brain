@@ -335,7 +335,7 @@ func TestInquiryOutcomeUsesCapturedPredictionAfterInterveningCognitiveState(t *t
 	execution := InquiryExecution{Proposal: InquiryProposal{BrainIdentity: BrainIdentity, Sequence: 30, CandidateID: "focus", Action: InquiryFocus, Reversibility: true}, Request: ExecutionRequest{RequestID: requestID, BrainIdentity: BrainIdentity, Expiry: now.Add(time.Minute), authorized: true}, Prediction: captured, PredictionCapturedAt: now}
 	interpretation, _, _, err := orch.ProcessInquiryOutcome(InquiryResult{Execution: execution, Event: Event{ID: "explicit-prediction-outcome", Timestamp: now.Add(time.Second)}, Observation: ObservationInput{Source: "camera", Modality: "vision", Tokens: []string{"unexpected"}}, Success: true, Reliability: 1, InformationGain: 1}, now.Add(time.Second))
 	if err != nil { t.Fatal(err) }
-	expected := runtime.activation.PredictionError(captured, interpretation.State.Activations)
+	expected := runtime.activation.PredictionError(captured, runtime.activation.LastObservedPopulation())
 	if interpretation.State.PredictionError != expected { t.Fatalf("outcome did not use captured prediction: got=%v want=%v", interpretation.State.PredictionError, expected) }
 	if interpretation.State.PredictionError <= 0 { t.Fatal("expected non-zero prediction error from unexpected outcome") }
 }

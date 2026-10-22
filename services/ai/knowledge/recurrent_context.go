@@ -56,6 +56,7 @@ func (p *PatternIndex) PredictRecurrent(trace *ObservationTrace, history []Conte
 	}
 	type candidate struct {
 		result                   NodeID
+		id                       PatternID
 		quality, score, strength float64
 	}
 	var candidates []candidate
@@ -92,14 +93,18 @@ func (p *PatternIndex) PredictRecurrent(trace *ObservationTrace, history []Conte
 		if strength > 0 {
 			strength = max(.01, min(.35, strength))
 		}
-		candidates = append(candidates, candidate{pattern.Result, quality, score, strength})
+		candidates = append(candidates, candidate{pattern.Result, pattern.ID, quality, score, strength})
 	}
 	if best == 0 {
 		return out
 	}
+	out.Credit = make(map[PatternID]float64)
 	competitors := make(map[NodeID]bool)
 	for _, c := range candidates {
 		competitors[c.result] = true
+		if c.score == best && c.quality > 0 {
+			out.Credit[c.id] = c.quality
+		}
 		// Relative competition separates recent from older competing contexts;
 		// absolute eligibility still decays with physical time and interference.
 		support := c.quality * math.Pow(c.score/best, 4)
