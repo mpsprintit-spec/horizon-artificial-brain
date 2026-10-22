@@ -26,7 +26,7 @@ func validateObservationCommand(event *Event, command *ObservationCommand) error
 	if event == nil || command == nil {
 		return errors.New("observation command requires event and adapter input")
 	}
-	if event.SensorObservation != nil || len(event.StimulusNodeIDs) != 0 {
+	if event.SensorObservation != nil || event.NeuralTrace != nil || len(event.StimulusNodeIDs) != 0 {
 		return errors.New("observation command must precede neural grounding")
 	}
 	if event.Source != command.Input.Source || event.Modality != command.Input.Modality || !slices.Equal(event.ContextTokens, command.Input.ContextTokens) || !slices.Equal(event.DataTokens, command.Input.DataTokens) {
@@ -48,10 +48,8 @@ func validateObservationCommand(event *Event, command *ObservationCommand) error
 		}
 	}
 	if command.Experience != nil {
-		for _, token := range command.Experience.Sequence {
-			if strings.TrimSpace(token) == "" {
-				return errors.New("experience contains an empty surface")
-			}
+		if err := validateExperienceStructure(*command.Experience); err != nil {
+			return err
 		}
 	}
 	if command.Inquiry != nil && (command.Inquiry.BrainIdentity != BrainIdentity || command.Inquiry.RequestID == "" || command.Inquiry.Action == "") {
@@ -94,6 +92,11 @@ func (r *BrainRuntime) processObservationCommand(event Event, command Observatio
 	event, command = normalizeObservationCommand(event, command, r.nowLocked())
 	if err = validateObservationCommand(&event, &command); err != nil {
 		return CognitiveInterpretation{}, false, err
+	}
+	if command.Experience != nil {
+		if err = r.validateExperienceLocked(*command.Experience); err != nil {
+			return CognitiveInterpretation{}, false, err
+		}
 	}
 	var cognitive CognitiveInterpretation
 	learned := false
@@ -142,19 +145,27 @@ func normalizeObservationCommand(event Event, command ObservationCommand, at tim
 func (r *BrainRuntime) applyObservationCommandLocked(event Event, command ObservationCommand) (CognitiveInterpretation, bool, error) {
 	input := command.Input
 	grounded := make([]knowledge.GroundedRepresentation, 0)
-	seen := make(map[string]bool)
-	for _, group := range [][]string{input.Tokens, input.ContextTokens, input.DataTokens} {
+	cache := make(map[string]knowledge.GroundedRepresentation)
+	streams := make([][][]knowledge.NodeID, 3)
+	for groupIndex, group := range [][]string{input.Tokens, input.ContextTokens, input.DataTokens} {
 		for _, token := range group {
-			if seen[token] {
-				continue
+			representation, exists := cache[token]
+			if !exists {
+				var err error
+				representation, err = r.brain.GroundObservationWithEncodingAt(token, input.Source, input.Modality, GroundingThreshold, event.Timestamp, r.surfaceEncoding)
+				if err != nil {
+					return CognitiveInterpretation{}, false, err
+				}
+				cache[token] = representation
+				grounded = append(grounded, representation)
 			}
-			seen[token] = true
-			representation, err := r.brain.GroundObservationWithEncodingAt(token, input.Source, input.Modality, GroundingThreshold, event.Timestamp, r.surfaceEncoding)
-			if err != nil {
-				return CognitiveInterpretation{}, false, err
+			if r.dynamicsEncoding == knowledge.OrderedDynamics {
+				streams[groupIndex] = append(streams[groupIndex], append([]knowledge.NodeID(nil), representation.Population...))
 			}
-			grounded = append(grounded, representation)
 		}
+	}
+	if r.dynamicsEncoding == knowledge.OrderedDynamics {
+		event.NeuralTrace = (&knowledge.ObservationTrace{Stimulus: streams[0], Context: streams[1], Data: streams[2]}).Canonical()
 	}
 	event.StimulusNodeIDs = groundedPopulationNodeIDs(grounded)
 	output, err := r.cognitiveProcessWithPersistenceLocked(event, false)
@@ -164,9 +175,9 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 	if err = r.learnObservedTransitionLocked(event.StimulusNodeIDs, event.Timestamp); err != nil {
 		return CognitiveInterpretation{}, false, err
 	}
-	learned := command.Experience != nil && len(command.Experience.Sequence) > 0
+	learned := command.Experience != nil && (len(command.Experience.Sequence) > 0 || len(command.Experience.NeuralSequence) > 0)
 	if learned {
-		r.learning.LearnExperienceWithEncoding(*command.Experience, event.Timestamp, r.surfaceEncoding)
+		r.learning.LearnExperienceWithDynamics(*command.Experience, event.Timestamp, r.surfaceEncoding, r.dynamicsEncoding)
 	}
 	cognitive, err := r.InterpretCognitive(output, Observation{Source: input.Source, Modality: input.Modality, Tokens: input.Tokens, ContextTokens: input.ContextTokens, DataTokens: input.DataTokens})
 	if err != nil {

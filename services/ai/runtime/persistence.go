@@ -15,7 +15,8 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
-const BrainSnapshotSchemaVersion = 7
+const BrainSnapshotSchemaVersion = 8
+const outcomeBrainSnapshotSchemaVersion = 7
 const neuralBrainSnapshotSchemaVersion = 6
 const priorBrainSnapshotSchemaVersion = 5
 const legacyBrainSnapshotSchemaVersion = 4
@@ -165,7 +166,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	for _, annotation := range snapshot.SurfaceAnnotations {
@@ -177,11 +178,11 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if snapshot.SchemaVersion < neuralBrainSnapshotSchemaVersion && len(snapshot.SurfaceAnnotations) > 0 {
 		return errors.New("legacy checkpoint cannot carry unauthenticated adapter annotations")
 	}
-	if snapshot.SchemaVersion < BrainSnapshotSchemaVersion && (len(snapshot.ActionBindings) > 0 || snapshot.EvidenceLedger != nil) {
+	if snapshot.SchemaVersion < outcomeBrainSnapshotSchemaVersion && (len(snapshot.ActionBindings) > 0 || snapshot.EvidenceLedger != nil) {
 		return errors.New("legacy checkpoint cannot carry unauthenticated outcome state")
 	}
 	var ledger *learning.EvidenceLedger
-	if snapshot.SchemaVersion == BrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion >= outcomeBrainSnapshotSchemaVersion {
 		if snapshot.EvidenceLedger == nil {
 			return errors.New("checkpoint is missing outcome continuation state")
 		}
@@ -219,6 +220,8 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 			}
 		}
 	}
+
+	if err := knowledge.ValidateOrderedState(snapshot.Brain, snapshot.Activation.LastTrace, snapshot.SchemaVersion >= BrainSnapshotSchemaVersion); err != nil { return fmt.Errorf("checkpoint neural contract: %w", err) }
 
 	r.mu.Lock()
 	defer r.mu.Unlock()

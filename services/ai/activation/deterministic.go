@@ -17,6 +17,10 @@ func (e *Engine) ThinkWithPredictionAt(cycles int, now time.Time) ThoughtResult 
 // endogenous context signal to the existing neural state. The context is
 // additive and therefore cannot replace the current recurrent trajectory.
 func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]float64, now time.Time) ThoughtResult {
+	return e.ThinkWithContextDynamicsAt(cycles, context, now, knowledge.LegacyDynamics)
+}
+
+func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.NodeID]float64, now time.Time, dynamics knowledge.DynamicsEncoding) ThoughtResult {
 	if cycles < 1 {
 		cycles = 1
 	}
@@ -30,6 +34,7 @@ func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]flo
 	state := cloneState(e.internalState)
 	confidence := cloneState(e.internalConfidence)
 	previousPrediction := cloneState(e.lastPrediction)
+	trace := e.lastTrace.Clone()
 	e.mu.RUnlock()
 
 	for id, boost := range context {
@@ -58,6 +63,7 @@ func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]flo
 	}
 
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
+	if dynamics == knowledge.OrderedDynamics { nextPrediction, nextPredictionConfidence = e.applyOrderedPatternPrediction(nextPrediction, nextPredictionConfidence, trace) }
 
 	e.mu.Lock()
 	e.internalState = cloneState(actual.Activations)

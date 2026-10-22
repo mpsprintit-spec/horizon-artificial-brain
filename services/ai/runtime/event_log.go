@@ -17,11 +17,12 @@ import (
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
-const EventLogSchemaVersion = 2
+const EventLogSchemaVersion = 3
 
-func supportedEventLogSchema(version int) bool { return version == 1 || version == EventLogSchemaVersion }
+func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion }
 
 type LoggedEvent struct {
+	DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding,omitempty"`
 	SurfaceRebinding *WrittenSurfaceRebinding `json:"surface_rebinding,omitempty"`
 	SurfaceEncoding knowledge.SurfaceEncoding `json:"surface_encoding,omitempty"`
 	InquiryOutcome *InquiryOutcomeCommand `json:"inquiry_outcome,omitempty"`
@@ -364,7 +365,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			}
 			if event.IntentHash == "" || event.IntentHash != pendingHash || event.Event != nil ||
 				event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.ObservationCommand != nil || event.ActionBinding != nil || event.InquiryOutcome != nil ||
-				!event.Timestamp.Equal(pending.Timestamp) {
+				!event.Timestamp.Equal(pending.Timestamp) || event.DynamicsEncoding != pending.DynamicsEncoding || event.SurfaceEncoding != pending.SurfaceEncoding {
 				return nil, fmt.Errorf("%w: sensor commit mismatch at line %d", ErrUncommittedSensorTransaction, lineNumber)
 			}
 			seen[key] = canonical
@@ -511,12 +512,14 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	if brainRuntime.supervised { brainRuntime.mu.Unlock(); return ErrManagedRuntimeAccess }
 	originalLog := brainRuntime.eventLog
 	originalEncoding := brainRuntime.surfaceEncoding
+	originalDynamics := brainRuntime.dynamicsEncoding
 	brainRuntime.eventLog = nil
 	brainRuntime.mu.Unlock()
 	defer func() {
 		brainRuntime.mu.Lock()
 		brainRuntime.eventLog = originalLog
 		brainRuntime.surfaceEncoding = originalEncoding
+		brainRuntime.dynamicsEncoding = originalDynamics
 		brainRuntime.mu.Unlock()
 	}()
 
@@ -534,6 +537,7 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		expected++
 		brainRuntime.mu.Lock()
 		brainRuntime.surfaceEncoding = logged.SurfaceEncoding
+		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
 		case EventTypeSurfaceRebinding:

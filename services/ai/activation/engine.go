@@ -15,9 +15,13 @@ type Engine struct {
 	mu sync.RWMutex
 	internalState, internalConfidence map[knowledge.NodeID]float64
 	lastPrediction, lastPredictionConf map[knowledge.NodeID]float64
+	lastTrace *knowledge.ObservationTrace
 }
 
 type Request struct {
+	CarryPreviousContext bool
+	DynamicsEncoding *knowledge.DynamicsEncoding
+	NeuralTrace *knowledge.ObservationTrace
 	SurfaceEncoding *knowledge.SurfaceEncoding
 	StimulusTokens []string
 	StimulusNodeIDs []knowledge.NodeID
@@ -36,6 +40,11 @@ func (e *Engine) Think(cycles int) Result { return e.ThinkWithPrediction(cycles)
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkWithPredictionAt(cycles,time.Now().UTC()) }
 
 func (e *Engine) ActivateWith(req Request) Result {
+	if req.DynamicsEncoding == nil || *req.DynamicsEncoding == knowledge.LegacyDynamics { return e.activateLegacyWith(req) }
+	return e.activateOrderedWith(req)
+}
+
+func (e *Engine) activateLegacyWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
 	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
 	if req.PredictionOverride != nil {
@@ -117,7 +126,7 @@ func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.Nod
 		// discard population members and make an otherwise learned outcome
 		// disappear from future prediction.
 		for _, pattern := range matches {
-			if pattern==nil || len(pattern.Sequence)==0 || pattern.Result==id { continue }
+			if pattern==nil || pattern.Dynamics!=knowledge.LegacyDynamics || len(pattern.Sequence)==0 || pattern.Result==id { continue }
 			strength:=clamp01(pattern.Weight)*clamp01(pattern.Confidence)
 			// Frequency ranks repeated evidence but must not suppress a newly
 			// learned causal trace. A first observation is already valid

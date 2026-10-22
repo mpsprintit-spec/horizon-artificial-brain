@@ -91,6 +91,8 @@ func TestCheckpointV7AuthenticatesBindingsAndEvidence(t *testing.T) {
 func TestCheckpointV6RemainsReadableButCannotSupplyOutcomeOffsetState(t *testing.T) {
 	journal := openKnowledgeJournal(t)
 	r := NewBrainRuntime(nil)
+	// Produce a genuine pre-ordered state before testing legacy import.
+	r.dynamicsEncoding = knowledge.LegacyDynamics
 	r.SetEventLog(journal)
 	at := time.Date(2026, 10, 19, 9, 0, 0, 0, time.UTC)
 	if _, err := r.ProcessObservationEnvelope(transactionObservation("prefix", at, "seen")); err != nil {
