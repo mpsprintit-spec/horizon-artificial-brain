@@ -98,6 +98,9 @@ func (r *BrainRuntime) processObservationCommand(event Event, command Observatio
 			return CognitiveInterpretation{}, false, err
 		}
 	}
+	if err = r.validateNeuralEventLocked(event); err != nil {
+		return CognitiveInterpretation{}, false, err
+	}
 	var cognitive CognitiveInterpretation
 	learned := false
 	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeObservation, Timestamp: event.Timestamp, Event: cloneEvent(event), ObservationCommand: &command}, func() error {
@@ -159,12 +162,12 @@ func (r *BrainRuntime) applyObservationCommandLocked(event Event, command Observ
 				cache[token] = representation
 				grounded = append(grounded, representation)
 			}
-			if r.dynamicsEncoding == knowledge.OrderedDynamics {
+			if r.dynamicsEncoding.HasOrderedObservations() {
 				streams[groupIndex] = append(streams[groupIndex], append([]knowledge.NodeID(nil), representation.Population...))
 			}
 		}
 	}
-	if r.dynamicsEncoding == knowledge.OrderedDynamics {
+	if r.dynamicsEncoding.HasOrderedObservations() {
 		event.NeuralTrace = (&knowledge.ObservationTrace{Stimulus: streams[0], Context: streams[1], Data: streams[2]}).Canonical()
 	}
 	event.StimulusNodeIDs = groundedPopulationNodeIDs(grounded)

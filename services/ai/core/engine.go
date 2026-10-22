@@ -90,6 +90,7 @@ func (h *HorizonEngine) pulseSignalsWith(orchestrator *runtime.CognitiveOrchestr
 
 		event := runtime.Event{
 			ID:        fmt.Sprintf("pulse-%s-%d", observedAt.Format("20060102T150405.000000000Z0700"), index),
+	EpisodeID: signal.SessionID, ResetContext: signal.ResetContext,
 			Stimulus:  append([]string(nil), signal.Tokens...),
 			Source:    signal.Source,
 			Modality:  modality,

@@ -6,6 +6,7 @@ import "github.com/project-horizon/horizon-core/services/ai/knowledge"
 // state, not a second memory substrate, and is persisted only so a checkpoint
 // can resume the same ongoing neural process.
 type StateSnapshot struct {
+	ContextState *ContextState `json:"recurrent_context,omitempty"`
 	LastTrace *knowledge.ObservationTrace `json:"last_observation_trace,omitempty"`
 	InternalState      map[knowledge.NodeID]float64 `json:"internal_state,omitempty"`
 	InternalConfidence map[knowledge.NodeID]float64 `json:"internal_confidence,omitempty"`
@@ -21,6 +22,7 @@ func (e *Engine) SnapshotState() StateSnapshot {
 	defer e.mu.RUnlock()
 	return StateSnapshot{
 		LastTrace: e.lastTrace.Clone(),
+	ContextState: e.contextState.Clone(),
 		InternalState:      cloneState(e.internalState),
 		InternalConfidence: cloneState(e.internalConfidence),
 		LastPrediction:     cloneState(e.lastPrediction),
@@ -39,6 +41,7 @@ func (e *Engine) RestoreState(snapshot StateSnapshot) {
 	e.lastPrediction = cloneState(snapshot.LastPrediction)
 	e.lastPredictionConf = cloneState(snapshot.LastPredictionConf)
 	e.lastTrace = snapshot.LastTrace.Clone()
+	e.contextState = snapshot.ContextState.Clone()
 }
 
 

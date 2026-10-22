@@ -54,7 +54,7 @@ func TestPreOrderedSchema2ReplayMatchesOriginalStateAndNextThought(t *testing.T)
 		t.Fatal(err)
 	}
 	for _, r := range []*BrainRuntime{genesis, suffix} {
-		if r.dynamicsEncoding != knowledge.OrderedDynamics || r.surfaceEncoding != knowledge.WrittenTextEncoding {
+		if r.dynamicsEncoding != knowledge.CurrentDynamics || r.surfaceEncoding != knowledge.WrittenTextEncoding {
 			t.Fatal("replay leaked historical dynamics into serving")
 		}
 		if surfaceCheckpointChecksum(t, r) != ref.Checksum {

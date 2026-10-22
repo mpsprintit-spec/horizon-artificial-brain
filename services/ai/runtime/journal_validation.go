@@ -23,8 +23,11 @@ func validateJournalPayload(event LoggedEvent) error {
 		return errors.New("ordered neural dynamics require journal schema 3")
 	}
 	if event.Event != nil {
-		if event.Event.NeuralTrace != nil && event.DynamicsEncoding != knowledge.OrderedDynamics {
+		if event.Event.NeuralTrace != nil && !event.DynamicsEncoding.HasOrderedObservations() {
 			return errors.New("neural trace requires ordered dynamics")
+		}
+		if err := validateEpisodeControls(*event.Event, event.DynamicsEncoding); err != nil {
+			return err
 		}
 		if err := event.Event.NeuralTrace.Validate(nil); err != nil {
 			return err
@@ -44,7 +47,7 @@ func validateJournalPayload(event LoggedEvent) error {
 		if err := validateExperienceStructure(*experience); err != nil {
 			return err
 		}
-		if experience.HasOrderedFields() && event.DynamicsEncoding != knowledge.OrderedDynamics {
+		if experience.HasOrderedFields() && !event.DynamicsEncoding.HasOrderedObservations() {
 			return errors.New("ordered experience requires ordered dynamics")
 		}
 	}
@@ -113,7 +116,7 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	if event.Type == EventTypeCognitiveThink || event.Type == EventTypeThink {
 		e := event.Event
-		if e.ID != "" || len(e.Stimulus)+len(e.StimulusNodeIDs)+len(e.ContextTokens)+len(e.DataTokens) != 0 || e.Source != "" || e.Modality != "" || e.NeuralTrace != nil || e.PredictionOverride != nil || e.Observation != nil || e.SensorObservation != nil || event.Type == EventTypeCognitiveThink && len(e.Context) > 0 {
+		if e.ID != "" || len(e.Stimulus)+len(e.StimulusNodeIDs)+len(e.ContextTokens)+len(e.DataTokens) != 0 || e.Source != "" || e.Modality != "" || e.EpisodeID != "" || e.ResetContext || e.NeuralTrace != nil || e.PredictionOverride != nil || e.Observation != nil || e.SensorObservation != nil || event.Type == EventTypeCognitiveThink && len(e.Context) > 0 {
 			return errors.New("think record contains ignored event fields")
 		}
 	}
