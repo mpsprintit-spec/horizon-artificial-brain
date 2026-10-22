@@ -1,4 +1,4 @@
-# Complete cognitive commands and checkpoint v11
+# Complete cognitive commands and checkpoint v12
 
 This change addresses the reproduced H03/H04 cases in the consolidated
 2026-10-19 audit, using PR #27 as its baseline. The production integration
@@ -44,8 +44,9 @@ learning and its controlled retention evidence. [OBSERVED_FEEDBACK.md](OBSERVED_
 defines retained observed-feedback-v1 evidence accounting and adaptation.
 [EVIDENCE_UNCERTAINTY.md](EVIDENCE_UNCERTAINTY.md) defines the
 retained evidence-uncertainty-v1 predictive readout and scoped inquiry feedback.
-[STABLE_PROJECTION.md](STABLE_PROJECTION.md) defines current stable-sensory-projection-v1
-recovery and representation credit. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
+[STABLE_PROJECTION.md](STABLE_PROJECTION.md) defines retained stable-sensory-projection-v1
+recovery and representation credit. [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md)
+defines current evidence-provenance-v1 accounting and checkpoint v12. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
 An action binding registration now consumes a revision. Re-registering the
@@ -89,6 +90,11 @@ This does not change the legacy hash-token fallback for nonnumeric envelopes.
 
 ## Checkpoint and historical data
 
+Checkpoint **v12** additionally authenticates typed outcome provenance, its
+observation/source/episode/cause identities and archived legacy evidence.
+Pre-v12 envelopes cannot carry this typed continuation. Anchored v7-v12 support
+suffix recovery; see [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md).
+
 Checkpoint **v11** authenticates the pending actual observation, frozen forecast
 and learned channel credit. Pre-v11 envelopes cannot carry this evidence boundary.
 Anchored v7-v11 support suffix recovery.
@@ -118,7 +124,7 @@ ordinary learned populations are not relabeled as bootstrap populations.
 
 Historical checkpoints v4-v6 retain detached read/import compatibility using
 their original checksums. They cannot provide verified journal-offset recovery
-because they lack outcome continuation state. Verified checkpoint-offset startup requires v7, v8, v9, v10 or v11. Do not upgrade an old file by merely changing its schema
+because they lack outcome continuation state. Verified checkpoint-offset startup requires v7, v8, v9, v10, v11 or v12. Do not upgrade an old file by merely changing its schema
 or checksum. Migration needs a verified complete baseline, including any
 action/evidence state, or a history demonstrably sufficient to reconstruct it.
 

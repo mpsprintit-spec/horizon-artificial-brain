@@ -1,6 +1,8 @@
 # Evidence-based predictive uncertainty (H13)
 
-The predictive uncertainty law is retained by current `stable-sensory-projection-v1`
+For current provenance accounting and checkpoint v12, see [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md).
+
+The predictive uncertainty law is retained by current `evidence-provenance-v1`
 serving (see [STABLE_PROJECTION.md](STABLE_PROJECTION.md)), retaining H12 observation/feedback,
 H09 activity, H08 physical-time and bounded recurrent context laws. This change
 reads existing learned patterns, synapses and actual experience traces in one
@@ -65,7 +67,8 @@ unrecognized population yields confidence zero. Internal thought does not add
 counts or replace the real forecast. Time-based retention can reduce support.
 
 Counts describe repeated experiences; they do not assert independent sources.
-This change does not close H15 provenance/independence accounting. Retained traces
+The historical H13 change did not close H15 provenance/independence accounting;
+current bounded H15 accounting is specified in [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md). Retained traces
 are bounded by the existing Brain limit; an absent trace is not reconstructed.
 
 ## Inquiry
@@ -126,7 +129,7 @@ calibration under drift, and generalization H23 are not established.
 Journal schema 3 explicitly records `evidence-uncertainty-v1`; readers without the
 new encoding reject it. Earlier encodings retain their historical readout and
 inquiry laws. Outputs without the new assessment retain the legacy typed contract.
-Checkpoint v11 and canonical Brain v3 are unchanged: assessment is derived from
+At H13, checkpoint v11 and canonical Brain v3 were unchanged: assessment is derived from
 the persisted observation boundary and existing neural evidence, with no new
 calibration memory or unauthenticated continuation cache. The full inquiry
 command journals the captured request forecast.

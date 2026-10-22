@@ -1,7 +1,9 @@
 # Physical-time passive retention (H08)
 
+For current provenance accounting and checkpoint v12, see [EVIDENCE_PROVENANCE.md](EVIDENCE_PROVENANCE.md).
+
 The `physical-memory-v1` retention law is also retained by current
-`stable-sensory-projection-v1` serving runtimes (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
+`evidence-provenance-v1` serving runtimes (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
 and [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)).
 Passive forgetting operates on existing
 synapses and experience traces in the single canonical Brain. It adds no

@@ -95,28 +95,50 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 		"web-inquiry",
 		at,
 	)
-	if err != nil { t.Fatalf("BuildInquiryCandidate: %v", err) }
+	if err != nil {
+		t.Fatalf("BuildInquiryCandidate: %v", err)
+	}
 	decision := learning.ValidateInquiry(candidate, learning.DefaultLearningPolicy())
-	if decision != learning.PromotionAccepted { t.Fatalf("inquiry decision = %v, want %v", decision, learning.PromotionAccepted) }
-	if !candidate.Experience.Timestamp.Equal(at) { t.Fatalf("candidate timestamp = %v, want %v", candidate.Experience.Timestamp, at) }
+	if decision != learning.PromotionAccepted {
+		t.Fatalf("inquiry decision = %v, want %v", decision, learning.PromotionAccepted)
+	}
+	if !candidate.Experience.Timestamp.Equal(at) {
+		t.Fatalf("candidate timestamp = %v, want %v", candidate.Experience.Timestamp, at)
+	}
 
-	if _, err := runtime.LearnExperience(candidate.Experience, at); err != nil { t.Fatalf("LearnExperience: %v", err) }
+	if _, err := runtime.LearnExperience(candidate.Experience, at); err != nil {
+		t.Fatalf("LearnExperience: %v", err)
+	}
 
 	first := brain.Registry.Get("matahari")
 	second := brain.Registry.Get("terbit")
-	if first == nil || second == nil { t.Fatal("accepted inquiry did not create canonical Brain nodes") }
-	if !first.LastActivation.Equal(at) || !second.LastActivation.Equal(at) { t.Fatalf("learned node timestamps = %v, %v; want %v", first.LastActivation, second.LastActivation, at) }
+	if first == nil || second == nil {
+		t.Fatal("accepted inquiry did not create canonical Brain nodes")
+	}
+	if !first.LastActivation.Equal(at) || !second.LastActivation.Equal(at) {
+		t.Fatalf("learned node timestamps = %v, %v; want %v", first.LastActivation, second.LastActivation, at)
+	}
 
 	patterns := brain.Patterns.MatchTrace([]knowledge.PatternStep{
 		{NodeID: first.ID, Position: 0, Activation: 1},
 		{NodeID: second.ID, Position: 1, Activation: 1},
 	}, nil)
-	if len(patterns) == 0 { t.Fatal("accepted inquiry did not form a recoverable canonical pattern") }
+	if len(patterns) == 0 {
+		t.Fatal("accepted inquiry did not form a recoverable canonical pattern")
+	}
 	pattern := patterns[0]
-	if pattern.Result != second.ID { t.Fatalf("pattern result = %d, want %d", pattern.Result, second.ID) }
-	if len(pattern.Evidence) != 1 { t.Fatalf("pattern evidence count = %d, want 1", len(pattern.Evidence)) }
-	if !pattern.Evidence[0].Timestamp.Equal(at) { t.Fatalf("pattern evidence timestamp = %v, want %v", pattern.Evidence[0].Timestamp, at) }
-	if pattern.Evidence[0].Source != "source-a" { t.Fatalf("pattern provenance source = %q, want source-a", pattern.Evidence[0].Source) }
+	if pattern.Result != second.ID {
+		t.Fatalf("pattern result = %d, want %d", pattern.Result, second.ID)
+	}
+	if len(pattern.Evidence) != 1 {
+		t.Fatalf("pattern evidence count = %d, want 1", len(pattern.Evidence))
+	}
+	if !pattern.Evidence[0].Timestamp.Equal(at) {
+		t.Fatalf("pattern evidence timestamp = %v, want %v", pattern.Evidence[0].Timestamp, at)
+	}
+	if pattern.Evidence[0].Source != "source-a" {
+		t.Fatalf("pattern provenance source = %q, want source-a", pattern.Evidence[0].Source)
+	}
 
 	// Recover the learned inquiry through the same observation boundary used by
 	// ordinary perception. Context/data grounding must resolve to the canonical
@@ -124,19 +146,23 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 	// the cognitive runtime.
 	recoveryAt := at.Add(time.Second)
 	observation := ObservationInput{
-		Source: "follow-up-observation",
-		Modality: "text",
-		Tokens: []string{"matahari", "terbit"},
+		Source:        "follow-up-observation",
+		Modality:      "text",
+		Tokens:        []string{"matahari", "terbit"},
 		ContextTokens: []string{"matahari", "terbit"},
 	}
 	interpreted, learned, err := NewCognitiveOrchestrator(runtime).ProcessObservation(Event{
-		ID: "p1-inquiry-recovery",
-		Stimulus: observation.Tokens,
+		ID:        "p1-inquiry-recovery",
+		Stimulus:  observation.Tokens,
 		Timestamp: recoveryAt,
-		Cycles: 1,
+		Cycles:    1,
 	}, observation, nil)
-	if err != nil { t.Fatalf("ProcessObservation recovery: %v", err) }
-	if learned { t.Fatal("recovery observation without an experience should not learn") }
+	if err != nil {
+		t.Fatalf("ProcessObservation recovery: %v", err)
+	}
+	if learned {
+		t.Fatal("recovery observation without an experience should not learn")
+	}
 	if len(interpreted.GroundedRepresentations) != 2 {
 		t.Fatalf("recovery grounding count = %d, want 2", len(interpreted.GroundedRepresentations))
 	}
@@ -157,12 +183,14 @@ func TestP1AcceptedInquiryLearnsIntoCanonicalBrainAndIsRecoverable(t *testing.T)
 
 	secondRecoveryAt := recoveryAt.Add(time.Second)
 	recovered, _, err := NewCognitiveOrchestrator(runtime).ProcessObservation(Event{
-		ID: "p1-inquiry-recovery-repeat",
-		Stimulus: observation.Tokens,
+		ID:        "p1-inquiry-recovery-repeat",
+		Stimulus:  observation.Tokens,
 		Timestamp: secondRecoveryAt,
-		Cycles: 1,
+		Cycles:    1,
 	}, observation, nil)
-	if err != nil { t.Fatalf("ProcessObservation repeated recovery: %v", err) }
+	if err != nil {
+		t.Fatalf("ProcessObservation repeated recovery: %v", err)
+	}
 	for i, representation := range recovered.GroundedRepresentations {
 		if representation.Status != "existing" {
 			t.Fatalf("repeated text recovery[%d] status = %q, want existing", i, representation.Status)
@@ -246,14 +274,15 @@ func TestP1ActionOutcomeLearningRequiresSafetyAndIndependentEvidence(t *testing.
 
 	for _, sourceName := range []string{"executor-a", "executor-b"} {
 		if _, err := runtime.ObserveOutcome(OutcomeEvent{
-			RequestID:     execution.RequestID,
-			BrainIdentity: BrainIdentity,
-			Success:       true,
-			Observation:   []string{"target-observed"},
-			Source:        sourceName,
-			Modality:      "execution-outcome",
-			ObservedAt:    now.Add(10 * time.Second),
-			Reliability:   1.0,
+			RequestID:         execution.RequestID,
+			BrainIdentity:     BrainIdentity,
+			Success:           true,
+			Observation:       []string{"target-observed"},
+			Source:            sourceName,
+			IndependenceGroup: sourceName + "-origin",
+			Modality:          "execution-outcome",
+			ObservedAt:        now.Add(10 * time.Second),
+			Reliability:       1.0,
 		}); err != nil {
 			t.Fatalf("ObserveOutcome(%s): %v", sourceName, err)
 		}

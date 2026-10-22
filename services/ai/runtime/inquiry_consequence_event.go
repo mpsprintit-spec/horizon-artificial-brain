@@ -1,6 +1,7 @@
 package runtime
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"math"
@@ -8,14 +9,18 @@ import (
 )
 
 type InquiryConsequenceEvent struct {
-	Action          InquiryAction      `json:"action"`
-	Valence         float64            `json:"valence"`
-	InformationGain float64            `json:"information_gain"`
-	PredictionError float64            `json:"prediction_error"`
-	Reliability     float64            `json:"reliability"`
-	TargetNodeIDs   []knowledge.NodeID `json:"target_node_ids,omitempty"`
-	OutcomeNodeIDs  []knowledge.NodeID `json:"outcome_node_ids,omitempty"`
-	CausalLink      string             `json:"causal_link,omitempty"`
+	Action            InquiryAction      `json:"action"`
+	Valence           float64            `json:"valence"`
+	InformationGain   float64            `json:"information_gain"`
+	PredictionError   float64            `json:"prediction_error"`
+	Reliability       float64            `json:"reliability"`
+	TargetNodeIDs     []knowledge.NodeID `json:"target_node_ids,omitempty"`
+	OutcomeNodeIDs    []knowledge.NodeID `json:"outcome_node_ids,omitempty"`
+	CausalLink        string             `json:"causal_link,omitempty"`
+	Source            string             `json:"source,omitempty"`
+	EpisodeID         string             `json:"episode_id,omitempty"`
+	IndependenceGroup string             `json:"independence_group,omitempty"`
+	CausalGroup       string             `json:"causal_group,omitempty"`
 }
 
 // RecordInquiryConsequenceEvent applies a learned inquiry consequence and
@@ -63,11 +68,22 @@ func (r *BrainRuntime) applyInquiryConsequenceLocked(event InquiryConsequenceEve
 	}
 	previous := r.inquiryValence[event.Action]
 	if r.learning != nil && len(event.TargetNodeIDs) > 0 && len(event.OutcomeNodeIDs) > 0 {
-		r.learning.LearnOutcomeTrace(event.TargetNodeIDs, event.OutcomeNodeIDs, clamp01(0.5+0.5*absFloat(event.Valence)), clamp01(event.Reliability), knowledge.ExperienceEvidence{
+		evidence := knowledge.ExperienceEvidence{
 			ExperienceID: event.CausalLink, Source: "inquiry-consequence", Modality: "outcome",
 			Timestamp: at, Reliability: event.Reliability, IndependenceGroup: event.CausalLink,
 			CausalLink: event.CausalLink,
-		}, at)
+		}
+		if r.dynamicsEncoding.HasEvidenceProvenance() {
+			if event.CausalLink != "" {
+				identity, _ := json.Marshal([2]string{event.CausalLink, event.Source})
+				evidence.ExperienceID = string(identity)
+			}
+			evidence.Source = event.Source
+			evidence.EpisodeID = event.EpisodeID
+			evidence.IndependenceGroup = event.IndependenceGroup
+			evidence.CausalGroup = event.CausalGroup
+		}
+		r.learning.LearnOutcomeTraceWithDynamics(event.TargetNodeIDs, event.OutcomeNodeIDs, clamp01(0.5+0.5*absFloat(event.Valence)), clamp01(event.Reliability), evidence, at, r.dynamicsEncoding)
 	}
 	r.inquiryValence[event.Action] = clampSigned(previous + inquiryPreferenceLearningRate*(event.Valence-previous))
 }

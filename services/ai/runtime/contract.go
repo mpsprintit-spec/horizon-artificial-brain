@@ -11,13 +11,13 @@ import (
 )
 
 type CognitiveState struct {
-	BrainIdentity string
-	Sequence uint64
-	Timestamp time.Time
-	ActiveNodeIDs []knowledge.NodeID
-	Activations map[knowledge.NodeID]float64
-	Confidence map[knowledge.NodeID]float64
-	Resonance float64
+	BrainIdentity   string
+	Sequence        uint64
+	Timestamp       time.Time
+	ActiveNodeIDs   []knowledge.NodeID
+	Activations     map[knowledge.NodeID]float64
+	Confidence      map[knowledge.NodeID]float64
+	Resonance       float64
 	PredictionError float64
 }
 
@@ -26,25 +26,25 @@ func (o CognitiveOutput) State() CognitiveState {
 }
 
 type CognitiveStateDelta struct {
-	FromSequence uint64 `json:"from_sequence"`
-	ToSequence uint64 `json:"to_sequence"`
-	AddedNodeIDs []knowledge.NodeID `json:"added_node_ids"`
-	RemovedNodeIDs []knowledge.NodeID `json:"removed_node_ids"`
-	ActivationDelta map[knowledge.NodeID]float64 `json:"activation_delta"`
-	ConfidenceDelta map[knowledge.NodeID]float64 `json:"confidence_delta"`
-	ResonanceDelta float64 `json:"resonance_delta"`
-	PredictionErrorDelta float64 `json:"prediction_error_delta"`
+	FromSequence         uint64                       `json:"from_sequence"`
+	ToSequence           uint64                       `json:"to_sequence"`
+	AddedNodeIDs         []knowledge.NodeID           `json:"added_node_ids"`
+	RemovedNodeIDs       []knowledge.NodeID           `json:"removed_node_ids"`
+	ActivationDelta      map[knowledge.NodeID]float64 `json:"activation_delta"`
+	ConfidenceDelta      map[knowledge.NodeID]float64 `json:"confidence_delta"`
+	ResonanceDelta       float64                      `json:"resonance_delta"`
+	PredictionErrorDelta float64                      `json:"prediction_error_delta"`
 }
 
 func cloneCognitiveState(in CognitiveState) CognitiveState {
 	return CognitiveState{
-		BrainIdentity: in.BrainIdentity,
-		Sequence: in.Sequence,
-		Timestamp: in.Timestamp,
-		ActiveNodeIDs: append([]knowledge.NodeID(nil), in.ActiveNodeIDs...),
-		Activations: cloneNodeValues(in.Activations),
-		Confidence: cloneNodeValues(in.Confidence),
-		Resonance: in.Resonance,
+		BrainIdentity:   in.BrainIdentity,
+		Sequence:        in.Sequence,
+		Timestamp:       in.Timestamp,
+		ActiveNodeIDs:   append([]knowledge.NodeID(nil), in.ActiveNodeIDs...),
+		Activations:     cloneNodeValues(in.Activations),
+		Confidence:      cloneNodeValues(in.Confidence),
+		Resonance:       in.Resonance,
 		PredictionError: in.PredictionError,
 	}
 }
@@ -54,54 +54,71 @@ func (s CognitiveState) Diff(previous CognitiveState) CognitiveStateDelta {
 	removed := make([]knowledge.NodeID, 0)
 	previousActive := make(map[knowledge.NodeID]struct{}, len(previous.ActiveNodeIDs))
 	currentActive := make(map[knowledge.NodeID]struct{}, len(s.ActiveNodeIDs))
-	for _, id := range previous.ActiveNodeIDs { previousActive[id] = struct{}{} }
+	for _, id := range previous.ActiveNodeIDs {
+		previousActive[id] = struct{}{}
+	}
 	for _, id := range s.ActiveNodeIDs {
 		currentActive[id] = struct{}{}
-		if _, ok := previousActive[id]; !ok { added = append(added, id) }
+		if _, ok := previousActive[id]; !ok {
+			added = append(added, id)
+		}
 	}
 	for _, id := range previous.ActiveNodeIDs {
-		if _, ok := currentActive[id]; !ok { removed = append(removed, id) }
+		if _, ok := currentActive[id]; !ok {
+			removed = append(removed, id)
+		}
 	}
 	activationDelta := make(map[knowledge.NodeID]float64)
 	for id, value := range s.Activations {
 		if previousValue, ok := previous.Activations[id]; ok {
-			if delta := value - previousValue; delta != 0 { activationDelta[id] = delta }
+			if delta := value - previousValue; delta != 0 {
+				activationDelta[id] = delta
+			}
 		} else if value != 0 {
 			activationDelta[id] = value
 		}
 	}
 	for id, value := range previous.Activations {
-		if _, ok := s.Activations[id]; !ok && value != 0 { activationDelta[id] = -value }
+		if _, ok := s.Activations[id]; !ok && value != 0 {
+			activationDelta[id] = -value
+		}
 	}
 	confidenceDelta := make(map[knowledge.NodeID]float64)
 	for id, value := range s.Confidence {
 		if previousValue, ok := previous.Confidence[id]; ok {
-			if delta := value - previousValue; delta != 0 { confidenceDelta[id] = delta }
+			if delta := value - previousValue; delta != 0 {
+				confidenceDelta[id] = delta
+			}
 		} else if value != 0 {
 			confidenceDelta[id] = value
 		}
 	}
 	for id, value := range previous.Confidence {
-		if _, ok := s.Confidence[id]; !ok && value != 0 { confidenceDelta[id] = -value }
+		if _, ok := s.Confidence[id]; !ok && value != 0 {
+			confidenceDelta[id] = -value
+		}
 	}
 	return CognitiveStateDelta{
 		FromSequence: previous.Sequence, ToSequence: s.Sequence,
 		AddedNodeIDs: added, RemovedNodeIDs: removed,
 		ActivationDelta: activationDelta, ConfidenceDelta: confidenceDelta,
-		ResonanceDelta: s.Resonance - previous.Resonance,
+		ResonanceDelta:       s.Resonance - previous.Resonance,
 		PredictionErrorDelta: s.PredictionError - previous.PredictionError,
 	}
 }
 
 type OutcomeEvent struct {
-	RequestID string
-	BrainIdentity string
-	Success bool
-	Observation []string
-	Source string
-	Modality string
-	ObservedAt time.Time
-	Reliability float64
+	RequestID         string
+	BrainIdentity     string
+	Success           bool
+	Observation       []string
+	Source            string
+	Modality          string
+	ObservedAt        time.Time
+	Reliability       float64
+	EpisodeID         string `json:"episode_id,omitempty"`
+	IndependenceGroup string `json:"independence_group,omitempty"`
+	CausalGroup       string `json:"causal_group,omitempty"`
 }
 
 // ObserveOutcome writes the complete input before changing evidence or its
@@ -139,6 +156,9 @@ func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
 	}
 	if binding.BrainIdentity != BrainIdentity {
 		return 0, errors.New("action binding belongs to a different brain")
+	}
+	if err := validateOutcomeDynamics(outcome, r.dynamicsEncoding); err != nil {
+		return r.seq, err
 	}
 
 	err := r.runJournalCommandLocked(LoggedEvent{Type: EventTypeOutcome, Timestamp: outcome.ObservedAt, Outcome: cloneOutcome(outcome)}, func() error {
@@ -190,7 +210,12 @@ func (r *BrainRuntime) applyOutcomeLocked(outcome OutcomeEvent, binding ActionBi
 	evidence := learning.Evidence{Weight: weight, Confidence: confidence, Reliability: clamp01(outcome.Reliability), IndependentSources: 1, Contradictions: contradictions}
 
 	for _, nodeID := range binding.TargetNodeIDs {
-		combined, added, err := r.evidence.Record(learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence})
+		record := learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence, EpisodeID: outcome.EpisodeID, IndependenceGroup: outcome.IndependenceGroup, CausalGroup: outcome.CausalGroup}
+		recordOutcome := r.evidence.RecordLegacy
+		if r.dynamicsEncoding.HasEvidenceProvenance() {
+			recordOutcome = r.evidence.Record
+		}
+		combined, added, err := recordOutcome(record)
 		if err != nil {
 			return err
 		}

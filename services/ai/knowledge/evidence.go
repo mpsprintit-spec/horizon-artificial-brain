@@ -14,6 +14,8 @@ type ExperienceEvidence struct {
 	IndependenceGroup string    `json:"independence_group,omitempty"`
 	CausalLink        string    `json:"causal_link,omitempty"`
 	ContradictionSet  string    `json:"contradiction_set,omitempty"`
+	EpisodeID         string    `json:"episode_id,omitempty"`
+	CausalGroup       string    `json:"causal_group,omitempty"`
 }
 
 // EvidenceIndependence counts independent evidence groups. Evidence without
