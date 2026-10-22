@@ -1,6 +1,7 @@
 # Evidence-based predictive uncertainty (H13)
 
-Serving uses `evidence-uncertainty-v1`, retaining all H12 observation/feedback,
+The predictive uncertainty law is retained by current `stable-sensory-projection-v1`
+serving (see [STABLE_PROJECTION.md](STABLE_PROJECTION.md)), retaining H12 observation/feedback,
 H09 activity, H08 physical-time and bounded recurrent context laws. This change
 reads existing learned patterns, synapses and actual experience traces in one
 Brain. It creates no answer database, semantic rules, external model or parallel
@@ -108,12 +109,13 @@ covered by their existing tests. Replicating population members across widths
 duplicate pattern paths cannot manufacture support. Twenty same-time thought
 cycles preserve the assessment.
 
-Production numeric sensor tests expose a remaining H14 limitation: twelve stable
+Historical PR36 numeric sensor tests exposed an H14 limitation: twelve stable
 vector episodes leave eleven distinct retained outcome populations. The exact
 vector receives confidence 0.081374 and unknown mass 0.491224; perturbations 0.01
 and 0.1 in an unused channel fail exact evidence matching and receive confidence
 zero. These are conservative uncertainty results, not robust sensor recognition
-or successful calibration under representation drift. H14 remains open.
+or successful calibration under representation drift. STABLE_PROJECTION.md
+now documents bounded recovery improvements and the remaining limitations.
 
 These results support bounded calibration on the specified distribution only.
 General semantic accuracy, independent-source certainty, broad task transfer,

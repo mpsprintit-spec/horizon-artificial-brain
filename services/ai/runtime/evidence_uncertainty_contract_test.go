@@ -132,7 +132,7 @@ func TestEvidenceUncertaintyInquiryGenesisSuffixAndNextReadout(t *testing.T) {
 		t.Fatal(err)
 	}
 	for _, event := range events {
-		if event.DynamicsEncoding != knowledge.EvidenceUncertaintyDynamics {
+		if event.DynamicsEncoding != knowledge.CurrentDynamics {
 			t.Fatal("new readout/inquiry policy lost journal version")
 		}
 	}

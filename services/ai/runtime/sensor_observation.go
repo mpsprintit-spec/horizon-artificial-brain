@@ -14,7 +14,10 @@ import (
 // boundary. Numeric values are normalized to [-1, 1] by the sensor adapter;
 // labels and provenance remain metadata and never become neural identity.
 type SensorObservation struct {
-	SessionID string `json:"session_id,omitempty"`
+	// NoiseTolerance is a declared maximum per-measurement-coordinate
+	// deviation for receptive-field recovery. Zero requires exact input.
+	NoiseTolerance     float64          `json:"noise_tolerance,omitempty"`
+	SessionID          string           `json:"session_id,omitempty"`
 	Fields             []SensorField    `json:"fields,omitempty"`
 	Modality           string           `json:"modality"`
 	Source             string           `json:"source"`
@@ -57,7 +60,15 @@ func (s SensorObservation) Clone() SensorObservation {
 // Validate rejects ambiguous or non-finite physical input before it reaches
 // the canonical brain. Numeric feature arrays are expected to be normalized.
 func (s SensorObservation) Validate() error {
-	if s.SessionID!="" && strings.TrimSpace(s.SessionID)=="" {return fmt.Errorf("%w: blank session",ErrInvalidSensorObservation)}
+	if math.IsNaN(s.NoiseTolerance) || math.IsInf(s.NoiseTolerance, 0) || s.NoiseTolerance < 0 || s.NoiseTolerance > 1 {
+		return fmt.Errorf("%w: noise tolerance must be finite and within [0,1]", ErrInvalidSensorObservation)
+	}
+	if s.NoiseTolerance > 0 && len(s.Fields) > 0 {
+		return fmt.Errorf("%w: measurement tolerance is only defined for unscoped numeric observations", ErrInvalidSensorObservation)
+	}
+	if s.SessionID != "" && strings.TrimSpace(s.SessionID) == "" {
+		return fmt.Errorf("%w: blank session", ErrInvalidSensorObservation)
+	}
 	if strings.TrimSpace(s.Modality) == "" || strings.TrimSpace(s.Source) == "" || strings.TrimSpace(s.SampleID) == "" || s.Timestamp.IsZero() {
 		return fmt.Errorf("%w: modality, source, sample_id and timestamp are required", ErrInvalidSensorObservation)
 	}
@@ -142,6 +153,9 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		if err := r.ensureWritableLocked(); err != nil {
 			return processedSensor{}, err
 		}
+		if sensor.NoiseTolerance > 0 && !r.dynamicsEncoding.HasStableProjection() {
+			return processedSensor{}, fmt.Errorf("%w: noise tolerance requires stable projection dynamics", ErrInvalidSensorObservation)
+		}
 
 		if !r.lastObservationAt.IsZero() && sensor.Timestamp.Before(r.lastObservationAt) {
 			return processedSensor{}, fmt.Errorf("%w: timestamp %s precedes last observation %s", ErrInvalidSensorObservation, sensor.Timestamp.UTC().Format(time.RFC3339Nano), r.lastObservationAt.UTC().Format(time.RFC3339Nano))
@@ -164,7 +178,9 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				Sequence: r.seq + 1, Type: EventTypeSensorIntent,
 				Timestamp: sensor.Timestamp.UTC(), Event: cloneEvent(intentEvent),
 			}
-			if err:=validateJournalPayload(intent);err!=nil {return processedSensor{},err}
+			if err := validateJournalPayload(intent); err != nil {
+				return processedSensor{}, err
+			}
 			intentHash, err = sensorIntentHash(intent)
 			if err != nil {
 				return processedSensor{}, err
@@ -182,7 +198,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		if len(sensor.Fields) > 0 {
 			bindings, ids, err = r.projectSensorFieldsLocked(sensor)
 		} else {
-			population, err = r.brain.ProjectVectorPopulationAt(vector, GroundingThreshold, 4, sensor.Timestamp)
+			population, err = r.brain.ProjectVectorPopulationWithDynamicsAt(vector, GroundingThreshold, 4, sensor.Timestamp, r.dynamicsEncoding, sensor.projectionTolerance())
 			for _, unit := range population.Units {
 				ids = append(ids, unit.NodeID)
 			}

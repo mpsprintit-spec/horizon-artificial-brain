@@ -10,7 +10,7 @@ import (
 // cannot create extra experience support or replace it with simulated evidence.
 // It is derived from persisted neural state and needs no additional checkpoint cache.
 func (e *Engine) PredictionAssessment(now time.Time, dynamics knowledge.DynamicsEncoding) *knowledge.PredictionAssessment {
-	if dynamics != knowledge.EvidenceUncertaintyDynamics {
+	if !dynamics.HasEvidenceUncertainty() {
 		return nil
 	}
 	e.mu.RLock()

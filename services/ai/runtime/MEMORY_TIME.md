@@ -1,7 +1,7 @@
 # Physical-time passive retention (H08)
 
 The `physical-memory-v1` retention law is also retained by current
-`evidence-uncertainty-v1` serving runtimes (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
+`stable-sensory-projection-v1` serving runtimes (see [OBSERVED_FEEDBACK.md](OBSERVED_FEEDBACK.md)
 and [LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md)).
 Passive forgetting operates on existing
 synapses and experience traces in the single canonical Brain. It adds no
