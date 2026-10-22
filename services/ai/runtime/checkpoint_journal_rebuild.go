@@ -10,7 +10,7 @@ import (
 )
 
 // RebuildRuntimeFromCheckpointAndJournal restores a fresh runtime from an
-// anchored v7-v12 checkpoint, then replays only committed events after its
+// anchored v7-v13 checkpoint, then replays only committed events after its
 // sequence. The journal writer must be held exclusively by the caller. An
 // incomplete journal is rejected; repair the trailing intent separately.
 //
