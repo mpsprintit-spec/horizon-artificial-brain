@@ -161,6 +161,10 @@ func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.Nod
 }
 
 func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
+	return e.advanceWithDynamics(state, confidence, now, cycles, knowledge.LegacyDynamics)
+}
+
+func (e *Engine) advanceWithDynamics(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int, dynamics knowledge.DynamicsEncoding) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
 	if e==nil || e.Memory==nil { return cloneState(state),cloneState(confidence) }
 	e.Memory.Lock(); defer e.Memory.Unlock()
 	state=cloneState(state); confidence=cloneState(confidence)
@@ -170,7 +174,7 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 		for _,id:=range sortedNodeIDs(state) {
 			level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}
 			next[id]+=level*(1-e.Decay); nextConfidence[id]=max(nextConfidence[id],confidence[id])
-			synapses:=n.OutboundAll(); sort.Slice(synapses,func(i,j int)bool{return synapses[i].TargetID<synapses[j].TargetID})
+			synapses:=n.OutboundAll(); orderPropagationSynapses(synapses, dynamics.HasCanonicalPropagation())
 			for _,s:=range synapses {
 				age:=temporalPenalty(now,s.LastActivation); pulse:=level*s.Weight*s.Confidence*e.SpreadRate*age
 				if s.Inhibitory { next[s.TargetID]-=pulse*e.Inhibition } else { next[s.TargetID]+=pulse }

@@ -56,7 +56,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 		}}
 	}
 
-	actualState, actualConfidence := e.advance(state, confidence, now, cycles)
+	actualState, actualConfidence := e.advanceWithDynamics(state, confidence, now, cycles, dynamics)
 	actual := e.converge(actualState, actualConfidence, now)
 	if dynamics.HasObservedFeedback() {
 		e.ApplyActivityPlasticityWithDynamics(nil, nil, now, dynamics)
@@ -72,7 +72,7 @@ func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.No
 		}
 	}
 
-	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
+	nextPrediction, nextPredictionConfidence := e.advanceWithDynamics(actual.Activations, actual.Confidence, now, cycles, dynamics)
 	if dynamics.HasRecurrentContext() {
   nextPrediction,nextPredictionConfidence=e.applyRecurrentPatternPrediction(nextPrediction,nextPredictionConfidence,trace,recurrentContext,now,true)
 	} else if dynamics == knowledge.OrderedDynamics {nextPrediction,nextPredictionConfidence=e.applyOrderedPatternPrediction(nextPrediction,nextPredictionConfidence,trace)}

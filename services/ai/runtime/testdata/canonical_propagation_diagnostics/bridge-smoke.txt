@@ -1,0 +1,8 @@
+bash scripts/bridge_smoke.sh
+curl: (7) Failed to connect to 127.0.0.1 port 32981 after 0 ms: Couldn't connect to server
+Visual sensor smoke: analytical pixels -> production adapter -> live Bridge -> scoped reuse, uncertainty, canonical memory and journal passed
+Inspection smoke: authenticated bounded pages, Go/JS wire digest and production bounded monitor connection passed
+Browser sensor smoke: production text/camera/audio/IMU/simulator handlers -> live Bridge -> physical reuse, lineage and persistence passed
+Bridge smoke: health, handshake, snapshot, legacy/numeric observations, persistence and event replay passed
+revision: 2 -> 4
+hash: sha256:defc113560766a40a6561024e0a2aea681d303dd6896421881e87020c2a7419f -> sha256:bbdb285454e098789402070a4348003bb4091d00609d4dc883ab6e76d04d65de

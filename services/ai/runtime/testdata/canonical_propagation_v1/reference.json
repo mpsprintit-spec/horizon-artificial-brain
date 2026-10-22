@@ -1,0 +1,50 @@
+{
+  "dynamics_encoding": "canonical-propagation-v1",
+  "future": [
+    {
+      "at": "1970-01-01T00:01:42Z",
+      "checkpoint_sha256": "9c0248bc7fc5fba85fb230925172c3c59900a6d682894364a768d2941332fe03",
+      "output_sha256": "fed3bc6a83b724193acf90d648e114f6a0bab449dd4ae41249d50163e777e392"
+    },
+    {
+      "at": "1970-01-01T00:01:43Z",
+      "checkpoint_sha256": "e777a38170a298f357ad24958bb99d100158f2aa3bffde7333386c416e017622",
+      "output_sha256": "1fcb6f25a4dfdcdfe27dd200d61818ccca5a9a74965b63cd2f7fe42ac634a4b8"
+    },
+    {
+      "at": "1970-01-01T00:01:44Z",
+      "checkpoint_sha256": "07d989a69e99a628d62bccd46af2fd2cd67a92cc2625de9881ae4c1e0f70efde",
+      "output_sha256": "93fe1cb95d16ab12586b3bd9cf8fc308e2fd98bbf004fa35742cea0dfb6fe5eb"
+    },
+    {
+      "at": "1970-01-01T00:01:45Z",
+      "checkpoint_sha256": "43a7ea7e4721839dfb04be7721358856f62d0c24bc7b5720e9c2044523f58342",
+      "output_sha256": "1ea25ffc1941e3501cef1f5f76265e57090a0e96d7cfac7835d64ba530bc792d"
+    },
+    {
+      "at": "1970-01-01T00:01:46Z",
+      "checkpoint_sha256": "441d792489c284a57f534b532e0cf2b7aab0f626b24d2364852c287df276226d",
+      "output_sha256": "0a4a76fe0b6c2a473904bf297280efab2ea80334162558dd59c213e1e2c63a06"
+    },
+    {
+      "at": "1970-01-01T00:01:47Z",
+      "checkpoint_sha256": "d7160f839c9bcf17eefa8792dcb21718022d74401c619768d5b20ba258fdc554",
+      "output_sha256": "a67a0975adcdc3da3799e278365be1d873c253d73c879f20af977a9666a522fa"
+    },
+    {
+      "at": "1970-01-01T00:01:48Z",
+      "checkpoint_sha256": "60ec32acfa6135d26e5f48553f9fcb6a3f05897f56504d753cfeacaca2fbd896",
+      "output_sha256": "fbc0a80b672dcdefb31c602ed0e08622b3a354ca1273e484d5adceaacccce45c"
+    },
+    {
+      "at": "1970-01-01T00:01:49Z",
+      "checkpoint_sha256": "a73949d51e3b7012347aa7b8ac6ef3e8999f3f89d76ff75308fde193b54aa5db",
+      "output_sha256": "07bef05020079fa3fbc0e3b4cbcd2485e6f0c13faa46ff17c683c5a584e8f1dc"
+    }
+  ],
+  "initial_checkpoint_sha256": "9d612641f130f812bd1f16b0548f50e10d47f773b3bdc11bf11adb4428e0ca62",
+  "initial_clock": "1970-01-01T00:01:40Z",
+  "journal_sha256": "14de56d7491a29114568e34d8cd0373cac5b75f59724587dafdde60c41f251f1",
+  "parent_commit": "3f3716cb283372a18cf12a0ae17fdf2ff515118f",
+  "records": 18
+}

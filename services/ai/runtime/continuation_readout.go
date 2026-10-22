@@ -117,7 +117,7 @@ func (r *BrainRuntime) ReadLearnedContinuation(seed *knowledge.ObservationTrace,
 		return out, err
 	}
 	out.Sequence = r.seq
-	if r.dynamicsEncoding != knowledge.CurrentDynamics {
+	if !r.dynamicsEncoding.HasEvidenceProvenance() {
 		return out, errors.New("learned continuation requires the current explicit neural dynamics")
 	}
 	if err := seed.Validate(func(id knowledge.NodeID) bool { return r.brain.Registry.GetByID(id) != nil }); err != nil {

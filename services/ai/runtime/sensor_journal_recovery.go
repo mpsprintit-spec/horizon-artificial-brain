@@ -81,6 +81,7 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 	if err := l.file.Truncate(int64(len(prefix))); err != nil {
 		return backupPath, fmt.Errorf("truncate uncommitted journal tail (backup at %s): %w", backupPath, err)
 	}
+	l.propagationLawKnown = false // The removed intent may have been the only record.
 	if err := l.file.Sync(); err != nil {
 		return backupPath, fmt.Errorf("sync recovered journal (backup at %s): %w", backupPath, err)
 	}

@@ -9,20 +9,23 @@ import (
 type DynamicsEncoding string
 
 const (
-	LegacyDynamics              DynamicsEncoding = ""
-	OrderedDynamics             DynamicsEncoding = "ordered-observation-v1"
-	RecurrentDynamics           DynamicsEncoding = "recurrent-context-v1"
-	PhysicalMemoryDynamics      DynamicsEncoding = "physical-memory-v1"
-	LocalActivityDynamics       DynamicsEncoding = "local-activity-v1"
-	ObservedFeedbackDynamics    DynamicsEncoding = "observed-feedback-v1"
-	EvidenceUncertaintyDynamics DynamicsEncoding = "evidence-uncertainty-v1"
-	StableProjectionDynamics    DynamicsEncoding = "stable-sensory-projection-v1"
-	EvidenceProvenanceDynamics  DynamicsEncoding = "evidence-provenance-v1"
-	CurrentDynamics                              = EvidenceProvenanceDynamics
+	LegacyDynamics               DynamicsEncoding = ""
+	OrderedDynamics              DynamicsEncoding = "ordered-observation-v1"
+	RecurrentDynamics            DynamicsEncoding = "recurrent-context-v1"
+	PhysicalMemoryDynamics       DynamicsEncoding = "physical-memory-v1"
+	LocalActivityDynamics        DynamicsEncoding = "local-activity-v1"
+	ObservedFeedbackDynamics     DynamicsEncoding = "observed-feedback-v1"
+	EvidenceUncertaintyDynamics  DynamicsEncoding = "evidence-uncertainty-v1"
+	StableProjectionDynamics     DynamicsEncoding = "stable-sensory-projection-v1"
+	EvidenceProvenanceDynamics   DynamicsEncoding = "evidence-provenance-v1"
+	CanonicalPropagationDynamics DynamicsEncoding = "canonical-propagation-v1"
+	// Preserve the historical default. Canonical propagation is explicit opt-in
+	// on a fresh runtime and is retained by its own checkpoint/journal contract.
+	CurrentDynamics = EvidenceProvenanceDynamics
 )
 
 func (d DynamicsEncoding) Validate() error {
-	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics && d != ObservedFeedbackDynamics && d != EvidenceUncertaintyDynamics && d != StableProjectionDynamics && d != EvidenceProvenanceDynamics {
+	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics && d != ObservedFeedbackDynamics && d != EvidenceUncertaintyDynamics && d != StableProjectionDynamics && d != EvidenceProvenanceDynamics && d != CanonicalPropagationDynamics {
 		return fmt.Errorf("unsupported neural dynamics %q", d)
 	}
 	return nil
@@ -128,4 +131,8 @@ func (d DynamicsEncoding) HasStableProjection() bool {
 	return d == StableProjectionDynamics || d.HasEvidenceProvenance()
 }
 
-func (d DynamicsEncoding) HasEvidenceProvenance() bool { return d == EvidenceProvenanceDynamics }
+func (d DynamicsEncoding) HasEvidenceProvenance() bool {
+	return d == EvidenceProvenanceDynamics || d.HasCanonicalPropagation()
+}
+
+func (d DynamicsEncoding) HasCanonicalPropagation() bool { return d == CanonicalPropagationDynamics }

@@ -164,6 +164,7 @@ func (r *BrainRuntime) LoadBrain(path string) error {
 	if err := r.ensureWritableLocked(); err != nil { return err }
 	// Manual brain import resets the local event sequence. It cannot be
 	// reconciled with an existing attached journal; use checkpoint recovery.
+	if r.dynamicsEncoding.HasCanonicalPropagation() { return errors.New("canonical propagation requires a complete versioned checkpoint, not a Brain-only load") }
 	if r.neuralWrittenGrounding { return errors.New("numeric written serving requires complete checkpoint recovery, not a Brain-only load") }
 	if r.eventLog != nil { return errors.New("manual brain load is forbidden while an event journal is attached; use verified checkpoint recovery") }
 	if err := r.brain.LoadStandalone(path); err != nil { return err }
@@ -187,6 +188,7 @@ func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
 	if r.supervised { return ErrManagedRuntimeAccess }
 	if r.eventLog != nil { return errors.New("cannot restore event index while journal writer is attached") }
 	if r.seq != 0 { return errors.New("cannot restore event index into a nonempty runtime") }
+	if r.dynamicsEncoding.HasCanonicalPropagation() { return errors.New("canonical propagation requires full replay or checkpoint recovery, not an index-only import") }
 	index := make(map[string]uint64)
 	expected := uint64(1)
 	for _, event := range events {
@@ -215,7 +217,7 @@ func (r *BrainRuntime) DNF() *dnf.Fabric {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.ensureWritableLocked() != nil || r.supervised || r.eventLog != nil {
+	if r.ensureWritableLocked() != nil || r.supervised || r.eventLog != nil || r.dynamicsEncoding.HasCanonicalPropagation() {
 		return nil
 	}
 	return r.dnf

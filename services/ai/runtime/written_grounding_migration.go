@@ -59,6 +59,9 @@ func (r *BrainRuntime) PlanNeuralWrittenGrounding() (WrittenGroundingPlan, error
 	if err := r.ensureWritableLocked(); err != nil {
 		return WrittenGroundingPlan{}, err
 	}
+	if r.dynamicsEncoding.HasCanonicalPropagation() {
+		return WrittenGroundingPlan{}, errors.New("written migration requires a historical propagation runtime; canonical migration is not supported")
+	}
 	if r.neuralWrittenGrounding {
 		return WrittenGroundingPlan{}, errors.New("numeric written grounding is already enabled")
 	}
@@ -71,6 +74,9 @@ func (r *BrainRuntime) PlanNeuralWrittenGrounding() (WrittenGroundingPlan, error
 }
 
 func (r *BrainRuntime) validateWrittenGroundingPlanLocked(plan WrittenGroundingPlan) error {
+	if r.dynamicsEncoding.HasCanonicalPropagation() {
+		return errors.New("written migration cannot downgrade the canonical propagation backup")
+	}
 	if r.neuralWrittenGrounding {
 		return errors.New("numeric written grounding is already enabled")
 	}

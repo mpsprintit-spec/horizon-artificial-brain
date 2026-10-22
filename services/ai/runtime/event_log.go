@@ -64,6 +64,8 @@ const (
 )
 
 type EventLog struct {
+	propagationLawKnown bool // Guarded by mu; initialized from the first durable record.
+	canonicalPropagation bool
 	mu sync.Mutex
 	file *os.File
 	lockFile *os.File
@@ -101,11 +103,20 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.file == nil || l.lockFile == nil { return errors.New("event log is not initialized") }
+	if !l.propagationLawKnown {
+		canonical, exists, err := journalPropagationLaw(l.file.Name())
+		if err != nil { return fmt.Errorf("read journal propagation law: %w", err) }
+		l.canonicalPropagation, l.propagationLawKnown = canonical, exists
+	}
+	if l.propagationLawKnown && l.canonicalPropagation != event.DynamicsEncoding.HasCanonicalPropagation() {
+		return errors.New("journal append cannot change canonical propagation law")
+	}
 	if l.beforeAppend != nil {
 		if err := l.beforeAppend(event); err != nil { return fmt.Errorf("inject event log append failure: %w", err) }
 	}
 	if _, err := l.file.Write(append(data, '\n')); err != nil { return fmt.Errorf("append logged event: %w", err) }
 	if err := l.file.Sync(); err != nil { return fmt.Errorf("sync event log: %w", err) }
+	l.canonicalPropagation, l.propagationLawKnown = event.DynamicsEncoding.HasCanonicalPropagation(), true
 	return nil
 }
 
@@ -293,6 +304,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		return "", fmt.Errorf("reopen recovered event log (backup at %s): %w", backupPath, err)
 	}
 	l.file = reopened
+	l.propagationLawKnown = false
 	return backupPath, nil
 }
 
@@ -512,6 +524,10 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	}
 	brainRuntime.mu.Lock()
 	if brainRuntime.supervised { brainRuntime.mu.Unlock(); return ErrManagedRuntimeAccess }
+	if err := validateCanonicalPropagationTimeline(events, brainRuntime.dynamicsEncoding.HasCanonicalPropagation()); err != nil {
+		brainRuntime.mu.Unlock()
+		return err
+	}
 	// Validate the whole contract timeline before the first mutation. A v2
 	// command cannot bypass its migration, nor can serving silently revert.
 	migrated := brainRuntime.neuralWrittenGrounding

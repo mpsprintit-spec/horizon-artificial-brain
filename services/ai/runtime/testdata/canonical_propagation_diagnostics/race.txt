@@ -1,0 +1,7 @@
+ok  	github.com/project-horizon/horizon-core/services/ai/activation	1.235s
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	14.004s
+ok  	github.com/project-horizon/horizon-core/services/ai/learning	1.703s
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	389.157s
+ok  	github.com/project-horizon/horizon-core/services/ai/bridge	13.407s
+ok  	github.com/project-horizon/horizon-core/services/ai/core	13.584s
+ok  	github.com/project-horizon/horizon-core/services/ai/cmd/horizon-cli	11.441s

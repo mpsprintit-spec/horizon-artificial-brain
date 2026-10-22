@@ -118,7 +118,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	for _, stream := range [][][]knowledge.NodeID{trace.Context, trace.Data, trace.Stimulus} {
 		for _, frame := range stream {
 			if step > 0 {
-				state, confidence = e.advance(state, confidence, req.Now, 1)
+				state, confidence = e.advanceWithDynamics(state, confidence, req.Now, 1, *req.DynamicsEncoding)
 			}
 			for _, id := range frame {
 				if node := e.Memory.Registry.GetByID(id); node != nil {
@@ -135,7 +135,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	}
 	state = normalize(state)
 	pre := cloneState(state)
-	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
+	state, confidence = e.advanceWithDynamics(state, confidence, req.Now, req.Cycles, *req.DynamicsEncoding)
 	result := e.converge(state, confidence, req.Now)
 	actualEvidence := observedPopulation(trace)
 	result.ObservedInput = observedFeedback && len(actualEvidence) > 0
@@ -163,7 +163,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	} else {
 		e.Memory.UpdateInformationDynamics(previousPrediction, result.Activations, predictionError, req.Now)
 	}
-	next, nextConfidence := e.advance(result.Activations, result.Confidence, req.Now, req.Cycles)
+	next, nextConfidence := e.advanceWithDynamics(result.Activations, result.Confidence, req.Now, req.Cycles, *req.DynamicsEncoding)
 	next, nextConfidence = e.applyPatternPrediction(next, nextConfidence, result.Activations)
 	var patternCredit map[knowledge.PatternID]float64
 	if observedFeedback {

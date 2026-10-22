@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/project-horizon/horizon-core/services/ai/internal/jsonstream"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 )
 
 // checkpointChecksumV5 binds both the neural state and recovery metadata.
@@ -144,6 +145,24 @@ func checkpointChecksumV8WithBrain(snapshot BrainSnapshot, writer jsonstream.Val
 	return hex.EncodeToString(sum[:]), nil
 }
 
+// v9 binds the opt-in propagation law on top of the complete v8 state.
+// Keeping the historical checksum functions untouched preserves old fixtures.
+func checkpointChecksumV9(snapshot BrainSnapshot) (string, error) {
+	return checkpointChecksumV9WithBrain(snapshot, nil)
+}
+
+func checkpointChecksumV9WithBrain(snapshot BrainSnapshot, writer jsonstream.ValueWriter) (string, error) {
+	base, err := checkpointChecksumV8WithBrain(snapshot, writer)
+	if err != nil { return "", err }
+	data, err := json.Marshal(struct {
+		Base string `json:"base_digest"`
+		DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding"`
+	}{base, snapshot.DynamicsEncoding})
+	if err != nil { return "", err }
+	sum := sha256.Sum256(data)
+	return hex.EncodeToString(sum[:]), nil
+}
+
 // journalPrefixHash hashes the *logical committed* prefix, never the raw
 // intent/commit physical framing. This anchors a checkpoint to a specific
 // replayable event history and detects tampering with its earlier records.
@@ -176,6 +195,9 @@ func (r *BrainRuntime) checkpointJournalPrefixLocked() (string, error) {
 	}
 	events, err := ReadEventLog(log.file.Name())
 	if err != nil {
+		return "", err
+	}
+	if err := validateCanonicalPropagationTimeline(events, r.dynamicsEncoding.HasCanonicalPropagation()); err != nil {
 		return "", err
 	}
 	if uint64(len(events)) != r.seq {

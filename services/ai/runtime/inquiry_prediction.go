@@ -74,7 +74,7 @@ func (r *BrainRuntime) predictInquiryInformationValueWithTargets(action InquiryA
 
 	r.brain.RLock()
 	defer r.brain.RUnlock()
-	prediction := r.activation.PredictOutcomeFromNodes(targets, at, 1)
+	prediction := r.activation.PredictOutcomeFromNodesWithDynamics(targets, at, 1, r.dynamicsEncoding)
 
 	// Restrict the outcome distribution to neural units that are actually
 	// reachable through the learned action -> outcome channels. The recurrent

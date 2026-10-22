@@ -1,0 +1,133 @@
+=== RUN   TestCanonicalPropagationOpponentsRealAndHypothetical
+--- PASS: TestCanonicalPropagationOpponentsRealAndHypothetical (0.00s)
+=== RUN   TestCanonicalPropagationRoutesObservationThoughtAndInquiryForecast
+--- PASS: TestCanonicalPropagationRoutesObservationThoughtAndInquiryForecast (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/activation	0.022s
+=== RUN   TestCanonicalPropagationFrozenV1
+--- PASS: TestCanonicalPropagationFrozenV1 (0.06s)
+=== RUN   TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought
+=== RUN   TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought/7
+    canonical_propagation_test.go:111: seed=7 recovery_paths=5 native_steps=8 exact_output_and_full_checkpoint=true
+=== RUN   TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought/17
+    canonical_propagation_test.go:111: seed=17 recovery_paths=5 native_steps=8 exact_output_and_full_checkpoint=true
+=== RUN   TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought/47
+    canonical_propagation_test.go:111: seed=47 recovery_paths=5 native_steps=8 exact_output_and_full_checkpoint=true
+--- PASS: TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought (30.19s)
+    --- PASS: TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought/7 (3.68s)
+    --- PASS: TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought/17 (11.14s)
+    --- PASS: TestCanonicalPropagationExactRecoveryAndRepeatedNativeThought/47 (15.37s)
+=== RUN   TestCanonicalPropagationDefaultAndHistoricalLawIsolation
+--- PASS: TestCanonicalPropagationDefaultAndHistoricalLawIsolation (0.01s)
+=== RUN   TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation
+=== RUN   TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation/wrong-reader
+=== RUN   TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation/mixed-upgrade
+=== RUN   TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation/mixed-downgrade
+--- PASS: TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation (0.13s)
+    --- PASS: TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation/wrong-reader (0.04s)
+    --- PASS: TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation/mixed-upgrade (0.02s)
+    --- PASS: TestCanonicalPropagationRejectsLawTimelineChangesBeforeMutation/mixed-downgrade (0.01s)
+=== RUN   TestCanonicalPropagationCheckpointAuthenticatesLawAndRejectsDowngrade
+--- PASS: TestCanonicalPropagationCheckpointAuthenticatesLawAndRejectsDowngrade (0.07s)
+=== RUN   TestCanonicalPropagationAppendRejectsCrossingLawsIncludingReopen
+=== RUN   TestCanonicalPropagationAppendRejectsCrossingLawsIncludingReopen/false
+=== RUN   TestCanonicalPropagationAppendRejectsCrossingLawsIncludingReopen/true
+--- PASS: TestCanonicalPropagationAppendRejectsCrossingLawsIncludingReopen (0.02s)
+    --- PASS: TestCanonicalPropagationAppendRejectsCrossingLawsIncludingReopen/false (0.01s)
+    --- PASS: TestCanonicalPropagationAppendRejectsCrossingLawsIncludingReopen/true (0.01s)
+=== RUN   TestCanonicalPropagationCheckpointAndJournalMustHaveSameLaw
+=== RUN   TestCanonicalPropagationCheckpointAndJournalMustHaveSameLaw/false
+=== RUN   TestCanonicalPropagationCheckpointAndJournalMustHaveSameLaw/true
+--- PASS: TestCanonicalPropagationCheckpointAndJournalMustHaveSameLaw (0.02s)
+    --- PASS: TestCanonicalPropagationCheckpointAndJournalMustHaveSameLaw/false (0.01s)
+    --- PASS: TestCanonicalPropagationCheckpointAndJournalMustHaveSameLaw/true (0.01s)
+=== RUN   TestCanonicalPropagationWrittenMigrationRefusesHistoricalBackup
+--- PASS: TestCanonicalPropagationWrittenMigrationRefusesHistoricalBackup (0.02s)
+=== RUN   TestCanonicalPropagationRejectsLegacyMutableImports
+--- PASS: TestCanonicalPropagationRejectsLegacyMutableImports (0.03s)
+=== RUN   TestCanonicalPropagationSupervisorHandoverKeepsLaw
+--- PASS: TestCanonicalPropagationSupervisorHandoverKeepsLaw (0.03s)
+=== RUN   TestCanonicalPropagationOrphanOnlyJournalClearsCachedLaw
+--- PASS: TestCanonicalPropagationOrphanOnlyJournalClearsCachedLaw (0.01s)
+=== RUN   TestCanonicalPropagationRejectsWrongFullPrefixWithValidDigests
+--- PASS: TestCanonicalPropagationRejectsWrongFullPrefixWithValidDigests (0.01s)
+=== RUN   TestLearnedContinuationFrozenV1
+--- PASS: TestLearnedContinuationFrozenV1 (0.08s)
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/think
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/experience
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/monitor
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/timed-ground
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/binding
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/outcome
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/bootstrap
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/mutable-view
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-think
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/observation
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/knowledge-import
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inspection
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/load
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/labels
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/handshake
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-apply
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/vector
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/claim
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inquiry-prediction
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-learn
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/complete-inquiry
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-contract
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/continuation-read
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/sensor
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/capture-prediction
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-plan
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/ground
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/save
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/event-index
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/transition
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-read
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/plan
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/checkpoint
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/restore
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/process
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-process
+=== RUN   TestRetiredRuntimeSupportedMutationAndInspectionMatrix/consequence
+--- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix (1.43s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/think (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/experience (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/monitor (0.05s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/timed-ground (0.06s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/binding (0.04s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/outcome (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/bootstrap (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/mutable-view (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-think (0.04s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/observation (0.07s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/knowledge-import (0.04s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inspection (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/load (0.06s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/labels (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/handshake (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-apply (0.06s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/vector (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/claim (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/inquiry-prediction (0.05s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-learn (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/complete-inquiry (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-contract (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/continuation-read (0.04s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/sensor (0.05s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/capture-prediction (0.05s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/written-migration-plan (0.06s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/ground (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/save (0.05s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/event-index (0.04s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/transition (0.04s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/spelling-read (0.03s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/plan (0.06s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/checkpoint (0.01s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/restore (0.05s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/process (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/cognitive-process (0.02s)
+    --- PASS: TestRetiredRuntimeSupportedMutationAndInspectionMatrix/consequence (0.03s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	32.178s

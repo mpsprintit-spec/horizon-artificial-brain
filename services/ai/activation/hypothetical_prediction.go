@@ -1,7 +1,6 @@
 package activation
 
 import (
-	"sort"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -24,6 +23,12 @@ func (e *Engine) CurrentState() map[knowledge.NodeID]float64 {
 // Learned pattern completion is included because it is part of Horizon's
 // existing predictive substrate.
 func (e *Engine) PredictOutcomeFromNodes(targets []knowledge.NodeID, now time.Time, cycles int) Prediction {
+	return e.PredictOutcomeFromNodesWithDynamics(targets, now, cycles, knowledge.LegacyDynamics)
+}
+
+// PredictOutcomeFromNodesWithDynamics applies the caller's recorded propagation
+// law without changing the engine or Brain. Historical callers retain v1 order.
+func (e *Engine) PredictOutcomeFromNodesWithDynamics(targets []knowledge.NodeID, now time.Time, cycles int, dynamics knowledge.DynamicsEncoding) Prediction {
 	if e == nil || e.Memory == nil {
 		return Prediction{}
 	}
@@ -47,7 +52,7 @@ func (e *Engine) PredictOutcomeFromNodes(targets []knowledge.NodeID, now time.Ti
 		confidence[id] = max(confidence[id], 0.5)
 	}
 	state = normalize(state)
-	predicted, predictedConfidence := e.advanceHypothetical(state, confidence, now, cycles)
+	predicted, predictedConfidence := e.advanceHypotheticalWithSynapseOrder(state, confidence, now, cycles, dynamics.HasCanonicalPropagation())
 	predicted, predictedConfidence = e.applyPatternPrediction(predicted, predictedConfidence, state)
 
 	// Keep the representation deterministic for callers that compare snapshots.
@@ -59,8 +64,8 @@ func (e *Engine) advanceHypothetical(state, confidence map[knowledge.NodeID]floa
 	return e.advanceHypotheticalWithSynapseOrder(state, confidence, now, cycles, false)
 }
 
-// Only the new, explicitly versioned continuation readout uses total ordering
-// of opposing channels. Historical hypothetical/recurrent laws stay intact.
+// The continuation readout and opt-in canonical propagation law order opposing
+// channels. Historical hypothetical/recurrent laws retain their original order.
 func (e *Engine) advanceHypotheticalWithSynapseOrder(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int, totalOrder bool) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
 	if e == nil || e.Memory == nil {
 		return cloneState(state), cloneState(confidence)
@@ -86,15 +91,7 @@ func (e *Engine) advanceHypotheticalWithSynapseOrder(state, confidence map[knowl
 			next[id] += level * (1 - e.Decay)
 			nextConfidence[id] = max(nextConfidence[id], confidence[id])
 			synapses := n.OutboundAll()
-			sort.Slice(synapses, func(i, j int) bool {
-				if totalOrder && synapses[i].TargetID == synapses[j].TargetID {
-					if synapses[i].Inhibitory != synapses[j].Inhibitory {
-						return !synapses[i].Inhibitory
-					}
-					return synapses[i].Kind < synapses[j].Kind
-				}
-				return synapses[i].TargetID < synapses[j].TargetID
-			})
+			orderPropagationSynapses(synapses, totalOrder)
 			for _, s := range synapses {
 				age := temporalPenalty(now, s.LastActivation)
 				pulse := level * s.Weight * s.Confidence * e.SpreadRate * age

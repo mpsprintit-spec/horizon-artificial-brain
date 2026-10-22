@@ -19,6 +19,8 @@ const observedFeedbackBrainSnapshotSchemaVersion = 11
 const evidenceProvenanceBrainSnapshotSchemaVersion = 12
 const neuralWrittenBrainSnapshotSchemaVersion = 13
 const BrainSnapshotSchemaVersion = neuralWrittenBrainSnapshotSchemaVersion
+// Opt-in only. Historical/default writers continue emitting schema 13.
+const CanonicalPropagationSnapshotSchemaVersion = 14
 const recurrentBrainSnapshotSchemaVersion = 9
 const orderedBrainSnapshotSchemaVersion = 8
 const outcomeBrainSnapshotSchemaVersion = 7
@@ -27,6 +29,7 @@ const priorBrainSnapshotSchemaVersion = 5
 const legacyBrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
+	DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding,omitempty"`
 	NeuralWrittenGrounding bool `json:"neural_written_grounding,omitempty"`
 	ActionBindings map[string]ActionBinding         `json:"action_bindings,omitempty"`
 	EvidenceLedger *learning.EvidenceLedgerSnapshot `json:"evidence_ledger,omitempty"`
@@ -92,10 +95,16 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 // checkpointLocked is also used to persist a private pre-migration backup
 // while the same owner lock protects its reference and journal receipt.
 func (r *BrainRuntime) checkpointLocked(path string) error {
+	if r.dynamicsEncoding.HasCanonicalPropagation() {
+		return r.checkpointVersionLocked(path, CanonicalPropagationSnapshotSchemaVersion)
+	}
 	return r.checkpointVersionLocked(path, BrainSnapshotSchemaVersion)
 }
 
 func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
+	if r.dynamicsEncoding.HasCanonicalPropagation() != (version == CanonicalPropagationSnapshotSchemaVersion) {
+		return errors.New("checkpoint version cannot change the propagation law")
+	}
 	// Checkpoints must persist the ENTIRE canonical substrate, including
 	// developmental experiences, bootstrap episodes, learned policy and
 	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
@@ -128,6 +137,9 @@ func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
 		SurfaceAnnotations:        r.brain.SurfaceAnnotationsSnapshot(),
 		JournalPrefixHash:         journalHash,
 	}
+	if version == CanonicalPropagationSnapshotSchemaVersion {
+		snapshot.DynamicsEncoding = r.dynamicsEncoding
+	}
 	return r.writeCheckpointLocked(path, snapshot)
 }
 
@@ -146,8 +158,11 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != CanonicalPropagationSnapshotSchemaVersion && snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
+	}
+	if err := validateCheckpointPropagation(snapshot); err != nil {
+		return err
 	}
 	if snapshot.SchemaVersion < neuralWrittenBrainSnapshotSchemaVersion && snapshot.NeuralWrittenGrounding {
 		return errors.New("numeric written serving contract requires checkpoint schema 13")
@@ -227,6 +242,9 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if r.eventLog != nil {
 		return errors.New("checkpoint restore requires a detached runtime; use supervisor recovery")
 	}
+	if r.dynamicsEncoding.HasCanonicalPropagation() && snapshot.SchemaVersion != CanonicalPropagationSnapshotSchemaVersion {
+		return errors.New("restore historical checkpoint with a historical runtime; propagation migration is not supported")
+	}
 	brainPath := path + ".restore.tmp"
 	if err := os.WriteFile(brainPath, snapshot.Brain, 0600); err != nil {
 		return fmt.Errorf("stage brain restore: %w", err)
@@ -258,6 +276,9 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	}
 	r.inspectionEpoch = ""
 	r.neuralWrittenGrounding = snapshot.NeuralWrittenGrounding
+	if snapshot.SchemaVersion == CanonicalPropagationSnapshotSchemaVersion {
+		r.dynamicsEncoding = snapshot.DynamicsEncoding
+	}
 	if r.neuralWrittenGrounding { r.surfaceEncoding = knowledge.NeuralWrittenEncoding } else { r.surfaceEncoding = knowledge.WrittenTextEncoding }
 	r.actions, r.evidence = actions, ledger
 	r.activation.RestoreState(snapshot.Activation)
@@ -272,6 +293,8 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 
 func checkpointChecksumForSchema(snapshot BrainSnapshot) (string, error) {
 	switch snapshot.SchemaVersion {
+	case CanonicalPropagationSnapshotSchemaVersion:
+		return checkpointChecksumV9(snapshot)
 	case neuralWrittenBrainSnapshotSchemaVersion:
 		return checkpointChecksumV8(snapshot)
 	case legacyBrainSnapshotSchemaVersion:

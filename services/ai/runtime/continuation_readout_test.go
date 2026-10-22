@@ -28,7 +28,11 @@ type continuationFixture struct {
 
 func newContinuationFixture(t *testing.T, seed int64, journal bool) continuationFixture {
 	t.Helper()
-	r := NewBrainRuntime(knowledge.NewBrain())
+	return newContinuationFixtureRuntime(t, seed, journal, NewBrainRuntime(knowledge.NewBrain()))
+}
+
+func newContinuationFixtureRuntime(t *testing.T, seed int64, journal bool, r *BrainRuntime) continuationFixture {
+	t.Helper()
 	at := time.Unix(100, 0).UTC()
 	r.SetClock(NewFixedClock(at))
 	f := continuationFixture{r: r, at: at, pops: map[string][]knowledge.NodeID{}}

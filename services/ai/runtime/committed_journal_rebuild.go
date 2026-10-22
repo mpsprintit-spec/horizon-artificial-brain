@@ -49,6 +49,12 @@ func RebuildRuntimeFromCommittedJournal(log *EventLog, newFoundation func() *kno
 	if fresh == nil {
 		return nil, errors.New("could not initialize recovered brain runtime")
 	}
+	if len(events) > 0 && events[0].DynamicsEncoding.HasCanonicalPropagation() {
+		if err := validateCanonicalPropagationFoundation(brain); err != nil {
+			return nil, err
+		}
+		fresh.dynamicsEncoding = knowledge.CanonicalPropagationDynamics
+	}
 	// fresh has not escaped to other goroutines and has no eventLog; replay
 	// cannot interleave with its own live mutations or write new log entries.
 	if err := ReplayEventLog(fresh, events); err != nil {
