@@ -1,0 +1,5 @@
+=== RUN   TestInspectionScaleChild
+H18_SCALE {"allocated_bytes":3788010808,"canonical_hash":"sha256:9d80dcee53c2b95f6c8203c4b31be06e3a10b54d3e114bef9cd22ad6f2bc3818","heap_after_bytes":2701845800,"heap_before_bytes":313660424,"json_bytes":721050609,"mode":"snapshot","peak_reset":true,"peak_rss_bytes":2940526592,"rss_after_bytes":2940526592,"rss_before_bytes":328601600,"seconds":13.179519818,"seed_synapses":0,"setup_seconds":0.686784589,"units":1000000}
+--- PASS: TestInspectionScaleChild (14.24s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	14.317s

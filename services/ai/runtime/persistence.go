@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
@@ -90,10 +89,6 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 	// developmental experiences, bootstrap episodes, learned policy and
 	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
 	// these states and made checkpoint-offset replay diverge from live memory.
-	brainBytes, err := r.brain.CanonicalJSON()
-	if err != nil {
-		return fmt.Errorf("serialize complete canonical brain: %w", err)
-	}
 
 	activationState := r.activation.SnapshotState()
 	cognitiveState := cloneCognitiveState(r.lastCognitiveState)
@@ -112,7 +107,6 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		BrainIdentity:             BrainIdentity,
 		Sequence:                  r.seq,
 		Timestamp:                 r.nowLocked(),
-		Brain:                     json.RawMessage(brainBytes),
 		Activation:                activationState,
 		CognitiveState:            cognitiveState,
 		InquiryValence:            inquiryValence,
@@ -122,40 +116,7 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 		SurfaceAnnotations:        r.brain.SurfaceAnnotationsSnapshot(),
 		JournalPrefixHash:         journalHash,
 	}
-	snapshot.Checksum, err = checkpointChecksumV7(snapshot)
-	if err != nil {
-		return fmt.Errorf("checksum checkpoint: %w", err)
-	}
-	data, err := json.MarshalIndent(snapshot, "", "  ")
-	if err != nil {
-		return fmt.Errorf("encode checkpoint: %w", err)
-	}
-
-	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("create checkpoint directory: %w", err)
-	}
-	tmp, err := os.CreateTemp(dir, ".horizon-checkpoint-*.tmp")
-	if err != nil {
-		return fmt.Errorf("create checkpoint temp file: %w", err)
-	}
-	tmpName := tmp.Name()
-	defer os.Remove(tmpName)
-	if _, err := tmp.Write(data); err != nil {
-		_ = tmp.Close()
-		return fmt.Errorf("write checkpoint: %w", err)
-	}
-	if err := tmp.Sync(); err != nil {
-		_ = tmp.Close()
-		return fmt.Errorf("sync checkpoint: %w", err)
-	}
-	if err := tmp.Close(); err != nil {
-		return fmt.Errorf("close checkpoint: %w", err)
-	}
-	if err := os.Rename(tmpName, path); err != nil {
-		return fmt.Errorf("commit checkpoint: %w", err)
-	}
-	return nil
+	return r.writeCheckpointLocked(path, snapshot)
 }
 
 // RestoreCheckpoint loads a versioned checkpoint into the runtime's single
@@ -287,6 +248,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 			}
 		}
 	}
+	r.inspectionEpoch = ""
 	r.actions, r.evidence = actions, ledger
 	r.activation.RestoreState(snapshot.Activation)
 	r.lastCognitiveState = cloneCognitiveState(snapshot.CognitiveState)
