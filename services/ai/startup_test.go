@@ -23,17 +23,11 @@ func newStartupJournal(t *testing.T, path string) *runtime.EventLog {
 	return log
 }
 
-func getActiveStartupState(t *testing.T,h interface{
-	WithActiveBrain(func(*knowledge.Brain)error)error
-}) []byte {
+func getActiveStartupState(t *testing.T,h interface{ InspectActiveBrain() (runtime.BrainInspection,error) }) []byte {
 	t.Helper()
-	var data []byte
-	if err:=h.WithActiveBrain(func(brain *knowledge.Brain)error{
-		var err error
-		data,err=brain.CanonicalJSON()
-		return err
-	});err!=nil {t.Fatal(err)}
-	return data
+	snapshot,err:=h.InspectActiveBrain()
+	if err!=nil {t.Fatal(err)}
+	return snapshot.Graph.CanonicalBytes()
 }
 
 func TestProductionStartupAnchorsNewBrainBeforeObservationAndRecoversIt(t *testing.T) {
@@ -46,7 +40,7 @@ func TestProductionStartupAnchorsNewBrainBeforeObservationAndRecoversIt(t *testi
 	if err!=nil {t.Fatal(err)}
 	if !boot {t.Fatal("empty new startup did not request canonical bootstrap")}
 	if _,err:=os.Stat(checkpoint);err!=nil {t.Fatalf("sequence-zero checkpoint not anchored: %v",err)}
-	if err:=h.Supervisor.WithMutation(func(rt *runtime.BrainRuntime)error{
+	if err:=h.Supervisor().WithMutation(func(rt *runtime.BrainRuntime)error{
 		if _,err:=rt.CognitiveProcess(runtime.Event{
 			ID:"startup-bootstrap",Stimulus:[]string{"light"},Cycles:1,
 			Timestamp:time.Date(2026,10,18,13,0,0,0,time.UTC),
@@ -55,7 +49,7 @@ func TestProductionStartupAnchorsNewBrainBeforeObservationAndRecoversIt(t *testi
 		return rt.Checkpoint(checkpoint)
 	});err!=nil {t.Fatal(err)}
 	before:=getActiveStartupState(t,h)
-	if err:=h.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=h.Supervisor().Close();err!=nil {t.Fatal(err)}
 	if err:=log.Close();err!=nil {t.Fatal(err)}
 
 	restarted:=newStartupJournal(t,journal)
@@ -64,16 +58,16 @@ func TestProductionStartupAnchorsNewBrainBeforeObservationAndRecoversIt(t *testi
 	if boot {t.Fatal("restart tried to run bootstrap twice")}
 	after:=getActiveStartupState(t,next)
 	if !bytes.Equal(before,after) {t.Fatal("production startup changed neural state during anchored recovery")}
-	if err:=next.Supervisor.With(func(rt *runtime.BrainRuntime)error{
+	if err:=next.Supervisor().With(func(rt *runtime.BrainRuntime)error{
 		if rt.LastSequence()!=1 {t.Fatalf("restart sequence %d",rt.LastSequence())}
 		return nil
 	});err!=nil {t.Fatal(err)}
 
 	// Check both production adapters share the supervisor's active neural
 	// runtime without storing the old pointer.
-	monitor,err:=bridge.NewManaged(next.Supervisor,bridge.Config{})
+	monitor,err:=bridge.NewManaged(next.Supervisor(),bridge.Config{})
 	if err!=nil || monitor==nil {t.Fatalf("managed HTTP Bridge not initialized: %v",err)}
-	service,err:=runtime.NewManagedContinuousService(next.Supervisor,time.Hour,1)
+	service,err:=runtime.NewManagedContinuousService(next.Supervisor(),time.Hour,1)
 	if err!=nil {t.Fatal(err)}
 	ctx,cancel:=context.WithCancel(context.Background())
 	defer cancel()
@@ -82,7 +76,7 @@ func TestProductionStartupAnchorsNewBrainBeforeObservationAndRecoversIt(t *testi
 		cancel()
 	})
 	if !errors.Is(err,context.Canceled) {t.Fatalf("managed service exit: %v",err)}
-	if err:=next.Supervisor.With(func(rt *runtime.BrainRuntime)error{
+	if err:=next.Supervisor().With(func(rt *runtime.BrainRuntime)error{
 		if rt.LastSequence()!=2 {t.Fatalf("managed cognition did not advance restarted brain: %d",rt.LastSequence())}
 		return nil
 	});err!=nil {t.Fatal(err)}
@@ -131,26 +125,26 @@ func TestProductionStartupResumesInterruptedFirstBootstrap(t *testing.T) {
 	if err!=nil || !needsBootstrap {t.Fatalf("fresh startup: bootstrap=%t err=%v",needsBootstrap,err)}
 	// Simulate a crash after the sequence-zero checkpoint but before the
 	// initial bootstrap event or standalone brain-memory file is written.
-	if err:=first.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=first.Supervisor().Close();err!=nil {t.Fatal(err)}
 	if err:=log.Close();err!=nil {t.Fatal(err)}
 	reopened:=newStartupJournal(t,journal)
 	second,needsBootstrap,err:=initializeProductionHorizon(reopened,journal,memory,checkpoint)
 	if err!=nil || !needsBootstrap {
 		t.Fatalf("sequence-zero checkpoint prematurely suppressed bootstrap: bootstrap=%t err=%v",needsBootstrap,err)
 	}
-	if err:=second.Supervisor.WithMutation(func(rt *runtime.BrainRuntime)error{
+	if err:=second.Supervisor().WithMutation(func(rt *runtime.BrainRuntime)error{
 		if rt.LastSequence()!=0 {t.Fatalf("empty checkpoint restarted at sequence %d",rt.LastSequence())}
 		_,err:=rt.CognitiveProcess(runtime.Event{ID:"bootstrap",Stimulus:[]string{"restarted"},Cycles:1,Timestamp:time.Date(2026,10,18,13,0,0,0,time.UTC)})
 		if err!=nil{return err}
 		if err:=rt.SaveBrain(memory);err!=nil{return err}
 		return rt.Checkpoint(checkpoint)
 	});err!=nil {t.Fatal(err)}
-	if err:=second.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=second.Supervisor().Close();err!=nil {t.Fatal(err)}
 	if err:=reopened.Close();err!=nil {t.Fatal(err)}
 	thirdLog:=newStartupJournal(t,journal)
 	third,needsBootstrap,err:=initializeProductionHorizon(thirdLog,journal,memory,checkpoint)
 	if err!=nil || needsBootstrap {t.Fatalf("bootstrapped restart reinitialized: bootstrap=%t err=%v",needsBootstrap,err)}
-	if err:=third.Supervisor.With(func(rt *runtime.BrainRuntime)error{
+	if err:=third.Supervisor().With(func(rt *runtime.BrainRuntime)error{
 		if rt.LastSequence()!=1 {t.Fatalf("bootstrap event duplicated or lost: sequence %d",rt.LastSequence())}
 		return nil
 	});err!=nil {t.Fatal(err)}
@@ -169,7 +163,7 @@ func TestProductionStartupLegacyMemoryOnlyIsAnchoredAndRestartable(t *testing.T)
 	if err!=nil {t.Fatal(err)}
 	if boot {t.Fatal("memory-only migration must not rerun bootstrap")}
 	anchored:=getActiveStartupState(t,h)
-	if err:=h.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=h.Supervisor().Close();err!=nil {t.Fatal(err)}
 	if err:=log.Close();err!=nil {t.Fatal(err)}
 	reopened:=newStartupJournal(t,journal)
 	recovered,boot,err:=initializeProductionHorizon(reopened,journal,memory,checkpoint)

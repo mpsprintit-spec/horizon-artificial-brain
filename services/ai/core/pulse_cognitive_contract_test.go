@@ -8,7 +8,6 @@ import (
 
 func TestPulseReturnsTypedCognitiveContract(t *testing.T) {
 	h := NewHorizonEngine()
-	h.Knowledge.Store("air")
 
 	result, err := h.Pulse("air")
 	if err != nil {

@@ -25,15 +25,17 @@ published through `RuntimeSupervisor`. Inspection must not export a mutable
 
 ## Forbidden production patterns
 
-Production Bridge, startup, and CLI code must not invoke
-`WithActiveBrain` or `WithBrainView` to inspect live neurons. They also
-must not cache `HorizonEngine.Knowledge` or `HorizonEngine.Runtime`.
-`inspection_architecture_test.go` guards these source boundaries.
+Production Bridge, startup, and CLI code use the private facade owner's
+`Supervisor()` handle and detached inspection. `HorizonEngine` no longer
+exports raw Knowledge, Runtime, Learning, Thinking, Language or Orchestrator
+fields. The deprecated mutable callbacks are refused on managed/journaled
+runtimes, and managed `DNF()` cannot expose a mutable Fabric/Brain.
+`inspection_architecture_test.go` guards production source boundaries.
 
-These legacy public APIs still exist for compatibility, and are **not**
-security boundaries. External applications holding raw pointers can still
-mutate the canonical Brain. A later explicit breaking API migration would be
-needed to remove these aliases and enforce complete process-wide ownership.
+See [MANAGED_OWNERSHIP.md](MANAGED_OWNERSHIP.md) for the explicit source migration,
+single runtime/owner claims, supported API lifetime and standalone compatibility
+limits. Arbitrary pointers retained by an external standalone caller remain
+outside the managed contract; they must be discarded before managed use.
 
 ## Performance and lifetime
 
@@ -74,4 +76,4 @@ The automated regression suite exercises defensive copies, lexical
 annotation separation, numerical statistics equivalence, checkpoint
 handover, closed-supervisor fail-closed behavior, and CLI hot-path
 allocation limits. This is a narrower claim than perfect encapsulation:
-the existing legacy aliases remain explicitly untrusted.
+standalone legacy raw pointers remain explicitly untrusted.

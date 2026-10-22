@@ -31,3 +31,5 @@ For a remote GitHub Pages monitor, run the Bridge behind HTTPS/WSS. The runtime 
 The browser sends camera and microphone measurements through typed numeric sensor fields. Other adapters can use `ObservationEnvelope`. Camera/microphone access requires a secure browser context and explicit user permission. The Bridge persists the canonical brain to `HORIZON_BRAIN_MEMORY_PATH` and the runtime event log to `HORIZON_EVENT_LOG_PATH`.
 
 The runtime's complete observation/inquiry transactions, checkpoint v7 and historical recovery limits are documented in [COGNITIVE_JOURNAL.md](runtime/COGNITIVE_JOURNAL.md).
+
+The managed facade uses `Supervisor()` and detached inspection rather than exported neural aliases. See [MANAGED_OWNERSHIP.md](runtime/MANAGED_OWNERSHIP.md) for the API migration and lifetime contract.

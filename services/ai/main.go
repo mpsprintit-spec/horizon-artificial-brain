@@ -61,7 +61,7 @@ func main() {
 		}
 		stimulus := signalStimulus(signals)
 		stimulusCount = len(stimulus)
-		err = horizon.Supervisor.WithMutation(func(active *runtime.BrainRuntime) error {
+		err = horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
 			var processErr error
 			output, processErr = active.CognitiveProcess(runtime.Event{
 				ID: "bootstrap", Stimulus: stimulus, Cycles: 8, Timestamp: time.Now().UTC(),
@@ -71,7 +71,7 @@ func main() {
 			return active.Checkpoint(checkpointPath)
 		})
 	} else {
-		err = horizon.Supervisor.With(func(active *runtime.BrainRuntime) error {
+		err = horizon.Supervisor().With(func(active *runtime.BrainRuntime) error {
 			output = runtime.CognitiveOutput{
 				BrainIdentity: runtime.BrainIdentity,
 				Sequence: active.LastSequence(),
@@ -85,7 +85,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	service, err := runtime.NewManagedContinuousService(horizon.Supervisor, cfg.CognitiveInterval, 1)
+	service, err := runtime.NewManagedContinuousService(horizon.Supervisor(), cfg.CognitiveInterval, 1)
 	if err != nil {
 		logger.Error("failed to initialize managed cognitive service", "error", err)
 		os.Exit(1)
@@ -99,7 +99,7 @@ func main() {
 	if len(bridgeOrigins) == 0 {
 		bridgeOrigins = []string{"https://mpsprintit-spec.github.io", "http://localhost:8080"}
 	}
-	monitorBridge, err := bridge.NewManaged(horizon.Supervisor, bridge.Config{
+	monitorBridge, err := bridge.NewManaged(horizon.Supervisor(), bridge.Config{
 		AllowedOrigins: bridgeOrigins,
 		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
 		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
@@ -155,7 +155,7 @@ func main() {
 		// The callback is outside the service's lease. Acquire a fresh
 		// exclusive lease so a checkpoint and memory file always refer to
 		// the current canonical runtime, even after an atomic handover.
-		if saveErr := horizon.Supervisor.WithMutation(func(active *runtime.BrainRuntime) error {
+		if saveErr := horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
 			if err := active.SaveBrain(brainMemoryPath); err != nil { return err }
 			return active.Checkpoint(checkpointPath)
 		}); saveErr != nil {

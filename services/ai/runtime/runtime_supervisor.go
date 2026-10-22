@@ -8,6 +8,8 @@ import (
 
 // ErrRuntimeSupervisorClosed means the managed brain has been retired.
 var ErrRuntimeSupervisorClosed = errors.New("runtime supervisor is closed")
+var ErrRuntimeAlreadyOwned = errors.New("runtime already has a supervisor owner")
+var ErrManagedRuntimeAccess = errors.New("operation is restricted to a standalone runtime; use the active supervisor and detached inspection")
 
 // RuntimeSupervisor is the single publication boundary for a canonical
 // BrainRuntime. All managed callers must access the runtime only inside With.
@@ -30,9 +32,15 @@ func NewRuntimeSupervisor(initial *BrainRuntime) (*RuntimeSupervisor, error) {
 	if initial == nil || initial.brain == nil {
 		return nil, errors.New("runtime supervisor requires a canonical brain runtime")
 	}
-	if initial.RecoveryRequired() {
-		return nil, ErrRuntimeRecoveryRequired
+	initial.mu.Lock()
+	defer initial.mu.Unlock()
+	if err := initial.ensureWritableLocked(); err != nil {
+		return nil, err
 	}
+	if initial.supervised {
+		return nil, ErrRuntimeAlreadyOwned
+	}
+	initial.supervised = true
 	markSupervisorOwnedBrain(initial.brain)
 	return &RuntimeSupervisor{current: initial, epoch: make(chan struct{})}, nil
 }
@@ -110,7 +118,8 @@ func (s *RuntimeSupervisor) RecoverFromCheckpoint(log *EventLog, checkpointPath 
 	old.markRecoveryRequiredLocked()
 	old.eventLog = nil
 
-	recovered.SetEventLog(log)
+	recovered.eventLog = log
+	recovered.supervised = true
 	markSupervisorOwnedBrain(recovered.brain)
 	s.current = recovered
 	close(s.epoch)

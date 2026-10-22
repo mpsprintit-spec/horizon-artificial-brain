@@ -56,7 +56,6 @@ func TestPulseUsesCanonicalNeuralRuntimeByDefault(t *testing.T) {
 
 func TestPulseDoesNotRequireLegacyThinkingEngine(t *testing.T) {
 	h := NewHorizonEngine()
-	h.Thinking = nil
 	result, err := h.Pulse("uji jalur neural")
 	if err != nil {
 		t.Fatalf("Pulse should not depend on legacy ThinkingEngine: %v", err)

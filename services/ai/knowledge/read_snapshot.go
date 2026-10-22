@@ -16,6 +16,7 @@ type NeuralUnitRead struct {
 	Activation float64
 	Frequency int64
 	Plasticity float64
+	Importance float64
 }
 
 type SynapseRead struct {
@@ -139,7 +140,7 @@ func (k *KnowledgeBase) InspectReadOnly() (BrainReadSnapshot,error) {
 	for _,unit:=range decoded.NeuralUnits {
 		out.units=append(out.units,NeuralUnitRead{
 			ID:unit.ID,Representation:append([]float64(nil),unit.Representation...),
-			Activation:unit.Activation,Frequency:unit.Frequency,Plasticity:unit.Plasticity,
+			Activation:unit.Activation,Frequency:unit.Frequency,Plasticity:unit.Plasticity,Importance:unit.Importance,
 		})
 	}
 	sort.Slice(out.units,func(i,j int)bool{return out.units[i].ID<out.units[j].ID})

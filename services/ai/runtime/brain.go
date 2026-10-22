@@ -91,6 +91,9 @@ type BrainRuntime struct {
 	sensorMu sync.Mutex
 	// Set when a sensor journal operation may have left an incomplete write.
 	recoveryRequired bool
+	// Monotonic ownership claim. Managed runtime lifetime and journal binding
+	// can only be changed by its supervisor, not by cached runtime references.
+	supervised bool
 	seq uint64
 	lastCognitiveState CognitiveState
 	lastObservationPopulation []knowledge.NodeID
@@ -102,6 +105,7 @@ type BrainRuntime struct {
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBootstrapBrain() }
+	if !brain.BindRuntime() { return nil }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
 	return &BrainRuntime{brain: brain, dnf: fabric, activation: activation.NewEngine(brain), learning: learning.NewLearningUnit(brain), promotion: learning.NewPromotionEngine(brain, learning.DefaultLearningPolicy()), evidence: learning.NewEvidenceLedger(), actions: make(map[string]ActionBinding), inquiryValence: make(map[InquiryAction]float64), clock: WallClock{}, telemetry: NewTelemetryHub(256), processedEvents: make(map[string]uint64)}
@@ -181,6 +185,7 @@ func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return err }
+	if r.supervised { return ErrManagedRuntimeAccess }
 	if r.eventLog != nil { return errors.New("cannot restore event index while journal writer is attached") }
 	if r.seq != 0 { return errors.New("cannot restore event index into a nonempty runtime") }
 	index := make(map[string]uint64)
@@ -203,7 +208,20 @@ func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
 	return nil
 }
 
-func (r *BrainRuntime) DNF() *dnf.Fabric { if r == nil { return nil }; return r.dnf }
+// DNF is a legacy standalone escape hatch. Managed and journaled runtimes
+// expose detached inspection instead of a Fabric with a mutable Brain pointer.
+func (r *BrainRuntime) DNF() *dnf.Fabric {
+	if r == nil {
+		return nil
+	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if r.ensureWritableLocked() != nil || r.supervised || r.eventLog != nil {
+		return nil
+	}
+	return r.dnf
+}
+
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) {
 	if r == nil || r.brain == nil { return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized") }
 	r.mu.Lock()
@@ -264,10 +282,10 @@ func (r *BrainRuntime) actionBinding(requestID string) (ActionBinding, bool) { i
 func (r *BrainRuntime) SetClock(clock Clock) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.recoveryRequired { return }; if clock == nil { r.clock = WallClock{} } else { r.clock = clock } }
 func (r *BrainRuntime) nowLocked() time.Time { if r.clock == nil { r.clock = WallClock{} }; now := r.clock.Now(); if now.IsZero() { now = time.Now().UTC() }; return now.UTC() }
 func (r *BrainRuntime) now() time.Time { if r == nil { return time.Now().UTC() }; r.mu.Lock(); defer r.mu.Unlock(); return r.nowLocked() }
-// SetEventLog is retained for existing callers. It never reattaches a
-// journal to a retired or poisoned runtime. New integrations should bind
-// journals through the owning supervisor at startup/recovery boundaries.
-func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.recoveryRequired { return }; r.eventLog = log }
+// SetEventLog is retained for standalone callers. It never changes the writer
+// of a managed, retired or poisoned runtime. Managed integrations use the
+// owner's AttachEventLog or verified recovery.
+func (r *BrainRuntime) SetEventLog(log *EventLog) { if r == nil { return }; r.mu.Lock(); defer r.mu.Unlock(); if r.recoveryRequired || r.supervised { return }; r.eventLog = log }
 // HasProcessedEvent reports whether an event ID is already in the durable runtime index.
 // It is used by adapters to reject duplicate samples before they mutate the neural substrate.
 func (r *BrainRuntime) HasProcessedEvent(id string) bool {

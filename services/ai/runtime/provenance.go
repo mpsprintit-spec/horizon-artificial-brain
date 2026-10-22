@@ -56,9 +56,11 @@ func (r *BrainRuntime) VerifyKnowledgeClaim(claim KnowledgeClaim, evidence learn
 	if claim.NodeID == 0 {
 		return claim, learning.PromotionCandidate, errors.New("knowledge claim node ID is required")
 	}
-	if at.IsZero() {
-		at = r.now()
-	}
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil { return claim, learning.PromotionCandidate, err }
+	if r.eventLog != nil { return claim, learning.PromotionCandidate, errors.New("direct claim promotion is not journaled; use ObserveOutcome with an explicit binding") }
+	if at.IsZero() { at = r.nowLocked() }
 	decision, err := r.promotion.Apply(claim.NodeID, evidence, at)
 	if err != nil {
 		return claim, decision, err

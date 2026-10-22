@@ -1,19 +1,26 @@
 package core
 
-import "testing"
+import (
+	"github.com/project-horizon/horizon-core/services/ai/runtime"
+	"testing"
+)
 
 func TestHorizonEngineUsesSingleBrainRuntime(t *testing.T) {
 	h := NewHorizonEngine()
-	if h == nil || h.Runtime == nil {
-		t.Fatal("expected brain runtime")
+	if h == nil || h.Supervisor() == nil {
+		t.Fatal("expected supervised brain runtime")
 	}
-	if h.Knowledge == nil {
-		t.Fatal("expected engine brain reference")
+	owner := h.Supervisor()
+	if owner != h.Supervisor() {
+		t.Fatal("facade replaced its owner handle")
 	}
-	if h.Learning == nil || h.Learning.Kb != h.Knowledge {
-		t.Fatal("learning must operate on the same persistent brain")
+	before := inspectForTest(t, h)
+	output, err := h.ThinkActive(1)
+	if err != nil {
+		t.Fatal(err)
 	}
-	if h.Thinking == nil || h.Thinking.Activation == nil || h.Thinking.Activation.Memory != h.Knowledge {
-		t.Fatal("thinking activation must operate on the same persistent brain during migration")
+	after := inspectForTest(t, h)
+	if output.BrainIdentity != runtime.BrainIdentity || after.Revision != before.Revision+1 {
+		t.Fatal("facade thought did not advance the inspected canonical runtime")
 	}
 }

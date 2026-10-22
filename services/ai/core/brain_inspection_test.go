@@ -8,17 +8,18 @@ import (
 	"time"
 	"testing"
 
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 func TestActiveReadSnapshotFollowsHandoverAndOldSnapshotRemainsStable(t *testing.T) {
 	h:=NewHorizonEngine()
-	if h==nil || h.Supervisor==nil {t.Fatal("canonical supervised brain not initialized")}
+	if h==nil || h.Supervisor()==nil {t.Fatal("canonical supervised brain not initialized")}
 	log,err:=runtime.OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
 	if err!=nil {t.Fatal(err)}
 	defer log.Close()
-	legacy:=h.Runtime
-	legacy.SetEventLog(log)
+	legacy:=runtimeForTest(t,h)
+	attachJournalForTest(t,h,log)
 	if _,err:=h.Pulse("cahaya dan foton");err!=nil {t.Fatal(err)}
 	before,err:=h.InspectActiveBrain()
 	if err!=nil {t.Fatal(err)}
@@ -27,7 +28,7 @@ func TestActiveReadSnapshotFollowsHandoverAndOldSnapshotRemainsStable(t *testing
 	if len(neuralBefore)==0 {t.Fatal("empty neural snapshot")}
 	checkpoint:=filepath.Join(t.TempDir(),"checkpoint.json")
 	if err:=legacy.Checkpoint(checkpoint);err!=nil {t.Fatal(err)}
-	if err:=h.Supervisor.RecoverFromCheckpoint(log,checkpoint);err!=nil {t.Fatal(err)}
+	if err:=h.Supervisor().RecoverFromCheckpoint(log,checkpoint);err!=nil {t.Fatal(err)}
 	after,err:=h.InspectActiveBrain()
 	if err!=nil {t.Fatal(err)}
 	if after.Revision!=1 || !bytes.Equal(neuralBefore,after.Graph.CanonicalBytes()) {
@@ -43,7 +44,7 @@ func TestActiveReadSnapshotFollowsHandoverAndOldSnapshotRemainsStable(t *testing
 	if !bytes.Equal(before.Graph.CanonicalBytes(),neuralBefore) {
 		t.Fatal("previous neural inspection snapshot changed during handover")
 	}
-	if err:=h.Supervisor.Close();err!=nil {t.Fatal(err)}
+	if err:=h.Supervisor().Close();err!=nil {t.Fatal(err)}
 	if _,err:=h.InspectActiveBrain();!errors.Is(err,runtime.ErrRuntimeSupervisorClosed) {
 		t.Fatalf("retired engine exposed neural snapshot: %v",err)
 	}
@@ -64,12 +65,20 @@ func TestReadSnapshotAccessDoesNotAdvanceNeuralRuntime(t *testing.T) {
 }
 
 func TestConcurrentSnapshotsAndCheckpointHandoverDoNotExposeRetiredBrain(t *testing.T) {
-	h:=NewHorizonEngine()
+	// Exercise the ownership locks with a small nonempty graph. Repeatedly
+	// copying the full developmental bootstrap makes the deadlock deadline
+	// depend on race-instrumented serialization throughput on the test host.
+	brain:=knowledge.NewBrain()
+	if _,err:=brain.GroundVectorAt(knowledge.NewNeuralVector([]float64{.2,.8}),time.Unix(100,0).UTC());err!=nil {t.Fatal(err)}
+	r:=runtime.NewBrainRuntime(brain)
+	owner,err:=runtime.NewRuntimeSupervisor(r)
+	if err!=nil {t.Fatal(err)}
+	h:=&HorizonEngine{supervisor:owner}
 	log,err:=runtime.OpenEventLog(filepath.Join(t.TempDir(),"events.jsonl"))
 	if err!=nil {t.Fatal(err)}
 	defer log.Close()
-	old:=h.Runtime
-	old.SetEventLog(log)
+	old:=runtimeForTest(t,h)
+	attachJournalForTest(t,h,log)
 	checkpoint:=filepath.Join(t.TempDir(),"checkpoint.json")
 	if err:=old.Checkpoint(checkpoint);err!=nil {t.Fatal(err)}
 	initial,err:=h.InspectActiveBrain()
@@ -98,15 +107,12 @@ func TestConcurrentSnapshotsAndCheckpointHandoverDoNotExposeRetiredBrain(t *test
 	}
 	go func() {
 		close(start)
-		if err:=h.Supervisor.RecoverFromCheckpoint(log,checkpoint);err!=nil {errorsCh<-err}
+		if err:=h.Supervisor().RecoverFromCheckpoint(log,checkpoint);err!=nil {errorsCh<-err}
 		wg.Wait()
 		close(finished)
 	}()
 	select {
 	case <-finished:
-	// The race detector instruments 96 full graph copies serialized by the
-	// runtime lock. Allow that work to finish on slower CI hosts while still
-	// bounding an actual handover deadlock.
 	case <-time.After(30*time.Second):
 		t.Fatal("concurrent read snapshots deadlocked checkpoint handover")
 	}

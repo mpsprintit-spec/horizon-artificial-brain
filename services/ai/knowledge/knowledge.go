@@ -166,6 +166,7 @@ type KnowledgeBase struct {
 	// An atomic flag lives WITH the substrate rather than a global map,
 	// so retired brains remain guarded without leaking all old pointers.
 	runtimeOwned atomic.Bool
+	runtimeBound atomic.Bool
 	Registry              *NeuralRegistry
 	Patterns              *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
@@ -184,6 +185,13 @@ func (k *KnowledgeBase) MarkRuntimeOwned() {
 
 func (k *KnowledgeBase) RuntimeOwned() bool {
 	return k != nil && k.runtimeOwned.Load()
+}
+
+// BindRuntime admits exactly one runtime for this in-memory substrate. The
+// claim is monotonic and is not serialized: recovery uses a fresh Brain whose
+// persisted neural identity/state is restored before publication.
+func (k *KnowledgeBase) BindRuntime() bool {
+	return k != nil && !k.RuntimeOwned() && k.runtimeBound.CompareAndSwap(false, true)
 }
 
 // Lock serializes mutations to the canonical neural substrate.
