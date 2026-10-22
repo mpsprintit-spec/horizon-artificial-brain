@@ -13,8 +13,7 @@ import (
 
 	"github.com/project-horizon/horizon-core/services/ai/bridge"
 	"github.com/project-horizon/horizon-core/services/ai/config"
-	"github.com/project-horizon/horizon-core/services/ai/core"
-	"github.com/project-horizon/horizon-core/services/ai/runtime"
+		"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 func main() {
@@ -29,56 +28,68 @@ func main() {
 	// BrainRuntime is the single cognitive authority for the production
 	// executable. Cluster remains available as a legacy sensor/decision
 	// compatibility component, but it is not invoked as the brain here.
-	horizon := core.NewHorizonEngine()
 	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
 	if brainMemoryPath == "" { brainMemoryPath = "brain_memory.json" }
-	loadedBrain := false
 	eventLogPath := strings.TrimSpace(os.Getenv("HORIZON_EVENT_LOG_PATH"))
 	if eventLogPath == "" { eventLogPath = "horizon_events.jsonl" }
-	if _, statErr := os.Stat(brainMemoryPath); statErr == nil {
-		loadedBrain = true
-		if err := horizon.Runtime.LoadBrain(brainMemoryPath); err != nil {
-			logger.Error("failed to load canonical brain memory", "path", brainMemoryPath, "error", err)
-			os.Exit(1)
-		}
-	}
+	checkpointPath := strings.TrimSpace(os.Getenv("HORIZON_CHECKPOINT_PATH"))
+	if checkpointPath == "" { checkpointPath = brainMemoryPath + ".checkpoint.json" }
+
 	eventLog, err := runtime.OpenEventLog(eventLogPath)
-	if err != nil { logger.Error("failed to open brain event log", "path", eventLogPath, "error", err); os.Exit(1) }
-	defer eventLog.Close()
-	horizon.Runtime.SetEventLog(eventLog)
-	events, readErr := runtime.ReadEventLog(eventLogPath)
-	if readErr != nil && strings.Contains(readErr.Error(), "conflicting duplicate event sequence") {
-		backupPath, repairErr := eventLog.RepairConflictingSequences()
-		if repairErr != nil {
-			logger.Error("failed to safely recover brain event log", "error", repairErr)
-			os.Exit(1)
-		}
-		logger.Warn("recovered conflicting brain event log; original preserved", "backup", backupPath)
-		events, readErr = runtime.ReadEventLog(eventLogPath)
+	if err != nil {
+		logger.Error("failed to lock canonical brain event journal", "path", eventLogPath, "error", err)
+		os.Exit(1)
 	}
-	if readErr == nil && len(events) > 0 {
-		if err := horizon.Runtime.RestoreEventIndex(events); err != nil { logger.Error("failed to restore event index", "error", err); os.Exit(1) }
-	} else if readErr != nil && !os.IsNotExist(readErr) {
-		logger.Error("failed to read brain event log", "error", readErr); os.Exit(1)
+	defer eventLog.Close()
+
+	// The production brain is reconstructed and anchored BEFORE any
+	// asynchronous service starts accepting observations or cognitive work.
+	horizon, loadedBrain, err := initializeProductionHorizon(eventLog, eventLogPath, brainMemoryPath, checkpointPath)
+	if err != nil {
+		logger.Error("canonical brain startup refused", "error", err)
+		os.Exit(1)
 	}
 	var output runtime.CognitiveOutput
-	var bootstrapErr error
 	stimulusCount := 0
 	if !loadedBrain {
 		signals := bootstrapSignals()
 		for _, signal := range signals {
-			if err := signal.Validate(); err != nil { logger.Error("invalid bootstrap signal", "error", err); os.Exit(1) }
+			if err := signal.Validate(); err != nil {
+				logger.Error("invalid bootstrap signal", "error", err)
+				os.Exit(1)
+			}
 		}
 		stimulus := signalStimulus(signals)
 		stimulusCount = len(stimulus)
-		output, bootstrapErr = horizon.Runtime.CognitiveProcess(runtime.Event{ID:"bootstrap", Stimulus:stimulus, Cycles:8, Timestamp:time.Now().UTC()})
-		if bootstrapErr == nil { bootstrapErr = horizon.Runtime.SaveBrain(brainMemoryPath) }
+		err = horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
+			var processErr error
+			output, processErr = active.CognitiveProcess(runtime.Event{
+				ID: "bootstrap", Stimulus: stimulus, Cycles: 8, Timestamp: time.Now().UTC(),
+			})
+			if processErr != nil { return processErr }
+			if processErr = active.SaveBrain(brainMemoryPath); processErr != nil { return processErr }
+			return active.Checkpoint(checkpointPath)
+		})
 	} else {
-		output = runtime.CognitiveOutput{BrainIdentity: runtime.BrainIdentity, Sequence: horizon.Runtime.LastSequence(), Timestamp: time.Now().UTC()}
+		err = horizon.Supervisor().With(func(active *runtime.BrainRuntime) error {
+			output = runtime.CognitiveOutput{
+				BrainIdentity: runtime.BrainIdentity,
+				Sequence: active.LastSequence(),
+				Timestamp: time.Now().UTC(),
+			}
+			return nil
+		})
 	}
-	if bootstrapErr != nil { logger.Error("Horizon brain initialization failed", "error", bootstrapErr); os.Exit(1) }
+	if err != nil {
+		logger.Error("Horizon brain initialization failed", "error", err)
+		os.Exit(1)
+	}
 
-	service := runtime.NewContinuousService(horizon.Runtime, cfg.CognitiveInterval, 1)
+	service, err := runtime.NewManagedContinuousService(horizon.Supervisor(), cfg.CognitiveInterval, 1)
+	if err != nil {
+		logger.Error("failed to initialize managed cognitive service", "error", err)
+		os.Exit(1)
+	}
 
 	bridgeAddress := strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_ADDRESS"))
 	if bridgeAddress == "" {
@@ -88,7 +99,7 @@ func main() {
 	if len(bridgeOrigins) == 0 {
 		bridgeOrigins = []string{"https://mpsprintit-spec.github.io", "http://localhost:8080"}
 	}
-	monitorBridge, err := bridge.New(horizon.Runtime, bridge.Config{
+	monitorBridge, err := bridge.NewManaged(horizon.Supervisor(), bridge.Config{
 		AllowedOrigins: bridgeOrigins,
 		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
 		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
@@ -141,7 +152,15 @@ func main() {
 			logger.Error("continuous cognition cycle failed", "error", err)
 			return
 		}
-		if saveErr := horizon.Runtime.SaveBrain(brainMemoryPath); saveErr != nil { logger.Error("brain persistence failed", "error", saveErr) }
+		// The callback is outside the service's lease. Acquire a fresh
+		// exclusive lease so a checkpoint and memory file always refer to
+		// the current canonical runtime, even after an atomic handover.
+		if saveErr := horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
+			if err := active.SaveBrain(brainMemoryPath); err != nil { return err }
+			return active.Checkpoint(checkpointPath)
+		}); saveErr != nil {
+			logger.Error("canonical brain persistence failed", "error", saveErr)
+		}
 		logger.Info(
 			"Horizon cognitive cycle",
 			"sequence", output.Sequence,

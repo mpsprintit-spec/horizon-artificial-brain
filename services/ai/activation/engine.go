@@ -15,9 +15,18 @@ type Engine struct {
 	mu sync.RWMutex
 	internalState, internalConfidence map[knowledge.NodeID]float64
 	lastPrediction, lastPredictionConf map[knowledge.NodeID]float64
+	lastTrace *knowledge.ObservationTrace
+	contextState *ContextState
+	observationPrediction *ObservationPrediction
 }
 
 type Request struct {
+	EpisodeID string
+	ResetContext bool
+	CarryPreviousContext bool
+	DynamicsEncoding *knowledge.DynamicsEncoding
+	NeuralTrace *knowledge.ObservationTrace
+	SurfaceEncoding *knowledge.SurfaceEncoding
 	StimulusTokens []string
 	StimulusNodeIDs []knowledge.NodeID
 	ContextBoosts map[knowledge.NodeID]float64
@@ -25,7 +34,7 @@ type Request struct {
 	Cycles int
 	Now time.Time
 }
-type Result struct { Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode; PredictionError float64 }
+type Result struct { ObservedInput bool `json:"-"`; Converged bool; Resonance float64; Activations map[knowledge.NodeID]float64; Confidence map[knowledge.NodeID]float64; RankedNodes []*knowledge.ConceptNode; PredictionError float64 }
 type Prediction struct { State, Confidence map[knowledge.NodeID]float64 }
 type ThoughtResult struct { Result; Prediction Prediction; PredictionError float64 }
 
@@ -35,6 +44,16 @@ func (e *Engine) Think(cycles int) Result { return e.ThinkWithPrediction(cycles)
 func (e *Engine) ThinkWithPrediction(cycles int) ThoughtResult { return e.ThinkWithPredictionAt(cycles,time.Now().UTC()) }
 
 func (e *Engine) ActivateWith(req Request) Result {
+	if req.DynamicsEncoding == nil || !req.DynamicsEncoding.HasObservedFeedback() {
+		e.mu.Lock()
+		e.observationPrediction = nil
+		e.mu.Unlock()
+	}
+	if req.DynamicsEncoding == nil || *req.DynamicsEncoding == knowledge.LegacyDynamics { return e.activateLegacyWith(req) }
+	return e.activateOrderedWith(req)
+}
+
+func (e *Engine) activateLegacyWith(req Request) Result {
 	if req.Cycles<1 { req.Cycles=1 }; if req.Now.IsZero(){req.Now=time.Now().UTC()}
 	e.mu.RLock(); previousPrediction:=cloneState(e.lastPrediction); e.mu.RUnlock()
 	if req.PredictionOverride != nil {
@@ -66,7 +85,9 @@ func (e *Engine) ActivateWith(req Request) Result {
 		// boundary, not directly through population projection. Direct projection
 		// creates valid neural units but does not register the surface annotation
 		// needed to realize the neural state back into language.
-		grounded, err := e.Memory.GroundObservationAt(canonical, "activation", "language", e.Threshold, req.Now)
+		encoding := knowledge.WrittenTextEncoding
+		if req.SurfaceEncoding != nil { encoding = *req.SurfaceEncoding }
+		grounded, err := e.Memory.GroundObservationWithEncodingAt(canonical, "activation", "language", e.Threshold, req.Now, encoding)
 		if err != nil { continue }
 		vector := knowledge.EncodeObservation(canonical, "language")
 		for _, nodeID := range grounded.Population {
@@ -80,11 +101,13 @@ func (e *Engine) ActivateWith(req Request) Result {
 	}
 	for id,b:=range req.ContextBoosts { state[id]+=b; conf[id]=max(conf[id],b) }
 	state=normalize(state); pre:=cloneState(state); state,conf=e.advance(state,conf,req.Now,req.Cycles); result:=e.converge(state,conf,req.Now)
-	e.ApplyActivityPlasticity(pre,result.Activations,req.Now)
+	dynamics := knowledge.LegacyDynamics
+	if req.DynamicsEncoding != nil { dynamics = *req.DynamicsEncoding }
+	e.ApplyActivityPlasticityWithDynamics(pre,result.Activations,req.Now,dynamics)
 	predictionError:=0.0
 	if len(previousPrediction)>0 {
 		predictionError=stateDifference(previousPrediction,result.Activations)
-		e.ApplyPredictionErrorPlasticity(previousPrediction,result.Activations,predictionError,req.Now)
+		e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction,result.Activations,predictionError,req.Now,dynamics)
 		e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction,result.Activations,predictionError,0.20,req.Now)
 	}
 	e.Memory.UpdateInformationDynamics(previousPrediction,result.Activations,predictionError,req.Now)
@@ -114,7 +137,7 @@ func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.Nod
 		// discard population members and make an otherwise learned outcome
 		// disappear from future prediction.
 		for _, pattern := range matches {
-			if pattern==nil || len(pattern.Sequence)==0 || pattern.Result==id { continue }
+			if pattern==nil || pattern.Dynamics!=knowledge.LegacyDynamics || len(pattern.Sequence)==0 || pattern.Result==id { continue }
 			strength:=clamp01(pattern.Weight)*clamp01(pattern.Confidence)
 			// Frequency ranks repeated evidence but must not suppress a newly
 			// learned causal trace. A first observation is already valid

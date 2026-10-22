@@ -1,12 +1,14 @@
 package knowledge
 
 import (
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -141,6 +143,8 @@ type InquiryState struct {
 }
 
 type BrainState struct {
+	MemoryDecay *MemoryDecayState `json:"memory_decay,omitempty"`
+	SensoryTraces []SensoryExperienceTrace `json:"sensory_traces,omitempty"`
 	AttentionState map[string]float64 `json:"attention_state,omitempty"`
 	CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`
 	PredictionState map[string]float64 `json:"prediction_state,omitempty"`
@@ -158,6 +162,12 @@ type BrainState struct {
 }
 
 type KnowledgeBase struct {
+	// Ownership is a monotonic, non-serialized guard against legacy
+	// adapters mutating the canonical brain after a runtime handover.
+	// An atomic flag lives WITH the substrate rather than a global map,
+	// so retired brains remain guarded without leaking all old pointers.
+	runtimeOwned atomic.Bool
+	runtimeBound atomic.Bool
 	Registry              *NeuralRegistry
 	Patterns              *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
@@ -166,6 +176,23 @@ type KnowledgeBase struct {
 	projectionMu          sync.RWMutex
 	annotationMu          sync.RWMutex
 	mu                    sync.RWMutex
+}
+
+// MarkRuntimeOwned prevents legacy GroundingIntegration from bypassing the
+// runtime owner. This flag cannot be cleared, including after a handover.
+func (k *KnowledgeBase) MarkRuntimeOwned() {
+	if k != nil { k.runtimeOwned.Store(true) }
+}
+
+func (k *KnowledgeBase) RuntimeOwned() bool {
+	return k != nil && k.runtimeOwned.Load()
+}
+
+// BindRuntime admits exactly one runtime for this in-memory substrate. The
+// claim is monotonic and is not serialized: recovery uses a fresh Brain whose
+// persisted neural identity/state is restored before publication.
+func (k *KnowledgeBase) BindRuntime() bool {
+	return k != nil && !k.RuntimeOwned() && k.runtimeBound.CompareAndSwap(false, true)
 }
 
 // Lock serializes mutations to the canonical neural substrate.
@@ -265,7 +292,7 @@ func (k *KnowledgeBase) SurfaceForNode(id NodeID, modality string) string {
 	best := ""
 	var bestSeen time.Time
 	for _, annotation := range k.SurfaceAnnotations {
-		if modality != "" && annotation.Modality != modality { continue }
+		if modality != "" && CanonicalSurfaceModality(annotation.Modality) != CanonicalSurfaceModality(modality) { continue }
 		match := annotation.NodeID == id
 		if !match {
 			for _, member := range annotation.Population {
@@ -350,20 +377,49 @@ type persistedGraph struct {
 }
 
 func (k *KnowledgeBase) Load(path string) error {
+	return k.load(path, false)
+}
+
+// LoadStandalone rejects a Brain-only v2 export that lacks the authenticated
+// runtime contract. Complete checkpoint restoration uses Load after validation.
+func (k *KnowledgeBase) LoadStandalone(path string) error {
+	return k.load(path, true)
+}
+
+func (k *KnowledgeBase) load(path string, standalone bool) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	b, err := os.ReadFile(path); if err != nil { return err }
+	if standalone { if err := ValidateWrittenNumericState(b, false); err != nil { return err } }
+	var envelope struct { SchemaVersion int `json:"schema_version"` }
+	if err := json.Unmarshal(b, &envelope); err != nil { return err }
+	// Legacy graph files need dynamic-state hydration. Canonical v2 already
+	// persists exact dynamic AND legacy fields; hydration changes their values
+	// and makes deterministic checkpoint continuation diverge.
+	legacy := envelope.SchemaVersion < 2
 	nodes, patterns, populations, state, err := loadCanonicalBrain(b)
 	if err != nil { return err }
 	registry := NewTokenRegistry(); var maxID NodeID
-	for _, node := range nodes { if node == nil { continue }; if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }; for _, synapses := range node.Synapses { for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) } }; registry.byID[node.ID] = node; if node.ID > maxID { maxID = node.ID } }
+	for _, node := range nodes {
+		if node == nil { continue }
+		if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }
+		if legacy {
+			for _, synapses := range node.Synapses {
+				for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) }
+			}
+		}
+		registry.byID[node.ID] = node
+		if node.ID > maxID { maxID = node.ID }
+	}
 	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
 	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
 	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), populations...); k.projectionMu.Unlock()
 	k.BrainState = state
 	k.normalizeBrainState()
-	k.normalizeBootstrapState()
+	// Canonical state already records population provenance explicitly. Only
+	// legacy migration may synthesize missing bootstrap metadata.
+	if legacy { k.normalizeBootstrapState() }
 
 	return nil
 }
@@ -567,15 +623,13 @@ func (k *KnowledgeBase) Save(path string) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.RLock()
 	defer k.mu.RUnlock()
-	b, e := marshalCanonicalBrain(k)
-	if e != nil { return e }
-	dir := filepath.Dir(path)
+		dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0755); err != nil { return err }
 	tmp, err := os.CreateTemp(dir, ".brain-memory-*.tmp")
 	if err != nil { return err }
 	tmpName := tmp.Name()
 	defer os.Remove(tmpName)
-	if _, err := tmp.Write(b); err != nil { _ = tmp.Close(); return err }
+	if err := writeCanonicalBrain(tmp,k,true,""); err != nil { _ = tmp.Close(); return err }
 	if err := tmp.Sync(); err != nil { _ = tmp.Close(); return err }
 	if err := tmp.Close(); err != nil { return err }
 	return os.Rename(tmpName, path)

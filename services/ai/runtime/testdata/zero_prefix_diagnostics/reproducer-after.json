@@ -1,0 +1,9 @@
+{
+  "empty_journal_restore_error": "",
+  "nonempty_recovered_revision": 2,
+  "observed_empty_prefix_failure": false,
+  "restore_one_after_second_event_error": "",
+  "restore_zero_after_first_event_error": "",
+  "zero_checkpoint_prefix_hash": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
+  "zero_checkpoint_sequence": 0
+}

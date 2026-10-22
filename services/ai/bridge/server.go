@@ -42,7 +42,7 @@ type rateBucket struct { started time.Time; count int }
 func New(brainRuntime *runtime.BrainRuntime, cfg Config) (*Server, error) {
 	if brainRuntime == nil { return nil, errors.New("brain runtime is required") }
 	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
-	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
+	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 600 }
 	return &Server{runtime: brainRuntime, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
 }
 
@@ -51,19 +51,21 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/health", s.health)
 	mux.HandleFunc("/v1/brain/handshake", s.handshake)
 	mux.HandleFunc("/v1/brain/snapshot", s.snapshot)
+	mux.HandleFunc("/v1/brain/inspection", s.inspection)
 	mux.HandleFunc("/v1/brain/events", s.events)
 	mux.HandleFunc("/v1/brain/stream", s.stream)
 	mux.HandleFunc("/v1/observations", s.observations)
+	mux.HandleFunc("/v1/sensor-observations", s.sensorObservations)
 	mux.HandleFunc("/v1/outcomes", s.outcomes)
 	return s.withCORS(s.withAuth(s.withRateLimit(mux)))
 }
 
 func (s *Server) health(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet { writeError(w,http.StatusMethodNotAllowed,"method not allowed"); return }
-	var snapshot runtime.MonitorSnapshot
+	var snapshot runtime.MonitorHandshake
 	err := s.withRuntime(func(rt *runtime.BrainRuntime) error {
 		var err error
-		snapshot, err = rt.MonitorSnapshot()
+		snapshot, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
 		return err
 	})
 	if err != nil { writeError(w,http.StatusServiceUnavailable,err.Error()); return }
@@ -133,6 +135,10 @@ func (s *Server) readEvents(after uint64) ([]replayEvent,error) {
 }
 
 func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
+	mode := r.URL.Query().Get("telemetry")
+	bounded := r.URL.Query().Get("inspection") == "bounded"
+	if value := r.URL.Query().Get("inspection"); value != "" && value != "bounded" || bounded && mode != "revisions" { writeError(w,400,"bounded inspection requires revision telemetry"); return }
+	if mode != "" && mode != "canonical" && mode != "revisions" { writeError(w,http.StatusBadRequest,"unsupported telemetry mode"); return }
 	if !websocketRequested(r) { writeError(w,http.StatusBadRequest,"websocket upgrade required"); return }
 	if !originAllowed(r.Header.Get("Origin"),s.cfg.AllowedOrigins) { writeError(w,http.StatusForbidden,"origin is not allowed"); return }
 
@@ -141,13 +147,18 @@ func (s *Server) stream(w http.ResponseWriter, r *http.Request) {
 	var hub *runtime.TelemetryHub
 	var sub *runtime.TelemetrySubscriber
 	var epoch <-chan struct{}
-	var handshake runtime.MonitorHandshake
+	var handshake any
 	err := s.withRuntimeEpoch(func(rt *runtime.BrainRuntime, invalidated <-chan struct{}) error {
 		hub = rt.Telemetry()
-		sub = hub.Subscribe()
+		if mode == "revisions" { sub = hub.SubscribeRevisions() } else { sub = hub.Subscribe() }
 		if sub == nil { return errors.New("telemetry hub is not initialized") }
 		var err error
-		handshake, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
+		if bounded { handshake, err = rt.MonitorInspectionHandshake(s.cfg.RuntimeCommit) } else {
+			var full runtime.MonitorHandshake
+			full, err = rt.MonitorHandshake(s.cfg.RuntimeCommit)
+			full.TelemetryMode = mode
+			handshake = full
+		}
 		if err != nil { hub.Unsubscribe(sub); sub = nil; return err }
 		epoch = invalidated
 		return nil
@@ -251,7 +262,7 @@ func (s *Server) observations(w http.ResponseWriter, r *http.Request) {
 		writeError(w,status,err.Error())
 		return
 	}
-	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs})
+	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs,"answer":readoutForAnswer(interpretation.Answer)})
 }
 
 func (s *Server) outcomes(w http.ResponseWriter, r *http.Request) {

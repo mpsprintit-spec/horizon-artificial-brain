@@ -41,12 +41,16 @@ func TestP15RecommendationAuthorizationActionOutcomePromotionLoop(t *testing.T) 
 	p := &closedLoopTestPlugin{}
 	h.Gateway.RegisterPlugin("complete-task", p)
 
-	completed := h.Knowledge.Store("completed")
+	grounded, err := runtimeForTest(t, h).GroundObservationAt("completed", "test", "language", now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	completed := unitForTest(t, h, grounded.NodeID)
 	beforeImportance := completed.Importance
 	beforePlasticity := completed.Plasticity
 
 	const requestID = "p1-5-closed-loop"
-	if err := h.Runtime.RegisterActionBinding(runtime.ActionBinding{
+	if err := runtimeForTest(t, h).RegisterActionBinding(runtime.ActionBinding{
 		RequestID:     requestID,
 		BrainIdentity: runtime.BrainIdentity,
 		Intent:        "complete-task",
@@ -72,38 +76,40 @@ func TestP15RecommendationAuthorizationActionOutcomePromotionLoop(t *testing.T) 
 	}
 
 	firstOutcome := runtime.OutcomeEvent{
-		RequestID:     requestID,
-		BrainIdentity: runtime.BrainIdentity,
-		Success:       true,
-		Observation:   []string{"task completed"},
-		Source:        "executor",
-		Modality:      "execution-outcome",
-		ObservedAt:    now.Add(2 * time.Minute),
-		Reliability:   1,
+		RequestID:         requestID,
+		BrainIdentity:     runtime.BrainIdentity,
+		Success:           true,
+		Observation:       []string{"task completed"},
+		Source:            "executor",
+		IndependenceGroup: "executor-origin",
+		Modality:          "execution-outcome",
+		ObservedAt:        now.Add(2 * time.Minute),
+		Reliability:       1,
 	}
-	if _, err := h.Runtime.ObserveOutcome(firstOutcome); err != nil {
+	if _, err := runtimeForTest(t, h).ObserveOutcome(firstOutcome); err != nil {
 		t.Fatalf("first outcome: %v", err)
 	}
-	if completed.Importance != beforeImportance {
-		t.Fatalf("first independent outcome promoted node: got importance %v want %v", completed.Importance, beforeImportance)
+	if current := unitForTest(t, h, completed.ID); current.Importance != beforeImportance {
+		t.Fatalf("first independent outcome promoted node: got importance %v want %v", current.Importance, beforeImportance)
 	}
 
 	secondOutcome := firstOutcome
 	secondOutcome.Source = "sensor-verification"
+	secondOutcome.IndependenceGroup = "verification-origin"
 	secondOutcome.ObservedAt = now.Add(3 * time.Minute)
 	secondOutcome.Observation = []string{"sensor independently verified completion"}
-	if _, err := h.Runtime.ObserveOutcome(secondOutcome); err != nil {
+	if _, err := runtimeForTest(t, h).ObserveOutcome(secondOutcome); err != nil {
 		t.Fatalf("second outcome: %v", err)
 	}
 
-	if completed.Importance <= beforeImportance {
-		t.Fatalf("promotion did not change neural state: importance got %v want > %v", completed.Importance, beforeImportance)
+	if current := unitForTest(t, h, completed.ID); current.Importance <= beforeImportance {
+		t.Fatalf("promotion did not change neural state: importance got %v want > %v", current.Importance, beforeImportance)
 	}
-	if completed.Plasticity <= beforePlasticity {
-		t.Fatalf("promotion did not change plasticity: got %v want > %v", completed.Plasticity, beforePlasticity)
+	if current := unitForTest(t, h, completed.ID); current.Plasticity <= beforePlasticity {
+		t.Fatalf("promotion did not change plasticity: got %v want > %v", current.Plasticity, beforePlasticity)
 	}
 
-	cognitive, err := h.Runtime.CognitiveProcess(runtime.Event{
+	cognitive, err := runtimeForTest(t, h).CognitiveProcess(runtime.Event{
 		Stimulus:  []string{"completed"},
 		Source:    "closed-loop-test",
 		Modality:  "symbolic",

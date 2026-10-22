@@ -23,8 +23,15 @@ The production monitor is served from `web/monitor` and reads the single `BrainR
 - `GET /v1/brain/events?after=<revision>`
 - `WS /v1/brain/stream`
 - `POST /v1/observations`
+- `POST /v1/sensor-observations`
 - `POST /v1/outcomes`
 
 For a remote GitHub Pages monitor, run the Bridge behind HTTPS/WSS. The runtime supports direct TLS with `HORIZON_BRIDGE_TLS_CERT` and `HORIZON_BRIDGE_TLS_KEY`; set `HORIZON_BRIDGE_ADDRESS` to the externally reachable listener and configure `HORIZON_MONITOR_ORIGINS` for the exact monitor origin. Set `HORIZON_BRIDGE_TOKEN` for non-health endpoints.
 
-The browser sends camera, microphone, motion, and simulator observations as raw `ObservationEnvelope` records. Camera/microphone access requires a secure browser context and explicit user permission. The Bridge persists the canonical brain to `HORIZON_BRAIN_MEMORY_PATH` and the runtime event log to `HORIZON_EVENT_LOG_PATH`.
+The browser sends camera and microphone measurements through typed numeric sensor fields. Other adapters can use `ObservationEnvelope`. Camera/microphone access requires a secure browser context and explicit user permission. The Bridge persists the canonical brain to `HORIZON_BRAIN_MEMORY_PATH` and the runtime event log to `HORIZON_EVENT_LOG_PATH`.
+
+The runtime's complete observation/inquiry transactions, checkpoint v7 and historical recovery limits are documented in [COGNITIVE_JOURNAL.md](runtime/COGNITIVE_JOURNAL.md).
+
+The managed facade uses `Supervisor()` and detached inspection rather than exported neural aliases. See [MANAGED_OWNERSHIP.md](runtime/MANAGED_OWNERSHIP.md) for the API migration and lifetime contract.
+
+Written input, sequence learning, Bridge text and knowledge import share the [written text contract](runtime/WRITTEN_TEXT_CONTRACT.md). New journals use schema 2; schema 1 retains historical replay semantics. The contract documents explicit rebinding of legacy written populations and the remaining language-understanding limits.

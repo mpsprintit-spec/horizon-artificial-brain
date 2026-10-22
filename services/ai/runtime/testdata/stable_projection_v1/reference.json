@@ -1,0 +1,34 @@
+{
+  "commit": "b5b697f5570495094c9a2f2db7432708c3d166c1",
+  "checksum": "c7bd5f0aac5655a83e41e51ad830a4b97c04d746dcb8d0da7d05c85bce9ba106",
+  "next_outcome": {
+    "RequestID": "request-3",
+    "BrainIdentity": "",
+    "Success": true,
+    "Observation": [
+      "seen-again"
+    ],
+    "Source": "same-camera",
+    "Modality": "",
+    "ObservedAt": "2026-10-20T09:00:10Z",
+    "Reliability": 0.9
+  },
+  "after_next_checksum": "aa4c271ad391076f23f3d71756ada23a4f3668a9af8d30d7fcea4a30b7a2aa93",
+  "evidence": {
+    "by_node": {
+      "1": {
+        "Weight": 0.6,
+        "Confidence": 0.6,
+        "Reliability": 0.9,
+        "IndependentSources": 2,
+        "Contradictions": 0
+      }
+    },
+    "seen": {
+      "1": [
+        "request-1|same-camera",
+        "request-2|same-camera"
+      ]
+    }
+  }
+}

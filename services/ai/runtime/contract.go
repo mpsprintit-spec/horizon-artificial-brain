@@ -2,6 +2,10 @@ package runtime
 
 import (
 	"errors"
+	"maps"
+	"math"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -9,13 +13,13 @@ import (
 )
 
 type CognitiveState struct {
-	BrainIdentity string
-	Sequence uint64
-	Timestamp time.Time
-	ActiveNodeIDs []knowledge.NodeID
-	Activations map[knowledge.NodeID]float64
-	Confidence map[knowledge.NodeID]float64
-	Resonance float64
+	BrainIdentity   string
+	Sequence        uint64
+	Timestamp       time.Time
+	ActiveNodeIDs   []knowledge.NodeID
+	Activations     map[knowledge.NodeID]float64
+	Confidence      map[knowledge.NodeID]float64
+	Resonance       float64
 	PredictionError float64
 }
 
@@ -24,25 +28,27 @@ func (o CognitiveOutput) State() CognitiveState {
 }
 
 type CognitiveStateDelta struct {
-	FromSequence uint64 `json:"from_sequence"`
-	ToSequence uint64 `json:"to_sequence"`
-	AddedNodeIDs []knowledge.NodeID `json:"added_node_ids"`
-	RemovedNodeIDs []knowledge.NodeID `json:"removed_node_ids"`
-	ActivationDelta map[knowledge.NodeID]float64 `json:"activation_delta"`
-	ConfidenceDelta map[knowledge.NodeID]float64 `json:"confidence_delta"`
-	ResonanceDelta float64 `json:"resonance_delta"`
-	PredictionErrorDelta float64 `json:"prediction_error_delta"`
+	FromSequence         uint64                       `json:"from_sequence"`
+	ToSequence           uint64                       `json:"to_sequence"`
+	AddedNodeIDs         []knowledge.NodeID           `json:"added_node_ids"`
+	RemovedNodeIDs       []knowledge.NodeID           `json:"removed_node_ids"`
+	ActivationDelta      map[knowledge.NodeID]float64 `json:"activation_delta"`
+	ConfidenceDelta      map[knowledge.NodeID]float64 `json:"confidence_delta"`
+	ResonanceDelta       float64                      `json:"resonance_delta"`
+	PredictionErrorDelta float64                      `json:"prediction_error_delta"`
 }
 
 func cloneCognitiveState(in CognitiveState) CognitiveState {
 	return CognitiveState{
 		BrainIdentity: in.BrainIdentity,
-		Sequence: in.Sequence,
-		Timestamp: in.Timestamp,
-		ActiveNodeIDs: append([]knowledge.NodeID(nil), in.ActiveNodeIDs...),
-		Activations: cloneNodeValues(in.Activations),
-		Confidence: cloneNodeValues(in.Confidence),
-		Resonance: in.Resonance,
+		Sequence:      in.Sequence,
+		Timestamp:     in.Timestamp,
+		// Preserve nil vs allocated-empty state as well as values. A codec
+		// can be trained/checkpointed before the first cognitive transition.
+		ActiveNodeIDs:   slices.Clone(in.ActiveNodeIDs),
+		Activations:     maps.Clone(in.Activations),
+		Confidence:      maps.Clone(in.Confidence),
+		Resonance:       in.Resonance,
 		PredictionError: in.PredictionError,
 	}
 }
@@ -52,101 +58,204 @@ func (s CognitiveState) Diff(previous CognitiveState) CognitiveStateDelta {
 	removed := make([]knowledge.NodeID, 0)
 	previousActive := make(map[knowledge.NodeID]struct{}, len(previous.ActiveNodeIDs))
 	currentActive := make(map[knowledge.NodeID]struct{}, len(s.ActiveNodeIDs))
-	for _, id := range previous.ActiveNodeIDs { previousActive[id] = struct{}{} }
+	for _, id := range previous.ActiveNodeIDs {
+		previousActive[id] = struct{}{}
+	}
 	for _, id := range s.ActiveNodeIDs {
 		currentActive[id] = struct{}{}
-		if _, ok := previousActive[id]; !ok { added = append(added, id) }
+		if _, ok := previousActive[id]; !ok {
+			added = append(added, id)
+		}
 	}
 	for _, id := range previous.ActiveNodeIDs {
-		if _, ok := currentActive[id]; !ok { removed = append(removed, id) }
+		if _, ok := currentActive[id]; !ok {
+			removed = append(removed, id)
+		}
 	}
 	activationDelta := make(map[knowledge.NodeID]float64)
 	for id, value := range s.Activations {
 		if previousValue, ok := previous.Activations[id]; ok {
-			if delta := value - previousValue; delta != 0 { activationDelta[id] = delta }
+			if delta := value - previousValue; delta != 0 {
+				activationDelta[id] = delta
+			}
 		} else if value != 0 {
 			activationDelta[id] = value
 		}
 	}
 	for id, value := range previous.Activations {
-		if _, ok := s.Activations[id]; !ok && value != 0 { activationDelta[id] = -value }
+		if _, ok := s.Activations[id]; !ok && value != 0 {
+			activationDelta[id] = -value
+		}
 	}
 	confidenceDelta := make(map[knowledge.NodeID]float64)
 	for id, value := range s.Confidence {
 		if previousValue, ok := previous.Confidence[id]; ok {
-			if delta := value - previousValue; delta != 0 { confidenceDelta[id] = delta }
+			if delta := value - previousValue; delta != 0 {
+				confidenceDelta[id] = delta
+			}
 		} else if value != 0 {
 			confidenceDelta[id] = value
 		}
 	}
 	for id, value := range previous.Confidence {
-		if _, ok := s.Confidence[id]; !ok && value != 0 { confidenceDelta[id] = -value }
+		if _, ok := s.Confidence[id]; !ok && value != 0 {
+			confidenceDelta[id] = -value
+		}
 	}
 	return CognitiveStateDelta{
 		FromSequence: previous.Sequence, ToSequence: s.Sequence,
 		AddedNodeIDs: added, RemovedNodeIDs: removed,
 		ActivationDelta: activationDelta, ConfidenceDelta: confidenceDelta,
-		ResonanceDelta: s.Resonance - previous.Resonance,
+		ResonanceDelta:       s.Resonance - previous.Resonance,
 		PredictionErrorDelta: s.PredictionError - previous.PredictionError,
 	}
 }
 
 type OutcomeEvent struct {
-	RequestID string
-	BrainIdentity string
-	Success bool
-	Observation []string
-	Source string
-	Modality string
-	ObservedAt time.Time
-	Reliability float64
+	RequestID         string
+	BrainIdentity     string
+	Success           bool
+	Observation       []string
+	Source            string
+	Modality          string
+	ObservedAt        time.Time
+	Reliability       float64
+	EpisodeID         string `json:"episode_id,omitempty"`
+	IndependenceGroup string `json:"independence_group,omitempty"`
+	CausalGroup       string `json:"causal_group,omitempty"`
 }
 
-// ObserveOutcome records the outcome first, then evaluates it against the
-// explicit action binding and learning policy. An outcome never guesses a
-// neural target and never mutates the brain before promotion is accepted.
+// ObserveOutcome writes the complete input before changing evidence or its
+// explicitly bound neural targets. An uncertain append retires the runtime.
 func (r *BrainRuntime) ObserveOutcome(outcome OutcomeEvent) (uint64, error) {
-	if r == nil || r.brain == nil || r.learning == nil || r.promotion == nil || r.evidence == nil { return 0, errors.New("brain runtime is not initialized") }
-	if outcome.BrainIdentity == "" { outcome.BrainIdentity = BrainIdentity }
-	if outcome.BrainIdentity != BrainIdentity { return 0, errors.New("outcome belongs to a different brain") }
-	if outcome.RequestID == "" { return 0, errors.New("outcome request ID is required") }
-	if len(outcome.Observation) == 0 { return 0, errors.New("outcome observation is required") }
-	if outcome.ObservedAt.IsZero() { outcome.ObservedAt = r.now() }
-	if outcome.Source == "" { outcome.Source = "outcome" }
-	if outcome.Modality == "" { outcome.Modality = "execution-outcome" }
+	if r == nil || r.brain == nil || r.learning == nil || r.promotion == nil || r.evidence == nil {
+		return 0, errors.New("brain runtime is not initialized")
+	}
+	outcome = *cloneOutcome(outcome)
+	if outcome.BrainIdentity == "" {
+		outcome.BrainIdentity = BrainIdentity
+	}
+	if outcome.ObservedAt.IsZero() {
+		outcome.ObservedAt = r.now()
+	}
+	outcome.ObservedAt = outcome.ObservedAt.UTC()
+	if outcome.Source == "" {
+		outcome.Source = "outcome"
+	}
+	if outcome.Modality == "" {
+		outcome.Modality = "execution-outcome"
+	}
+	if err := validateOutcome(outcome); err != nil {
+		return 0, err
+	}
 
-	r.mu.Lock(); defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil { return r.seq, err }
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil {
+		return r.seq, err
+	}
 	binding, ok := r.actions[outcome.RequestID]
-	if !ok { return 0, errors.New("outcome has no registered action binding") }
-	if binding.BrainIdentity != BrainIdentity { return 0, errors.New("action binding belongs to a different brain") }
-
-	nextSeq := r.seq + 1
-	if r.eventLog != nil {
-		if err := r.eventLog.Append(LoggedEvent{SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, Sequence: nextSeq, Type: EventTypeOutcome, Timestamp: outcome.ObservedAt, Outcome: cloneOutcome(outcome)}); err != nil { return r.seq, err }
+	if !ok {
+		return 0, errors.New("outcome has no registered action binding")
+	}
+	if binding.BrainIdentity != BrainIdentity {
+		return 0, errors.New("action binding belongs to a different brain")
+	}
+	if err := validateOutcomeDynamics(outcome, r.dynamicsEncoding); err != nil {
+		return r.seq, err
 	}
 
-	weight, confidence, contradictions := 0.45, 0.30, 1
-	if outcome.Success { weight, confidence, contradictions = 0.60, 0.50, 0 }
-	evidence := learning.Evidence{Weight: weight, Confidence: confidence, Reliability: clamp01(outcome.Reliability), IndependentSources: 1, Contradictions: contradictions}
-
-	for _, nodeID := range binding.TargetNodeIDs {
-		combined, added, err := r.evidence.Record(learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence})
-		if err != nil { return r.seq, err }
-		if !added { continue }
-		decision, err := r.promotion.Apply(nodeID, combined, outcome.ObservedAt)
-		if err != nil { return r.seq, err }
-		if decision == learning.PromotionAccepted {
-			for _, synapse := range binding.Synapses {
-				if synapse.TargetNodeID != nodeID { continue }
-				if err := learning.PromoteSynapse(r.brain, learning.SynapsePromotion{SourceNodeID: synapse.SourceNodeID, TargetNodeID: synapse.TargetNodeID, Inhibitory: synapse.Inhibitory}, combined, outcome.ObservedAt); err != nil { return r.seq, err }
-			}
+	err := r.runJournalCommandLocked(LoggedEvent{Type: EventTypeOutcome, Timestamp: outcome.ObservedAt, Outcome: cloneOutcome(outcome)}, func() error {
+		if err := r.applyOutcomeLocked(outcome, binding); err != nil {
+			return err
 		}
+		r.seq++
+		return nil
+	})
+	if err != nil {
+		return r.seq, err
 	}
-	r.seq = nextSeq
-	if r.telemetry != nil { r.telemetry.Publish(r.telemetryEventLocked(EventTypeOutcome, outcome.ObservedAt, nil, nil, &outcome)) }
+	if r.telemetry != nil {
+		r.publishTelemetryLocked(EventTypeOutcome, outcome.ObservedAt, nil, nil, &outcome, nil, nil)
+	}
 	return r.seq, nil
 }
 
-func cloneOutcome(in OutcomeEvent) *OutcomeEvent { out := in; out.Observation = append([]string(nil), in.Observation...); return &out }
-func clamp01(v float64) float64 { if v < 0 { return 0 }; if v > 1 { return 1 }; return v }
+func validateOutcome(outcome OutcomeEvent) error {
+	if outcome.BrainIdentity != BrainIdentity {
+		return errors.New("outcome belongs to a different brain")
+	}
+	if strings.TrimSpace(outcome.RequestID) == "" {
+		return errors.New("outcome request ID is required")
+	}
+	if len(outcome.Observation) == 0 {
+		return errors.New("outcome observation is required")
+	}
+	for _, token := range outcome.Observation {
+		if strings.TrimSpace(token) == "" {
+			return errors.New("outcome contains an empty observation")
+		}
+	}
+	if strings.TrimSpace(outcome.Source) == "" || strings.TrimSpace(outcome.Modality) == "" || outcome.ObservedAt.IsZero() {
+		return errors.New("outcome provenance is required")
+	}
+	if math.IsNaN(outcome.Reliability) || math.IsInf(outcome.Reliability, 0) {
+		return errors.New("outcome reliability must be finite")
+	}
+	return nil
+}
+
+// applyOutcomeLocked does not allocate a revision; compound commands own it.
+func (r *BrainRuntime) applyOutcomeLocked(outcome OutcomeEvent, binding ActionBinding) error {
+	weight, confidence, contradictions := 0.45, 0.30, 1
+	if outcome.Success {
+		weight, confidence, contradictions = 0.60, 0.50, 0
+	}
+	evidence := learning.Evidence{Weight: weight, Confidence: confidence, Reliability: clamp01(outcome.Reliability), IndependentSources: 1, Contradictions: contradictions}
+
+	for _, nodeID := range binding.TargetNodeIDs {
+		record := learning.OutcomeEvidence{RequestID: outcome.RequestID, NodeID: nodeID, Source: outcome.Source, Evidence: evidence, EpisodeID: outcome.EpisodeID, IndependenceGroup: outcome.IndependenceGroup, CausalGroup: outcome.CausalGroup}
+		recordOutcome := r.evidence.RecordLegacy
+		if r.dynamicsEncoding.HasEvidenceProvenance() {
+			recordOutcome = r.evidence.Record
+		}
+		combined, added, err := recordOutcome(record)
+		if err != nil {
+			return err
+		}
+		if !added {
+			continue
+		}
+		decision, err := r.promotion.Apply(nodeID, combined, outcome.ObservedAt)
+		if err != nil {
+			return err
+		}
+		if decision == learning.PromotionAccepted {
+			r.settleMemoryTimeLocked(outcome.ObservedAt)
+			for _, synapse := range binding.Synapses {
+				if synapse.TargetNodeID != nodeID {
+					continue
+				}
+				if err := learning.PromoteSynapse(r.brain, learning.SynapsePromotion{SourceNodeID: synapse.SourceNodeID, TargetNodeID: synapse.TargetNodeID, Inhibitory: synapse.Inhibitory}, combined, outcome.ObservedAt); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func cloneOutcome(in OutcomeEvent) *OutcomeEvent {
+	out := in
+	out.Observation = append([]string(nil), in.Observation...)
+	return &out
+}
+func clamp01(v float64) float64 {
+	if v < 0 {
+		return 0
+	}
+	if v > 1 {
+		return 1
+	}
+	return v
+}

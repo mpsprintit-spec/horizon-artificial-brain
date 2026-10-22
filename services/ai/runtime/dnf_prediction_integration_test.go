@@ -9,16 +9,16 @@ import (
 
 func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 	brain := knowledge.NewBrain()
-	source := brain.Store("source")
-	target := brain.Store("target")
-	brain.Connect(source, target, 0.20, 0.50, false)
+	t0 := time.Unix(400, 0).UTC()
+	source := brain.StoreAt("source", t0)
+	target := brain.StoreAt("target", t0)
+	brain.ConnectAt(source, target, 0.20, 0.50, false, t0)
 
 	runtime := NewBrainRuntime(brain)
 	if runtime == nil || runtime.DNF() == nil {
 		t.Fatal("expected runtime and DNF fabric")
 	}
 
-	t0 := time.Unix(400, 0).UTC()
 	runtime.SetClock(NewFixedClock(t0.Add(250 * time.Millisecond)))
 	first, err := runtime.CognitiveProcess(Event{
 		ID:        "prediction-seed",

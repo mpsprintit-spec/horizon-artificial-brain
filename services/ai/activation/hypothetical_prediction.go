@@ -56,6 +56,12 @@ func (e *Engine) PredictOutcomeFromNodes(targets []knowledge.NodeID, now time.Ti
 }
 
 func (e *Engine) advanceHypothetical(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+	return e.advanceHypotheticalWithSynapseOrder(state, confidence, now, cycles, false)
+}
+
+// Only the new, explicitly versioned continuation readout uses total ordering
+// of opposing channels. Historical hypothetical/recurrent laws stay intact.
+func (e *Engine) advanceHypotheticalWithSynapseOrder(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int, totalOrder bool) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
 	if e == nil || e.Memory == nil {
 		return cloneState(state), cloneState(confidence)
 	}
@@ -81,6 +87,12 @@ func (e *Engine) advanceHypothetical(state, confidence map[knowledge.NodeID]floa
 			nextConfidence[id] = max(nextConfidence[id], confidence[id])
 			synapses := n.OutboundAll()
 			sort.Slice(synapses, func(i, j int) bool {
+				if totalOrder && synapses[i].TargetID == synapses[j].TargetID {
+					if synapses[i].Inhibitory != synapses[j].Inhibitory {
+						return !synapses[i].Inhibitory
+					}
+					return synapses[i].Kind < synapses[j].Kind
+				}
 				return synapses[i].TargetID < synapses[j].TargetID
 			})
 			for _, s := range synapses {

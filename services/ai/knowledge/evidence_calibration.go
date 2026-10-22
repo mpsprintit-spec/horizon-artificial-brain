@@ -7,13 +7,21 @@ import "math"
 // contradiction remain separate signals. Repeated observations from one
 // source/group therefore cannot masquerade as independent confirmation.
 func CalibratedConfidence(base float64, evidence []ExperienceEvidence) float64 {
+	return calibratedConfidence(base, evidence, EvidenceIndependenceBounded(evidence))
+}
+
+// CalibratedConfidenceWithDynamics retains old replay laws while new serving
+// uses declared provenance components rather than observation identities.
+func CalibratedConfidenceWithDynamics(base float64, evidence []ExperienceEvidence, dynamics DynamicsEncoding) float64 {
+	if !dynamics.HasEvidenceProvenance() {
+		return CalibratedConfidence(base, evidence)
+	}
+	return calibratedConfidence(base, evidence, CountEvidenceProvenance(evidence).IndependentGroups)
+}
+
+func calibratedConfidence(base float64, evidence []ExperienceEvidence, independent int) float64 {
 	base = clamp01(base)
 	if len(evidence) == 0 {
-		return base
-	}
-
-	independent := EvidenceIndependenceBounded(evidence)
-	if independent <= 0 {
 		return base
 	}
 

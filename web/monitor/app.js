@@ -1,4 +1,7 @@
 import { HorizonStore } from "./lib/horizon-store.js";
+import { extractVisionFields, extractAudioFields, extractMotionFields, browserSensorProfile } from "./sensor-adapters.js";
+import { createSnapshotScheduler } from "./snapshot-scheduler.js";
+import { verifyInspectionPage, inspectionGraph, readInspectionText } from "./inspection-page.js";
 
 const $ = id => document.getElementById(id);
 const store = new HorizonStore();
@@ -9,11 +12,22 @@ let reconnectTimer = null;
 let cameraStream = null;
 let cameraTimer = null;
 let audioStream = null;
-let recorder = null;
+let audioTimer = null;
+let cameraGeneration = 0;
+let audioGeneration = 0;
+let motionGeneration = 0;
+let motionHandler = null;
+let observationQueue = Promise.resolve();
 let audioContext = null;
 let analyser = null;
 let waveFrame = null;
-let snapshotRefresh = Promise.resolve();
+let revisionTelemetry = false;
+let boundedInspection = false;
+let graphCursor = "";
+let inspectorPage = null;
+let monitorReadSerial=0, inspectorReadSerial=0;
+const monitorReads=new WeakMap();
+const snapshotRefresh = createSnapshotScheduler({load:()=>loadMonitorView(),apply:applyMonitorView});
 
 const savedBridge = sessionStorage.getItem("horizon.bridge");
 const savedToken = sessionStorage.getItem("horizon.token");
@@ -24,29 +38,82 @@ function status(text, cls) { $("status").textContent=text; $("status").className
 function baseUrl() { return $("bridge").value.trim().replace(/\/$/,""); }
 function authHeaders() { const token=$("token").value.trim(); return token ? {Authorization:"Bearer "+token} : {}; }
 function nextId(prefix) { sessionSequence += 1; return prefix+"-"+sessionSequence+"-"+crypto.randomUUID(); }
+function browserSessionId() {
+  let id = sessionStorage.getItem("horizon.session");
+  if (!id) { id = "browser-"+crypto.randomUUID(); sessionStorage.setItem("horizon.session", id); }
+  return id;
+}
 function bridgeWsUrl() {
   const u=new URL(baseUrl()); u.protocol=u.protocol==="https:"?"wss:":"ws:"; u.pathname="/v1/brain/stream"; u.searchParams.set("after",String(store.revision));
+  if(revisionTelemetry) u.searchParams.set("telemetry","revisions");
+  if(boundedInspection) u.searchParams.set("inspection","bounded");
   const token=$("token").value.trim(); if(token) u.searchParams.set("token",token); return u.toString();
 }
 async function get(path) {
   const response=await fetch(baseUrl()+path,{headers:authHeaders(),cache:"no-store"});
   const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
 }
-async function postObservation(envelope) {
-  const payloadBytes=rawPayload(JSON.stringify(envelope.payload??null));
-  envelope.payload_hash=await hashBuffer(payloadBytes);
-  envelope.payload_bytes=payloadBytes.byteLength;
-  const response=await fetch(baseUrl()+"/v1/observations",{method:"POST",headers:{"Content-Type":"application/json",...authHeaders()},body:JSON.stringify(envelope)});
-  const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
+async function readInspection(section="neural_units",cursor="",order="id") {
+  const query=new URLSearchParams({section,limit:"256",order});if(cursor)query.set("cursor",cursor);
+  const response=await fetch(baseUrl()+"/v1/brain/inspection?"+query,{headers:authHeaders(),cache:"no-store"});
+  const text=await readInspectionText(response);
+  if(!response.ok){let message;try{message=JSON.parse(text).error;}catch{}const error=new Error(message||("HTTP "+response.status));error.status=response.status;throw error;}
+  return verifyInspectionPage(text,hashBuffer);
 }
-function binaryToBase64(buffer) { const bytes=new Uint8Array(buffer); let out=""; const step=0x8000; for(let i=0;i<bytes.length;i+=step)out+=String.fromCharCode(...bytes.subarray(i,Math.min(i+step,bytes.length))); return btoa(out); }
+async function loadMonitorView(cursor="") {
+  const serial=++monitorReadSerial;
+  const snapshot=boundedInspection?inspectionGraph(await readInspection("neural_units",cursor,"activity")):await get("/v1/brain/snapshot");
+  monitorReads.set(snapshot,serial);return snapshot;
+}
+function applyMonitorView(snapshot){
+  if(monitorReads.has(snapshot)&&monitorReads.get(snapshot)!==monitorReadSerial)return;
+  store.setSnapshot(snapshot);render();
+}
+async function loadInspector(cursor="") {
+  const serial=++inspectorReadSerial;
+  try {
+    const page=await readInspection($("inspectSection").value,cursor);
+    if(serial!==inspectorReadSerial)return;
+    inspectorPage=page;
+    $("inspector").textContent=JSON.stringify({section:page.data.section,revision:page.state_revision,inspection_epoch:page.inspection_epoch,page_hash:page.page_hash,loaded:page.data.items.length,total:page.data.total,next_page:Boolean(page.next_cursor),items:page.data.items},null,2);
+    $("inspectNext").disabled=!page.next_cursor;
+  } catch(error){if(serial!==inspectorReadSerial)return;inspectorPage=null;$("inspectNext").disabled=true;$("inspector").textContent=error.message;}
+}
+async function postObservation(envelope) {
+  return enqueueObservation(async()=>{
+    const payloadBytes=rawPayload(JSON.stringify(envelope.payload??null));
+    envelope.payload_hash=await hashBuffer(payloadBytes);
+    envelope.payload_bytes=payloadBytes.byteLength;
+    const response=await fetch(baseUrl()+"/v1/observations",{method:"POST",headers:{"Content-Type":"application/json",...authHeaders()},body:JSON.stringify(envelope)});
+    const body=await response.json().catch(()=>({})); if(!response.ok) throw new Error(body.error||("HTTP "+response.status)); return body;
+  });
+}
+function enqueueObservation(send) {
+  const result=observationQueue.then(send,send);
+  observationQueue=result.catch(()=>{});
+  return result;
+}
+function makeSensorObservation(modality, source, fields, capture) {
+  return {modality, source:source+":"+browserSessionId()+":"+capture.id, timestamp:capture.timestamp, sample_id:nextId(modality), fields, confidence:.5,
+    provenance:{...browserSensorProfile(modality), parent_sample_ids:[...(capture.parents ?? [])]}};
+}
+function postSensorObservation(sensor, current) {
+  const send = async () => {
+    if (!current()) throw new Error("capture stopped");
+    const response = await fetch(baseUrl()+"/v1/sensor-observations", {method:"POST", headers:{"Content-Type":"application/json", ...authHeaders()}, body:JSON.stringify(sensor)});
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || ("HTTP "+response.status));
+    return body;
+  };
+  return enqueueObservation(send);
+}
 function rawPayload(value) { return new TextEncoder().encode(value); }
 async function hashBuffer(buffer) { const hash=await crypto.subtle.digest("SHA-256",buffer); return "sha256:"+Array.from(new Uint8Array(hash)).map(x=>x.toString(16).padStart(2,"0")).join(""); }
 function makeEnvelope(modality, source, payload, extra={}) {
-  const sessionId=sessionStorage.getItem("horizon.session")||"browser-"+crypto.randomUUID();
-  sessionStorage.setItem("horizon.session",sessionId);
+  const sessionId=browserSessionId();
   const eventId=nextId(modality);
-  return {schema_version:1,brain_identity:"horizon-primary-brain",event_id:eventId,session_id:sessionId,sequence:sessionSequence,timestamp:new Date().toISOString(),modality,source,provenance:{source,modality,capture_device:extra.capture_device||"",adapter:"github-pages-browser",synthetic:Boolean(extra.synthetic)},payload,...extra.payloadMeta};
+  const tokens = modality === "text" || modality === "language" ? String(payload.raw ?? "").trim().split(/\s+/u).filter(Boolean) : [];
+  return {schema_version:1,brain_identity:"horizon-primary-brain",event_id:eventId,session_id:sessionId,sequence:sessionSequence,timestamp:new Date().toISOString(),modality,source,provenance:{source,modality,capture_device:extra.capture_device||"",adapter:"github-pages-browser",synthetic:Boolean(extra.synthetic)},payload,...(tokens.length ? {tokens} : {}),...extra.payloadMeta};
 }
 async function sendEnvelope(envelope, uiStatus) {
   try { uiStatus.textContent="captured"; const response=await postObservation(envelope); uiStatus.textContent="acknowledged r"+response.state_revision; }
@@ -54,7 +121,11 @@ async function sendEnvelope(envelope, uiStatus) {
 }
 function render() {
   const s=store.snapshot; if(!s)return;
-  $("brain").textContent=s.brain_identity||"unavailable"; $("revision").textContent=String(s.state_revision); $("hash").textContent=s.canonical_state_hash||"unavailable";
+  $("brain").textContent=s.brain_identity||"unavailable"; $("revision").textContent=String(s.state_revision); $("hash").textContent=s.page_hash||s.canonical_state_hash||"unavailable";
+  $("hashLabel").textContent=s.inspection?"Page hash":"Snapshot hash";
+  $("inspectionWindow").textContent=s.inspection?"Loaded "+s.neural_units.length+" of "+s.counts.neural_units+" units · "+s.synapses.length+" of "+(s.inspection.data.related_total??0)+" connections within this window · state preview ≤16 entries per map":"Full snapshot view";
+  graphCursor=s.inspection?.next_cursor||"";
+  $("graphNext").disabled=!graphCursor;
   $("units").textContent=String(s.counts?.neural_units??"unavailable"); $("populations").textContent=String(s.counts?.populations??"unavailable"); $("synapses").textContent=String(s.counts?.synapses??"unavailable");
   $("prediction").textContent=JSON.stringify(s.brain_state?.prediction||{},null,2); $("error").textContent=JSON.stringify(s.brain_state?.error||{},null,2); $("memory").textContent=JSON.stringify(s.brain_state?.memory||{},null,2); $("plasticity").textContent=JSON.stringify(s.brain_state?.plasticity||{},null,2); $("curiosity").textContent=JSON.stringify(s.brain_state?.curiosity||{},null,2); $("provenance").textContent=JSON.stringify({provenance:s.provenance||[],episodes:s.episodes||[],bootstrap_experiences:s.bootstrap_experiences||[]},null,2); renderCognitivePanel(s);
   renderGraph(s); renderEvents(); renderInspectableState(s);
@@ -154,7 +225,7 @@ function renderCognitivePanel(s){
   const last=store.events[store.events.length-1],obs=last?.observation||last?.Observation;
   $("ioOutput").textContent=JSON.stringify({runtime_event:last?.type||null,state_revision:s.state_revision,canonical_state_hash:s.canonical_state_hash,observation:obs||null},null,2);
   const active=(s.neural_units||[]).filter(u=>Number(u.activation||0)>.5).sort((a,b)=>Number(b.activation||0)-Number(a.activation||0)).slice(0,12);
-  $("thoughtState").textContent=JSON.stringify({status:"neural-state view",note:"Kata hanya ditampilkan sebagai pikiran aktual jika runtime mengekspos aktivasi simbolik. Saat ini panel menunjukkan keadaan neural aktif, prediksi, error, dan plasticity.",active_neural_units:active.map(u=>({id:u.id,activation:u.activation})),prediction:s.brain_state?.prediction||{},error:s.brain_state?.error||{},plasticity:s.brain_state?.plasticity||{},communication_bootstrap_words:s.brain_state?.memory?.communication_lexicon_words||0,state_revision:s.state_revision},null,2);
+  $("thoughtState").textContent=JSON.stringify({status:"neural-state view",note:"Kata hanya ditampilkan sebagai pikiran aktual jika runtime mengekspos aktivasi simbolik. Saat ini panel menunjukkan keadaan neural aktif, prediksi, error, dan plasticity.",active_neural_units:active.map(u=>({id:u.id,activation:u.activation})),prediction:s.brain_state?.prediction||{},error:s.brain_state?.error||{},plasticity:s.brain_state?.plasticity||{},communication_bootstrap_words:s.brain_state?.memory?.communication_lexicon_words??(s.inspection?null:0),state_revision:s.state_revision},null,2);
 }
 function renderInspectableState(s){
   const root=$("inspectList"); if(!root)return; root.textContent="";
@@ -162,33 +233,222 @@ function renderInspectableState(s){
   (s.populations||[]).forEach((value,i)=>add("population "+i,value,"population"));
   (s.temporal_patterns||[]).forEach((value,i)=>add("temporal trace "+i,value,"temporal_trace"));
   (s.experience_traces||[]).forEach((value,i)=>add("experience trace "+i,value,"experience_trace"));
+  (s.sensory_traces||[]).forEach((value,i)=>add("sensor trace "+i,value,"sensor_trace"));
   (s.provenance||[]).forEach((value,i)=>add("provenance "+i,value,"provenance"));
   add("prediction state",s.brain_state?.prediction||{},"prediction_error");
   add("plasticity state",s.brain_state?.plasticity||{},"plasticity");
 }
 async function refreshSnapshotForEvent(event){
-  snapshotRefresh=snapshotRefresh.then(async()=>{
-    const snapshot=await get("/v1/brain/snapshot");
-    if(Number(snapshot.state_revision)<Number(event.state_revision))throw new Error("snapshot revision is behind telemetry event");
-    if(Number(snapshot.state_revision)===Number(event.state_revision) && event.canonical_state_hash && snapshot.canonical_state_hash!==event.canonical_state_hash)throw new Error("telemetry canonical hash mismatch");
-    store.setSnapshot(snapshot); render();
-  });
-  return snapshotRefresh;
+  return snapshotRefresh.request(event);
 }
-async function resync(){store.setStatus("resyncing");try{const s=await get("/v1/brain/snapshot");store.setSnapshot(s);$("streamState").textContent="snapshot resynced";openStream();}catch(error){status("ERROR","error");$("source").textContent=error.message;}}
-function openStream(){if(socket)socket.close();if(!baseUrl())return;store.clearForReconnect();socket=new WebSocket(bridgeWsUrl());socket.onopen=()=>{store.setStatus("connected");$("streamState").textContent="live WebSocket";status("CONNECTED","connected");};socket.onmessage=async event=>{try{const payload=JSON.parse(event.data);if(payload.type==="brain.handshake"){$("commit").textContent=payload.runtime_commit||"unavailable";return;}const result=store.applyEvent(payload);if(result==="gap")await resync();else if(result==="applied")await refreshSnapshotForEvent(payload);else render();}catch(error){store.setStatus("error");$("streamState").textContent=error.message;status("ERROR","error");}};socket.onerror=()=>{store.setStatus("error");$("streamState").textContent="stream error";};socket.onclose=()=>{if(store.status!=="resyncing"){store.setStatus("stale");$("streamState").textContent="reconnecting";reconnectTimer=setTimeout(openStream,2000);}};}
-async function connect(){if(!baseUrl())return;sessionStorage.setItem("horizon.bridge",baseUrl());if($("token").value.trim())sessionStorage.setItem("horizon.token",$("token").value.trim());status("CONNECTING","stale");try{const handshake=await get("/v1/brain/handshake");$("commit").textContent=handshake.runtime_commit||"unavailable";const snapshot=await get("/v1/brain/snapshot");if(handshake.canonical_state_hash!==snapshot.canonical_state_hash||handshake.state_revision!==snapshot.state_revision)throw new Error("handshake/snapshot revision or hash mismatch");store.setSnapshot(snapshot);$("source").textContent="Horizon Bridge canonical runtime";render();openStream();}catch(error){store.setStatus("error");status("ERROR","error");$("source").textContent=error.message;}}
-function disconnect(){if(reconnectTimer)clearTimeout(reconnectTimer);if(socket)socket.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");}
+async function resync(){snapshotRefresh.reset();store.setStatus("resyncing");try{const s=await loadMonitorView();applyMonitorView(s);$("streamState").textContent="snapshot resynced";openStream();}catch(error){status("ERROR","error");$("source").textContent=error.message;}}
+function openStream(){
+  if(socket){const previous=socket;socket=null;previous.close();}
+  if(!baseUrl())return;
+  store.clearForReconnect();
+  const connection=new WebSocket(bridgeWsUrl());socket=connection;
+  connection.onopen=()=>{if(socket!==connection)return;store.setStatus("connected");$("streamState").textContent="live WebSocket";status("CONNECTED","connected");};
+  connection.onmessage=async event=>{
+    if(socket!==connection)return;
+    try{
+      const payload=JSON.parse(event.data);
+      if(payload.type==="brain.handshake"){
+        $("commit").textContent=payload.runtime_commit||"unavailable";
+        if(boundedInspection&&store.snapshot?.inspection_epoch&&payload.inspection_epoch!==store.snapshot.inspection_epoch)await resync();
+        return;
+      }
+      const result=store.applyEvent(payload);
+      if(result==="gap")await resync();else if(result==="applied")await refreshSnapshotForEvent(payload);else render();
+    }catch(error){if(socket!==connection)return;store.setStatus("error");$("streamState").textContent=error.message;status("ERROR","error");}
+  };
+  connection.onerror=()=>{if(socket!==connection)return;store.setStatus("error");$("streamState").textContent="stream error";};
+  connection.onclose=()=>{if(socket!==connection)return;socket=null;if(store.status!=="resyncing"&&store.status!=="disconnected"){store.setStatus("stale");$("streamState").textContent="reconnecting";reconnectTimer=setTimeout(openStream,2000);}};
+}
+
+async function connect(){
+  if(!baseUrl())return;
+  snapshotRefresh.reset();++monitorReadSerial;++inspectorReadSerial;graphCursor="";inspectorPage=null;
+  if(socket){const previous=socket;socket=null;previous.close();}
+  sessionStorage.setItem("horizon.bridge",baseUrl());if($("token").value.trim())sessionStorage.setItem("horizon.token",$("token").value.trim());
+  status("CONNECTING","stale");
+  try {
+    let snapshot;
+    try {
+      const page=await readInspection("neural_units","","activity");
+      boundedInspection=true;revisionTelemetry=true;graphCursor=page.next_cursor||"";
+      snapshot=inspectionGraph(page);$("commit").textContent=page.runtime_commit||"unavailable";
+    } catch(error) {
+      if(error.status!==404)throw error;
+      boundedInspection=false;
+      const handshake=await get("/v1/brain/handshake");revisionTelemetry=handshake.capabilities?.includes("revision_stream")===true;
+      $("commit").textContent=handshake.runtime_commit||"unavailable";
+      snapshot=await get("/v1/brain/snapshot");
+      if(handshake.canonical_state_hash!==snapshot.canonical_state_hash||handshake.state_revision!==snapshot.state_revision)throw new Error("handshake/snapshot revision or hash mismatch");
+    }
+    store.resetForConnection();store.setSnapshot(snapshot);
+    $("source").textContent=boundedInspection?"Horizon Bridge · bounded live inspection":"Horizon Bridge canonical runtime";
+    render();openStream();
+  }catch(error){store.setStatus("error");status("ERROR","error");$("source").textContent=error.message;}
+}
+
+function disconnect(){
+  ++monitorReadSerial;++inspectorReadSerial;snapshotRefresh.reset();if(reconnectTimer)clearTimeout(reconnectTimer);
+  const previous=socket;socket=null;previous?.close();store.setStatus("disconnected");status("DISCONNECTED","disconnected");
+}
+
+$("graphNext").onclick=async()=>{try{snapshotRefresh.reset();applyMonitorView(await loadMonitorView(graphCursor));}catch(error){$("inspectionWindow").textContent=error.message+" · refresh the live view";}};
+$("graphRefresh").onclick=async()=>{try{snapshotRefresh.reset();applyMonitorView(await loadMonitorView());}catch(error){$("inspectionWindow").textContent=error.message;}};
+$("inspectLoad").onclick=()=>loadInspector();
+$("inspectNext").onclick=()=>loadInspector(inspectorPage?.next_cursor||"");
 $("connect").onclick=connect;$("disconnect").onclick=disconnect;store.subscribe(render);
 
 
-$("ioSend").onclick=async()=>{const text=$("ioInput").value.trim();if(!text)return;$("ioStatus").textContent="sending...";try{const payload=rawPayload(text),env=makeEnvelope("text","web-test-input",{raw:text},{synthetic:true,payloadMeta:{payload_hash:await hashBuffer(payload)}}),response=await postObservation(env);$("ioStatus").textContent="accepted revision "+response.state_revision;$("ioInput").value="";await refreshSnapshotForEvent({state_revision:Number(response.state_revision),canonical_state_hash:response.canonical_state_hash});}catch(error){$("ioStatus").textContent="failed: "+error.message;}};
-$("simSend").onclick=async()=>{const text=$("simText").value;if(!text)return;const payload=rawPayload(text);const envelope=makeEnvelope($("simModality").value,"browser-simulator",{raw:text},{synthetic:true,payloadMeta:{payload_hash:await hashBuffer(payload)}});await sendEnvelope(envelope,$("simStatus"));};
-$("cameraStart").onclick=async()=>{try{cameraStream=await navigator.mediaDevices.getUserMedia({video:true});$("video").srcObject=cameraStream;const canvas=document.createElement("canvas"),ctx=canvas.getContext("2d");cameraTimer=setInterval(async()=>{canvas.width=$("video").videoWidth||320;canvas.height=$("video").videoHeight||240;ctx.drawImage($("video"),0,0,canvas.width,canvas.height);const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/jpeg",.65));if(!blob)return;const data=await blob.arrayBuffer();const envelope=makeEnvelope("vision","github-pages-camera",{encoding:"image/jpeg;base64",data:binaryToBase64(data)},{capture_device:"browser-camera",payloadMeta:{payload_hash:await hashBuffer(data)}});sendEnvelope(envelope,$("cameraStatus")).catch(()=>{});},1000);$("cameraStatus").textContent="captured";}catch(error){$("cameraStatus").textContent="failed: "+error.message;}};
-$("cameraStop").onclick=()=>{if(cameraTimer)clearInterval(cameraTimer);if(cameraStream)cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;$("cameraStatus").textContent="stopped";};
-$("audioStart").onclick=async()=>{try{audioStream=await navigator.mediaDevices.getUserMedia({audio:true});audioContext=new AudioContext();const source=audioContext.createMediaStreamSource(audioStream);analyser=audioContext.createAnalyser();analyser.fftSize=256;source.connect(analyser);const draw=()=>{if(!analyser)return;const data=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(data);const ctx=$("wave").getContext("2d");ctx.clearRect(0,0,360,80);ctx.beginPath();data.forEach((v,i)=>{const x=i*360/data.length,y=(v/255)*80;i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.stroke();waveFrame=requestAnimationFrame(draw);};draw();recorder=new MediaRecorder(audioStream);recorder.ondataavailable=async e=>{if(!e.data.size)return;const data=await e.data.arrayBuffer();const envelope=makeEnvelope("audio","github-pages-microphone",{encoding:e.data.type,data:binaryToBase64(data)},{capture_device:"browser-microphone",payloadMeta:{payload_hash:await hashBuffer(data)}});sendEnvelope(envelope,$("audioStatus")).catch(()=>{});};recorder.start(1000);$("audioStatus").textContent="captured";}catch(error){$("audioStatus").textContent="failed: "+error.message;}};
-$("audioStop").onclick=()=>{if(recorder)recorder.stop();if(audioStream)audioStream.getTracks().forEach(t=>t.stop());if(audioContext)audioContext.close();if(waveFrame)cancelAnimationFrame(waveFrame);recorder=null;audioStream=null;$("audioStatus").textContent="stopped";};
-let lastMotionSent=0;
-$("motionStart").onclick=async()=>{try{if(typeof DeviceMotionEvent!=="undefined"&&typeof DeviceMotionEvent.requestPermission==="function"){const p=await DeviceMotionEvent.requestPermission();if(p!=="granted")throw new Error("motion permission denied");}const handler=e=>{const now=performance.now();if(now-lastMotionSent<250)return;lastMotionSent=now;const payload={acceleration:e.acceleration,accelerationIncludingGravity:e.accelerationIncludingGravity,rotationRate:e.rotationRate,interval:e.interval};$("motionData").textContent=JSON.stringify(payload,null,2);const envelope=makeEnvelope("motion","github-pages-motion",payload,{capture_device:"browser-motion"});sendEnvelope(envelope,$("motionStatus")).catch(()=>{});};window.addEventListener("devicemotion",handler);$("motionStatus").textContent="captured";}catch(error){$("motionStatus").textContent="failed: "+error.message;}};
+$("ioSend").onclick=async()=>{const text=$("ioInput").value.trim();if(!text)return;$("ioStatus").textContent="sending...";try{const env=makeEnvelope("text","web-test-input",{raw:text},{synthetic:true}),response=await postObservation(env);$("ioStatus").textContent="accepted revision "+response.state_revision;$("ioInput").value="";await refreshSnapshotForEvent({state_revision:Number(response.state_revision),canonical_state_hash:response.canonical_state_hash});}catch(error){$("ioStatus").textContent="failed: "+error.message;}};
+$("simSend").onclick=async()=>{
+  const text=$("simText").value;if(!text.trim())return;
+  try {
+    const modality=$("simModality").value;
+    if (modality === "text" || modality === "language") {
+      await sendEnvelope(makeEnvelope(modality,"browser-simulator",{raw:text},{synthetic:true}),$("simStatus"));
+      return;
+    }
+    const timestamp=new Date().toISOString(), input=JSON.parse(text);
+    if (!input || Array.isArray(input) || typeof input !== "object") throw new Error("use numeric sensor JSON");
+    const allowed=new Set(["fields","channel_states","spatial_coordinates","temporal_delta","confidence"]);
+    if (Object.keys(input).some(key=>!allowed.has(key))) throw new Error("use numeric fields or channel arrays");
+    if (![input.fields,input.channel_states,input.spatial_coordinates,input.temporal_delta].some(group=>Array.isArray(group)&&group.length)) throw new Error("numeric sensor state is required");
+    const sensor={...input,modality,source:"browser-simulator:"+browserSessionId(),timestamp,sample_id:nextId("synthetic"),confidence:input.confidence??.5,
+      provenance:{adapter:"browser-numeric-simulator-v1",calibration_id:"synthetic-normalized-v1"}};
+    const response=await postSensorObservation(sensor,()=>true);
+    $("simStatus").textContent="synthetic acknowledged r"+response.state_revision;
+  } catch(error) { $("simStatus").textContent="failed: "+error.message; }
+};
+function stopCamera() {
+  cameraGeneration++;
+  if (cameraTimer) clearInterval(cameraTimer);
+  if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+  cameraTimer = null; cameraStream = null; $("video").srcObject = null;
+}
+$("cameraStart").onclick=async()=>{
+  stopCamera();
+  const generation = cameraGeneration;
+  const captureID = nextId("camera-capture");
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({video:true});
+    if (generation !== cameraGeneration) { stream.getTracks().forEach(track => track.stop()); return; }
+    cameraStream = stream; $("video").srcObject = stream;
+    const canvas = document.createElement("canvas"), ctx = canvas.getContext("2d");
+    let busy = false, previous = null, previousAt = 0, parent = null;
+    cameraTimer = setInterval(async () => {
+      if (busy || generation !== cameraGeneration || !$("video").videoWidth) return;
+      busy = true;
+      try {
+        const ratio = Math.min(160/$("video").videoWidth, 120/$("video").videoHeight);
+        canvas.width = Math.max(4, Math.round($("video").videoWidth*ratio));
+        canvas.height = Math.max(4, Math.round($("video").videoHeight*ratio));
+        ctx.drawImage($("video"), 0, 0, canvas.width, canvas.height);
+        const capturedAt = performance.now(), timestamp = new Date().toISOString(), elapsedNS = previous ? Math.round((capturedAt-previousAt)*1e6) : 0;
+        const measured = extractVisionFields(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, previous, elapsedNS);
+        const sensor = makeSensorObservation("vision", "github-pages-camera", measured.fields, {id:captureID,timestamp,parents:parent ? [parent] : []});
+        const response = await postSensorObservation(sensor, () => generation === cameraGeneration);
+        if (generation === cameraGeneration) {
+          previous = measured.state; previousAt = capturedAt; parent = sensor.sample_id;
+          const quality = measured.fields.filter(field => field.kind.startsWith("light.flow.quality."));
+          const supported = quality.filter(field => field.values[5]===1).length;
+          $("cameraStatus").textContent = "acknowledged r"+response.state_revision+" · motion evidence "+(quality.length ? supported+"/"+quality.length : "pending");
+        }
+      } catch (error) { if (generation === cameraGeneration) $("cameraStatus").textContent = "failed: "+error.message; }
+      finally { busy = false; }
+    }, 1000);
+    $("cameraStatus").textContent = "capturing";
+  } catch (error) { if (generation === cameraGeneration) { stopCamera(); $("cameraStatus").textContent = "failed: "+error.message; } }
+};
+$("cameraStop").onclick=()=>{stopCamera(); $("cameraStatus").textContent="stopped";};
+function stopAudio() {
+  audioGeneration++;
+  if (audioTimer) clearInterval(audioTimer);
+  if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+  if (audioContext) void audioContext.close();
+  if (waveFrame) cancelAnimationFrame(waveFrame);
+  audioTimer = null; audioStream = null; audioContext = null; analyser = null; waveFrame = null;
+}
+$("audioStart").onclick=async()=>{
+  stopAudio();
+  const generation = audioGeneration;
+  const captureID = nextId("audio-capture");
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    if (generation !== audioGeneration) { stream.getTracks().forEach(track => track.stop()); return; }
+    audioStream = stream; audioContext = new AudioContext();
+    const context = audioContext, source = context.createMediaStreamSource(stream);
+    analyser = context.createAnalyser(); analyser.fftSize = 16384; source.connect(analyser);
+    const capture = analyser;
+    await context.resume();
+    if (generation !== audioGeneration) return;
+    const draw = () => {
+      if (generation !== audioGeneration) return;
+      const data = new Float32Array(capture.fftSize); capture.getFloatTimeDomainData(data);
+      const ctx = $("wave").getContext("2d"); ctx.clearRect(0,0,360,80); ctx.beginPath();
+      for (let point = 0; point < 360; point++) {
+        const value = data[Math.floor(point*data.length/360)], y = (1-value)*40;
+        point ? ctx.lineTo(point,y) : ctx.moveTo(point,y);
+      }
+      ctx.stroke(); waveFrame = requestAnimationFrame(draw);
+    };
+    draw();
+    let busy = false, parent = null;
+    audioTimer = setInterval(async () => {
+      if (busy || generation !== audioGeneration) return;
+      busy = true;
+      try {
+        const samples = new Float32Array(capture.fftSize); capture.getFloatTimeDomainData(samples);
+        const timestamp = new Date().toISOString();
+        const fields = extractAudioFields(samples, context.sampleRate);
+        const sensor = makeSensorObservation("audio", "github-pages-microphone", fields, {id:captureID,timestamp,parents:parent ? [parent] : []});
+        const response = await postSensorObservation(sensor, () => generation === audioGeneration);
+        if (generation === audioGeneration) { parent = sensor.sample_id; $("audioStatus").textContent = "acknowledged r"+response.state_revision; }
+      } catch (error) { if (generation === audioGeneration) $("audioStatus").textContent = "failed: "+error.message; }
+      finally { busy = false; }
+    }, 1000);
+    $("audioStatus").textContent = "capturing";
+  } catch (error) { if (generation === audioGeneration) { stopAudio(); $("audioStatus").textContent = "failed: "+error.message; } }
+};
+$("audioStop").onclick=()=>{stopAudio(); $("audioStatus").textContent="stopped";};
+function stopMotion() {
+  motionGeneration++;
+  if (motionHandler) window.removeEventListener("devicemotion",motionHandler);
+  motionHandler=null;
+}
+$("motionStart").onclick=async()=>{
+  stopMotion();
+  const generation=motionGeneration,captureID=nextId("motion-capture");
+  try {
+    if (typeof DeviceMotionEvent === "undefined") throw new Error("motion sensor unavailable");
+    if (typeof DeviceMotionEvent.requestPermission === "function") {
+      const permission=await DeviceMotionEvent.requestPermission();
+      if (generation !== motionGeneration) return;
+      if (permission !== "granted") throw new Error("motion permission denied");
+    }
+    if (generation !== motionGeneration) return;
+    let busy=false,lastSent=-Infinity,parent=null;
+    motionHandler=async event=>{
+      const now=performance.now();
+      if (generation !== motionGeneration || busy || now-lastSent<500) return;
+      busy=true;
+      try {
+        const timestamp=new Date().toISOString(),fields=extractMotionFields(event);
+        const sensor=makeSensorObservation("motion","github-pages-motion",fields,{id:captureID,timestamp,parents:parent ? [parent] : []});
+        $("motionData").textContent=JSON.stringify({acceleration:event.acceleration,accelerationIncludingGravity:event.accelerationIncludingGravity,rotationRate:event.rotationRate,interval:event.interval},null,2);
+        lastSent=now;
+        const response=await postSensorObservation(sensor,()=>generation===motionGeneration);
+        if (generation === motionGeneration) {parent=sensor.sample_id;$("motionStatus").textContent="acknowledged r"+response.state_revision;}
+      } catch(error) {if (generation === motionGeneration) $("motionStatus").textContent="failed: "+error.message;}
+      finally {busy=false;}
+    };
+    window.addEventListener("devicemotion",motionHandler);
+    $("motionStatus").textContent="capturing";
+  } catch(error) {if (generation === motionGeneration) {stopMotion();$("motionStatus").textContent="failed: "+error.message;}}
+};
+$("motionStop").onclick=()=>{stopMotion();$("motionStatus").textContent="stopped";};
 
 status("DISCONNECTED","disconnected");

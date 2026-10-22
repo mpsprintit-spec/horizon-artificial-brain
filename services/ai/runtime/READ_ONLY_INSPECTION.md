@@ -1,0 +1,79 @@
+# Horizon Neural Read Inspection Contract (PR #24)
+
+The canonical brain is a single substrate owned by `BrainRuntime` and
+published through `RuntimeSupervisor`. Inspection must not export a mutable
+`*knowledge.Brain`, `*NeuralUnit`, synapse pointer, or registry pointer.
+
+## Allowed pathways
+
+- `HorizonEngine.InspectActiveBrain()` is the public facade. It obtains a
+  supervisor read lease and a runtime lock, then creates a detached
+  `runtime.BrainInspection` value tagged with the exact runtime revision.
+- `BrainInspection.Graph` is `knowledge.BrainReadSnapshot`. Its
+  `NeuralUnits()`, `Synapses()`, `Patterns()`, and `CanonicalBytes()`
+  return copies. All internal slices are private.
+- `BrainReadSnapshot.HasNode`, `NodeForSurface` and `SurfaceForNode`
+  are lookup operations over detached data. Lexical adapter annotations
+  remain separate from the canonical numeric substrate.
+- `BrainRuntime.ResolveNodeLabels` is for hot cognition paths. It reads
+  labels under the runtime lock, avoiding a full graph serialization every
+  cycle. `PulseWithLabels` holds the same supervisor mutation lease for
+  cognition and label resolution.
+- `evolution.ClusterSnapshot` and `ComputeSnapshotStats` consume values.
+  The clustering path builds edge statistics with a single sparse graph scan,
+  rather than recomputing incoming links per neuron.
+
+## Forbidden production patterns
+
+Production Bridge, startup, and CLI code use the private facade owner's
+`Supervisor()` handle and detached inspection. `HorizonEngine` no longer
+exports raw Knowledge, Runtime, Learning, Thinking, Language or Orchestrator
+fields. The deprecated mutable callbacks are refused on managed/journaled
+runtimes, and managed `DNF()` cannot expose a mutable Fabric/Brain.
+`inspection_architecture_test.go` guards production source boundaries.
+
+See [MANAGED_OWNERSHIP.md](MANAGED_OWNERSHIP.md) for the explicit source migration,
+single runtime/owner claims, supported API lifetime and standalone compatibility
+limits. Arbitrary pointers retained by an external standalone caller remain
+outside the managed contract; they must be discarded before managed use.
+
+## Performance and lifetime
+
+- Do not construct full read snapshots while checking an ordinary user
+  input or an unrelated CLI command. The CLI fast path avoids these copies.
+- A snapshot allocates O(number of units + synapses + patterns) memory and
+  may copy canonical JSON. It is appropriate for inspection, not for every
+  cognitive microstep.
+- Snapshots remain detached and valid after a supervisor handover.
+  Their `Revision` is the source runtime revision at capture, not a
+  live revision subscription or another independent neural brain.
+- No snapshot method mutates the live substrate. Returned collections can
+  be modified by callers, but this affects only their private copies.
+
+## Monitor lifetime
+
+`MonitorSnapshot` and `MonitorHandshake` refuse a retired or recovery-required
+runtime, just like `InspectBrain`. A previously captured detached snapshot
+remains valid; it cannot be used to obtain a new live view of the retired brain.
+
+Successful checkpoint or genesis handover, supervisor shutdown, and uncertain
+neural commits close the old runtime's telemetry hub. Cached hub references
+cannot publish again or accept new subscriptions. Existing subscribers may
+drain their already-buffered events before their channels report closure.
+Managed Bridge streams additionally check the supervisor epoch before sending
+each frame, so buffered events from an old runtime cannot cross a handover.
+Rejected recovery leaves a healthy active runtime and its subscribers intact.
+
+Publication, unsubscribe, overflow eviction, and hub shutdown share one lock.
+Publication never waits on a subscriber: a full queue closes that subscription
+without interrupting the others. Legacy Bridge instances bound to a raw runtime
+refuse reads after that runtime becomes unavailable; applications requiring
+handover continuity must use `bridge.NewManaged`.
+
+## Verification
+
+The automated regression suite exercises defensive copies, lexical
+annotation separation, numerical statistics equivalence, checkpoint
+handover, closed-supervisor fail-closed behavior, and CLI hot-path
+allocation limits. This is a narrower claim than perfect encapsulation:
+standalone legacy raw pointers remain explicitly untrusted.

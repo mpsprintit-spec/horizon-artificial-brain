@@ -13,61 +13,92 @@ import (
 //go:embed data/basic_experiences.json
 var foundationalExperienceCorpus []byte
 
-
 //go:embed data/foundational_vector_experiences.json
 var foundationalVectorExperienceCorpus []byte
 
 type Experience struct {
-	Sequence          []string  `json:"sequence"`
-	Weight            float64   `json:"weight"`
-	Confidence        float64   `json:"confidence"`
-	ExperienceID      string    `json:"experience_id,omitempty"`
-	Source            string    `json:"source,omitempty"`
-	Modality          string    `json:"modality,omitempty"`
-	Timestamp         time.Time `json:"timestamp,omitempty"`
-	Reliability       float64   `json:"reliability,omitempty"`
-	IndependenceGroup string    `json:"independence_group,omitempty"`
-	CausalLink        string    `json:"causal_link,omitempty"`
-	ContradictionSet  string    `json:"contradiction_set,omitempty"`
+	ContextSequence   []string             `json:"context_sequence,omitempty"`
+	DataSequence      []string             `json:"data_sequence,omitempty"`
+	NeuralSequence    [][]knowledge.NodeID `json:"neural_sequence,omitempty"`
+	NeuralContext     [][]knowledge.NodeID `json:"neural_context,omitempty"`
+	NeuralData        [][]knowledge.NodeID `json:"neural_data,omitempty"`
+	Sequence          []string             `json:"sequence"`
+	Weight            float64              `json:"weight"`
+	Confidence        float64              `json:"confidence"`
+	ExperienceID      string               `json:"experience_id,omitempty"`
+	Source            string               `json:"source,omitempty"`
+	Modality          string               `json:"modality,omitempty"`
+	Timestamp         time.Time            `json:"timestamp,omitempty"`
+	Reliability       float64              `json:"reliability,omitempty"`
+	IndependenceGroup string               `json:"independence_group,omitempty"`
+	CausalLink        string               `json:"causal_link,omitempty"`
+	ContradictionSet  string               `json:"contradiction_set,omitempty"`
+	EpisodeID         string               `json:"episode_id,omitempty"`
+	CausalGroup       string               `json:"causal_group,omitempty"`
 }
 
 func clamp01(v float64) float64 {
-	if v < 0 { return 0 }
-	if v > 1 { return 1 }
+	if v < 0 {
+		return 0
+	}
+	if v > 1 {
+		return 1
+	}
 	return v
 }
 
 func (e Experience) evidence(now time.Time) knowledge.ExperienceEvidence {
 	stamp := e.Timestamp
-	if stamp.IsZero() { stamp = now }
+	if stamp.IsZero() {
+		stamp = now
+	}
 	return knowledge.ExperienceEvidence{
 		ExperienceID: e.ExperienceID, Source: e.Source, Modality: e.Modality,
 		Timestamp: stamp, Reliability: clamp01(e.Reliability),
 		IndependenceGroup: e.IndependenceGroup, CausalLink: e.CausalLink,
 		ContradictionSet: e.ContradictionSet,
+		EpisodeID:        e.EpisodeID, CausalGroup: e.CausalGroup,
 	}
 }
 
 func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
-	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 { return }
-	if now.IsZero() { now = time.Now().UTC() }
+	l.LearnExperienceWithEncoding(experience, now, knowledge.WrittenTextEncoding)
+}
+
+func (l *LearningUnit) LearnExperienceWithEncoding(experience Experience, now time.Time, encoding knowledge.SurfaceEncoding) {
+	if l == nil || l.Kb == nil || len(experience.Sequence) == 0 {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
 	now = now.UTC()
 	weight := clamp01(experience.Weight)
 	confidence := clamp01(experience.Confidence)
-	if weight == 0 { weight = 0.5 }
-	if confidence == 0 { confidence = 0.5 }
+	if weight == 0 {
+		weight = 0.5
+	}
+	if confidence == 0 {
+		confidence = 0.5
+	}
 
 	steps := make([]knowledge.PatternStep, 0, len(experience.Sequence))
 	var previous *knowledge.ConceptNode
 	for i, token := range experience.Sequence {
-		node := l.Kb.StoreAt(token, now)
-		if node == nil { continue }
+		node := l.Kb.StoreSurfaceAt(token, now, encoding)
+		if node == nil {
+			continue
+		}
 		steps = append(steps, knowledge.PatternStep{NodeID: node.ID, Position: i, Activation: 1})
-		if previous != nil { l.Kb.ConnectAt(previous, node, weight, confidence, false, now) }
+		if previous != nil {
+			l.Kb.ConnectAt(previous, node, weight, confidence, false, now)
+		}
 		previous = node
 		node.LastActivation = now
 	}
-	if len(steps) == 0 { return }
+	if len(steps) == 0 {
+		return
+	}
 	// A distributed outcome has multiple members; keep the first observed
 	// outcome unit as the population anchor so adapter-level resolution and
 	// prediction refer to the same learned population without collapsing it.
@@ -82,6 +113,10 @@ func (l *LearningUnit) LearnExperience(experience Experience, now time.Time) {
 }
 
 func (l *LearningUnit) LearnOutcomeTrace(targetNodeIDs, outcomeNodeIDs []knowledge.NodeID, weight, confidence float64, evidence knowledge.ExperienceEvidence, now time.Time) {
+	l.LearnOutcomeTraceWithDynamics(targetNodeIDs, outcomeNodeIDs, weight, confidence, evidence, now, knowledge.LegacyDynamics)
+}
+
+func (l *LearningUnit) LearnOutcomeTraceWithDynamics(targetNodeIDs, outcomeNodeIDs []knowledge.NodeID, weight, confidence float64, evidence knowledge.ExperienceEvidence, now time.Time, dynamics knowledge.DynamicsEncoding) {
 	if l == nil || l.Kb == nil || len(targetNodeIDs) == 0 || len(outcomeNodeIDs) == 0 {
 		return
 	}
@@ -133,22 +168,30 @@ func (l *LearningUnit) LearnOutcomeTrace(targetNodeIDs, outcomeNodeIDs []knowled
 	for _, outcomeID := range outcomeNodeIDs {
 		pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, outcomeID, weight, confidence, evidence)
 		if pattern != nil {
-			pattern.Confidence = knowledge.CalibratedConfidence(confidence, pattern.Evidence)
+			pattern.Confidence = knowledge.CalibratedConfidenceWithDynamics(confidence, pattern.Evidence, dynamics)
 		}
 	}
 }
 
 func (l *LearningUnit) LoadExperiences(path string, now time.Time) (int, error) {
-	if l == nil || l.Kb == nil { return 0, fmt.Errorf("learning unit or knowledge base is nil") }
+	if l == nil || l.Kb == nil {
+		return 0, fmt.Errorf("learning unit or knowledge base is nil")
+	}
 	data, err := os.ReadFile(path)
-	if err != nil { return 0, err }
+	if err != nil {
+		return 0, err
+	}
 	return l.loadExperienceData(data, now)
 }
 
 func (l *LearningUnit) loadExperienceData(data []byte, now time.Time) (int, error) {
 	var experiences []Experience
-	if err := json.Unmarshal(data, &experiences); err != nil { return 0, err }
-	for _, experience := range experiences { l.LearnExperience(experience, now) }
+	if err := json.Unmarshal(data, &experiences); err != nil {
+		return 0, err
+	}
+	for _, experience := range experiences {
+		l.LearnExperience(experience, now)
+	}
 	return len(experiences), nil
 }
 
@@ -167,15 +210,14 @@ func (l *LearningUnit) BootstrapBasicExperiences(now time.Time) (int, error) {
 	return count + len(vectorExperiences), nil
 }
 
-
 type FoundationalVectorExperience struct {
-	ExperienceID string          `json:"experience_id"`
-	Modality     string          `json:"modality"`
-	Vectors      [][]float64     `json:"vectors"`
-	Weight       float64         `json:"weight"`
-	Confidence   float64         `json:"confidence"`
-	Reliability  float64         `json:"reliability"`
-	CausalLink   string          `json:"causal_link,omitempty"`
+	ExperienceID string      `json:"experience_id"`
+	Modality     string      `json:"modality"`
+	Vectors      [][]float64 `json:"vectors"`
+	Weight       float64     `json:"weight"`
+	Confidence   float64     `json:"confidence"`
+	Reliability  float64     `json:"reliability"`
+	CausalLink   string      `json:"causal_link,omitempty"`
 }
 
 func (l *LearningUnit) LearnFoundationalVectorExperience(experience FoundationalVectorExperience, now time.Time) {
@@ -224,13 +266,13 @@ func (l *LearningUnit) LearnFoundationalVectorExperience(experience Foundational
 	}
 	result := steps[len(steps)-1].NodeID
 	evidence := knowledge.ExperienceEvidence{
-		ExperienceID: experience.ExperienceID,
-		Source: "foundational-bootstrap",
-		Modality: experience.Modality,
-		Timestamp: now,
-		Reliability: reliability,
+		ExperienceID:      experience.ExperienceID,
+		Source:            "foundational-bootstrap",
+		Modality:          experience.Modality,
+		Timestamp:         now,
+		Reliability:       reliability,
 		IndependenceGroup: experience.ExperienceID,
-		CausalLink: experience.CausalLink,
+		CausalLink:        experience.CausalLink,
 	}
 	pattern := l.Kb.Patterns.LearnTraceWithEvidence(steps, nil, result, weight, confidence, evidence)
 	if pattern != nil {

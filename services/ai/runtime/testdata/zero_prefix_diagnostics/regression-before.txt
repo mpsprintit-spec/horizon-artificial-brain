@@ -1,0 +1,17 @@
+--- FAIL: TestJournalPrefixHashCanonicalEmptyAndUnchangedNonempty (0.00s)
+    --- FAIL: TestJournalPrefixHashCanonicalEmptyAndUnchangedNonempty/allocated (0.00s)
+        checkpoint_zero_prefix_test.go:32: empty history digest: got "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945", <nil>
+    --- FAIL: TestJournalPrefixHashCanonicalEmptyAndUnchangedNonempty/reserved (0.00s)
+        checkpoint_zero_prefix_test.go:32: empty history digest: got "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945", <nil>
+    --- FAIL: TestJournalPrefixHashCanonicalEmptyAndUnchangedNonempty/slice-of-nonempty (0.00s)
+        checkpoint_zero_prefix_test.go:32: empty history digest: got "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945", <nil>
+--- FAIL: TestCheckpointJournalRecoveryFromRevisionZero (0.11s)
+    --- FAIL: TestCheckpointJournalRecoveryFromRevisionZero/empty (0.01s)
+        checkpoint_zero_prefix_test.go:86: zero checkpoint, 1 appended events: checkpoint journal prefix hash mismatch
+    --- FAIL: TestCheckpointJournalRecoveryFromRevisionZero/bootstrap (0.11s)
+        checkpoint_zero_prefix_test.go:86: zero checkpoint, 1 appended events: checkpoint journal prefix hash mismatch
+--- FAIL: TestZeroPrefixSupervisorHandoverPreservesLearnedSpelling (0.02s)
+    checkpoint_zero_prefix_test.go:248: runtime handover aborted: checkpoint journal prefix hash mismatch
+FAIL
+FAIL	github.com/project-horizon/horizon-core/services/ai/runtime	0.147s
+FAIL

@@ -1,0 +1,287 @@
+{
+  "evidence_ledger": {
+    "by_node": {},
+    "seen": {}
+  },
+  "schema_version": 9,
+  "brain_identity": "horizon-primary-brain",
+  "sequence": 1,
+  "timestamp": "2026-10-19T10:00:00Z",
+  "checksum": "02bd17faaff0c4da28a642e7d35afb7818c7da92df0d8ef32a4326fada7aedad",
+  "brain": {
+    "schema_version": 2,
+    "brain_identity": "horizon",
+    "neural_units": [
+      {
+        "id": 1,
+        "representation": [
+          -0.546,
+          0.44900000000000007,
+          -0.831,
+          -0.736,
+          0.4119999999999999,
+          0.375,
+          0.663,
+          0.817,
+          -0.33099999999999996,
+          -0.31499999999999995,
+          0.45999999999999996,
+          0.919,
+          -0.19999999999999996,
+          -0.542,
+          0.7170000000000001,
+          0.32499999999999996
+        ],
+        "activation": 1,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "usage_history": [
+          "2026-10-19T10:00:00Z"
+        ],
+        "last_activation": "2026-10-19T10:00:00Z"
+      },
+      {
+        "id": 2,
+        "representation": [
+          0.391,
+          -0.94,
+          0.923,
+          0.526,
+          -0.126,
+          0.12400000000000011,
+          -0.954,
+          -0.749,
+          0.026999999999999913,
+          -0.747,
+          -0.015000000000000013,
+          -0.746,
+          -0.784,
+          0.2649999999999999,
+          0.45799999999999996,
+          0.8660000000000001
+        ],
+        "activation": 1,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "usage_history": [
+          "2026-10-19T10:00:00Z"
+        ],
+        "last_activation": "2026-10-19T10:00:00Z"
+      },
+      {
+        "id": 3,
+        "representation": [
+          -0.383,
+          -0.45699999999999996,
+          -0.8200000000000001,
+          0.885,
+          -0.07999999999999996,
+          -0.497,
+          -0.050000000000000044,
+          -0.42500000000000004,
+          0.4650000000000001,
+          -0.11599999999999999,
+          0.7230000000000001,
+          -0.907,
+          0.9219999999999999,
+          -0.139,
+          0.052999999999999936,
+          -0.569
+        ],
+        "activation": 1,
+        "resting_activation": 0.05,
+        "threshold": 0.25,
+        "frequency": 1,
+        "importance": 0.5,
+        "plasticity": 0.3,
+        "usage_history": [
+          "2026-10-19T10:00:00Z"
+        ],
+        "last_activation": "2026-10-19T10:00:00Z"
+      }
+    ],
+    "populations": null,
+    "synapses": [
+      {
+        "source_id": 1,
+        "target_id": 2,
+        "weight": 0.8,
+        "activation": 1,
+        "frequency": 1,
+        "confidence": 0.8,
+        "inhibitory": false,
+        "last_activation": "2026-10-19T10:00:00Z",
+        "dynamic": {
+          "weight": 0.8,
+          "activation": 1,
+          "eligibility": 1,
+          "confidence": 0.8,
+          "frequency": 1,
+          "last_activation": "2026-10-19T10:00:00Z",
+          "last_modification": "2026-10-19T10:00:00Z",
+          "last_eligibility_update": "2026-10-19T10:00:00Z"
+        }
+      },
+      {
+        "source_id": 2,
+        "target_id": 3,
+        "weight": 0.8,
+        "activation": 1,
+        "frequency": 1,
+        "confidence": 0.8,
+        "inhibitory": false,
+        "last_activation": "2026-10-19T10:00:00Z",
+        "dynamic": {
+          "weight": 0.8,
+          "activation": 1,
+          "eligibility": 1,
+          "confidence": 0.8,
+          "frequency": 1,
+          "last_activation": "2026-10-19T10:00:00Z",
+          "last_modification": "2026-10-19T10:00:00Z",
+          "last_eligibility_update": "2026-10-19T10:00:00Z"
+        }
+      }
+    ],
+    "temporal_patterns": [
+      {
+        "dynamics_encoding": "ordered-observation-v1",
+        "ordered_observation": {
+          "stimulus": [
+            [
+              1
+            ],
+            [
+              2
+            ],
+            [
+              3
+            ]
+          ]
+        },
+        "id": 1,
+        "members": [
+          1,
+          2,
+          3
+        ],
+        "sequence": [
+          {
+            "node_id": 1,
+            "position": 0,
+            "delta": 0,
+            "activation": 1
+          },
+          {
+            "node_id": 2,
+            "position": 1,
+            "delta": 0,
+            "activation": 1
+          },
+          {
+            "node_id": 3,
+            "position": 2,
+            "delta": 0,
+            "activation": 1
+          }
+        ],
+        "result": 3,
+        "weight": 0.8,
+        "confidence": 0.8,
+        "frequency": 1,
+        "evidence": [
+          {
+            "source": "legacy-teacher",
+            "modality": "language",
+            "timestamp": "2026-10-19T10:00:00Z"
+          }
+        ]
+      }
+    ],
+    "episodes": null,
+    "bootstrap_experiences": null,
+    "experience_traces": null,
+    "developmental_experiences": null,
+    "attention_state": {},
+    "prediction_state": {},
+    "error_state": {},
+    "memory_state": {},
+    "curiosity_state": {},
+    "learning_policy_state": {
+      "novelty_sensitivity": 0.7,
+      "uncertainty_sensitivity": 0.8,
+      "memory_retention": 0.6,
+      "curiosity_pressure": 0.65,
+      "exploration_bias": 0.3,
+      "repeat_observation_bias": 0.2,
+      "defer_conclusion_bias": 0.2
+    },
+    "self_model_state": {},
+    "social_model_state": {},
+    "value_state": {},
+    "plasticity_state": {},
+    "inquiry_state": {
+      "sequence": 0,
+      "last_updated": "0001-01-01T00:00:00Z",
+      "pending": false,
+      "uncertainty": 0,
+      "expected_information_gain": 0,
+      "selected_score": 0,
+      "observed_information_gain": 0,
+      "outcome_prediction_error": 0
+    },
+    "provenance": []
+  },
+  "activation": {},
+  "cognitive_state": {
+    "BrainIdentity": "",
+    "Sequence": 0,
+    "Timestamp": "0001-01-01T00:00:00Z",
+    "ActiveNodeIDs": null,
+    "Activations": {},
+    "Confidence": {},
+    "Resonance": 0,
+    "PredictionError": 0
+  },
+  "inquiry_valence": {},
+  "last_observation_at": "0001-01-01T00:00:00Z",
+  "surface_annotations": [
+    {
+      "surface_encoding": "written-text-v1",
+      "surface": "naku",
+      "modality": "language",
+      "node_id": 1,
+      "population": [
+        1
+      ],
+      "last_seen": "2026-10-19T10:00:00Z"
+    },
+    {
+      "surface_encoding": "written-text-v1",
+      "surface": "melo",
+      "modality": "language",
+      "node_id": 2,
+      "population": [
+        2
+      ],
+      "last_seen": "2026-10-19T10:00:00Z"
+    },
+    {
+      "surface_encoding": "written-text-v1",
+      "surface": "tiva",
+      "modality": "language",
+      "node_id": 3,
+      "population": [
+        3
+      ],
+      "last_seen": "2026-10-19T10:00:00Z"
+    }
+  ],
+  "journal_prefix_hash": "a17537a7b10a0cebabfc83f6d5c9a5dce3a7d37e581310203ee2000b2ea8d931"
+}

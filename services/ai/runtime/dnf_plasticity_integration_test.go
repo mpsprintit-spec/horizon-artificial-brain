@@ -30,9 +30,9 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 	}
 
 	before, err := runtime.CognitiveProcess(Event{
-		ID: "p2-before",
-		Stimulus: []string{"source"},
-		Cycles: 1,
+		ID:        "p2-before",
+		Stimulus:  []string{"source"},
+		Cycles:    1,
 		Timestamp: time.Unix(101, 0).UTC(),
 	})
 	if err != nil {
@@ -45,9 +45,9 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 
 	const requestID = "p2-plasticity-loop"
 	if err := runtime.RegisterActionBinding(ActionBinding{
-		RequestID: requestID,
+		RequestID:     requestID,
 		BrainIdentity: BrainIdentity,
-		Intent: "reinforce target pathway",
+		Intent:        "reinforce target pathway",
 		TargetNodeIDs: []knowledge.NodeID{target.ID},
 		Synapses: []SynapseBinding{{
 			SourceNodeID: source.ID,
@@ -59,8 +59,8 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 
 	t0 := time.Unix(102, 0).UTC()
 	for _, outcome := range []OutcomeEvent{
-		{RequestID: requestID, BrainIdentity: BrainIdentity, Success: true, Observation: []string{"verified"}, Source: "executor", Modality: "execution-outcome", ObservedAt: t0, Reliability: 1},
-		{RequestID: requestID, BrainIdentity: BrainIdentity, Success: true, Observation: []string{"independent verification"}, Source: "sensor-verification", Modality: "sensor", ObservedAt: t0.Add(time.Minute), Reliability: 1},
+		{RequestID: requestID, BrainIdentity: BrainIdentity, Success: true, Observation: []string{"verified"}, Source: "executor", IndependenceGroup: "executor-origin", Modality: "execution-outcome", ObservedAt: t0, Reliability: 1},
+		{RequestID: requestID, BrainIdentity: BrainIdentity, Success: true, Observation: []string{"independent verification"}, Source: "sensor-verification", IndependenceGroup: "verification-origin", Modality: "sensor", ObservedAt: t0.Add(time.Minute), Reliability: 1},
 	} {
 		if _, err := runtime.ObserveOutcome(outcome); err != nil {
 			t.Fatal(err)
@@ -79,9 +79,9 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 	}
 
 	after, err := runtime.CognitiveProcess(Event{
-		ID: "p2-after",
-		Stimulus: []string{"source"},
-		Cycles: 1,
+		ID:        "p2-after",
+		Stimulus:  []string{"source"},
+		Cycles:    1,
 		Timestamp: t0.Add(2 * time.Minute),
 	})
 	if err != nil {

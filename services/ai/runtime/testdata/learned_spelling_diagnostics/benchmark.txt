@@ -1,0 +1,12 @@
+goos: linux
+goarch: amd64
+pkg: github.com/project-horizon/horizon-core/services/ai/knowledge
+cpu: AMD EPYC 9V74 80-Core Processor
+BenchmarkLearnedSpellingReadout/words-8-4         	      20	     65672 ns/op	   2489369 canonical-bytes	         0 new-units	       133.0 output-cells	      4256 synapses	       165.0 units	   23219 B/op	      47 allocs/op
+BenchmarkLearnedSpellingReadout/words-8-4         	      20	     69878 ns/op	   2489369 canonical-bytes	         0 new-units	       133.0 output-cells	      4256 synapses	       165.0 units	   23304 B/op	      49 allocs/op
+BenchmarkLearnedSpellingReadout/words-8-4         	      20	     94404 ns/op	   2489369 canonical-bytes	         0 new-units	       133.0 output-cells	      4256 synapses	       165.0 units	   23179 B/op	      49 allocs/op
+BenchmarkLearnedSpellingReadout/words-32-4        	      20	     83005 ns/op	   9563615 canonical-bytes	         0 new-units	       133.0 output-cells	     17024 synapses	       261.0 units	   23201 B/op	      47 allocs/op
+BenchmarkLearnedSpellingReadout/words-32-4        	      20	     90963 ns/op	   9563615 canonical-bytes	         0 new-units	       133.0 output-cells	     17024 synapses	       261.0 units	   23382 B/op	      50 allocs/op
+BenchmarkLearnedSpellingReadout/words-32-4        	      20	     82636 ns/op	   9563615 canonical-bytes	         0 new-units	       133.0 output-cells	     17024 synapses	       261.0 units	   23459 B/op	      50 allocs/op
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	1.005s

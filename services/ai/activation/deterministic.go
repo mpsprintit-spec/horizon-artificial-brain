@@ -17,6 +17,10 @@ func (e *Engine) ThinkWithPredictionAt(cycles int, now time.Time) ThoughtResult 
 // endogenous context signal to the existing neural state. The context is
 // additive and therefore cannot replace the current recurrent trajectory.
 func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]float64, now time.Time) ThoughtResult {
+	return e.ThinkWithContextDynamicsAt(cycles, context, now, knowledge.LegacyDynamics)
+}
+
+func (e *Engine) ThinkWithContextDynamicsAt(cycles int, context map[knowledge.NodeID]float64, now time.Time, dynamics knowledge.DynamicsEncoding) ThoughtResult {
 	if cycles < 1 {
 		cycles = 1
 	}
@@ -25,11 +29,16 @@ func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]flo
 	} else {
 		now = now.UTC()
 	}
+	if dynamics.HasPhysicalMemory() {
+		e.Memory.ApplyMemoryDynamicsWithEncoding(now, dynamics)
+	}
 
 	e.mu.RLock()
 	state := cloneState(e.internalState)
 	confidence := cloneState(e.internalConfidence)
 	previousPrediction := cloneState(e.lastPrediction)
+	trace := e.lastTrace.Clone()
+	recurrentContext := e.contextState.Clone()
 	e.mu.RUnlock()
 
 	for id, boost := range context {
@@ -49,15 +58,24 @@ func (e *Engine) ThinkWithContextAt(cycles int, context map[knowledge.NodeID]flo
 
 	actualState, actualConfidence := e.advance(state, confidence, now, cycles)
 	actual := e.converge(actualState, actualConfidence, now)
-	e.ApplyActivityPlasticity(state, actual.Activations, now)
+	if dynamics.HasObservedFeedback() {
+		e.ApplyActivityPlasticityWithDynamics(nil, nil, now, dynamics)
+	} else {
+		e.ApplyActivityPlasticityWithDynamics(state, actual.Activations, now, dynamics)
+	}
 
 	error := 0.0
 	if len(previousPrediction) > 0 {
 		error = stateDifference(previousPrediction, actual.Activations)
-		e.ApplyPredictionErrorPlasticity(previousPrediction, actual.Activations, error, now)
+		if !dynamics.HasObservedFeedback() {
+			e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction, actual.Activations, error, now, dynamics)
+		}
 	}
 
 	nextPrediction, nextPredictionConfidence := e.advance(actual.Activations, actual.Confidence, now, cycles)
+	if dynamics.HasRecurrentContext() {
+  nextPrediction,nextPredictionConfidence=e.applyRecurrentPatternPrediction(nextPrediction,nextPredictionConfidence,trace,recurrentContext,now,true)
+	} else if dynamics == knowledge.OrderedDynamics {nextPrediction,nextPredictionConfidence=e.applyOrderedPatternPrediction(nextPrediction,nextPredictionConfidence,trace)}
 
 	e.mu.Lock()
 	e.internalState = cloneState(actual.Activations)

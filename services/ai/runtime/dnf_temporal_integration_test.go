@@ -9,18 +9,18 @@ import (
 
 func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 	brain := knowledge.NewBrain()
-	source := brain.Store("source")
-	target := brain.Store("target")
-	idle := brain.Store("idle")
+	t0 := time.Unix(200, 0).UTC()
+	source := brain.StoreAt("source", t0)
+	target := brain.StoreAt("target", t0)
+	idle := brain.StoreAt("idle", t0)
 	_ = idle
-	brain.Connect(source, target, 0.20, 0.50, false)
+	brain.ConnectAt(source, target, 0.20, 0.50, false, t0)
 
 	runtime := NewBrainRuntime(brain)
 	if runtime == nil || runtime.DNF() == nil {
 		t.Fatal("expected runtime and DNF fabric")
 	}
 
-	t0 := time.Unix(200, 0).UTC()
 	if _, err := runtime.CognitiveProcess(Event{
 		ID:        "temporal-seed",
 		Stimulus:  []string{"source"},

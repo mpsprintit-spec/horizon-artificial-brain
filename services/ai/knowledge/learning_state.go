@@ -163,9 +163,9 @@ func (k *KnowledgeBase) ReinforceTransitionPopulation(previous, current []NodeID
 }
 
 
-// ApplyMemoryDynamics performs time-dependent retention on the existing
-// substrate. Forgetting reduces the influence of old connections and the
-// priority of old temporal traces, but does not delete historical structure.
+// ApplyMemoryDynamics preserves the historical age-per-call retention law for
+// old journal encodings and trusted legacy callers. Current serving code uses
+// ApplyMemoryDynamicsWithEncoding; changing this function would change replay.
 func (k *KnowledgeBase) ApplyMemoryDynamics(now time.Time) {
 	if k == nil {
 		return

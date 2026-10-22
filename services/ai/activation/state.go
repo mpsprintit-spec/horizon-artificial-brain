@@ -6,6 +6,9 @@ import "github.com/project-horizon/horizon-core/services/ai/knowledge"
 // state, not a second memory substrate, and is persisted only so a checkpoint
 // can resume the same ongoing neural process.
 type StateSnapshot struct {
+	ObservationPrediction *ObservationPrediction `json:"observation_prediction,omitempty"`
+	ContextState *ContextState `json:"recurrent_context,omitempty"`
+	LastTrace *knowledge.ObservationTrace `json:"last_observation_trace,omitempty"`
 	InternalState      map[knowledge.NodeID]float64 `json:"internal_state,omitempty"`
 	InternalConfidence map[knowledge.NodeID]float64 `json:"internal_confidence,omitempty"`
 	LastPrediction     map[knowledge.NodeID]float64 `json:"last_prediction,omitempty"`
@@ -19,6 +22,9 @@ func (e *Engine) SnapshotState() StateSnapshot {
 	e.mu.RLock()
 	defer e.mu.RUnlock()
 	return StateSnapshot{
+		LastTrace: e.lastTrace.Clone(),
+		ObservationPrediction: e.observationPrediction.Clone(),
+	ContextState: e.contextState.Clone(),
 		InternalState:      cloneState(e.internalState),
 		InternalConfidence: cloneState(e.internalConfidence),
 		LastPrediction:     cloneState(e.lastPrediction),
@@ -36,6 +42,9 @@ func (e *Engine) RestoreState(snapshot StateSnapshot) {
 	e.internalConfidence = cloneState(snapshot.InternalConfidence)
 	e.lastPrediction = cloneState(snapshot.LastPrediction)
 	e.lastPredictionConf = cloneState(snapshot.LastPredictionConf)
+	e.lastTrace = snapshot.LastTrace.Clone()
+	e.contextState = snapshot.ContextState.Clone()
+	e.observationPrediction = snapshot.ObservationPrediction.Clone()
 }
 
 

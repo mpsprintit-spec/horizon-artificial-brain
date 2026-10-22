@@ -55,3 +55,29 @@ test("canonical hash is checked when a live event is resynced", () => {
     populations:[], synapses:[], temporal_patterns:[], experience_traces:[], brain_state:{}
   });
 });
+
+test("in-flight snapshots cannot rewind event continuity or the displayed graph",()=>{
+  const store=new HorizonStore();
+  const snapshot=revision=>({type:"brain.snapshot",brain_identity:"horizon-primary-brain",state_revision:revision,captured_at:"",canonical_state_hash:"sha256:"+revision,counts:{},neural_units:[],populations:[],synapses:[],temporal_patterns:[],experience_traces:[],brain_state:{}});
+  store.setSnapshot(snapshot(4));
+  store.applyEvent({type:"process",state_revision:5,timestamp:"",canonical_state_hash:"sha256:5"});
+  store.applyEvent({type:"think",state_revision:6,timestamp:"",canonical_state_hash:"sha256:6"});
+  store.setSnapshot(snapshot(5));
+  assert.equal(store.revision,6);assert.equal(store.snapshot.state_revision,5);
+  assert.equal(store.applyEvent({type:"think",state_revision:7,timestamp:""}),"applied");
+  store.setSnapshot(snapshot(7));store.setSnapshot(snapshot(6));
+  assert.equal(store.revision,7);assert.equal(store.snapshot.state_revision,7);
+  assert.equal(store.applyEvent({type:"process",state_revision:8,timestamp:"",schema_version:2}),"applied");
+  store.resetForConnection();store.setSnapshot(snapshot(1));
+  assert.equal(store.revision,1);assert.equal(store.snapshot.state_revision,1);
+  assert.equal(store.applyEvent({type:"process",state_revision:2,timestamp:"",schema_version:2}),"applied");
+});
+
+test("new inspection runtime epochs reset the cursor after recovery",()=>{
+  const store=new HorizonStore();
+  const page=(epoch,revision)=>({type:"brain.snapshot",brain_identity:"horizon-primary-brain",state_revision:revision,inspection_epoch:epoch,captured_at:"",canonical_state_hash:"",counts:{},neural_units:[],populations:[],synapses:[],temporal_patterns:[],experience_traces:[],brain_state:{}});
+  store.setSnapshot(page("before-recovery",9));
+  store.applyEvent({type:"think",state_revision:10,timestamp:"",schema_version:2});
+  store.setSnapshot(page("after-recovery",4));
+  assert.equal(store.revision,4);assert.equal(store.snapshot.inspection_epoch,"after-recovery");assert.equal(store.events.length,0);
+});

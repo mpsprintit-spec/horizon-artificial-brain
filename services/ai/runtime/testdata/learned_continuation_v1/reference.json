@@ -1,0 +1,113 @@
+{
+  "at": "1970-01-01T00:01:40Z",
+  "canonical_sha256": "de56a03aee6193e6b79e4e2ab4751d90520f9d4a95e9887928f6e1bb46bfc6ae",
+  "encoding": "learned-continuation-v1",
+  "journal_sha256": "9ee80d3c60b42ecc8baea732047d9f64263f5af52adb2d78c908f5f3b646a64f",
+  "parent_commit": "99820e0c7912440f84fa4e0a223a3880b88bbf7b",
+  "population": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "readout": {
+    "brain_identity": "horizon-primary-brain",
+    "sequence": 25,
+    "hypothetical": true,
+    "at": "1970-01-01T00:01:40Z",
+    "encoding": "learned-continuation-v1",
+    "status": "complete",
+    "steps": [
+      {
+        "forecast": {
+          "node_ids": [
+            1,
+            5,
+            6,
+            7
+          ],
+          "member_count": 4,
+          "alternatives": 1,
+          "confidence": 0.8415213946117275,
+          "unknown_probability": 0.15847860538827252,
+          "context_support": 1,
+          "ambiguity": 0,
+          "evidence_mass": 5.3100000000000005
+        },
+        "spelling": {
+          "status": "decoded",
+          "text": "na ",
+          "scalars": [
+            110,
+            97,
+            32
+          ],
+          "min_margin": 0.20374209249238862,
+          "conductance": 0.30721801383973435,
+          "position": 3
+        }
+      },
+      {
+        "forecast": {
+          "node_ids": [
+            1,
+            75,
+            76,
+            77
+          ],
+          "member_count": 4,
+          "alternatives": 1,
+          "confidence": 0.8415213946117275,
+          "unknown_probability": 0.15847860538827252,
+          "context_support": 1,
+          "ambiguity": 0,
+          "evidence_mass": 5.3100000000000005
+        },
+        "spelling": {
+          "status": "decoded",
+          "text": "lu",
+          "scalars": [
+            108,
+            117
+          ],
+          "min_margin": 0.2787735561315407,
+          "conductance": 0.30721801383973435,
+          "position": 2
+        }
+      },
+      {
+        "forecast": {
+          "node_ids": [
+            1,
+            78,
+            79,
+            80
+          ],
+          "member_count": 4,
+          "alternatives": 1,
+          "confidence": 0.8415213946117275,
+          "unknown_probability": 0.15847860538827252,
+          "context_support": 1,
+          "ambiguity": 0,
+          "evidence_mass": 5.3100000000000005
+        },
+        "spelling": {
+          "status": "decoded",
+          "min_margin": 0.5429323333336213,
+          "conductance": 0.8281723355248753,
+          "position": 0
+        }
+      }
+    ],
+    "text": "na lu",
+    "scalars": [
+      110,
+      97,
+      32,
+      108,
+      117
+    ],
+    "min_confidence": 0.8415213946117275
+  },
+  "records": 25
+}

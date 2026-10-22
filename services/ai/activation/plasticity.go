@@ -30,6 +30,17 @@ func decayPredictionEligibility(eligibility float64, lastUpdate, now time.Time) 
 // cognitive rule is consulted. Eligibility is evaluated at the supplied
 // timestamp using the same elapsed-time decay model as activity plasticity.
 func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.NodeID]float64, errorSignal float64, now time.Time) {
+	e.applyPredictionErrorPlasticity(predicted, actual, errorSignal, now, false)
+}
+
+// Versioned local credit requires the source to participate in the compared
+// states. Residual eligibility or a stale node.Activation cannot attribute an
+// unrelated target's surprise to every incoming connection.
+func (e *Engine) ApplyPredictionErrorPlasticityWithDynamics(predicted, actual map[knowledge.NodeID]float64, errorSignal float64, now time.Time, dynamics knowledge.DynamicsEncoding) {
+	e.applyPredictionErrorPlasticity(predicted, actual, errorSignal, now, dynamics.HasLocalActivity())
+}
+
+func (e *Engine) applyPredictionErrorPlasticity(predicted, actual map[knowledge.NodeID]float64, errorSignal float64, now time.Time, local bool) {
 	if e == nil || e.Memory == nil || errorSignal <= 0 {
 		return
 	}
@@ -45,6 +56,9 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 	defer e.Memory.Unlock()
 
 	for _, source := range e.Memory.Registry.Nodes() {
+		if local && max(clamp01(predicted[source.ID]), clamp01(actual[source.ID])) < activityPlasticityMinActive {
+			continue
+		}
 		for _, synapse := range source.OutboundAll() {
 			if synapse == nil || synapse.Inhibitory {
 				continue
@@ -65,7 +79,9 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 			}
 
 			synapse.Dynamic.Eligibility = eligibility
-			synapse.Dynamic.LastEligibilityUpdate = now
+			if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
+				synapse.Dynamic.LastEligibilityUpdate = now
+			}
 			magnitude := predictionLearningRate * errorSignal * clamp01(abs(direction)) * eligibility
 			if direction > 0 {
 				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+magnitude, predictionMinWeight, predictionMaxWeight)
@@ -92,6 +108,14 @@ func (e *Engine) ApplyPredictionErrorPlasticity(predicted, actual map[knowledge.
 // controls how strongly the consequence is retained; it never changes the
 // sign of valence. No new connections are created.
 func (e *Engine) ApplyConsequencePlasticity(valence, informationGain float64, now time.Time) {
+	e.applyConsequencePlasticity(valence, informationGain, now, false)
+}
+
+func (e *Engine) ApplyConsequencePlasticityWithDynamics(valence, informationGain float64, now time.Time, dynamics knowledge.DynamicsEncoding) {
+	e.applyConsequencePlasticity(valence, informationGain, now, dynamics.HasLocalActivity())
+}
+
+func (e *Engine) applyConsequencePlasticity(valence, informationGain float64, now time.Time, local bool) {
 	if e == nil || e.Memory == nil || valence == 0 {
 		return
 	}
@@ -130,7 +154,9 @@ func (e *Engine) ApplyConsequencePlasticity(valence, informationGain float64, no
 				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - magnitude*0.5)
 			}
 			synapse.Dynamic.LastModification = now
-			synapse.Dynamic.LastEligibilityUpdate = now
+			if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
+				synapse.Dynamic.LastEligibilityUpdate = now
+			}
 			synapse.Dynamic.Eligibility = eligibility
 			synapse.Weight = synapse.Dynamic.Weight
 			synapse.Confidence = synapse.Dynamic.Confidence

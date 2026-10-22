@@ -181,6 +181,8 @@ func TestLegacyV4CheckpointCanRestoreButCannotOffsetReplay(t *testing.T) {
 	snapshot, err := readCheckpointForTest(path)
 	if err != nil { t.Fatal(err) }
 	snapshot.SchemaVersion = legacyBrainSnapshotSchemaVersion
+	snapshot.ActionBindings = nil
+	snapshot.EvidenceLedger = nil
 	snapshot.JournalPrefixHash = ""
 	snapshot.LastObservationPopulation = nil
 	snapshot.LastObservationAt = time.Time{}

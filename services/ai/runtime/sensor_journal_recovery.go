@@ -39,14 +39,16 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 	if err := json.Unmarshal(lines[len(lines)-1], &tail); err != nil {
 		return "", fmt.Errorf("decode journal tail: %w", err)
 	}
-	if tail.Type != EventTypeSensorIntent || tail.SchemaVersion != EventLogSchemaVersion ||
+	if err := validateJournalPayload(tail); err != nil { return "", err }
+	if tail.Type != EventTypeSensorIntent || !supportedEventLogSchema(tail.SchemaVersion) ||
 		tail.BrainIdentity != BrainIdentity || tail.Event == nil ||
 		tail.Event.SensorObservation == nil || tail.Event.ID == "" ||
 		tail.Event.ID != tail.Event.SensorObservation.SampleID ||
 		!tail.Timestamp.Equal(tail.Event.Timestamp) ||
 		!tail.Timestamp.Equal(tail.Event.SensorObservation.Timestamp) ||
 		tail.IntentHash != "" || tail.Experience != nil ||
-		tail.Outcome != nil || tail.Consequence != nil {
+		tail.KnowledgeDocument != nil || tail.Vector != nil ||
+		tail.Outcome != nil || tail.Consequence != nil || tail.ObservationCommand != nil || tail.ActionBinding != nil || tail.InquiryOutcome != nil {
 		return "", errors.New("journal tail is not a valid uncommitted sensor intent")
 	}
 

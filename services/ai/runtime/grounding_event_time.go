@@ -12,5 +12,13 @@ func (r *BrainRuntime) GroundObservationAt(token, source, modality string, at ti
 	if r == nil || r.brain == nil {
 		return knowledge.GroundedRepresentation{}, errors.New("brain runtime is not initialized")
 	}
-	return r.brain.GroundObservationAt(token, source, modality, GroundingThreshold, at)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if err := r.ensureWritableLocked(); err != nil {
+		return knowledge.GroundedRepresentation{}, err
+	}
+	if r.eventLog != nil {
+		return knowledge.GroundedRepresentation{}, errors.New("standalone grounding is forbidden with an attached journal; use ProcessObservation")
+	}
+	return r.brain.GroundObservationWithEncodingAt(token, source, modality, GroundingThreshold, at, r.surfaceEncoding)
 }

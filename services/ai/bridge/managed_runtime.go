@@ -15,7 +15,7 @@ func NewManaged(supervisor *runtime.RuntimeSupervisor, cfg Config) (*Server, err
 		return nil, err
 	}
 	if cfg.MaxPayloadBytes <= 0 { cfg.MaxPayloadBytes = 4 << 20 }
-	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 120 }
+	if cfg.RateLimitPerMinute <= 0 { cfg.RateLimitPerMinute = 600 }
 	return &Server{supervisor: supervisor, cfg: cfg, rate: make(map[string]*rateBucket)}, nil
 }
 
@@ -23,6 +23,7 @@ func (s *Server) withRuntime(fn func(*runtime.BrainRuntime) error) error {
 	if s == nil { return errors.New("brain bridge is not initialized") }
 	if s.supervisor != nil { return s.supervisor.With(fn) }
 	if s.runtime == nil { return errors.New("brain runtime is not initialized") }
+	if s.runtime.RecoveryRequired() { return runtime.ErrRuntimeRecoveryRequired }
 	return fn(s.runtime)
 }
 
@@ -31,8 +32,7 @@ func (s *Server) withRuntime(fn func(*runtime.BrainRuntime) error) error {
 func (s *Server) withMutatingRuntime(fn func(*runtime.BrainRuntime) error) error {
 	if s == nil { return errors.New("brain bridge is not initialized") }
 	if s.supervisor != nil { return s.supervisor.WithMutation(fn) }
-	if s.runtime == nil { return errors.New("brain runtime is not initialized") }
-	return fn(s.runtime)
+	return s.withRuntime(fn)
 }
 
 // withRuntimeEpoch obtains a lease and an epoch invalidation signal. It is
@@ -41,8 +41,7 @@ func (s *Server) withMutatingRuntime(fn func(*runtime.BrainRuntime) error) error
 func (s *Server) withRuntimeEpoch(fn func(*runtime.BrainRuntime, <-chan struct{}) error) error {
 	if s == nil { return errors.New("brain bridge is not initialized") }
 	if s.supervisor != nil { return s.supervisor.WithEpoch(fn) }
-	if s.runtime == nil { return errors.New("brain runtime is not initialized") }
-	return fn(s.runtime, nil)
+	return s.withRuntime(func(rt *runtime.BrainRuntime) error { return fn(rt, nil) })
 }
 
 func epochExpired(epoch <-chan struct{}) bool {

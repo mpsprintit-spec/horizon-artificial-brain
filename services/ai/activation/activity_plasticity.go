@@ -30,11 +30,22 @@ func decayEligibility(eligibility float64, lastUpdate, now time.Time) float64 {
 	return clamp01(eligibility * factor)
 }
 
-// ApplyActivityPlasticity adapts existing recurrent synapses from actual
-// pre/post neural activity. It does not inspect tokens, RelationKind, or any
-// semantic rule. Co-active pathways are strengthened through a time-decaying
-// eligibility trace; unused pathways decay without immediate deletion.
+// ApplyActivityPlasticity preserves the historical call-based inactive decay
+// for old journals and trusted legacy callers. Serving supplies its recorded
+// dynamics explicitly through ApplyActivityPlasticityWithDynamics.
 func (e *Engine) ApplyActivityPlasticity(preState, postState map[knowledge.NodeID]float64, now time.Time) {
+	e.applyActivityPlasticity(preState, postState, now, false)
+}
+
+// ApplyActivityPlasticityWithDynamics separates passive retention from actual
+// co-activity. An unrelated/empty experience supplies no evidence against an
+// inactive connection. Prediction error and consequences still adapt eligible
+// paths in either direction; this does not freeze previously learned weights.
+func (e *Engine) ApplyActivityPlasticityWithDynamics(preState, postState map[knowledge.NodeID]float64, now time.Time, dynamics knowledge.DynamicsEncoding) {
+	e.applyActivityPlasticity(preState, postState, now, dynamics.HasLocalActivity())
+}
+
+func (e *Engine) applyActivityPlasticity(preState, postState map[knowledge.NodeID]float64, now time.Time, local bool) {
 	if e == nil || e.Memory == nil {
 		return
 	}
@@ -55,11 +66,17 @@ func (e *Engine) ApplyActivityPlasticity(preState, postState map[knowledge.NodeI
 			coactivity := pre * target
 			eligibility := decayEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
 
-			// Eligibility is a continuous temporal trace. New co-activity is
-			// accumulated after elapsed-time decay, replacing call-count decay.
-			eligibility = clamp01(eligibility*0.85 + coactivity*0.15)
+			if local {
+				// Only elapsed time forgets eligibility. Actual co-activity
+				// adds bounded evidence; empty calls cannot multiply it away.
+				eligibility = clamp01(eligibility + .15*coactivity*(1-eligibility))
+			} else {
+				eligibility = clamp01(eligibility*0.85 + coactivity*0.15)
+			}
 			synapse.Dynamic.Eligibility = eligibility
-			synapse.Dynamic.LastEligibilityUpdate = now
+			if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
+				synapse.Dynamic.LastEligibilityUpdate = now
+			}
 
 			if synapse.Inhibitory {
 				if coactivity >= activityPlasticityMinActive {
@@ -78,7 +95,7 @@ func (e *Engine) ApplyActivityPlasticity(preState, postState map[knowledge.NodeI
 				synapse.Dynamic.Frequency++
 				synapse.Dynamic.LastActivation = now
 				synapse.Dynamic.LastModification = now
-			} else {
+			} else if !local {
 				decay := activityPlasticityDecayRate * (1 - eligibility)
 				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-decay, activityPlasticityMinWeight, activityPlasticityMaxWeight)
 				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - decay*0.25)
