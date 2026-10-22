@@ -173,3 +173,7 @@ interrupts an in-progress journal transition halfway through application.
 Current bounded monitor reads and complete streamed persistence are described in
 [BOUNDED_INSPECTION.md](BOUNDED_INSPECTION.md); earlier measurements above retain
 their original baseline scope.
+
+Current P0 follow-up: [numerical written grounding](NEURAL_WRITTEN_GROUNDING.md)
+introduces explicit migration, schema-13 serving-mode checksums and schema-12
+rollback backups. Historical measurements/contracts above retain their stated scope.

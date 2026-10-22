@@ -124,7 +124,7 @@ func TestOrderedJournalAndCheckpointContractsRejectDowngradesBeforeMutation(t *t
 		var changed BrainSnapshot
 		_ = json.Unmarshal(packet, &changed)
 		mutation(&changed)
-		changed.Checksum, err = checkpointChecksumV7(changed)
+		changed.Checksum, err = checkpointChecksumForSchema(changed)
 		if err != nil {
 			t.Fatal(err)
 		}

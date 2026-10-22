@@ -23,6 +23,7 @@ func assertCompleteContinuation(t *testing.T, live, restored *BrainRuntime) {
 		{"actions", live.actions, restored.actions},
 		{"evidence and dedup keys", live.evidence.Snapshot(), restored.evidence.Snapshot()},
 		{"adapter provenance", live.brain.SurfaceAnnotationsSnapshot(), restored.brain.SurfaceAnnotationsSnapshot()},
+		{"written grounding contract", live.neuralWrittenGrounding, restored.neuralWrittenGrounding},
 	}
 	for _, check := range checks {
 		if !reflect.DeepEqual(check.want, check.got) {

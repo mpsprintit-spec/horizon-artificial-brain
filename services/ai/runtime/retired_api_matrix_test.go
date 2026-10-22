@@ -82,6 +82,9 @@ func TestRetiredRuntimeSupportedMutationAndInspectionMatrix(t *testing.T) {
 		"labels":     func() error { _, err := r.ResolveNodeLabels([]knowledge.NodeID{grounded.NodeID}, "text"); return err },
 		"monitor":    func() error { _, err := r.MonitorSnapshot(); return err },
 		"handshake":  func() error { _, err := r.MonitorHandshake("test"); return err },
+		"written-contract": func() error { _, err := r.WrittenGroundingContract(); return err },
+		"written-migration-plan": func() error { _, err := r.PlanNeuralWrittenGrounding(); return err },
+		"written-migration-apply": func() error { return r.ApplyNeuralWrittenGrounding(WrittenGroundingPlan{}, filepath.Join(t.TempDir(), "backup.json"), at) },
 	}
 	for name, operation := range cases {
 		t.Run(name, func(t *testing.T) {

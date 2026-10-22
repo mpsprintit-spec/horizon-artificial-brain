@@ -175,7 +175,7 @@ func TestPhysicalMemoryCheckpointRejectsInvalidClockBeforeMutation(t *testing.T)
 	} {
 		changed := snapshot
 		mutate(&changed)
-		changed.Checksum, err = checkpointChecksumV7(changed)
+		changed.Checksum, err = checkpointChecksumForSchema(changed)
 		if err != nil {
 			t.Fatal(err)
 		}

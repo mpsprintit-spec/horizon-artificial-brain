@@ -1,0 +1,10 @@
+{
+  "old_reader_commit": "8a4f9ced05d715b338bab4d324011e8c4f6c8596",
+  "backup_schema": 12,
+  "expected_hash": "sha256:05aafbdf183d5df3761fb44a0b90b7e696786cbf11c9737c98c012ae69235937",
+  "old_reader_restored_hash": "sha256:05aafbdf183d5df3761fb44a0b90b7e696786cbf11c9737c98c012ae69235937",
+  "old_reader_checkpoint_journal_recovery_hash": "sha256:05aafbdf183d5df3761fb44a0b90b7e696786cbf11c9737c98c012ae69235937",
+  "match": true,
+  "old_reader_rejects_schema_13": true,
+  "old_reader_binary_sha256": "c3ca051a1642c318518547b0e75a187c5067c706bdac805ae6d5639e96a6d989"
+}

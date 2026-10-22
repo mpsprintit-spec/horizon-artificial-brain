@@ -14,10 +14,11 @@ type SurfaceEncoding string
 const (
 	LegacySurfaceEncoding SurfaceEncoding = ""
 	WrittenTextEncoding   SurfaceEncoding = "written-text-v1"
+	NeuralWrittenEncoding SurfaceEncoding = "written-neural-v2"
 )
 
 func (e SurfaceEncoding) Validate() error {
-	if e != LegacySurfaceEncoding && e != WrittenTextEncoding {
+	if e != LegacySurfaceEncoding && e != WrittenTextEncoding && e != NeuralWrittenEncoding {
 		return fmt.Errorf("unsupported surface encoding %q", e)
 	}
 	return nil
@@ -36,7 +37,7 @@ func CanonicalSurfaceModality(modality string) string {
 }
 
 func observationVectorWithEncoding(value, modality string, encoding SurfaceEncoding) NeuralVector {
-	if encoding == WrittenTextEncoding && CanonicalSurfaceModality(modality) == "language" {
+	if (encoding == WrittenTextEncoding || encoding == NeuralWrittenEncoding) && CanonicalSurfaceModality(modality) == "language" {
 		return observationVector(canonicalToken(value), "language")
 	}
 	return observationVector(value, modality)
@@ -60,6 +61,15 @@ func (k *KnowledgeBase) StoreSurfaceAt(token string, now time.Time, encoding Sur
 		now = time.Now().UTC()
 	}
 	vector := observationVectorWithEncoding(canonical, "language", encoding)
+	if encoding == NeuralWrittenEncoding {
+		population, _, err := k.projectWrittenNumeric(vector, .999999, 1, now, true)
+		if err != nil || len(population.Units) == 0 {
+			return nil
+		}
+		ids := writtenPopulationIDs(population)
+		k.recordEncodedSurfaceAnnotation(canonical, "language", ids[0], ids, now, encoding)
+		return k.Registry.GetByID(ids[0])
+	}
 	if population, ok := k.populationForWrittenSurface(canonical, vector, now); ok {
 		ids := make([]NodeID, len(population.Units))
 		for i, unit := range population.Units {
@@ -78,7 +88,7 @@ func (k *KnowledgeBase) StoreSurfaceAt(token string, now time.Time, encoding Sur
 }
 
 func (k *KnowledgeBase) recordEncodedSurfaceAnnotation(surface, modality string, nodeID NodeID, population []NodeID, at time.Time, encoding SurfaceEncoding) {
-	if encoding != WrittenTextEncoding || CanonicalSurfaceModality(modality) != "language" {
+	if (encoding != WrittenTextEncoding && encoding != NeuralWrittenEncoding) || CanonicalSurfaceModality(modality) != "language" {
 		k.recordSurfaceAnnotation(surface, modality, nodeID, population, at)
 		return
 	}

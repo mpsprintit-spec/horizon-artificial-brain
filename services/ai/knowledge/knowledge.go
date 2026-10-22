@@ -377,10 +377,21 @@ type persistedGraph struct {
 }
 
 func (k *KnowledgeBase) Load(path string) error {
+	return k.load(path, false)
+}
+
+// LoadStandalone rejects a Brain-only v2 export that lacks the authenticated
+// runtime contract. Complete checkpoint restoration uses Load after validation.
+func (k *KnowledgeBase) LoadStandalone(path string) error {
+	return k.load(path, true)
+}
+
+func (k *KnowledgeBase) load(path string, standalone bool) error {
 	if k == nil { return ErrNilBrain }
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	b, err := os.ReadFile(path); if err != nil { return err }
+	if standalone { if err := ValidateWrittenNumericState(b, false); err != nil { return err } }
 	var envelope struct { SchemaVersion int `json:"schema_version"` }
 	if err := json.Unmarshal(b, &envelope); err != nil { return err }
 	// Legacy graph files need dynamic-state hydration. Canonical v2 already

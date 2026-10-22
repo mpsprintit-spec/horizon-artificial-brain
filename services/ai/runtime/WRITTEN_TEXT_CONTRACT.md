@@ -1,5 +1,12 @@
 # Written text contract (H24)
 
+Latest P0 correction: [numerical written grounding](NEURAL_WRITTEN_GROUNDING.md)
+adds an explicit migrated `written-neural-v2` contract. The v1 behavior described
+below still uses adapter labels for population routing; excluding labels from
+canonical neural JSON alone does not remove that dependency. Default compatibility
+serving remains v1 until migration. New complete checkpoints use schema 13;
+historical checkpoint laws stay supported. P0 remains RED / OPEN.
+
 New written input uses `written-text-v1`: `text`, `language` and the historical
 `web-search` transport name share the existing `language` numerical namespace.
 Values are trimmed and lowercased with the same normalization used

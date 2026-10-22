@@ -96,8 +96,10 @@ type BrainRuntime struct {
 	// can only be changed by its supervisor, not by cached runtime references.
 	supervised bool
 	// Replay selects the recorded adapter contract on a private runtime.
-	// Serving runtimes use WrittenTextEncoding; this is not persistent Brain state.
+	// Default compatibility serving uses v1. Explicit migrated serving uses
+	// v2; its mode is authenticated separately from the neural Brain state.
 	surfaceEncoding knowledge.SurfaceEncoding
+	neuralWrittenGrounding bool // Explicitly migrated serving contract, authenticated in v13 checkpoints.
 	dynamicsEncoding knowledge.DynamicsEncoding
 	seq uint64
 	lastCognitiveState CognitiveState
@@ -111,6 +113,7 @@ type BrainRuntime struct {
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBootstrapBrain() }
+	if brain.HasNeuralWrittenProjection() { return nil } // Recover v2 through its complete checkpoint.
 	if !brain.BindRuntime() { return nil }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
@@ -161,8 +164,9 @@ func (r *BrainRuntime) LoadBrain(path string) error {
 	if err := r.ensureWritableLocked(); err != nil { return err }
 	// Manual brain import resets the local event sequence. It cannot be
 	// reconciled with an existing attached journal; use checkpoint recovery.
+	if r.neuralWrittenGrounding { return errors.New("numeric written serving requires complete checkpoint recovery, not a Brain-only load") }
 	if r.eventLog != nil { return errors.New("manual brain load is forbidden while an event journal is attached; use verified checkpoint recovery") }
-	if err := r.brain.Load(path); err != nil { return err }
+	if err := r.brain.LoadStandalone(path); err != nil { return err }
 	r.inspectionEpoch = ""
 	r.seq = 0
 	r.lastCognitiveState = CognitiveState{}
