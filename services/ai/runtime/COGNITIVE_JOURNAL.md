@@ -38,7 +38,9 @@ dynamics encodings. Schemas 1 and 2 replay with their original dynamics.
 See [ORDERED_OBSERVATIONS.md](ORDERED_OBSERVATIONS.md) for ordered frames and
 conditional pattern prediction. [RECURRENT_CONTEXT.md](RECURRENT_CONTEXT.md)
 describes bounded context dynamics and episode controls. [MEMORY_TIME.md](MEMORY_TIME.md)
-defines current physical-memory-v1 retention and its historical compatibility. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
+defines physical-memory-v1 retention and its historical compatibility.
+[LOCAL_PLASTICITY.md](LOCAL_PLASTICITY.md) defines current local-activity-v1
+learning and its controlled retention evidence. See [WRITTEN_TEXT_CONTRACT.md](WRITTEN_TEXT_CONTRACT.md)
 for text/language consistency, legacy reference evidence and migration.
 
 An action binding registration now consumes a revision. Re-registering the

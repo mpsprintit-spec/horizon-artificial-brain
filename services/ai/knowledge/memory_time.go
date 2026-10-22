@@ -18,7 +18,7 @@ type MemoryDecayState struct {
 // Passive retention does not count experiences or consume eligibility; those
 // learning signals retain their separate activity/prediction/consequence clocks.
 func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics DynamicsEncoding) {
-	if dynamics != PhysicalMemoryDynamics {
+	if !dynamics.HasPhysicalMemory() {
 		k.ApplyMemoryDynamics(now)
 		return
 	}

@@ -13,11 +13,12 @@ const (
 	OrderedDynamics        DynamicsEncoding = "ordered-observation-v1"
 	RecurrentDynamics      DynamicsEncoding = "recurrent-context-v1"
 	PhysicalMemoryDynamics DynamicsEncoding = "physical-memory-v1"
-	CurrentDynamics                         = PhysicalMemoryDynamics
+	LocalActivityDynamics  DynamicsEncoding = "local-activity-v1"
+	CurrentDynamics                         = LocalActivityDynamics
 )
 
 func (d DynamicsEncoding) Validate() error {
-	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics {
+	if d != LegacyDynamics && d != OrderedDynamics && d != RecurrentDynamics && d != PhysicalMemoryDynamics && d != LocalActivityDynamics {
 		return fmt.Errorf("unsupported neural dynamics %q", d)
 	}
 	return nil
@@ -100,5 +101,9 @@ func (d DynamicsEncoding) HasOrderedObservations() bool {
 }
 
 func (d DynamicsEncoding) HasRecurrentContext() bool {
-	return d == RecurrentDynamics || d == PhysicalMemoryDynamics
+	return d == RecurrentDynamics || d.HasPhysicalMemory()
+}
+
+func (d DynamicsEncoding) HasPhysicalMemory() bool {
+	return d == PhysicalMemoryDynamics || d == LocalActivityDynamics
 }

@@ -14,7 +14,7 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	if req.Now.IsZero() {
 		req.Now = time.Now().UTC()
 	}
-	if req.DynamicsEncoding != nil && *req.DynamicsEncoding == knowledge.PhysicalMemoryDynamics {
+	if req.DynamicsEncoding != nil && req.DynamicsEncoding.HasPhysicalMemory() {
 		e.Memory.ApplyMemoryDynamicsWithEncoding(req.Now, *req.DynamicsEncoding)
 	}
 	trace := req.NeuralTrace.Canonical()
@@ -111,11 +111,11 @@ func (e *Engine) activateOrderedWith(req Request) Result {
 	pre := cloneState(state)
 	state, confidence = e.advance(state, confidence, req.Now, req.Cycles)
 	result := e.converge(state, confidence, req.Now)
-	e.ApplyActivityPlasticity(pre, result.Activations, req.Now)
+	e.ApplyActivityPlasticityWithDynamics(pre, result.Activations, req.Now, *req.DynamicsEncoding)
 	predictionError := 0.0
 	if len(previousPrediction) > 0 {
 		predictionError = stateDifference(previousPrediction, result.Activations)
-		e.ApplyPredictionErrorPlasticity(previousPrediction, result.Activations, predictionError, req.Now)
+		e.ApplyPredictionErrorPlasticityWithDynamics(previousPrediction, result.Activations, predictionError, req.Now, *req.DynamicsEncoding)
 		e.Memory.ApplyPredictionErrorRepresentationPlasticity(previousPrediction, result.Activations, predictionError, .20, req.Now)
 	}
 	e.Memory.UpdateInformationDynamics(previousPrediction, result.Activations, predictionError, req.Now)
