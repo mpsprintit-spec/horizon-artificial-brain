@@ -39,11 +39,13 @@ func (r *BrainRuntime) GroundVectorAt(vector knowledge.NeuralVector, at time.Tim
 	if err := r.ensureWritableLocked(); err != nil { return knowledge.GroundedVector{}, err }
 	if at.IsZero() { at = r.nowLocked() } else { at = at.UTC() }
 	if r.eventLog != nil {
-		if err := r.eventLog.Append(LoggedEvent{
+		record := LoggedEvent{
 			SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, DynamicsEncoding:r.dynamicsEncoding, SurfaceEncoding:r.surfaceEncoding,
 			Sequence: r.seq + 1, Type: EventTypeVectorGround,
 			Timestamp: at, Vector: &frozen,
-		}); err != nil {
+		}
+		r.decorateCompositionJournalLocked(&record)
+		if err := r.eventLog.Append(record); err != nil {
 			r.markRecoveryRequiredLocked()
 			return knowledge.GroundedVector{}, fmt.Errorf("%w: append numeric grounding: %v", ErrRuntimeRecoveryRequired, err)
 		}

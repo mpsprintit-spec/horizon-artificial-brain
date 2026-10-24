@@ -15,6 +15,7 @@ type ExecutionGateway struct {
 	Now  func() time.Time
 	mu sync.Mutex
 	executedIDs map[string]struct{}
+	motorActuators map[string]NumericMotorActuator
 }
 
 func NewExecutionGateway(core *ExecutionCore) *ExecutionGateway {
@@ -40,6 +41,7 @@ func (g *ExecutionGateway) Execute(request runtime.ExecutionRequest) error {
 	if !request.RequiredApproval && request.RiskLevel != runtime.RiskLow { return errors.New("non-low-risk execution requires explicit approval") }
 	g.mu.Lock(); defer g.mu.Unlock()
 	if _, exists := g.executedIDs[request.IdempotencyKey]; exists { return errors.New("execution request already executed") }
+	if request.Motor != nil { return g.executeNumericMotorLocked(request) }
 	g.Core.dispatchAuthorized(request.Intent, request.Intent)
 	g.executedIDs[request.IdempotencyKey] = struct{}{}
 	return nil

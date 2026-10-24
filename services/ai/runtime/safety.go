@@ -19,6 +19,7 @@ const (
 )
 
 type Recommendation struct {
+	Motor *NumericMotorCommand `json:"motor,omitempty"`
 	RequestID     string
 	BrainIdentity string
 	Intent        string
@@ -46,6 +47,7 @@ type AuthorizationDecision struct {
 }
 
 type ExecutionRequest struct {
+	Motor *NumericMotorCommand `json:"motor,omitempty"`
 	RequestID        string
 	BrainIdentity    string
 	Intent           string
@@ -75,6 +77,7 @@ type SafetyBoundary struct {
 }
 
 func (s SafetyBoundary) Assess(recommendation Recommendation) (RiskAssessment, error) {
+	if recommendation.Motor != nil { if err:=recommendation.Motor.Validate();err!=nil{return RiskAssessment{},err} }
 	if recommendation.RequestID == "" || recommendation.BrainIdentity == "" || strings.TrimSpace(recommendation.Intent) == "" {
 		return RiskAssessment{}, errors.New("recommendation is missing required identity or intent")
 	}
@@ -138,6 +141,7 @@ func (s SafetyBoundary) BuildExecutionRequest(recommendation Recommendation, ass
 		return ExecutionRequest{}, errors.New("execution request is expired")
 	}
 	return ExecutionRequest{
+		Motor: cloneNumericMotor(recommendation.Motor),
 		RequestID:        recommendation.RequestID,
 		BrainIdentity:    recommendation.BrainIdentity,
 		Intent:           recommendation.Intent,

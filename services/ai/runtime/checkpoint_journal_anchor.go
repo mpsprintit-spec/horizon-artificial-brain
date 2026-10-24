@@ -144,6 +144,16 @@ func checkpointChecksumV8WithBrain(snapshot BrainSnapshot, writer jsonstream.Val
 	return hex.EncodeToString(sum[:]), nil
 }
 
+func checkpointChecksumV9(snapshot BrainSnapshot) (string,error) { return checkpointChecksumV9WithBrain(snapshot,nil) }
+
+// v9 authenticates current physical/linguistic continuation and the enabled
+// numerical composition law. Historical checksum laws are left untouched.
+func checkpointChecksumV9WithBrain(snapshot BrainSnapshot,writer jsonstream.ValueWriter) (string,error) {
+	base,err:=checkpointChecksumV8WithBrain(snapshot,writer);if err!=nil{return "",err}
+	data,err:=json.Marshal(struct{Base string `json:"base_digest"`;Composition *CompositionContinuation `json:"composition"`}{base,snapshot.Composition});if err!=nil{return "",err}
+	sum:=sha256.Sum256(data);return hex.EncodeToString(sum[:]),nil
+}
+
 // journalPrefixHash hashes the *logical committed* prefix, never the raw
 // intent/commit physical framing. This anchors a checkpoint to a specific
 // replayable event history and detects tampering with its earlier records.

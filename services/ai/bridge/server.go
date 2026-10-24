@@ -20,6 +20,7 @@ import (
 )
 
 type Config struct {
+	AllowCompositionTraining bool
 	AllowedOrigins []string
 	Token string
 	RuntimeCommit string
@@ -57,6 +58,7 @@ func (s *Server) Handler() http.Handler {
 	mux.HandleFunc("/v1/observations", s.observations)
 	mux.HandleFunc("/v1/sensor-observations", s.sensorObservations)
 	mux.HandleFunc("/v1/outcomes", s.outcomes)
+	mux.HandleFunc("/v1/composition/exposures", s.compositionExposures)
 	return s.withCORS(s.withAuth(s.withRateLimit(mux)))
 }
 
@@ -262,7 +264,9 @@ func (s *Server) observations(w http.ResponseWriter, r *http.Request) {
 		writeError(w,status,err.Error())
 		return
 	}
-	writeJSON(w,http.StatusAccepted,map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs,"answer":readoutForAnswer(interpretation.Answer)})
+	response:=map[string]any{"brain_identity":runtime.BrainIdentity,"event_id":envelope.EventID,"state_revision":interpretation.State.Sequence,"prediction_error":interpretation.State.PredictionError,"active_node_ids":interpretation.State.ActiveNodeIDs,"answer":readoutForAnswer(interpretation.Answer)}
+	if interpretation.Composition!=nil {response["composition"]=interpretation.Composition}
+	writeJSON(w,http.StatusAccepted,response)
 }
 
 func (s *Server) outcomes(w http.ResponseWriter, r *http.Request) {

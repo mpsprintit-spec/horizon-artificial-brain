@@ -54,10 +54,12 @@ func (s *Server) sensorObservations(w http.ResponseWriter, r *http.Request) {
 		writeError(w, status, err.Error())
 		return
 	}
-	writeJSON(w, http.StatusAccepted, map[string]any{
+	response:=map[string]any{
 		"brain_identity": runtime.BrainIdentity, "event_id": sensor.SampleID,
 		"state_revision": result.State.Sequence, "prediction_error": result.State.PredictionError,
 		"active_node_ids": result.State.ActiveNodeIDs, "sensor_bindings": result.SensorBindings,
 		"answer": readoutForAnswer(result.Answer),
-	})
+	}
+	if result.Composition!=nil {response["composition"]=result.Composition}
+	writeJSON(w,http.StatusAccepted,response)
 }

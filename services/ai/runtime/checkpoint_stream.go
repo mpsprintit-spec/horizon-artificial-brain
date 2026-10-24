@@ -50,6 +50,7 @@ func (r *BrainRuntime) writeCheckpointLocked(path string, snapshot BrainSnapshot
 		"brain": func(_ io.Writer, _ bool, _ string) error {
 			checksumLaw := checkpointChecksumV7WithBrain
 			if snapshot.SchemaVersion >= neuralWrittenBrainSnapshotSchemaVersion { checksumLaw = checkpointChecksumV8WithBrain }
+			if snapshot.SchemaVersion >= compositionBrainSnapshotSchemaVersion { checksumLaw = checkpointChecksumV9WithBrain }
 			checksum, e := checksumLaw(snapshot, func(hash io.Writer, _ bool, _ string) error {
 				return r.brain.WriteCanonical(io.MultiWriter(hash, file), false, "")
 			})

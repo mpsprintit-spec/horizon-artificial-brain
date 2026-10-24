@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"errors"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -43,6 +44,19 @@ func initializeProductionHorizon(log *runtime.EventLog, journalPath, memoryPath,
 		// before the very first bootstrap event, complete bootstrap on
 		// restart instead of silently serving an uninitialized substrate.
 		return h, len(events) == 0 && !memoryExists, nil
+	}
+
+	// Enabled serving memory is a complete authenticated checkpoint, not a
+	// graph-only export. If the primary checkpoint is missing, verify its
+	// journal anchor instead of trying to import its envelope as a bare Brain.
+	if memoryExists {
+		data,readErr:=os.ReadFile(memoryPath);if readErr!=nil{return nil,false,readErr}
+		var header struct{BrainIdentity string `json:"brain_identity"`;Brain json.RawMessage `json:"brain"`}
+		if json.Unmarshal(data,&header)==nil&&header.BrainIdentity==runtime.BrainIdentity&&len(header.Brain)>0 {
+			if err:=h.Supervisor().RecoverFromCheckpoint(log,memoryPath);err!=nil{return nil,false,fmt.Errorf("complete serving memory recovery refused: %w",err)}
+			if err:=h.Supervisor().WithMutation(func(rt *runtime.BrainRuntime)error{return rt.Checkpoint(checkpointPath)});err!=nil{return nil,false,err}
+			return h,false,nil
+		}
 	}
 
 	if len(events) > 0 {

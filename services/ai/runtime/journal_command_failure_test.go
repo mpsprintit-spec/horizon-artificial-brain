@@ -20,7 +20,7 @@ func continuationBytes(t *testing.T, r *BrainRuntime) []byte {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := json.Marshal([]any{json.RawMessage(brain), r.seq, r.activation.SnapshotState(), r.lastCognitiveState, r.lastObservationPopulation, r.lastObservationAt, r.processedEvents, r.inquiryValence, r.actions, r.evidence.Snapshot(), r.brain.SurfaceAnnotationsSnapshot(), r.neuralWrittenGrounding})
+	data, err := json.Marshal([]any{json.RawMessage(brain), r.seq, r.activation.SnapshotState(), r.lastCognitiveState, r.lastObservationPopulation, r.lastObservationAt, r.processedEvents, r.inquiryValence, r.actions, r.evidence.Snapshot(), r.brain.SurfaceAnnotationsSnapshot(), r.neuralWrittenGrounding, r.composition})
 	if err != nil {
 		t.Fatal(err)
 	}

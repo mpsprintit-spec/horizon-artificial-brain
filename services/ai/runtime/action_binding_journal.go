@@ -7,6 +7,7 @@ import (
 )
 
 func cloneActionBinding(binding ActionBinding) ActionBinding {
+	binding.NumericPrediction=cloneNumericPrediction(binding.NumericPrediction)
 	binding.TargetNodeIDs = append(binding.TargetNodeIDs[:0:0], binding.TargetNodeIDs...)
 	binding.Synapses = append(binding.Synapses[:0:0], binding.Synapses...)
 	return binding
@@ -21,6 +22,7 @@ func cloneActionBindings(bindings map[string]ActionBinding) map[string]ActionBin
 }
 
 func (r *BrainRuntime) validateActionBindingLocked(binding ActionBinding) (ActionBinding, error) {
+	if err:=binding.NumericPrediction.validate();err!=nil{return ActionBinding{},err}
 	if strings.TrimSpace(binding.RequestID) == "" {
 		return ActionBinding{}, errors.New("action binding request ID is required")
 	}
@@ -55,7 +57,7 @@ func (r *BrainRuntime) registerActionBindingLocked(binding ActionBinding) error 
 		return err
 	}
 	if previous, exists := r.actions[binding.RequestID]; exists {
-		if previous.RequestID == binding.RequestID && previous.BrainIdentity == binding.BrainIdentity && previous.Intent == binding.Intent && slices.Equal(previous.TargetNodeIDs, binding.TargetNodeIDs) && slices.Equal(previous.Synapses, binding.Synapses) {
+		if previous.RequestID == binding.RequestID && previous.BrainIdentity == binding.BrainIdentity && previous.Intent == binding.Intent && sameNumericPrediction(previous.NumericPrediction,binding.NumericPrediction) && slices.Equal(previous.TargetNodeIDs, binding.TargetNodeIDs) && slices.Equal(previous.Synapses, binding.Synapses) {
 			return nil
 		}
 		return errors.New("action binding request ID already has different targets")

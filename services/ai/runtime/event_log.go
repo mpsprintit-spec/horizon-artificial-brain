@@ -19,9 +19,12 @@ import (
 
 const EventLogSchemaVersion = 3
 
-func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion }
+func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion }
 
 type LoggedEvent struct {
+	CompositionEncoding string `json:"composition_encoding,omitempty"`
+	CompositionMigration *CompositionMigration `json:"composition_migration,omitempty"`
+	CompositionExposure *knowledge.CompositionExposure `json:"composition_exposure,omitempty"`
 	SpellingExposure *knowledge.SpellingExposure `json:"spelling_exposure,omitempty"`
 	WrittenGroundingMigration *WrittenGroundingMigration `json:"written_grounding_migration,omitempty"`
 	DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding,omitempty"`
@@ -188,7 +191,7 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
-		if event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding || event.Type == EventTypeWrittenGroundingMigration || event.Type == EventTypeSpellingExposure {
+		if event.SchemaVersion >= compositionJournalSchemaVersion || event.Type == EventTypeSensorIntent || event.Type == EventTypeSensorCommit || event.Type == EventTypeKnowledgeImport || event.Type == EventTypeVectorGround || event.Type == EventTypeObservation || event.Type == EventTypeCognitiveProcess || event.Type == EventTypeCognitiveThink || event.Type == EventTypeActionBinding || event.Type == EventTypeInquiryOutcome || event.Type == EventTypeSurfaceRebinding || event.Type == EventTypeWrittenGroundingMigration || event.Type == EventTypeSpellingExposure {
 			return "", fmt.Errorf("cannot repair transactional sensor records at line %d using legacy sequence renumbering", lineNumber)
 		}
 		if event.Sequence == 0 {
@@ -367,7 +370,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			}
 			if event.IntentHash == "" || event.IntentHash != pendingHash || event.Event != nil ||
 				event.Experience != nil || event.KnowledgeDocument != nil || event.Vector != nil || event.Outcome != nil || event.Consequence != nil || event.ObservationCommand != nil || event.ActionBinding != nil || event.InquiryOutcome != nil ||
-				!event.Timestamp.Equal(pending.Timestamp) || event.DynamicsEncoding != pending.DynamicsEncoding || event.SurfaceEncoding != pending.SurfaceEncoding {
+				!event.Timestamp.Equal(pending.Timestamp) || event.DynamicsEncoding != pending.DynamicsEncoding || event.SurfaceEncoding != pending.SurfaceEncoding || event.CompositionEncoding != pending.CompositionEncoding {
 				return nil, fmt.Errorf("%w: sensor commit mismatch at line %d", ErrUncommittedSensorTransaction, lineNumber)
 			}
 			seen[key] = canonical
@@ -385,7 +388,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			return nil, fmt.Errorf("invalid journal payload at line %d: %w", lineNumber, err)
 		}
 		switch event.Type {
-		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeSpellingExposure:
+		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeSpellingExposure, EventTypeCompositionMigration, EventTypeCompositionExposure:
 			seen[key] = canonical
 			events = append(events, event)
 			expected++
@@ -515,7 +518,11 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	// Validate the whole contract timeline before the first mutation. A v2
 	// command cannot bypass its migration, nor can serving silently revert.
 	migrated := brainRuntime.neuralWrittenGrounding
+	compositionEncoding := ""
+	if brainRuntime.composition != nil { compositionEncoding = brainRuntime.composition.Config.Version }
 	for _, logged := range events {
+		if logged.CompositionEncoding != compositionEncoding { brainRuntime.mu.Unlock();return errors.New("composition contract changed without its migration") }
+		if logged.Type == EventTypeCompositionMigration { if compositionEncoding != "" { brainRuntime.mu.Unlock();return errors.New("duplicate composition migration") };compositionEncoding=logged.CompositionMigration.Plan.Config.Version }
 		if (logged.SurfaceEncoding == knowledge.NeuralWrittenEncoding) != migrated {
 			brainRuntime.mu.Unlock()
 			return errors.New("written grounding contract changed without its migration")
@@ -556,6 +563,13 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeCompositionMigration:
+			brainRuntime.mu.Lock()
+			err := brainRuntime.applyCompositionMigrationLocked(*logged.CompositionMigration,logged.Timestamp)
+			brainRuntime.mu.Unlock()
+			if err != nil { return err }
+		case EventTypeCompositionExposure:
+			if _,err:=brainRuntime.LearnComposition(*logged.CompositionExposure,logged.Timestamp);err!=nil{return err}
 		case EventTypeSpellingExposure:
 			if _, err := brainRuntime.LearnSpelling(*logged.SpellingExposure, logged.Timestamp); err != nil { return err }
 		case EventTypeWrittenGroundingMigration:
