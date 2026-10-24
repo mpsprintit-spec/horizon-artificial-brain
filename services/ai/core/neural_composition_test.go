@@ -72,7 +72,9 @@ func TestCompositionFacadePulseThinkAndPersistence(t *testing.T) {
 		teach([]string{"matikan", "televisi"}, 1, false)
 	}
 	scene := makeScene()
-	scene.ObservedAt = at.Add(time.Second)
+	// This is a new physical observation after teaching, not the old
+	// pre-training frame. Race instrumentation may take longer than its TTL.
+	scene.ObservedAt = time.Now().UTC()
 	scene.Patches[0].XY, scene.Patches[1].XY = scene.Patches[1].XY, scene.Patches[0].XY
 	if _, err := h.ObserveCompositionScene("moved-scene", "simulator", scene); err != nil {
 		t.Fatal(err)
