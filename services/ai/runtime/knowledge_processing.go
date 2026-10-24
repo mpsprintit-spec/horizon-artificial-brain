@@ -51,7 +51,7 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 		return r.processKnowledgeDocumentLocked(frozen, compiled, at, false)
 	}
 	nextSeq := r.seq + 1
-	if err := r.eventLog.Append(LoggedEvent{
+	record := LoggedEvent{
 		SurfaceEncoding: r.surfaceEncoding,
 		DynamicsEncoding: r.dynamicsEncoding,
 		SchemaVersion: EventLogSchemaVersion,
@@ -60,7 +60,9 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 		Type: EventTypeKnowledgeImport,
 		Timestamp: at,
 		KnowledgeDocument: &frozen,
-	}); err != nil {
+	}
+	r.decorateCompositionJournalLocked(&record)
+	if err := r.eventLog.Append(record); err != nil {
 		// Append might have partially persisted a record. Never assume the
 		// journal is clean or let this in-memory runtime accept more writes.
 		r.markRecoveryRequiredLocked()

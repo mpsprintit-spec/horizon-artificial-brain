@@ -137,6 +137,11 @@ func TestNativeCompositionSealedCurriculum(t *testing.T) {
 	}
 	for _, initialization := range []string{"separated", "zero", "random"} {
 		for _, seed := range []int64{7, 17, 47} {
+			// Statistical replication runs in the normal suite. Race covers
+			// every initialization at seed 7 plus the dedicated concurrent tests.
+			if compositionRaceDetector && seed != 7 {
+				continue
+			}
 			t.Run(fmt.Sprintf("%s/%d", initialization, seed), func(t *testing.T) {
 				r, _, _ := newCompositionTestRuntime(t, uint64(seed), initialization, false)
 				at := compositionTrain(t, r, seed, 24, false)

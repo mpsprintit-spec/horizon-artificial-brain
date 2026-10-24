@@ -216,6 +216,9 @@ and numerical gateway authorization/idempotency. Retention evidence is bounded
 to these tasks, not a claim that all long-term interference is solved.
 
 Run root tests, vet/build, the existing race suite and `make bridge-smoke`.
+The normal behavior suite uses all three seeds; race validation covers each
+initialization at seed 7 and the dedicated concurrency/recovery cases, avoiding
+redundant statistical repetitions under instrumentation.
 `BenchmarkNativeCompositionReadout` measures read-only query cost; it includes
 input freezing and native weight lookup but excludes training, checkpointing,
 network and device latency. Report durable ingress/fsync separately rather
