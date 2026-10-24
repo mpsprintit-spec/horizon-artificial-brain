@@ -144,6 +144,11 @@ func normalizeObservationCommand(event Event, command ObservationCommand, at tim
 
 func (r *BrainRuntime) applyObservationCommandLocked(event Event, command ObservationCommand) (CognitiveInterpretation, bool, error) {
 	input := command.Input
+	if r.composition!=nil && knowledge.CanonicalSurfaceModality(input.Modality)=="language" && len(input.Tokens)>0 {
+		r.composition.Words=nil
+		r.composition.Unsupported=len(input.Tokens)>knowledge.MaxCompositionWords
+		if !r.composition.Unsupported {for _,word:=range input.Tokens {r.composition.Words=append(r.composition.Words,knowledge.EncodeObservation(word,"language").Values)}}
+	}
 	grounded := make([]knowledge.GroundedRepresentation, 0)
 	cache := make(map[string]knowledge.GroundedRepresentation)
 	streams := make([][][]knowledge.NodeID, 3)

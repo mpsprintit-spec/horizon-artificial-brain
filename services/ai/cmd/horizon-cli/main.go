@@ -187,6 +187,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	// Labels returned by PulseWithLabels name activity for inspection. They
 	// cannot serve as a learned language decoder, even when a forecast exists.
 	answer := "Jawaban bahasa belum tersedia."
+	if result.Composition!=nil { answer=fmt.Sprintf("Komposisi: %s; usulan motor=%v (belum dieksekusi)",result.Composition.Status,result.Composition.Motor) }
 	return pipelineResult{
 		Input:               input,
 		Tokens:              strings.Fields(input),
@@ -210,6 +211,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 // Save/load and autonomous monitor controls are separate managed mutations.
 func (c *cli) handleCommand(input string) bool {
 	lower:=strings.ToLower(strings.TrimSpace(input))
+	if strings.HasPrefix(lower,"composition "){return c.handleComposition(input)}
 	switch lower {
 	case "brain":
 		c.toggleBrainMonitor()

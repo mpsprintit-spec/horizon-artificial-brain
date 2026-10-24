@@ -13,6 +13,7 @@ import (
 
 	"github.com/project-horizon/horizon-core/services/ai/bridge"
 	"github.com/project-horizon/horizon-core/services/ai/config"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 		"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
@@ -85,6 +86,17 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Explicit startup administration only. The enabled contract is persisted;
+	// ordinary startup/merging code never silently trains or migrates a Brain.
+	if backupPath:=strings.TrimSpace(os.Getenv("HORIZON_COMPOSITION_INIT_BACKUP"));backupPath!="" {
+		state,stateErr:=horizon.CompositionStatus()
+		if stateErr!=nil {logger.Error("composition status refused","error",stateErr);os.Exit(1)}
+		if state==nil {
+			if err:=horizon.InitializeNeuralComposition(knowledge.DefaultCompositionConfig(),backupPath,time.Now().UTC());err!=nil {logger.Error("explicit composition initialization refused","error",err);os.Exit(1)}
+			if err:=horizon.Supervisor().WithMutation(func(rt *runtime.BrainRuntime)error{return rt.Checkpoint(checkpointPath)});err!=nil {logger.Error("composition checkpoint failed","error",err);os.Exit(1)}
+		}
+	}
+
 	service, err := runtime.NewManagedContinuousService(horizon.Supervisor(), cfg.CognitiveInterval, 1)
 	if err != nil {
 		logger.Error("failed to initialize managed cognitive service", "error", err)
@@ -100,6 +112,7 @@ func main() {
 		bridgeOrigins = []string{"https://mpsprintit-spec.github.io", "http://localhost:8080"}
 	}
 	monitorBridge, err := bridge.NewManaged(horizon.Supervisor(), bridge.Config{
+		AllowCompositionTraining: strings.EqualFold(strings.TrimSpace(os.Getenv("HORIZON_COMPOSITION_TRAINING")),"true"),
 		AllowedOrigins: bridgeOrigins,
 		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
 		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),

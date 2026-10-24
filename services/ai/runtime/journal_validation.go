@@ -10,6 +10,7 @@ import (
 // Reject foreign payloads rather than replaying only the recognized fraction
 // of a mixed record. Legacy process/think retain their lower-level meaning.
 func validateJournalPayload(event LoggedEvent) error {
+	if event.CompositionEncoding != "" && (event.CompositionEncoding != knowledge.NeuralCompositionV1 || event.SchemaVersion < compositionJournalSchemaVersion) { return errors.New("unsupported composition journal contract") }
 	if err := event.SurfaceEncoding.Validate(); err != nil {
 		return err
 	}
@@ -23,6 +24,7 @@ func validateJournalPayload(event LoggedEvent) error {
 		return errors.New("ordered neural dynamics require journal schema 3")
 	}
 	if event.Event != nil {
+		if sensor:=event.Event.SensorObservation;sensor!=nil&&sensor.CompositionScene!=nil&&(event.SchemaVersion<compositionJournalSchemaVersion||event.CompositionEncoding!=knowledge.NeuralCompositionV1){return errors.New("composition sensor scene requires its active journal contract")}
 		if sensor := event.Event.SensorObservation; sensor != nil && sensor.NoiseTolerance > 0 && !event.DynamicsEncoding.HasStableProjection() {
 			return errors.New("measurement tolerance requires stable projection dynamics")
 		}
@@ -78,6 +80,10 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	var required []string
 	switch event.Type {
+	case EventTypeCompositionMigration:
+		required = []string{"composition_migration"}
+	case EventTypeCompositionExposure:
+		required = []string{"composition_exposure"}
 	case EventTypeSpellingExposure:
 		required = []string{"spelling_exposure"}
 	case EventTypeWrittenGroundingMigration:
@@ -110,6 +116,8 @@ func validateJournalPayload(event LoggedEvent) error {
 	present := map[string]bool{"event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
 	present["written_grounding_migration"] = event.WrittenGroundingMigration != nil
 	present["spelling_exposure"] = event.SpellingExposure != nil
+	present["composition_migration"] = event.CompositionMigration != nil
+	present["composition_exposure"] = event.CompositionExposure != nil
 	for _, field := range required {
 		if !present[field] {
 			return fmt.Errorf("%s record requires %s", event.Type, field)
@@ -122,6 +130,13 @@ func validateJournalPayload(event LoggedEvent) error {
 		}
 	}
 	switch event.Type {
+	case EventTypeCompositionMigration:
+		if event.SchemaVersion < compositionJournalSchemaVersion || event.Timestamp.IsZero() || event.CompositionEncoding != "" {return errors.New("composition migration requires an initial versioned command")}
+		if err:=event.CompositionMigration.validateShape();err!=nil{return err}
+		if event.Sequence!=event.CompositionMigration.Plan.ReferenceRevision+1{return errors.New("composition migration reference revision disagrees with journal")}
+	case EventTypeCompositionExposure:
+		if event.SchemaVersion < compositionJournalSchemaVersion || event.Timestamp.IsZero() || event.CompositionEncoding != knowledge.NeuralCompositionV1 {return errors.New("composition exposure requires its active versioned contract")}
+		if err:=event.CompositionExposure.Validate();err!=nil{return err}
 	case EventTypeSpellingExposure:
 		if event.SchemaVersion < 3 || event.Timestamp.IsZero() { return errors.New("spelling supervision requires schema 3 and event time") }
 		if err := event.SpellingExposure.Validate(); err != nil { return err }
@@ -151,6 +166,7 @@ func validateJournalPayload(event LoggedEvent) error {
 		if event.Timestamp.IsZero() || event.ActionBinding.RequestID == "" || event.ActionBinding.BrainIdentity != BrainIdentity {
 			return errors.New("incomplete action binding command")
 		}
+		if p:=event.ActionBinding.NumericPrediction;p!=nil {if err:=p.validate();err!=nil{return err};if event.CompositionEncoding!=knowledge.NeuralCompositionV1||event.SchemaVersion<compositionJournalSchemaVersion||p.ReferenceRevision+1!=event.Sequence{return errors.New("numeric action prediction has no current versioned reference")}}
 	}
 	if event.Type == EventTypeCognitiveThink || event.Type == EventTypeThink {
 		e := event.Event

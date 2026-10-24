@@ -16,6 +16,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	command.SchemaVersion, command.BrainIdentity, command.Sequence = EventLogSchemaVersion, BrainIdentity, r.seq+1
 	command.SurfaceEncoding = r.surfaceEncoding
 	command.DynamicsEncoding = r.dynamicsEncoding
+	r.decorateCompositionJournalLocked(&command)
 	if command.Timestamp.IsZero() {
 		command.Timestamp = r.nowLocked()
 	}
@@ -62,6 +63,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 }
 
 func processedJournalEvent(logged LoggedEvent) *Event {
+	if logged.Type == EventTypeCompositionExposure && logged.CompositionExposure != nil { return &Event{ID:logged.CompositionExposure.ID} }
 	if logged.Type == EventTypeProcess || logged.Type == EventTypeCognitiveProcess || logged.Type == EventTypeObservation || logged.Type == EventTypeInquiryOutcome {
 		return logged.Event
 	}

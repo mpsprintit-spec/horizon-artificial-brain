@@ -14,6 +14,7 @@ import (
 // boundary. Numeric values are normalized to [-1, 1] by the sensor adapter;
 // labels and provenance remain metadata and never become neural identity.
 type SensorObservation struct {
+	CompositionScene *knowledge.CompositionScene `json:"composition_scene,omitempty"`
 	// NoiseTolerance is a declared maximum per-measurement-coordinate
 	// deviation for receptive-field recovery. Zero requires exact input.
 	NoiseTolerance     float64          `json:"noise_tolerance,omitempty"`
@@ -43,6 +44,7 @@ var ErrInvalidSensorObservation = errors.New("invalid sensor observation")
 // Clone returns an ownership-safe copy of the observation and all nested slices.
 func (s SensorObservation) Clone() SensorObservation {
 	out := s
+	if s.CompositionScene != nil { scene,_:=freezeComposition(*s.CompositionScene);out.CompositionScene=&scene }
 	out.ChannelStates = append([]float64(nil), s.ChannelStates...)
 	out.SpatialCoordinates = append([]float64(nil), s.SpatialCoordinates...)
 	out.TemporalDelta = append([]float64(nil), s.TemporalDelta...)
@@ -60,6 +62,7 @@ func (s SensorObservation) Clone() SensorObservation {
 // Validate rejects ambiguous or non-finite physical input before it reaches
 // the canonical brain. Numeric feature arrays are expected to be normalized.
 func (s SensorObservation) Validate() error {
+	if s.CompositionScene!=nil {if err:=s.CompositionScene.Validate();err!=nil{return err};if s.Modality!="simulator"||!s.CompositionScene.ObservedAt.Equal(s.Timestamp){return errors.New("composition scene requires the contemporaneous numeric simulator boundary")}}
 	if math.IsNaN(s.NoiseTolerance) || math.IsInf(s.NoiseTolerance, 0) || s.NoiseTolerance < 0 || s.NoiseTolerance > 1 {
 		return fmt.Errorf("%w: noise tolerance must be finite and within [0,1]", ErrInvalidSensorObservation)
 	}
@@ -153,6 +156,8 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		if err := r.ensureWritableLocked(); err != nil {
 			return processedSensor{}, err
 		}
+		if sensor.CompositionScene!=nil && r.composition==nil {return processedSensor{},errors.New("neural composition is disabled")}
+		if sensor.CompositionScene!=nil && r.composition.Scene!=nil && sensor.Timestamp.Before(r.composition.Scene.ObservedAt) {return processedSensor{},errors.New("composition scene timestamp regressed")}
 		if sensor.NoiseTolerance > 0 && !r.dynamicsEncoding.HasStableProjection() {
 			return processedSensor{}, fmt.Errorf("%w: noise tolerance requires stable projection dynamics", ErrInvalidSensorObservation)
 		}
@@ -178,6 +183,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				Sequence: r.seq + 1, Type: EventTypeSensorIntent,
 				Timestamp: sensor.Timestamp.UTC(), Event: cloneEvent(intentEvent),
 			}
+			r.decorateCompositionJournalLocked(&intent)
 			if err := validateJournalPayload(intent); err != nil {
 				return processedSensor{}, err
 			}
@@ -192,6 +198,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		}
 
 		r.settleMemoryTimeLocked(sensor.Timestamp)
+		if sensor.CompositionScene!=nil {scene,_:=freezeComposition(*sensor.CompositionScene);r.composition.Scene=&scene}
 		var population knowledge.ProjectionPopulation
 		var bindings []knowledge.SensoryFieldBinding
 		var ids []knowledge.NodeID
@@ -238,6 +245,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				Sequence: output.Sequence, Type: EventTypeSensorCommit,
 				Timestamp: sensor.Timestamp.UTC(), IntentHash: intentHash,
 			}
+			r.decorateCompositionJournalLocked(&commit)
 			if err := r.eventLog.Append(commit); err != nil {
 				r.markRecoveryRequiredLocked()
 				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)

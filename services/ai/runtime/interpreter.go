@@ -58,6 +58,7 @@ func (r *BrainRuntime) InterpretCognitive(output CognitiveOutput, observation Ob
 		return CognitiveInterpretation{}, err
 	}
 	result := ToCognitiveInterpretation(observation, interpretation)
+	if output.Composition != nil { copied,_:=freezeComposition(*output.Composition);result.Composition=&copied }
 	result.State.Timestamp = output.Timestamp
 	return result, nil
 }

@@ -27,6 +27,7 @@ const priorBrainSnapshotSchemaVersion = 5
 const legacyBrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
+	Composition *CompositionContinuation `json:"composition,omitempty"`
 	NeuralWrittenGrounding bool `json:"neural_written_grounding,omitempty"`
 	ActionBindings map[string]ActionBinding         `json:"action_bindings,omitempty"`
 	EvidenceLedger *learning.EvidenceLedgerSnapshot `json:"evidence_ledger,omitempty"`
@@ -92,10 +93,12 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 // checkpointLocked is also used to persist a private pre-migration backup
 // while the same owner lock protects its reference and journal receipt.
 func (r *BrainRuntime) checkpointLocked(path string) error {
+	if r.composition != nil { return r.checkpointVersionLocked(path,compositionBrainSnapshotSchemaVersion) }
 	return r.checkpointVersionLocked(path, BrainSnapshotSchemaVersion)
 }
 
 func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
+	if r.composition != nil && version < compositionBrainSnapshotSchemaVersion { return errors.New("composition continuation requires checkpoint schema 14") }
 	// Checkpoints must persist the ENTIRE canonical substrate, including
 	// developmental experiences, bootstrap episodes, learned policy and
 	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
@@ -112,6 +115,7 @@ func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
 	}
 	ledger := r.evidence.Snapshot()
 	snapshot := BrainSnapshot{
+		Composition: cloneCompositionState(r.composition),
 		NeuralWrittenGrounding:    r.neuralWrittenGrounding,
 		ActionBindings:            cloneActionBindings(r.actions),
 		EvidenceLedger:            &ledger,
@@ -146,12 +150,15 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != compositionBrainSnapshotSchemaVersion && snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	if snapshot.SchemaVersion < neuralWrittenBrainSnapshotSchemaVersion && snapshot.NeuralWrittenGrounding {
 		return errors.New("numeric written serving contract requires checkpoint schema 13")
 	}
+	if snapshot.Composition != nil && (snapshot.SchemaVersion < compositionBrainSnapshotSchemaVersion || !snapshot.NeuralWrittenGrounding) { return errors.New("composition requires checkpoint schema 14 and numeric written grounding") }
+	if err:=snapshot.Composition.validate();err!=nil{return err}
+	if err:=knowledge.ValidateCompositionState(snapshot.Brain,snapshot.Composition!=nil);err!=nil{return err}
 	for _, annotation := range snapshot.SurfaceAnnotations {
 		if err := annotation.Encoding.Validate(); err != nil {
 			return fmt.Errorf("checkpoint adapter contract: %w", err)
@@ -257,6 +264,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 		}
 	}
 	r.inspectionEpoch = ""
+	r.composition = cloneCompositionState(snapshot.Composition)
 	r.neuralWrittenGrounding = snapshot.NeuralWrittenGrounding
 	if r.neuralWrittenGrounding { r.surfaceEncoding = knowledge.NeuralWrittenEncoding } else { r.surfaceEncoding = knowledge.WrittenTextEncoding }
 	r.actions, r.evidence = actions, ledger
@@ -272,6 +280,8 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 
 func checkpointChecksumForSchema(snapshot BrainSnapshot) (string, error) {
 	switch snapshot.SchemaVersion {
+	case compositionBrainSnapshotSchemaVersion:
+		return checkpointChecksumV9(snapshot)
 	case neuralWrittenBrainSnapshotSchemaVersion:
 		return checkpointChecksumV8(snapshot)
 	case legacyBrainSnapshotSchemaVersion:

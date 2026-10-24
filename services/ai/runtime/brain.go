@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"sort"
 	"strings"
 	"sync"
@@ -65,6 +66,7 @@ type Event struct {
 }
 
 type ActionBinding struct {
+	NumericPrediction *NumericActionPrediction `json:"numeric_prediction,omitempty"`
 	RequestID string
 	BrainIdentity string
 	Intent string
@@ -79,6 +81,7 @@ type SynapseBinding struct {
 }
 
 type BrainRuntime struct {
+	composition *CompositionContinuation
 	brain *knowledge.Brain
 	dnf *dnf.Fabric
 	activation *activation.Engine
@@ -113,7 +116,7 @@ type BrainRuntime struct {
 
 func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil { brain = knowledge.NewBootstrapBrain() }
-	if brain.HasNeuralWrittenProjection() { return nil } // Recover v2 through its complete checkpoint.
+	if brain.HasNeuralWrittenProjection() || brain.HasNeuralComposition() { return nil } // Recover versioned serving through its complete checkpoint.
 	if !brain.BindRuntime() { return nil }
 	fabric, err := dnf.NewFabric(brain)
 	if err != nil { return nil }
@@ -154,17 +157,30 @@ func (r *BrainRuntime) SaveBrain(path string) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return err }
+	if r.composition != nil { return r.checkpointLocked(path) }
 	return r.brain.Save(path)
 }
 func (r *BrainRuntime) LoadBrain(path string) error {
 	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
 	if strings.TrimSpace(path) == "" { return errors.New("brain path is empty") }
 	r.mu.Lock()
+	availabilityErr := r.ensureWritableLocked()
+	r.mu.Unlock()
+	if availabilityErr != nil { return availabilityErr }
+	if data,err:=os.ReadFile(path);err==nil {
+		var header struct { BrainIdentity string `json:"brain_identity"`; Brain json.RawMessage `json:"brain"` }
+		if json.Unmarshal(data,&header)==nil&&header.BrainIdentity==BrainIdentity&&len(header.Brain)>0 {
+			r.mu.Lock();allowed:=r.seq==0&&r.eventLog==nil;r.mu.Unlock()
+			if !allowed{return errors.New("complete checkpoint loading requires an initial detached runtime; use supervisor recovery for live handover")}
+			return r.RestoreCheckpoint(path)
+		}
+	}
+	r.mu.Lock()
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil { return err }
 	// Manual brain import resets the local event sequence. It cannot be
 	// reconciled with an existing attached journal; use checkpoint recovery.
-	if r.neuralWrittenGrounding { return errors.New("numeric written serving requires complete checkpoint recovery, not a Brain-only load") }
+	if r.neuralWrittenGrounding || r.composition != nil { return errors.New("versioned neural serving requires complete checkpoint recovery, not a Brain-only load") }
 	if r.eventLog != nil { return errors.New("manual brain load is forbidden while an event journal is attached; use verified checkpoint recovery") }
 	if err := r.brain.LoadStandalone(path); err != nil { return err }
 	r.inspectionEpoch = ""
@@ -472,6 +488,7 @@ func (r *BrainRuntime) thinkAtWithContextPersistenceLocked(cycles int, context m
 }
 
 type CognitiveOutput struct {
+	Composition *knowledge.CompositionReadout `json:"composition,omitempty"`
 	PredictionAssessment *knowledge.PredictionAssessment `json:"prediction_assessment,omitempty"`
 	BrainIdentity        string
 	Sequence             uint64
@@ -533,11 +550,14 @@ func (r *BrainRuntime) cognitiveProcessWithPersistenceLocked(event Event, persis
 		return output, nil
 	}
 
+	composition, err := r.compositionContextLocked(&event)
+	if err != nil { return CognitiveOutput{}, err }
 	result, sequence, err := r.processWithPersistenceLocked(event, false)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
 	output := cognitiveOutputFromResult(BrainIdentity, sequence, event.Timestamp, result)
+	if composition != nil { composition.Sequence = sequence; output.Composition = composition }
 	output.Prediction = r.activation.PredictionSnapshot()
 	output.PredictionAssessment = r.activation.PredictionAssessment(event.Timestamp, r.dynamicsEncoding)
 	if !r.dynamicsEncoding.HasObservedFeedback() || result.ObservedInput {
@@ -577,12 +597,17 @@ func (r *BrainRuntime) cognitiveThinkAtLocked(cycles int, now time.Time, persist
 		return output, nil
 	}
 	curiosityContext := r.applyCuriosityDrive(now)
+	compositionEvent := Event{Timestamp:now,Context:curiosityContext}
+	composition, err := r.compositionContextLocked(&compositionEvent)
+	if err != nil { return CognitiveOutput{},err }
+	curiosityContext = compositionEvent.Context
 	thought, sequence, err := r.thinkAtWithContextPersistenceLocked(cycles, curiosityContext, now, false)
 	if err != nil {
 		return CognitiveOutput{}, err
 	}
 	output := CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: sequence, Timestamp: now, RankedNodeIDs: rankedNodeIDs(thought.RankedNodes), Activations: cloneNodeValues(thought.Activations), Confidence: cloneNodeValues(thought.Confidence), Resonance: thought.Resonance, PredictionError: thought.PredictionError, Prediction: thought.Prediction}
 	output.PredictionAssessment = r.activation.PredictionAssessment(now, r.dynamicsEncoding)
+	if composition != nil { composition.Sequence = sequence; output.Composition = composition }
 	if !r.dynamicsEncoding.HasObservedFeedback() {
 		r.brain.RecordLearningSignal(output.PredictionError, now)
 	}

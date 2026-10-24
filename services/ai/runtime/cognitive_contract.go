@@ -46,6 +46,7 @@ type Answer struct {
 
 // CognitiveInterpretation is the typed boundary between neural state and externally usable cognition. Grounding records how raw context/data entered the shared substrate; they do not assert semantic truth or authorization.
 type CognitiveInterpretation struct {
+	Composition *knowledge.CompositionReadout `json:"composition,omitempty"`
 	SensorBindings          []knowledge.SensoryFieldBinding `json:"sensor_bindings,omitempty"`
 	Observation             Observation
 	GroundedRepresentations []knowledge.GroundedRepresentation
