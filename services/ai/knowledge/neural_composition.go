@@ -13,13 +13,17 @@ import (
 )
 
 const (
-	NeuralCompositionV1   = "synaptic-composition-v1"
-	MaxCompositionWords   = 6
-	MaxCompositionPatches = 7
-	compositionHidden     = 12
-	compositionOutputs    = 6
-	compositionBanks      = 28
-	compositionScale      = 8.0
+	NeuralCompositionV1 = "synaptic-composition-v1"
+	// Explicit experimental opt-in. The canonical bank layout is shared with
+	// v1; this version changes the forward/learning contract, not its storage.
+	NeuralCompositionQueryV2    = "synaptic-composition-query-v2"
+	NeuralCompositionSequenceV4 = "synaptic-composition-sequence-focus-v4"
+	MaxCompositionWords         = 6
+	MaxCompositionPatches       = 7
+	compositionHidden           = 12
+	compositionOutputs          = 6
+	compositionBanks            = 28
+	compositionScale            = 8.0
 )
 
 var compositionScope = ProjectionScope{Modality: "internal-numeric", Field: NeuralCompositionV1}
@@ -37,7 +41,7 @@ func DefaultCompositionConfig() CompositionConfig {
 }
 
 func (c CompositionConfig) Validate() error {
-	if c.Version != NeuralCompositionV1 || c.Initialization != "separated" && c.Initialization != "zero" && c.Initialization != "random" || c.MaxLearnedWords < 1 || c.MaxLearnedWords > 4096 || c.MaxSceneAgeNS <= 0 || c.MaxSceneAgeNS > int64(time.Minute) {
+	if !SupportedCompositionVersion(c.Version) || c.Initialization != "separated" && c.Initialization != "zero" && c.Initialization != "random" || c.MaxLearnedWords < 1 || c.MaxLearnedWords > 4096 || c.MaxSceneAgeNS <= 0 || c.MaxSceneAgeNS > int64(time.Minute) {
 		return errors.New("unsupported composition version, initialization or resource budget")
 	}
 	return nil
@@ -57,20 +61,24 @@ type CompositionScene struct {
 }
 
 type CompositionInput struct {
-	Words [][]float64      `json:"words"`
-	Scene CompositionScene `json:"scene"`
+	Words    [][]float64      `json:"words"`
+	Scene    CompositionScene `json:"scene"`
+	Sequence [][]float64      `json:"sequence,omitempty"`
 }
 
 type CompositionExposure struct {
-	ID                string           `json:"id"`
-	Source            string           `json:"source"`
-	EpisodeID         string           `json:"episode_id"`
-	IndependenceGroup string           `json:"independence_group"`
-	CausalGroup       string           `json:"causal_group"`
-	Reliability       float64          `json:"reliability"`
-	Input             CompositionInput `json:"input"`
-	Motor             []float64        `json:"motor"`
-	After             CompositionScene `json:"after"`
+	ID                  string             `json:"id"`
+	Source              string             `json:"source"`
+	EpisodeID           string             `json:"episode_id"`
+	IndependenceGroup   string             `json:"independence_group"`
+	CausalGroup         string             `json:"causal_group"`
+	Reliability         float64            `json:"reliability"`
+	Input               CompositionInput   `json:"input"`
+	Motor               []float64          `json:"motor"`
+	After               CompositionScene   `json:"after"`
+	SequenceFocus       []float64          `json:"sequence_focus,omitempty"`
+	SequenceFocusWeight float64            `json:"sequence_focus_weight,omitempty"`
+	Resolution          *NResolutionLesson `json:"resolution,omitempty"`
 }
 
 func compositionNumbers(v []float64, n int) bool {
@@ -103,6 +111,9 @@ func (s CompositionScene) Validate() error {
 }
 
 func (i CompositionInput) Validate() error {
+	if err := validateCompositionSequence(i.Sequence); err != nil {
+		return err
+	}
 	if err := ValidateCompositionWords(i.Words); err != nil {
 		return err
 	}
@@ -163,6 +174,12 @@ func (e CompositionExposure) target() (int, float64, float64, error) {
 }
 
 func (e CompositionExposure) Validate() error {
+	if err := validateNLesson(e); err != nil {
+		return err
+	}
+	if err := validateSequenceFocus(e); err != nil {
+		return err
+	}
 	if e.ID == "" || len(e.ID) > 256 || e.Source == "" || len(e.Source) > 256 || e.EpisodeID == "" || len(e.EpisodeID) > 256 || e.IndependenceGroup == "" || len(e.IndependenceGroup) > 256 || e.CausalGroup == "" || len(e.CausalGroup) > 256 || math.IsNaN(e.Reliability) || e.Reliability <= 0 || e.Reliability > 1 {
 		return errors.New("composition exposure requires bounded causal provenance and reliability in (0,1]")
 	}
@@ -180,17 +197,18 @@ func (e CompositionExposure) Validate() error {
 }
 
 type CompositionReadout struct {
-	Status          string    `json:"status"`
-	Accepted        bool      `json:"accepted"`
-	Goal            []float64 `json:"goal,omitempty"`
-	Motor           []float64 `json:"motor,omitempty"`
-	Confidence      float64   `json:"confidence"` // A bounded score, not a calibrated probability.
-	ReferenceMargin float64   `json:"reference_margin"`
-	LocalEffect     float64   `json:"predicted_local_effect"`
-	SceneAt         time.Time `json:"scene_at"`
-	Sequence        uint64    `json:"sequence"`
-	BrainIdentity   string    `json:"brain_identity"`
-	Coordinates     []float64 `json:"coordinates,omitempty"` // Current internal numerical state, never an authorization.
+	Status          string              `json:"status"`
+	Accepted        bool                `json:"accepted"`
+	Goal            []float64           `json:"goal,omitempty"`
+	Motor           []float64           `json:"motor,omitempty"`
+	Confidence      float64             `json:"confidence"` // A bounded score, not a calibrated probability.
+	ReferenceMargin float64             `json:"reference_margin"`
+	LocalEffect     float64             `json:"predicted_local_effect"`
+	SceneAt         time.Time           `json:"scene_at"`
+	Sequence        uint64              `json:"sequence"`
+	BrainIdentity   string              `json:"brain_identity"`
+	NResolution     *NResolutionReadout `json:"n_resolution,omitempty"`
+	Coordinates     []float64           `json:"coordinates,omitempty"` // Current internal numerical state, never an authorization.
 }
 
 type compositionWeights struct {
@@ -376,6 +394,9 @@ func (k *KnowledgeBase) InitializeCompositionAt(c CompositionConfig, at time.Tim
 	}
 	k.adjustCompositionParameter(bank[25], bank[27], 0, 0, at, true)
 	k.adjustCompositionParameter(bank[26], bank[27], 0, 0, at, true)
+	if c.Version == NeuralCompositionSequenceV4 {
+		k.initializeSequenceComposition(bank, c, at)
+	}
 	return nil
 }
 
@@ -406,6 +427,18 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 	if err := e.Validate(); err != nil {
 		return err
 	}
+	if e.Resolution != nil && c.Version != NeuralCompositionResolutionV5 {
+		return errors.New("resolution lessons require explicit v5")
+	}
+	if c.Version == NeuralCompositionResolutionV5 && len(e.Input.Words) > 0 && e.Resolution == nil {
+		return errors.New("v5 requires a diagnosed resolution lesson")
+	}
+	if c.Version != NeuralCompositionSequenceV4 && len(e.SequenceFocus) > 0 {
+		return errors.New("focus teaching requires v4")
+	}
+	if err := validateCompositionMode(c, e.Input); err != nil {
+		return err
+	}
 	k.RLock()
 	defer k.RUnlock()
 	bank, err := k.compositionBankLocked()
@@ -416,19 +449,26 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 		return errors.New("composition is not initialized")
 	}
 	ids, _ := k.compositionWordsLocked(e.Input.Words)
+	trained := func(p []NodeID) bool {
+		if c.Version == NeuralCompositionResolutionV5 {
+			_, ok := k.compositionParameter(bank[24], p)
+			return len(p) > 0 && ok
+		}
+		_, ok := k.compositionParameter(p, bank[0])
+		return ok
+	}
 	count := 0
 	k.projectionMu.RLock()
 	for _, p := range k.ProjectionPopulations {
 		if p.Scope != nil && *p.Scope == writtenNumericScope {
-			if _, ok := k.compositionParameter(writtenPopulationIDs(p), bank[0]); ok {
+			if trained(writtenPopulationIDs(p)) {
 				count++
 			}
 		}
 	}
 	k.projectionMu.RUnlock()
 	for i, p := range ids {
-		_, ok := k.compositionParameter(p, bank[0])
-		if ok {
+		if trained(p) {
 			continue
 		}
 		duplicate := false
@@ -440,6 +480,9 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 		if !duplicate {
 			count++
 		}
+	}
+	if c.Version == NeuralCompositionResolutionV5 && count > 32 {
+		return errors.New("N diagnosis query budget exceeded")
 	}
 	if count > c.MaxLearnedWords {
 		return errors.New("composition learned-word budget exceeded")
@@ -521,6 +564,20 @@ func (k *KnowledgeBase) LearnCompositionAt(c CompositionConfig, e CompositionExp
 	if err := k.ValidateCompositionExposure(c, e); err != nil {
 		return err
 	}
+	if c.Version == NeuralCompositionResolutionV5 && len(e.Input.Words) > 0 {
+		k.Lock()
+		defer k.Unlock()
+		bank, err := k.compositionBankLocked()
+		if err != nil {
+			return err
+		}
+		ids, _ := k.compositionWordsLocked(e.Input.Words)
+		query := ids[0]
+		if len(query) == 0 {
+			query = []NodeID{0}
+		}
+		return k.learnNResolution(bank, query, e, at)
+	}
 	ids := make([][]NodeID, len(e.Input.Words))
 	for i, v := range e.Input.Words {
 		p, _, err := k.projectWrittenNumeric(NewNeuralVector(v), GroundingProjectionThreshold(), 4, at, true)
@@ -557,9 +614,12 @@ func (k *KnowledgeBase) LearnCompositionAt(c CompositionConfig, e CompositionExp
 			}
 		}
 	}
+	if c.Version == NeuralCompositionSequenceV4 {
+		return k.learnSequenceComposition(bank, ids[0], e, at)
+	}
 	w := k.loadComposition(bank, ids)
 	for micro := 0; micro < 5; micro++ {
-		z, prob := compositionForward(e.Input, w)
+		z, prob := compositionForwardVersion(e.Input, w, c.Version)
 		var dz [compositionOutputs]float64
 		if force > 0 {
 			for j, p := range e.Input.Scene.Patches {
@@ -575,6 +635,10 @@ func (k *KnowledgeBase) LearnCompositionAt(c CompositionConfig, e CompositionExp
 			dz[4] = compositionSigmoid(z[4]) - (state+1)/2
 		}
 		dz[5] = compositionSigmoid(z[5]) - force
+		if c.Version == NeuralCompositionQueryV2 {
+			w = compositionQueryStep(w, ids, dz, e.Reliability)
+			continue
+		}
 		old := w
 		old.E = make([][]float64, len(w.E))
 		for i, e := range w.E {
@@ -667,6 +731,9 @@ func (k *KnowledgeBase) ReadComposition(c CompositionConfig, input CompositionIn
 	if err := input.Validate(); err != nil {
 		return out, err
 	}
+	if err := validateCompositionMode(c, input); err != nil {
+		return out, err
+	}
 	if at.Before(input.Scene.ObservedAt) || at.Sub(input.Scene.ObservedAt) > time.Duration(c.MaxSceneAgeNS) {
 		out.Status = "stale-scene"
 		return out, nil
@@ -690,13 +757,19 @@ func (k *KnowledgeBase) ReadComposition(c CompositionConfig, input CompositionIn
 			out.Status = "unknown-written-form"
 			return out, nil
 		}
-		if _, ok := k.compositionParameter(p, bank[0]); !ok {
+		if _, ok := k.compositionParameter(p, bank[0]); !ok && c.Version != NeuralCompositionResolutionV5 {
 			out.Status = "unknown-written-form"
 			return out, nil
 		}
 	}
+	if c.Version == NeuralCompositionResolutionV5 {
+		return k.readNResolution(bank, ids[0], input), nil
+	}
 	w := k.loadComposition(bank, ids)
-	z, scores := compositionForward(input, w)
+	if c.Version == NeuralCompositionSequenceV4 {
+		w = compositionWeights{B: sequenceForward(input, k.loadSequenceComposition(bank, ids[0])).Z}
+	}
+	z, scores := compositionForwardVersion(input, w, c.Version)
 	out.Coordinates = slices.Clone(z[:])
 	execute, state := compositionSigmoid(z[5]), compositionSigmoid(z[4])
 	if execute < .5 {
@@ -770,6 +843,19 @@ func (k *KnowledgeBase) CompositionActivation(out CompositionReadout) (map[NodeI
 			values[id] = .05 * (1 + math.Tanh(v))
 		}
 	}
+	if out.NResolution != nil && k.BrainState.NResolution != nil {
+		known := map[NodeID]bool{}
+		for _, f := range k.BrainState.NResolution.Features {
+			known[f.Node] = true
+		}
+		for _, u := range out.NResolution.Units {
+			if !known[u.Node] || math.IsNaN(u.Code) || math.IsInf(u.Code, 0) {
+				return nil, errors.New("invalid N activation context")
+			}
+			values[u.Node] = .5 * (1 + math.Tanh(u.Code))
+		}
+	}
+
 	return values, nil
 }
 

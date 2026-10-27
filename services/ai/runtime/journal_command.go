@@ -63,7 +63,12 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 }
 
 func processedJournalEvent(logged LoggedEvent) *Event {
-	if logged.Type == EventTypeCompositionExposure && logged.CompositionExposure != nil { return &Event{ID:logged.CompositionExposure.ID} }
+	if logged.Type == EventTypeCompositionPerception && logged.CompositionPerception != nil {
+		return &Event{ID: logged.CompositionPerception.ID}
+	}
+	if logged.Type == EventTypeCompositionExposure && logged.CompositionExposure != nil {
+		return &Event{ID: logged.CompositionExposure.ID}
+	}
 	if logged.Type == EventTypeProcess || logged.Type == EventTypeCognitiveProcess || logged.Type == EventTypeObservation || logged.Type == EventTypeInquiryOutcome {
 		return logged.Event
 	}

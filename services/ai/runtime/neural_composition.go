@@ -28,10 +28,13 @@ var ErrCompositionRequiresWrittenMigration = errors.New("composition requires th
 // There are no trainable weights, lexical maps or semantic answers. Learned
 // parameters are exclusively the canonical Brain's dynamic synapses.
 type CompositionContinuation struct {
-	Config      knowledge.CompositionConfig `json:"config"`
-	Scene       *knowledge.CompositionScene `json:"scene,omitempty"`
-	Words       [][]float64                 `json:"words,omitempty"`
-	Unsupported bool                        `json:"unsupported,omitempty"`
+	Config             knowledge.CompositionConfig `json:"config"`
+	Scene              *knowledge.CompositionScene `json:"scene,omitempty"`
+	Words              [][]float64                 `json:"words,omitempty"`
+	Unsupported        bool                        `json:"unsupported,omitempty"`
+	Sequence           [][]float64                 `json:"sequence,omitempty"`
+	SequenceObservedAt *time.Time                  `json:"sequence_observed_at,omitempty"`
+	SequenceSource     string                      `json:"sequence_source,omitempty"`
 }
 
 type CompositionPlan struct {
@@ -73,7 +76,10 @@ func (s *CompositionContinuation) validate() error {
 	if s.Scene == nil {
 		return knowledge.ValidateCompositionWords(s.Words)
 	}
-	return (knowledge.CompositionInput{Words: s.Words, Scene: *s.Scene}).Validate()
+	if len(s.Sequence) > 0 && (s.SequenceObservedAt == nil || s.SequenceObservedAt.IsZero() || s.SequenceSource == "") {
+		return errors.New("sequence continuation lacks provenance")
+	}
+	return (knowledge.CompositionInput{Words: s.Words, Scene: *s.Scene, Sequence: s.Sequence}).Validate()
 }
 
 func (m CompositionMigration) validateShape() error {
@@ -225,39 +231,51 @@ func (r *BrainRuntime) applyCompositionMigrationLocked(m CompositionMigration, a
 // supervision and controller updates. Demonstration provenance is retained in
 // the journal; repetition is not counted as independent outcome evidence.
 func (r *BrainRuntime) LearnComposition(e knowledge.CompositionExposure, at time.Time) (uint64, error) {
+	seq, _, err := r.LearnCompositionWithDiagnosis(e, at)
+	return seq, err
+}
+
+// CompositionLearningReceipt is detached while the teaching transaction lock
+// is held. A concurrent lesson cannot substitute its diagnosis in this reply.
+type CompositionLearningReceipt struct {
+	LearnedNUnits int                  `json:"learned_n_units"`
+	Diagnosis     knowledge.NDiagnosis `json:"diagnosis"`
+}
+
+func (r *BrainRuntime) LearnCompositionWithDiagnosis(e knowledge.CompositionExposure, at time.Time) (uint64, *CompositionLearningReceipt, error) {
 	if r == nil || r.brain == nil {
-		return 0, errors.New("runtime is unavailable")
+		return 0, nil, errors.New("runtime is unavailable")
 	}
 	if err := e.Validate(); err != nil {
-		return 0, err
+		return 0, nil, err
 	}
 	frozen, err := freezeComposition(e)
 	if err != nil {
-		return 0, err
+		return 0, nil, err
 	}
 	if err := frozen.Validate(); err != nil {
-		return 0, err
+		return 0, nil, err
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
 	if err := r.ensureWritableLocked(); err != nil {
-		return r.seq, err
+		return r.seq, nil, err
 	}
 	if r.composition == nil {
-		return r.seq, errors.New("neural composition is disabled")
+		return r.seq, nil, errors.New("neural composition is disabled")
 	}
 	if at.IsZero() {
 		at = r.nowLocked()
 	}
 	at = at.UTC()
 	if frozen.After.ObservedAt.After(at) {
-		return r.seq, errors.New("composition cannot learn an unobserved future outcome")
+		return r.seq, nil, errors.New("composition cannot learn an unobserved future outcome")
 	}
 	if _, exists := r.processedEvents[frozen.ID]; exists {
-		return r.seq, fmt.Errorf("duplicate event ID %q", frozen.ID)
+		return r.seq, nil, fmt.Errorf("duplicate event ID %q", frozen.ID)
 	}
 	if err := r.brain.ValidateCompositionExposure(r.composition.Config, frozen); err != nil {
-		return r.seq, err
+		return r.seq, nil, err
 	}
 	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeCompositionExposure, Timestamp: at, CompositionExposure: &frozen}, func() error {
 		if err := r.brain.LearnCompositionAt(r.composition.Config, frozen, at); err != nil {
@@ -265,6 +283,14 @@ func (r *BrainRuntime) LearnComposition(e knowledge.CompositionExposure, at time
 		}
 		r.seq++
 		r.processedEvents[frozen.ID] = r.seq
+		if len(frozen.Input.Sequence) > 0 && (r.composition.SequenceObservedAt == nil || !frozen.Input.Scene.ObservedAt.Before(*r.composition.SequenceObservedAt)) {
+			r.composition.Words = frozen.Input.Words
+			r.composition.Sequence = frozen.Input.Sequence
+			sequenceAt := frozen.Input.Scene.ObservedAt
+			r.composition.SequenceObservedAt = &sequenceAt
+			r.composition.SequenceSource = frozen.Source
+			r.composition.Unsupported = false
+		}
 		// Keep the most recent actual physical observation; never regress a
 		// live scene when a delayed teaching outcome arrives.
 		if r.composition.Scene == nil || !frozen.After.ObservedAt.Before(r.composition.Scene.ObservedAt) {
@@ -273,7 +299,14 @@ func (r *BrainRuntime) LearnComposition(e knowledge.CompositionExposure, at time
 		}
 		return nil
 	})
-	return r.seq, err
+	if err != nil || r.composition.Config.Version != knowledge.NeuralCompositionResolutionV5 || r.brain.BrainState.NResolution == nil {
+		return r.seq, nil, err
+	}
+	s := r.brain.BrainState.NResolution
+	d := s.Last
+	d.Query = append([]knowledge.NodeID(nil), d.Query...)
+	d.Trials = append([]knowledge.NTrial(nil), d.Trials...)
+	return r.seq, &CompositionLearningReceipt{LearnedNUnits: len(s.Features), Diagnosis: d}, nil
 }
 
 // ReadComposition is a detached numerical preview. It does not ground,
@@ -328,7 +361,7 @@ func (r *BrainRuntime) compositionReadoutLocked(at time.Time) (*knowledge.Compos
 	if r.composition.Scene == nil {
 		return &knowledge.CompositionReadout{Status: "missing-scene", Sequence: r.seq, BrainIdentity: BrainIdentity}, nil
 	}
-	out, err := r.brain.ReadComposition(r.composition.Config, knowledge.CompositionInput{Words: r.composition.Words, Scene: *r.composition.Scene}, at)
+	out, err := r.brain.ReadComposition(r.composition.Config, knowledge.CompositionInput{Words: r.composition.Words, Scene: *r.composition.Scene, Sequence: r.composition.Sequence}, at)
 	out.Sequence = r.seq
 	out.BrainIdentity = BrainIdentity
 	return &out, err

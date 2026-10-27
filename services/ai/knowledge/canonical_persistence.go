@@ -40,6 +40,7 @@ type canonicalProvenance struct {
 }
 
 type canonicalBrainFile struct {
+	NResolution *NResolutionState `json:"n_resolution,omitempty"`
 	SensoryTraces []SensoryExperienceTrace `json:"sensory_traces,omitempty"`
 	SchemaVersion int `json:"schema_version"`
 	BrainIdentity string `json:"brain_identity"`
@@ -105,7 +106,7 @@ func marshalCanonicalBrain(k *KnowledgeBase) ([]byte, error) {
 	state := k.BrainState
 	errorState := map[string]float64{}
 	for key, value := range state.PredictionState { if len(key) >= 6 && key[:6] == "error_" { errorState[key[6:]] = value } }
-	payload := canonicalBrainFile{MemoryDecay: state.MemoryDecay, SensoryTraces: state.SensoryTraces, SchemaVersion: 2, BrainIdentity: "horizon", NeuralUnits: neuralUnits, Populations: append([]ProjectionPopulation(nil), k.ProjectionPopulations...), Synapses: synapses, TemporalPatterns: append([]*PatternSynapse(nil), k.Patterns.All()...), Episodes: append([]BootstrapExperience(nil), state.Episodes...), BootstrapExperiences: append([]BootstrapExperience(nil), state.BootstrapExperiences...), AttentionState: cloneFloatMap(state.AttentionState), PredictionState: cloneFloatMap(state.PredictionState), ErrorState: errorState, MemoryState: cloneFloatMap(state.MemoryState), CuriosityState: cloneFloatMap(state.CuriosityState), LearningPolicyState: state.LearningPolicyState, SelfModelState: cloneFloatMap(state.SelfModelState), SocialModelState: cloneFloatMap(state.SocialModelState), ValueState: cloneFloatMap(state.ValueState), PlasticityState: cloneFloatMap(state.PlasticityState), InquiryState: state.InquiryState, Provenance: provenance, DevelopmentalExperiences: append([]DevelopmentalExperience(nil), state.DevelopmentalExperiences...), ExperienceTraces: append([]ExperienceTrace(nil), state.ExperienceTraces...) }
+	payload := canonicalBrainFile{NResolution:state.NResolution,MemoryDecay: state.MemoryDecay, SensoryTraces: state.SensoryTraces, SchemaVersion: 2, BrainIdentity: "horizon", NeuralUnits: neuralUnits, Populations: append([]ProjectionPopulation(nil), k.ProjectionPopulations...), Synapses: synapses, TemporalPatterns: append([]*PatternSynapse(nil), k.Patterns.All()...), Episodes: append([]BootstrapExperience(nil), state.Episodes...), BootstrapExperiences: append([]BootstrapExperience(nil), state.BootstrapExperiences...), AttentionState: cloneFloatMap(state.AttentionState), PredictionState: cloneFloatMap(state.PredictionState), ErrorState: errorState, MemoryState: cloneFloatMap(state.MemoryState), CuriosityState: cloneFloatMap(state.CuriosityState), LearningPolicyState: state.LearningPolicyState, SelfModelState: cloneFloatMap(state.SelfModelState), SocialModelState: cloneFloatMap(state.SocialModelState), ValueState: cloneFloatMap(state.ValueState), PlasticityState: cloneFloatMap(state.PlasticityState), InquiryState: state.InquiryState, Provenance: provenance, DevelopmentalExperiences: append([]DevelopmentalExperience(nil), state.DevelopmentalExperiences...), ExperienceTraces: append([]ExperienceTrace(nil), state.ExperienceTraces...) }
 	if state.MemoryDecay != nil { payload.SchemaVersion = 3 }
 	return json.MarshalIndent(payload, "", "  ")
 }
@@ -114,6 +115,7 @@ func cloneFloatMap(in map[string]float64) map[string]float64 { out := make(map[s
 
 func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []ProjectionPopulation, BrainState, error) {
 	var raw struct {
+	NResolution *NResolutionState `json:"n_resolution,omitempty"`
 		SensoryTraces []SensoryExperienceTrace `json:"sensory_traces,omitempty"`
 		SchemaVersion int `json:"schema_version"`
 		NeuralUnits []canonicalNeuralUnit `json:"neural_units"`
@@ -151,7 +153,7 @@ func loadCanonicalBrain(data []byte) ([]*ConceptNode, []*PatternSynapse, []Proje
 		// Rehydrating here would overwrite saved values and change replay state.
 		source.Synapses[item.TargetID] = append(source.Synapses[item.TargetID], synapse) }
 	nodes := make([]*ConceptNode, 0, len(registry)); for _, node := range registry { nodes = append(nodes, node) }; sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
-	state := BrainState{MemoryDecay: raw.MemoryDecay, SensoryTraces: raw.SensoryTraces, AttentionState: raw.AttentionState, CuriosityState: raw.CuriosityState, PredictionState: raw.PredictionState, MemoryState: raw.MemoryState, SelfModelState: raw.SelfModelState, SocialModelState: raw.SocialModelState, ValueState: raw.ValueState, PlasticityState: raw.PlasticityState, LearningPolicyState: raw.LearningPolicyState, InquiryState: raw.InquiryState, BootstrapExperiences: raw.BootstrapExperiences, Episodes: raw.Episodes, ExperienceTraces: raw.ExperienceTraces, DevelopmentalExperiences: raw.DevelopmentalExperiences}
+	state := BrainState{NResolution:raw.NResolution,MemoryDecay: raw.MemoryDecay, SensoryTraces: raw.SensoryTraces, AttentionState: raw.AttentionState, CuriosityState: raw.CuriosityState, PredictionState: raw.PredictionState, MemoryState: raw.MemoryState, SelfModelState: raw.SelfModelState, SocialModelState: raw.SocialModelState, ValueState: raw.ValueState, PlasticityState: raw.PlasticityState, LearningPolicyState: raw.LearningPolicyState, InquiryState: raw.InquiryState, BootstrapExperiences: raw.BootstrapExperiences, Episodes: raw.Episodes, ExperienceTraces: raw.ExperienceTraces, DevelopmentalExperiences: raw.DevelopmentalExperiences}
 	if state.PredictionState == nil { state.PredictionState = map[string]float64{} }; for key, value := range raw.ErrorState { state.PredictionState["error_"+key] = value }
 	return nodes, raw.TemporalPatterns, raw.Populations, state, nil
 }

@@ -27,19 +27,19 @@ const priorBrainSnapshotSchemaVersion = 5
 const legacyBrainSnapshotSchemaVersion = 4
 
 type BrainSnapshot struct {
-	Composition *CompositionContinuation `json:"composition,omitempty"`
-	NeuralWrittenGrounding bool `json:"neural_written_grounding,omitempty"`
-	ActionBindings map[string]ActionBinding         `json:"action_bindings,omitempty"`
-	EvidenceLedger *learning.EvidenceLedgerSnapshot `json:"evidence_ledger,omitempty"`
-	SchemaVersion  int                              `json:"schema_version"`
-	BrainIdentity  string                           `json:"brain_identity"`
-	Sequence       uint64                           `json:"sequence"`
-	Timestamp      time.Time                        `json:"timestamp"`
-	Checksum       string                           `json:"checksum"`
-	Brain          json.RawMessage                  `json:"brain"`
-	Activation     activation.StateSnapshot         `json:"activation"`
-	CognitiveState CognitiveState                   `json:"cognitive_state"`
-	InquiryValence map[InquiryAction]float64        `json:"inquiry_valence"`
+	Composition            *CompositionContinuation         `json:"composition,omitempty"`
+	NeuralWrittenGrounding bool                             `json:"neural_written_grounding,omitempty"`
+	ActionBindings         map[string]ActionBinding         `json:"action_bindings,omitempty"`
+	EvidenceLedger         *learning.EvidenceLedgerSnapshot `json:"evidence_ledger,omitempty"`
+	SchemaVersion          int                              `json:"schema_version"`
+	BrainIdentity          string                           `json:"brain_identity"`
+	Sequence               uint64                           `json:"sequence"`
+	Timestamp              time.Time                        `json:"timestamp"`
+	Checksum               string                           `json:"checksum"`
+	Brain                  json.RawMessage                  `json:"brain"`
+	Activation             activation.StateSnapshot         `json:"activation"`
+	CognitiveState         CognitiveState                   `json:"cognitive_state"`
+	InquiryValence         map[InquiryAction]float64        `json:"inquiry_valence"`
 	// Snapshot v5: temporal predecessor and dedup state must survive a restart.
 	LastObservationPopulation []knowledge.NodeID `json:"last_observation_population,omitempty"`
 	LastObservationAt         time.Time          `json:"last_observation_at,omitempty"`
@@ -93,12 +93,16 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 // checkpointLocked is also used to persist a private pre-migration backup
 // while the same owner lock protects its reference and journal receipt.
 func (r *BrainRuntime) checkpointLocked(path string) error {
-	if r.composition != nil { return r.checkpointVersionLocked(path,compositionBrainSnapshotSchemaVersion) }
+	if r.composition != nil {
+		return r.checkpointVersionLocked(path, compositionBrainSnapshotSchemaVersion)
+	}
 	return r.checkpointVersionLocked(path, BrainSnapshotSchemaVersion)
 }
 
 func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
-	if r.composition != nil && version < compositionBrainSnapshotSchemaVersion { return errors.New("composition continuation requires checkpoint schema 14") }
+	if r.composition != nil && version < compositionBrainSnapshotSchemaVersion {
+		return errors.New("composition continuation requires checkpoint schema 14")
+	}
 	// Checkpoints must persist the ENTIRE canonical substrate, including
 	// developmental experiences, bootstrap episodes, learned policy and
 	// neural dynamics. The legacy nodes/patterns-only snapshot silently lost
@@ -115,7 +119,7 @@ func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
 	}
 	ledger := r.evidence.Snapshot()
 	snapshot := BrainSnapshot{
-		Composition: cloneCompositionState(r.composition),
+		Composition:               cloneCompositionState(r.composition),
 		NeuralWrittenGrounding:    r.neuralWrittenGrounding,
 		ActionBindings:            cloneActionBindings(r.actions),
 		EvidenceLedger:            &ledger,
@@ -156,9 +160,19 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if snapshot.SchemaVersion < neuralWrittenBrainSnapshotSchemaVersion && snapshot.NeuralWrittenGrounding {
 		return errors.New("numeric written serving contract requires checkpoint schema 13")
 	}
-	if snapshot.Composition != nil && (snapshot.SchemaVersion < compositionBrainSnapshotSchemaVersion || !snapshot.NeuralWrittenGrounding) { return errors.New("composition requires checkpoint schema 14 and numeric written grounding") }
-	if err:=snapshot.Composition.validate();err!=nil{return err}
-	if err:=knowledge.ValidateCompositionState(snapshot.Brain,snapshot.Composition!=nil);err!=nil{return err}
+	if snapshot.Composition != nil && (snapshot.SchemaVersion < compositionBrainSnapshotSchemaVersion || !snapshot.NeuralWrittenGrounding) {
+		return errors.New("composition requires checkpoint schema 14 and numeric written grounding")
+	}
+	if err := snapshot.Composition.validate(); err != nil {
+		return err
+	}
+	version := ""
+	if snapshot.Composition != nil {
+		version = snapshot.Composition.Config.Version
+	}
+	if err := knowledge.ValidateCompositionState(snapshot.Brain, snapshot.Composition != nil, version); err != nil {
+		return err
+	}
 	for _, annotation := range snapshot.SurfaceAnnotations {
 		if err := annotation.Encoding.Validate(); err != nil {
 			return fmt.Errorf("checkpoint adapter contract: %w", err)
@@ -266,7 +280,11 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	r.inspectionEpoch = ""
 	r.composition = cloneCompositionState(snapshot.Composition)
 	r.neuralWrittenGrounding = snapshot.NeuralWrittenGrounding
-	if r.neuralWrittenGrounding { r.surfaceEncoding = knowledge.NeuralWrittenEncoding } else { r.surfaceEncoding = knowledge.WrittenTextEncoding }
+	if r.neuralWrittenGrounding {
+		r.surfaceEncoding = knowledge.NeuralWrittenEncoding
+	} else {
+		r.surfaceEncoding = knowledge.WrittenTextEncoding
+	}
 	r.actions, r.evidence = actions, ledger
 	r.activation.RestoreState(snapshot.Activation)
 	r.lastCognitiveState = cloneCognitiveState(snapshot.CognitiveState)

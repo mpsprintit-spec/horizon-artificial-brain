@@ -66,6 +66,7 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 		}
 		return expDecay(now.Sub(created).Hours() * rate * scale)
 	}
+	protectedN := k.protectedNParameter()
 	for _, source := range k.Registry.Nodes() {
 		if source == nil {
 			continue
@@ -80,7 +81,9 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 				if factor == 1 {
 					continue
 				}
-				d.Weight = clamp01(d.Weight * factor)
+				if !protectedN(source.ID, synapse.TargetID) {
+					d.Weight = clamp01(d.Weight * factor)
+				}
 				// Half the weight rate preserves slower confidence forgetting
 				// while obeying the same interval-composition law.
 				d.Confidence = clamp01(d.Confidence * factorSince(d.LastModification, .5))

@@ -9,7 +9,13 @@ import (
 
 // ValidateCompositionState checks the canonical coordinate topology without
 // constructing another mutable Brain or touching the restore target.
-func ValidateCompositionState(data []byte, enabled bool) error {
+func ValidateCompositionState(data []byte, enabled bool, versions ...string) error {
+	nEnabled := enabled && len(versions) > 0 && versions[0] == NeuralCompositionResolutionV5
+	if bytes.Contains(data, []byte("n_resolution")) || bytes.Contains(data, []byte(NeuralCompositionResolutionV5)) {
+		if err := validateNResolutionState(data, nEnabled); err != nil {
+			return err
+		}
+	}
 	if !enabled && !bytes.Contains(data, []byte(NeuralCompositionV1)) && bytes.IndexByte(data, '\\') < 0 {
 		return nil
 	}
@@ -95,6 +101,35 @@ func ValidateCompositionState(data []byte, enabled bool) error {
 		}
 		if !check(banks[24], banks[12+out]) {
 			return errors.New("incomplete composition bias")
+		}
+	}
+	if len(versions) > 0 && versions[0] == NeuralCompositionSequenceV4 {
+		for _, p := range raw.Populations {
+			if p.Scope != nil && *p.Scope == writtenNumericScope {
+				ids := writtenPopulationIDs(p)
+				if check(ids, banks[0]) {
+					for h := 0; h < compositionHidden; h++ {
+						if !check(ids, banks[h]) || !check(ids, banks[12+h]) {
+							return errors.New("incomplete sequence query coordinates")
+						}
+					}
+				}
+			}
+		}
+		for h := 0; h < compositionHidden; h++ {
+			if !check(banks[24], banks[h]) {
+				return errors.New("incomplete sequence bias")
+			}
+			for _, b := range sequenceInputBanks {
+				if !check(banks[b], banks[h]) {
+					return errors.New("incomplete sequence encoder")
+				}
+			}
+			for j := 0; j < compositionHidden; j++ {
+				if !check(banks[j], banks[h]) {
+					return errors.New("incomplete sequence recurrence")
+				}
+			}
 		}
 	}
 	if !check(banks[25], banks[27]) || !check(banks[26], banks[27]) {

@@ -18,8 +18,16 @@ jobs:
         run: make validate
       - name: Build Go runtime
         run: make build
+      - name: Validate nested adapter modules
+        run: |
+          while IFS= read -r module; do
+            (
+              cd "$(dirname "$module")"
+              go test ./...
+            )
+          done < <(git ls-files 'services/*/go.mod')
       - name: Race-test runtime and adapter concurrency
-        run: go test -race ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
+        run: go test -race ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
       - name: Live Bridge integration smoke
         run: make bridge-smoke
 

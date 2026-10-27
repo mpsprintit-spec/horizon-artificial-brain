@@ -143,6 +143,7 @@ type InquiryState struct {
 }
 
 type BrainState struct {
+	NResolution *NResolutionState `json:"n_resolution,omitempty"`
 	MemoryDecay *MemoryDecayState `json:"memory_decay,omitempty"`
 	SensoryTraces []SensoryExperienceTrace `json:"sensory_traces,omitempty"`
 	AttentionState map[string]float64 `json:"attention_state,omitempty"`

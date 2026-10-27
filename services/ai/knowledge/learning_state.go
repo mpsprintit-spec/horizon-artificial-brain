@@ -68,7 +68,6 @@ func (k *KnowledgeBase) RecordLearningSignal(predictionError float64, now time.T
 	k.BrainState.MemoryState["last_update_unix"] = float64(now.UnixNano())
 }
 
-
 // ReinforceTransitionPopulation binds two consecutive observed populations.
 // Plasticity and memory priority are read from the persistent BrainState so
 // those signals change how strongly later experience modifies the substrate.
@@ -162,7 +161,6 @@ func (k *KnowledgeBase) ReinforceTransitionPopulation(previous, current []NodeID
 	return nil
 }
 
-
 // ApplyMemoryDynamics preserves the historical age-per-call retention law for
 // old journal encodings and trusted legacy callers. Current serving code uses
 // ApplyMemoryDynamicsWithEncoding; changing this function would change replay.
@@ -189,6 +187,7 @@ func (k *KnowledgeBase) ApplyMemoryDynamics(now time.Time) {
 	// Retention controls the time constant: stronger retention means slower
 	// forgetting. The floor prevents old traces from disappearing in one pass.
 	const halfLifeHours = 24.0
+	protectedN := k.protectedNParameter()
 	for _, source := range k.Registry.Nodes() {
 		if source == nil {
 			continue
@@ -204,7 +203,9 @@ func (k *KnowledgeBase) ApplyMemoryDynamics(now time.Time) {
 				}
 				forgetRate := (1.0 - retention) / halfLifeHours
 				factor := expDecay(ageHours * forgetRate)
-				synapse.Dynamic.Weight = clamp01(synapse.Dynamic.Weight * factor)
+				if !protectedN(source.ID, synapse.TargetID) {
+					synapse.Dynamic.Weight = clamp01(synapse.Dynamic.Weight * factor)
+				}
 				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence * (0.5 + 0.5*factor))
 				synapse.Dynamic.Eligibility = clamp01(synapse.Dynamic.Eligibility * factor)
 				syncSynapseLegacyState(synapse)

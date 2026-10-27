@@ -22,6 +22,7 @@ const EventLogSchemaVersion = 3
 func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion }
 
 type LoggedEvent struct {
+	CompositionPerception *CompositionPerception `json:"composition_perception,omitempty"`
 	CompositionEncoding string `json:"composition_encoding,omitempty"`
 	CompositionMigration *CompositionMigration `json:"composition_migration,omitempty"`
 	CompositionExposure *knowledge.CompositionExposure `json:"composition_exposure,omitempty"`
@@ -388,7 +389,7 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 			return nil, fmt.Errorf("invalid journal payload at line %d: %w", lineNumber, err)
 		}
 		switch event.Type {
-		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeSpellingExposure, EventTypeCompositionMigration, EventTypeCompositionExposure:
+		case EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeSpellingExposure, EventTypeCompositionMigration, EventTypeCompositionExposure, EventTypeCompositionPerception:
 			seen[key] = canonical
 			events = append(events, event)
 			expected++
@@ -568,7 +569,9 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 			err := brainRuntime.applyCompositionMigrationLocked(*logged.CompositionMigration,logged.Timestamp)
 			brainRuntime.mu.Unlock()
 			if err != nil { return err }
-		case EventTypeCompositionExposure:
+		case EventTypeCompositionPerception:
+ if _,err:=brainRuntime.ObserveCompositionInput(*logged.CompositionPerception,logged.Timestamp);err!=nil{return err}
+ case EventTypeCompositionExposure:
 			if _,err:=brainRuntime.LearnComposition(*logged.CompositionExposure,logged.Timestamp);err!=nil{return err}
 		case EventTypeSpellingExposure:
 			if _, err := brainRuntime.LearnSpelling(*logged.SpellingExposure, logged.Timestamp); err != nil { return err }
