@@ -8,7 +8,7 @@ import (
 )
 
 // Reject malformed, detached or unauthenticated N topology before restore.
-func validateNResolutionState(data []byte, enabled bool) error {
+func validateNResolutionState(data []byte, enabled bool, version string) error {
 	var raw struct {
 		State       *NResolutionState      `json:"n_resolution"`
 		Units       []canonicalNeuralUnit  `json:"neural_units"`
@@ -24,13 +24,16 @@ func validateNResolutionState(data []byte, enabled bool) error {
 		known[u.ID] = true
 	}
 	nUnits := map[NodeID][]float64{}
-	var precision, bias, errorBank []NodeID
+	var precision, bias, errorBank, modeBank []NodeID
 	queries := [][]NodeID{}
 	for _, p := range raw.Populations {
 		if p.Scope == nil {
 			continue
 		}
-		if p.Scope.Field == NeuralCompositionResolutionV5 {
+		if IsNumericalCompositionVersion(p.Scope.Field) {
+			if p.Scope.Field != version {
+				return errors.New("N population contract mismatch")
+			}
 			if !enabled || s == nil || p.Scope.Modality != "internal-numeric" || len(p.Units) != 1 || len(p.Prototype) != 2 || nUnits[p.Units[0].NodeID] != nil {
 				return errors.New("invalid or unauthenticated N population")
 			}
@@ -44,6 +47,8 @@ func validateNResolutionState(data []byte, enabled bool) error {
 				precision = writtenPopulationIDs(p)
 			case 26:
 				errorBank = writtenPopulationIDs(p)
+			case 27:
+				modeBank = writtenPopulationIDs(p)
 			}
 		}
 		if *p.Scope == writtenNumericScope {
@@ -52,6 +57,16 @@ func validateNResolutionState(data []byte, enabled bool) error {
 	}
 	if s == nil {
 		return nil
+	}
+	metric := version == NeuralCompositionMetricV6
+	if (metric && s.Contract != NeuralCompositionMetricV6) || (!metric && (s.Contract != "" || len(s.Controls) > 0)) {
+		return errors.New("N state contract mismatch")
+	}
+	if len(s.Controls) > 1 {
+		return errors.New("invalid metric controls")
+	}
+	if err := validateMetricDiagnosis(s.Last, metric); err != nil {
+		return err
 	}
 	if !enabled || len(s.Sources) != nDimensions || len(s.Features) > maxNFeatures || len(s.Witnesses) > maxNWitnesses {
 		return errors.New("invalid N contract or resource limits")
@@ -102,6 +117,13 @@ func validateNResolutionState(data []byte, enabled bool) error {
 		}
 		used[id] = true
 	}
+	for i, id := range s.Controls {
+		p := nUnits[id]
+		if !metric || !known[id] || used[id] || len(p) != 2 || p[0] != .375 || p[1] != float64(i)/512 {
+			return errors.New("invalid metric error control")
+		}
+		used[id] = true
+	}
 	for i, f := range s.Features {
 		p := nUnits[f.Node]
 		if !known[f.Node] || used[f.Node] || len(p) != 2 || p[0] != .25 || p[1] != float64(i)/512 {
@@ -109,7 +131,7 @@ func validateNResolutionState(data []byte, enabled bool) error {
 		}
 		used[f.Node] = true
 		d, ok := param(precision, []NodeID{f.Node})
-		if !ok || math.IsNaN(d) || d < 1e-9 || d > 7.99 {
+		if !ok || math.IsNaN(d) || d <= 0 || (!metric && d < 1e-9) || d > 7.99 {
 			return errors.New("invalid N learned resolution")
 		}
 		center, centerOK := param(bias, []NodeID{f.Node})
@@ -132,7 +154,7 @@ func validateNResolutionState(data []byte, enabled bool) error {
 			if math.Abs(norm-1) > 1e-7 {
 				return errors.New("invalid N learned direction")
 			}
-		} else if f.Kind == 2 {
+		} else if f.Kind == 2 || (metric && f.Kind == 3) {
 			if len(f.Parents) != 2 {
 				return errors.New("invalid N relation arity")
 			}
@@ -166,6 +188,16 @@ func validateNResolutionState(data []byte, enabled bool) error {
 		if !ok || e < 0 || e > 7.99 {
 			return errors.New("invalid N empirical error")
 		}
+		if metric {
+			mode, ok := param(modeBank, h.Query)
+			if !ok || (mode != 0 && mode != 1) || len(s.Controls) != 1 {
+				return errors.New("invalid learned readout mode")
+			}
+			maxError, ok := param(s.Controls, h.Query)
+			if !ok || math.IsNaN(maxError) || math.IsInf(maxError, 0) || maxError < 0 || maxError > 2 {
+				return errors.New("invalid learned max error")
+			}
+		}
 		if len(h.Features) > len(s.Features) {
 			return errors.New("invalid N head extent")
 		}
@@ -179,8 +211,21 @@ func validateNResolutionState(data []byte, enabled bool) error {
 		}
 	}
 	for _, w := range s.Witnesses {
+		if !nFinite(w.OutcomeError) || w.OutcomeError < 0 || w.OutcomeError > 2 || (!metric && w.OutcomeError != 0) {
+			return errors.New("invalid witness outcome uncertainty")
+		}
 		if len(w.X) != nDimensions || len(w.Query) != 4 || !headSeen[w.Query[0]] || !headKnown(w.Query) || w.EpisodeID == "" || math.IsNaN(w.Outcome) || math.IsInf(w.Outcome, 0) || math.Abs(w.Outcome) > 1 {
 			return errors.New("invalid N retention witness")
+		}
+		if len(w.MeasurementError) > 0 {
+			if !metric || len(w.MeasurementError) != nDimensions {
+				return errors.New("invalid witness uncertainty")
+			}
+			for _, v := range w.MeasurementError {
+				if math.IsNaN(v) || math.IsInf(v, 0) || v < 0 || v > 2 {
+					return errors.New("invalid witness error")
+				}
+			}
 		}
 		for _, v := range w.X {
 			if math.IsNaN(v) || math.IsInf(v, 0) || math.Abs(v) > 1 {

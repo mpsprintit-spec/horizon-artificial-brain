@@ -47,7 +47,7 @@ func (r *BrainRuntime) ObserveCompositionInput(p CompositionPerception, at time.
 	if r.composition == nil {
 		return r.seq, errors.New("composition disabled")
 	}
-	if r.composition.Config.Version != knowledge.NeuralCompositionSequenceV4 && r.composition.Config.Version != knowledge.NeuralCompositionResolutionV5 {
+	if r.composition.Config.Version != knowledge.NeuralCompositionSequenceV4 && !knowledge.IsNumericalCompositionVersion(r.composition.Config.Version) {
 		return r.seq, errors.New("sequence perception requires a sequence contract")
 	}
 	if r.composition.SequenceObservedAt != nil && f.Input.Scene.ObservedAt.Before(*r.composition.SequenceObservedAt) {
@@ -63,6 +63,8 @@ func (r *BrainRuntime) ObserveCompositionInput(p CompositionPerception, at time.
 	e = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeCompositionPerception, Timestamp: at, CompositionPerception: &f}, func() error {
 		r.composition.Words = f.Input.Words
 		r.composition.Sequence = f.Input.Sequence
+		r.composition.RequiredPrecision = f.Input.RequiredPrecision
+		r.composition.MeasurementError = f.Input.MeasurementError
 		scene := f.Input.Scene
 		r.composition.Scene = &scene
 		sequenceAt := scene.ObservedAt

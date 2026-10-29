@@ -25,7 +25,10 @@ func validateCompositionSequence(seq [][]float64) error {
 	return nil
 }
 func validateCompositionMode(c CompositionConfig, in CompositionInput) error {
-	if c.Version != NeuralCompositionSequenceV4 && c.Version != NeuralCompositionResolutionV5 {
+	if c.Version != NeuralCompositionMetricV6 && (in.RequiredPrecision != nil || len(in.MeasurementError) > 0) {
+		return errors.New("precision metadata requires metric contract")
+	}
+	if c.Version != NeuralCompositionSequenceV4 && !IsNumericalCompositionVersion(c.Version) {
 		if len(in.Sequence) > 0 {
 			return errors.New("sequence requires explicit v4 contract")
 		}

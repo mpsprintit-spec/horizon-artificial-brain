@@ -61,9 +61,11 @@ type CompositionScene struct {
 }
 
 type CompositionInput struct {
-	Words    [][]float64      `json:"words"`
-	Scene    CompositionScene `json:"scene"`
-	Sequence [][]float64      `json:"sequence,omitempty"`
+	Words             [][]float64      `json:"words"`
+	Scene             CompositionScene `json:"scene"`
+	Sequence          [][]float64      `json:"sequence,omitempty"`
+	RequiredPrecision *float64         `json:"required_precision,omitempty"`
+	MeasurementError  [][]float64      `json:"measurement_error,omitempty"`
 }
 
 type CompositionExposure struct {
@@ -111,6 +113,9 @@ func (s CompositionScene) Validate() error {
 }
 
 func (i CompositionInput) Validate() error {
+	if err := validateMetricInput(i); err != nil {
+		return err
+	}
 	if err := validateCompositionSequence(i.Sequence); err != nil {
 		return err
 	}
@@ -427,10 +432,25 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 	if err := e.Validate(); err != nil {
 		return err
 	}
-	if e.Resolution != nil && c.Version != NeuralCompositionResolutionV5 {
+	if c.Version != NeuralCompositionMetricV6 && (e.Input.RequiredPrecision != nil || len(e.Input.MeasurementError) > 0) {
+		return errors.New("metric precision requires v6")
+	}
+	if e.Resolution != nil {
+		for _, set := range [][]NObservation{e.Resolution.Fit, e.Resolution.Check} {
+			for _, o := range set {
+				if c.Version != NeuralCompositionMetricV6 && o.OutcomeError != 0 {
+					return errors.New("outcome uncertainty requires v6")
+				}
+				if err := validateCompositionMode(c, o.Input); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	if e.Resolution != nil && !IsNumericalCompositionVersion(c.Version) {
 		return errors.New("resolution lessons require explicit v5")
 	}
-	if c.Version == NeuralCompositionResolutionV5 && len(e.Input.Words) > 0 && e.Resolution == nil {
+	if IsNumericalCompositionVersion(c.Version) && len(e.Input.Words) > 0 && e.Resolution == nil {
 		return errors.New("v5 requires a diagnosed resolution lesson")
 	}
 	if c.Version != NeuralCompositionSequenceV4 && len(e.SequenceFocus) > 0 {
@@ -441,6 +461,9 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 	}
 	k.RLock()
 	defer k.RUnlock()
+	if err := k.validateNContract(c); err != nil {
+		return err
+	}
 	bank, err := k.compositionBankLocked()
 	if err != nil {
 		return err
@@ -450,7 +473,7 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 	}
 	ids, _ := k.compositionWordsLocked(e.Input.Words)
 	trained := func(p []NodeID) bool {
-		if c.Version == NeuralCompositionResolutionV5 {
+		if IsNumericalCompositionVersion(c.Version) {
 			_, ok := k.compositionParameter(bank[24], p)
 			return len(p) > 0 && ok
 		}
@@ -481,7 +504,7 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 			count++
 		}
 	}
-	if c.Version == NeuralCompositionResolutionV5 && count > 32 {
+	if IsNumericalCompositionVersion(c.Version) && count > 32 {
 		return errors.New("N diagnosis query budget exceeded")
 	}
 	if count > c.MaxLearnedWords {
@@ -564,7 +587,7 @@ func (k *KnowledgeBase) LearnCompositionAt(c CompositionConfig, e CompositionExp
 	if err := k.ValidateCompositionExposure(c, e); err != nil {
 		return err
 	}
-	if c.Version == NeuralCompositionResolutionV5 && len(e.Input.Words) > 0 {
+	if IsNumericalCompositionVersion(c.Version) && len(e.Input.Words) > 0 {
 		k.Lock()
 		defer k.Unlock()
 		bank, err := k.compositionBankLocked()
@@ -575,6 +598,9 @@ func (k *KnowledgeBase) LearnCompositionAt(c CompositionConfig, e CompositionExp
 		query := ids[0]
 		if len(query) == 0 {
 			query = []NodeID{0}
+		}
+		if c.Version == NeuralCompositionMetricV6 {
+			return k.learnNMetric(bank, query, e, at)
 		}
 		return k.learnNResolution(bank, query, e, at)
 	}
@@ -744,6 +770,9 @@ func (k *KnowledgeBase) ReadComposition(c CompositionConfig, input CompositionIn
 	}
 	k.RLock()
 	defer k.RUnlock()
+	if err := k.validateNContract(c); err != nil {
+		return out, err
+	}
 	bank, err := k.compositionBankLocked()
 	if err != nil {
 		return out, err
@@ -757,12 +786,12 @@ func (k *KnowledgeBase) ReadComposition(c CompositionConfig, input CompositionIn
 			out.Status = "unknown-written-form"
 			return out, nil
 		}
-		if _, ok := k.compositionParameter(p, bank[0]); !ok && c.Version != NeuralCompositionResolutionV5 {
+		if _, ok := k.compositionParameter(p, bank[0]); !ok && !IsNumericalCompositionVersion(c.Version) {
 			out.Status = "unknown-written-form"
 			return out, nil
 		}
 	}
-	if c.Version == NeuralCompositionResolutionV5 {
+	if IsNumericalCompositionVersion(c.Version) {
 		return k.readNResolution(bank, ids[0], input), nil
 	}
 	w := k.loadComposition(bank, ids)

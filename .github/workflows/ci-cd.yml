@@ -28,6 +28,18 @@ jobs:
           done < <(git ls-files 'services/*/go.mod')
       - name: Race-test runtime and adapter concurrency
         run: go test -race ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
+      - name: Verify and prepare the trained dialogue bundle
+        run: |
+          python3 -m unittest discover -s scripts -p test_prepare_grounded_dialogue.py
+          python3 scripts/prepare_grounded_dialogue.py --state "$RUNNER_TEMP/horizon-dialogue-state"
+      - name: Validate trained language, journal replay and production recovery
+        env:
+          HORIZON_DIALOGUE_MODEL: ${{ runner.temp }}/horizon-dialogue-state
+          HORIZON_DIALOGUE_FINAL_CASES: ${{ runner.temp }}/horizon-dialogue-state/evaluation.json
+        run: |
+          go test ./services/ai/runtime -run '^TestGroundedDialogue(FreshEvaluation|PersistenceContextAndSynapticAblation)$' -count=1
+          go test ./services/ai -run '^TestProductionGroundedDialogueBundle$' -count=1
+          go test -race ./services/ai/runtime -run '^TestGroundedDialogueConcurrentCanonicalRead$' -count=1
       - name: Live Bridge integration smoke
         run: make bridge-smoke
 

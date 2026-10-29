@@ -29,6 +29,9 @@ func (k *KnowledgeBase) protectedNParameter() func(NodeID, NodeID) bool {
 				units[id] = true
 			}
 		}
+		for _, id := range s.Controls {
+			units[id] = true
+		}
 		for _, f := range s.Features {
 			units[f.Node] = true
 		}
@@ -39,7 +42,7 @@ func (k *KnowledgeBase) protectedNParameter() func(NodeID, NodeID) bool {
 		}
 		k.projectionMu.RLock()
 		for _, p := range k.ProjectionPopulations {
-			if p.Scope != nil && *p.Scope == compositionScope && len(p.Prototype) == 1 && (p.Prototype[0]*64 == 24 || p.Prototype[0]*64 == 26) {
+			if p.Scope != nil && *p.Scope == compositionScope && len(p.Prototype) == 1 && (p.Prototype[0]*64 == 24 || p.Prototype[0]*64 == 26 || (s.Contract == NeuralCompositionMetricV6 && p.Prototype[0]*64 == 27)) {
 				for _, u := range p.Units {
 					scalarSources[u.NodeID] = true
 				}
@@ -51,10 +54,11 @@ func (k *KnowledgeBase) protectedNParameter() func(NodeID, NodeID) bool {
 }
 
 type NObservation struct {
-	Input      CompositionInput `json:"input"`
-	Outcome    float64          `json:"outcome"`
-	ObservedAt time.Time        `json:"observed_at"`
-	EpisodeID  string           `json:"episode_id"`
+	OutcomeError float64          `json:"outcome_error,omitempty"`
+	Input        CompositionInput `json:"input"`
+	Outcome      float64          `json:"outcome"`
+	ObservedAt   time.Time        `json:"observed_at"`
+	EpisodeID    string           `json:"episode_id"`
 }
 type NResolutionLesson struct {
 	Fit   []NObservation `json:"fit"`
@@ -66,34 +70,47 @@ type NFeature struct {
 	Parents []NodeID `json:"parents,omitempty"`
 }
 type NWitness struct {
-	X         []float64 `json:"x"`
-	Query     []NodeID  `json:"query"`
-	Outcome   float64   `json:"outcome"`
-	EpisodeID string    `json:"episode_id"`
+	OutcomeError     float64   `json:"outcome_error,omitempty"`
+	MeasurementError []float64 `json:"measurement_error,omitempty"`
+	X                []float64 `json:"x"`
+	Query            []NodeID  `json:"query"`
+	Outcome          float64   `json:"outcome"`
+	EpisodeID        string    `json:"episode_id"`
 }
 type NTrial struct {
-	Kind                 string  `json:"kind"`
-	Feature              NodeID  `json:"feature,omitempty"`
-	CheckError           float64 `json:"check_error"`
-	RetentionRegressions int     `json:"retention_regressions"`
-	Eligible             bool    `json:"eligible"`
+	ReadoutMode          string   `json:"readout_mode,omitempty"`
+	FitValid             *bool    `json:"fit_valid,omitempty"`
+	RejectedBy           []string `json:"rejected_by,omitempty"`
+	Kind                 string   `json:"kind"`
+	Feature              NodeID   `json:"feature,omitempty"`
+	CheckError           float64  `json:"check_error"`
+	RetentionRegressions int      `json:"retention_regressions"`
+	Eligible             bool     `json:"eligible"`
 }
 type NDiagnosis struct {
-	Query            []NodeID `json:"query"`
-	Cause            string   `json:"cause"`
-	BeforeError      float64  `json:"before_error"`
-	AfterError       float64  `json:"after_error"`
-	Committed        bool     `json:"committed"`
-	Grown            NodeID   `json:"grown,omitempty"`
-	ResolutionBefore float64  `json:"resolution_before,omitempty"`
-	ResolutionAfter  float64  `json:"resolution_after,omitempty"`
-	Trials           []NTrial `json:"trials"`
+	RequiredPrecision *float64        `json:"required_precision,omitempty"`
+	EstimatedAbsError *float64        `json:"estimated_abs_error,omitempty"`
+	Stage             string          `json:"stage,omitempty"`
+	Hypotheses        []string        `json:"hypotheses,omitempty"`
+	Probes            []NProbeRequest `json:"probes,omitempty"`
+	AliasPairs        int             `json:"alias_pairs,omitempty"`
+	Query             []NodeID        `json:"query"`
+	Cause             string          `json:"cause"`
+	BeforeError       float64         `json:"before_error"`
+	AfterError        float64         `json:"after_error"`
+	Committed         bool            `json:"committed"`
+	Grown             NodeID          `json:"grown,omitempty"`
+	ResolutionBefore  float64         `json:"resolution_before,omitempty"`
+	ResolutionAfter   float64         `json:"resolution_after,omitempty"`
+	Trials            []NTrial        `json:"trials"`
 }
 type NHeadTopology struct {
 	Query    []NodeID `json:"query"`
 	Features []NodeID `json:"features"`
 }
 type NResolutionState struct {
+	Contract  string          `json:"contract,omitempty"`
+	Controls  []NodeID        `json:"controls,omitempty"`
 	Heads     []NHeadTopology `json:"heads"`
 	Sources   []NodeID        `json:"sources"`
 	Features  []NFeature      `json:"features"`
@@ -101,12 +118,19 @@ type NResolutionState struct {
 	Last      NDiagnosis      `json:"last"`
 }
 type NValue struct {
-	Contribution float64 `json:"contribution"`
-	Node         NodeID  `json:"node"`
-	Code         float64 `json:"code"`
-	Resolution   float64 `json:"resolution"`
+	Metric            *float64 `json:"metric,omitempty"`
+	Activation        *float64 `json:"activation,omitempty"`
+	QuantizationError *float64 `json:"quantization_error,omitempty"`
+	Contribution      float64  `json:"contribution"`
+	Node              NodeID   `json:"node"`
+	Code              float64  `json:"code"`
+	Resolution        float64  `json:"resolution"`
 }
 type NResolutionReadout struct {
+	MetricReadout           bool     `json:"metric_readout,omitempty"`
+	ObservedCheckMaxError   *float64 `json:"observed_check_max_error,omitempty"`
+	EstimatedAbsError       *float64 `json:"estimated_abs_error,omitempty"`
+	RequestedPrecision      *float64 `json:"requested_precision,omitempty"`
 	Value                   float64  `json:"value"`
 	ObservedCheckRMSE       float64  `json:"observed_check_rmse"`
 	Units                   []NValue `json:"units"`
@@ -127,6 +151,9 @@ func validateNLesson(e CompositionExposure) error {
 	fit, check := map[string]bool{}, map[string]bool{}
 	for set, rows := range [][]NObservation{b.Fit, b.Check} {
 		for _, o := range rows {
+			if !nFinite(o.OutcomeError) || o.OutcomeError < 0 || o.OutcomeError > 2 {
+				return errors.New("invalid outcome uncertainty")
+			}
 			if err := o.Input.Validate(); err != nil {
 				return err
 			}
@@ -169,14 +196,17 @@ type nCircuit struct {
 	Center float64
 }
 type nHead struct {
+	Metric   bool
+	MaxError float64
 	Query    []NodeID
 	W        []float64
 	B, Error float64
 	Known    bool
 }
 type nModel struct {
-	Circuits []nCircuit
-	Heads    []nHead
+	MetricEnabled bool
+	Circuits      []nCircuit
+	Heads         []nHead
 }
 
 func nDot(a, b []float64) float64 {
@@ -187,6 +217,10 @@ func nDot(a, b []float64) float64 {
 	return v
 }
 func nCodes(m nModel, x []float64) ([]float64, []float64) {
+	if m.MetricEnabled {
+		e := nMetricEvaluate(m, x, nil)
+		return e.Activation, e.Code
+	}
 	codes := make([]float64, len(m.Circuits))
 	values := make([]float64, len(codes))
 	index := map[NodeID]int{}
@@ -220,12 +254,16 @@ func nPredict(m nModel, x []float64, q []NodeID) float64 {
 		return 0
 	}
 	v, _ := nCodes(m, x)
+	if m.MetricEnabled && m.Heads[i].Metric {
+		v = nMetricEvaluate(m, x, nil).Metric
+	}
 	return math.Max(-1, math.Min(1, m.Heads[i].B+nDot(m.Heads[i].W, v)))
 }
 func (k *KnowledgeBase) loadNModel(bank [compositionBanks][]NodeID, queries [][]NodeID) nModel {
 	var m nModel
 	s := k.BrainState.NResolution
 	if s != nil {
+		m.MetricEnabled = s.Contract == NeuralCompositionMetricV6
 		for _, f := range s.Features {
 			c := nCircuit{Meta: f, Axis: make([]float64, nDimensions)}
 			c.Delta, _ = k.compositionParameter(bank[25], []NodeID{f.Node})
@@ -245,6 +283,13 @@ func (k *KnowledgeBase) loadNModel(bank [compositionBanks][]NodeID, queries [][]
 		if len(q) > 0 && q[0] != 0 {
 			h.B, h.Known = k.compositionParameter(bank[24], q)
 			h.Error, _ = k.compositionParameter(bank[26], q)
+			if m.MetricEnabled {
+				v, _ := k.compositionParameter(bank[27], q)
+				h.Metric = v == 1
+				if len(s.Controls) > 0 {
+					h.MaxError, _ = k.compositionParameter(s.Controls[:1], q)
+				}
+			}
 			for i, c := range m.Circuits {
 				h.W[i], _ = k.compositionParameter([]NodeID{c.Meta.Node}, q)
 			}
@@ -254,7 +299,7 @@ func (k *KnowledgeBase) loadNModel(bank [compositionBanks][]NodeID, queries [][]
 	return m
 }
 func nClone(m nModel) nModel {
-	out := nModel{}
+	out := nModel{MetricEnabled: m.MetricEnabled}
 	for _, c := range m.Circuits {
 		c.Axis = slices.Clone(c.Axis)
 		c.Meta.Parents = slices.Clone(c.Meta.Parents)
@@ -326,6 +371,9 @@ func nFit(m *nModel, q []NodeID, rows []NWitness) bool {
 	if hi < 0 {
 		m.Heads = append(m.Heads, nHead{Query: slices.Clone(q)})
 		hi = len(m.Heads) - 1
+	}
+	if m.MetricEnabled {
+		return nFitMetric(m, hi, rows)
 	}
 	n := len(m.Circuits) + 1
 	a := make([][]float64, n)
@@ -516,7 +564,11 @@ func nConflict(rows []NWitness) bool {
 func (k *KnowledgeBase) newNNode(kind, index int, at time.Time) NodeID {
 	v := NewNeuralVector([]float64{float64(kind) / 8, float64(index) / 512})
 	n := k.createRepresentationPrototypeAt(v, at)
-	scope := ProjectionScope{Modality: "internal-numeric", Field: NeuralCompositionResolutionV5}
+	field := NeuralCompositionResolutionV5
+	if k.BrainState.NResolution != nil && k.BrainState.NResolution.Contract == NeuralCompositionMetricV6 {
+		field = NeuralCompositionMetricV6
+	}
+	scope := ProjectionScope{Modality: "internal-numeric", Field: field}
 	k.registerProjectionPopulation(ProjectionPopulation{Scope: &scope, Prototype: v.Values, Units: []PopulationUnit{{NodeID: n.ID, Activation: 1}}, Provenance: BootstrapProvenance{Origin: "diagnosed_numeric_resolution", Status: "validated_circuit"}})
 	return n.ID
 }
@@ -818,6 +870,9 @@ func (k *KnowledgeBase) recordNDiagnosis(d NDiagnosis, at time.Time) {
 }
 func (k *KnowledgeBase) readNResolution(bank [compositionBanks][]NodeID, query []NodeID, in CompositionInput) CompositionReadout {
 	m := k.loadNModel(bank, [][]NodeID{query})
+	if m.MetricEnabled {
+		return k.readNMetric(m, query, in)
+	}
 	v := nPredict(m, nInput(in), query)
 	values, codes := nCodes(m, nInput(in))
 	out := CompositionReadout{Status: "untrained-n-resolution", SceneAt: in.Scene.ObservedAt, Coordinates: []float64{0, 0, 0, 0, 4 * v, 4}, NResolution: &NResolutionReadout{Value: v}}

@@ -1,0 +1,245 @@
+{
+  "version": "grounded-dialogue-io-v1",
+  "input": [
+    {
+      "form": "apakah",
+      "slot": 0
+    },
+    {
+      "form": "bagaimana",
+      "slot": 1
+    },
+    {
+      "form": "gimana",
+      "slot": 2
+    },
+    {
+      "form": "itu",
+      "slot": 3
+    },
+    {
+      "form": "keadaan",
+      "slot": 4
+    },
+    {
+      "form": "keadaannya",
+      "slot": 5
+    },
+    {
+      "form": "kipas",
+      "slot": 6
+    },
+    {
+      "form": "kondisi",
+      "slot": 7
+    },
+    {
+      "form": "lampu",
+      "slot": 8
+    },
+    {
+      "form": "masih",
+      "slot": 9
+    },
+    {
+      "form": "mati",
+      "slot": 10
+    },
+    {
+      "form": "menyala",
+      "slot": 11
+    },
+    {
+      "form": "nyala",
+      "slot": 12
+    },
+    {
+      "form": "padam",
+      "slot": 13
+    },
+    {
+      "form": "pintu",
+      "slot": 14
+    },
+    {
+      "form": "sekarang",
+      "slot": 15
+    },
+    {
+      "form": "sudah",
+      "slot": 16
+    },
+    {
+      "form": "tadi",
+      "slot": 17
+    },
+    {
+      "form": "terbuka",
+      "slot": 18
+    },
+    {
+      "form": "tertutup",
+      "slot": 19
+    },
+    {
+      "form": "tidak",
+      "slot": 20
+    }
+  ],
+  "output": [
+    {
+      "code": 0.03125,
+      "population": [
+        113,
+        114,
+        115,
+        116
+      ]
+    },
+    {
+      "code": 0.0625,
+      "population": [
+        113,
+        228,
+        229,
+        230
+      ]
+    },
+    {
+      "code": 0.09375,
+      "population": [
+        113,
+        231,
+        232,
+        233
+      ]
+    },
+    {
+      "code": 0.125,
+      "population": [
+        113,
+        234,
+        235,
+        236
+      ]
+    },
+    {
+      "code": 0.15625,
+      "population": [
+        113,
+        237,
+        238,
+        239
+      ]
+    },
+    {
+      "code": 0.1875,
+      "population": [
+        113,
+        306,
+        307,
+        308
+      ]
+    },
+    {
+      "code": 0.21875,
+      "population": [
+        113,
+        309,
+        310,
+        311
+      ]
+    },
+    {
+      "code": 0.25,
+      "population": [
+        113,
+        312,
+        313,
+        314
+      ]
+    },
+    {
+      "code": 0.28125,
+      "population": [
+        113,
+        315,
+        316,
+        317
+      ]
+    },
+    {
+      "code": 0.3125,
+      "population": [
+        113,
+        318,
+        319,
+        320
+      ]
+    },
+    {
+      "code": 0.34375,
+      "population": [
+        113,
+        321,
+        322,
+        323
+      ]
+    },
+    {
+      "code": 0.375,
+      "population": [
+        113,
+        324,
+        325,
+        326
+      ]
+    },
+    {
+      "code": 0.40625,
+      "population": [
+        113,
+        327,
+        328,
+        329
+      ]
+    },
+    {
+      "code": 0.4375,
+      "population": [
+        113,
+        330,
+        331,
+        332
+      ]
+    },
+    {
+      "code": 0.46875,
+      "population": [
+        113,
+        333,
+        334,
+        335
+      ]
+    },
+    {
+      "code": 0.5,
+      "population": [
+        113,
+        336,
+        337,
+        338
+      ]
+    },
+    {
+      "code": 0.53125,
+      "population": [
+        113,
+        339,
+        340,
+        341
+      ]
+    }
+  ],
+  "output_step": 0.03125
+}

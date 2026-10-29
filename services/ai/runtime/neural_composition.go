@@ -28,6 +28,8 @@ var ErrCompositionRequiresWrittenMigration = errors.New("composition requires th
 // There are no trainable weights, lexical maps or semantic answers. Learned
 // parameters are exclusively the canonical Brain's dynamic synapses.
 type CompositionContinuation struct {
+	RequiredPrecision  *float64                    `json:"required_precision,omitempty"`
+	MeasurementError   [][]float64                 `json:"measurement_error,omitempty"`
 	Config             knowledge.CompositionConfig `json:"config"`
 	Scene              *knowledge.CompositionScene `json:"scene,omitempty"`
 	Words              [][]float64                 `json:"words,omitempty"`
@@ -73,13 +75,19 @@ func (s *CompositionContinuation) validate() error {
 	if err := s.Config.Validate(); err != nil {
 		return err
 	}
+	if s.Config.Version != knowledge.NeuralCompositionMetricV6 && (s.RequiredPrecision != nil || len(s.MeasurementError) > 0) {
+		return errors.New("metric continuation requires v6")
+	}
 	if s.Scene == nil {
+		if s.RequiredPrecision != nil || len(s.MeasurementError) > 0 {
+			return errors.New("metric continuation lacks a scene")
+		}
 		return knowledge.ValidateCompositionWords(s.Words)
 	}
 	if len(s.Sequence) > 0 && (s.SequenceObservedAt == nil || s.SequenceObservedAt.IsZero() || s.SequenceSource == "") {
 		return errors.New("sequence continuation lacks provenance")
 	}
-	return (knowledge.CompositionInput{Words: s.Words, Scene: *s.Scene, Sequence: s.Sequence}).Validate()
+	return (knowledge.CompositionInput{Words: s.Words, Scene: *s.Scene, Sequence: s.Sequence, RequiredPrecision: s.RequiredPrecision, MeasurementError: s.MeasurementError}).Validate()
 }
 
 func (m CompositionMigration) validateShape() error {
@@ -286,6 +294,8 @@ func (r *BrainRuntime) LearnCompositionWithDiagnosis(e knowledge.CompositionExpo
 		if len(frozen.Input.Sequence) > 0 && (r.composition.SequenceObservedAt == nil || !frozen.Input.Scene.ObservedAt.Before(*r.composition.SequenceObservedAt)) {
 			r.composition.Words = frozen.Input.Words
 			r.composition.Sequence = frozen.Input.Sequence
+			r.composition.RequiredPrecision = frozen.Input.RequiredPrecision
+			r.composition.MeasurementError = frozen.Input.MeasurementError
 			sequenceAt := frozen.Input.Scene.ObservedAt
 			r.composition.SequenceObservedAt = &sequenceAt
 			r.composition.SequenceSource = frozen.Source
@@ -299,13 +309,11 @@ func (r *BrainRuntime) LearnCompositionWithDiagnosis(e knowledge.CompositionExpo
 		}
 		return nil
 	})
-	if err != nil || r.composition.Config.Version != knowledge.NeuralCompositionResolutionV5 || r.brain.BrainState.NResolution == nil {
+	if err != nil || !knowledge.IsNumericalCompositionVersion(r.composition.Config.Version) || r.brain.BrainState.NResolution == nil {
 		return r.seq, nil, err
 	}
 	s := r.brain.BrainState.NResolution
-	d := s.Last
-	d.Query = append([]knowledge.NodeID(nil), d.Query...)
-	d.Trials = append([]knowledge.NTrial(nil), d.Trials...)
+	d := s.Last.Clone()
 	return r.seq, &CompositionLearningReceipt{LearnedNUnits: len(s.Features), Diagnosis: d}, nil
 }
 
@@ -361,7 +369,7 @@ func (r *BrainRuntime) compositionReadoutLocked(at time.Time) (*knowledge.Compos
 	if r.composition.Scene == nil {
 		return &knowledge.CompositionReadout{Status: "missing-scene", Sequence: r.seq, BrainIdentity: BrainIdentity}, nil
 	}
-	out, err := r.brain.ReadComposition(r.composition.Config, knowledge.CompositionInput{Words: r.composition.Words, Scene: *r.composition.Scene, Sequence: r.composition.Sequence}, at)
+	out, err := r.brain.ReadComposition(r.composition.Config, knowledge.CompositionInput{Words: r.composition.Words, Scene: *r.composition.Scene, Sequence: r.composition.Sequence, RequiredPrecision: r.composition.RequiredPrecision, MeasurementError: r.composition.MeasurementError}, at)
 	out.Sequence = r.seq
 	out.BrainIdentity = BrainIdentity
 	return &out, err
