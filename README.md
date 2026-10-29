@@ -27,6 +27,11 @@ See `docs/HC-001-foundation.md` for the completion analysis and component map.
 
 ## Trained contextual dialogue
 
+For an interactive terminal UI on Android, see [Termux chat](docs/TERMUX_CHAT.md).
+Run `bash scripts/horizon-chat.sh` after installing Go. The program includes the
+trained profile, remembers bounded session context, and answers through the
+active canonical Brain without an LLM or API key.
+
 The optional [grounded dialogue bundle](models/grounded-dialogue-v1/README.md)
 includes an authenticated V6 trained Brain, matching journal, neutral I/O codec,
 and frozen evaluation. It answers bounded Indonesian questions about an observed
