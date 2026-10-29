@@ -32,6 +32,10 @@ jobs:
         run: |
           python3 -m unittest discover -s scripts -p test_prepare_grounded_dialogue.py
           python3 scripts/prepare_grounded_dialogue.py --state "$RUNNER_TEMP/horizon-dialogue-state"
+      - name: Race-test native terminal chat
+        run: go test -race ./services/ai/terminal -run '^TestTerminalTranscriptCommandsAndPlainOutput$'
+      - name: Build terminal chat for Android arm64
+        run: GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -o "$RUNNER_TEMP/horizon-chat-android-arm64" ./cmd/horizon-chat
       - name: Validate trained language, journal replay and production recovery
         env:
           HORIZON_DIALOGUE_MODEL: ${{ runner.temp }}/horizon-dialogue-state
