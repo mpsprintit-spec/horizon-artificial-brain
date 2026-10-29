@@ -11,14 +11,14 @@ import (
 
 func TestPrepareRefusesExistingAndCorruptedProfiles(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "profile")
-	if err := Prepare(dir); err != nil {
+	if err := PrepareServingProfile(dir); err != nil {
 		t.Fatal(err)
 	}
 	checkpoint := filepath.Join(dir, "language-brain.json")
 	if err := os.WriteFile(checkpoint, []byte("existing learned state"), 0600); err != nil {
 		t.Fatal(err)
 	}
-	if err := Prepare(dir); !os.IsExist(err) {
+	if err := PrepareServingProfile(dir); !os.IsExist(err) {
 		t.Fatalf("existing state was not refused: %v", err)
 	}
 	data, err := os.ReadFile(checkpoint)

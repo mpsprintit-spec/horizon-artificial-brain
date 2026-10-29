@@ -42,7 +42,7 @@ func Open(directory string) (*Session, error) {
 		if err := os.MkdirAll(filepath.Dir(directory), 0700); err != nil {
 			return nil, err
 		}
-		if err := profile.Prepare(directory); err != nil {
+		if err := profile.PrepareServingProfile(directory); err != nil {
 			return nil, err
 		}
 	} else if err != nil {

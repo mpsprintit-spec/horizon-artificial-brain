@@ -15,12 +15,13 @@ import (
 	"path/filepath"
 )
 
-//go:embed manifest.json language-brain.json.gz events.jsonl.gz codec.json evaluation.json.gz start.json.gz
+//go:embed manifest.json language-brain.json.gz events.jsonl.gz codec.json
 var assets embed.FS
 
-// Prepare verifies every embedded asset before creating a new private profile.
+// PrepareServingProfile verifies the three serving assets before creating a
+// private profile. Evaluation cases and the replay seed are not in the binary.
 // An existing directory (even an empty one) is never replaced or repaired.
-func Prepare(directory string) error { return prepare(assets, directory) }
+func PrepareServingProfile(directory string) error { return prepare(assets, directory) }
 
 func prepare(source fs.FS, directory string) error {
 	var manifest struct {
@@ -45,12 +46,20 @@ func prepare(source fs.FS, directory string) error {
 	if manifest.Version != "grounded-dialogue-bundle-v1" {
 		return fmt.Errorf("unsupported dialogue bundle")
 	}
-	required := map[string]bool{"language-brain.json": true, "events.jsonl": true, "codec.json": true, "evaluation.json": true, "start.json": true}
+	required := map[string]bool{"language-brain.json": true, "events.jsonl": true, "codec.json": true}
+	seen := map[string]bool{}
 	verified := map[string][]byte{}
 	digest := func(data []byte) string { sum := sha256.Sum256(data); return hex.EncodeToString(sum[:]) }
 	for _, entry := range manifest.Files {
-		if !fs.ValidPath(entry.Source) || filepath.Base(entry.Source) != entry.Source || !required[entry.Target] || verified[entry.Target] != nil {
+		if !fs.ValidPath(entry.Source) || filepath.Base(entry.Source) != entry.Source || seen[entry.Target] {
 			return fmt.Errorf("invalid or repeated dialogue asset")
+		}
+		seen[entry.Target] = true
+		if !required[entry.Target] {
+			if entry.Target == "evaluation.json" || entry.Target == "start.json" {
+				continue
+			}
+			return fmt.Errorf("unknown dialogue asset")
 		}
 		const budget = 16 << 20
 		if entry.Bytes <= 0 || entry.Bytes > budget || entry.UnpackedBytes <= 0 || entry.UnpackedBytes > budget {

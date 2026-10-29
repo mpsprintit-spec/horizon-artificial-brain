@@ -15,6 +15,12 @@ curriculum and its supplied meanings remain test-only code.
 
 ## Prepare and use
 
+For interactive terminal chat, run `bash scripts/horizon-chat.sh`; see the
+[Termux guide](../../docs/TERMUX_CHAT.md). The Go serving package embeds only the
+final checkpoint, matching journal and codec. Frozen evaluation answers and the
+replay starting checkpoint stay in the repository, outside the chat binary.
+The Python preparation command below still extracts the complete evaluation bundle.
+
 From the repository root, choose a **new, nonexistent** state directory. Its
 parent must exist. The preparation command verifies all assets before writing
 private state files and refuses an existing destination, including symlinks.
