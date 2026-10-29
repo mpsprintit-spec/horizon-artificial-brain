@@ -127,3 +127,25 @@ func TestTerminalTranscriptCommandsAndPlainOutput(t *testing.T) {
 		t.Fatal("plain UI emitted a terminal control sequence")
 	}
 }
+
+func TestSessionPersistenceWithFullyEscapedHistory(t *testing.T) {
+	at := time.Date(2026, 10, 29, 0, 0, 0, 0, time.UTC)
+	state := sessionState{Version: 1, Room: runtime.DialogueRoom{Current: []float64{-1, -1, -1}, Previous: []float64{-1, -1, -1}, Kinds: []float64{1, 1, -1}, ObservedAt: at, PreviousAt: at.Add(-time.Second)}}
+	for n := 0; n < historyLimit; n++ {
+		state.History = append(state.History, strings.Repeat("<", 1024))
+	}
+	s := &Session{path: filepath.Join(t.TempDir(), "chat-session.json")}
+	if err := s.save(state); err != nil {
+		t.Fatal(err)
+	}
+	var restored sessionState
+	if err := readJSON(s.path, &restored); err != nil {
+		t.Fatalf("a valid full history cannot be resumed: %v", err)
+	}
+	if err := restored.validate(); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Join(restored.History, "") != strings.Join(state.History, "") {
+		t.Fatal("valid escaped text changed during persistence")
+	}
+}

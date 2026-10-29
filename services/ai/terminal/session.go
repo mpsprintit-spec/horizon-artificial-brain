@@ -97,7 +97,9 @@ func readJSON(path string, target any) error {
 		return err
 	}
 	defer f.Close()
-	const budget = 64 << 10
+	// Sixfold JSON escaping of 16 valid 1024-byte messages can exceed 64 KiB.
+	// Reserve space for that worst case plus the room and envelope.
+	const budget = 128 << 10
 	data, err := io.ReadAll(io.LimitReader(f, budget+1))
 	if err != nil {
 		return err
