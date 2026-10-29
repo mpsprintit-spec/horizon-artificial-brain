@@ -6,7 +6,7 @@ import (
 )
 
 func SupportedCompositionVersion(version string) bool {
-	return version == NeuralCompositionV1 || version == NeuralCompositionQueryV2 || version == NeuralCompositionSequenceV4 || version == NeuralCompositionResolutionV5
+	return version == NeuralCompositionV1 || version == NeuralCompositionQueryV2 || version == NeuralCompositionSequenceV4 || IsNumericalCompositionVersion(version)
 }
 
 // The final observed frame conditions each earlier frame. Its learned

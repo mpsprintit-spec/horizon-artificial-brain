@@ -152,7 +152,7 @@ func (b Bridge) Exchange(data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	if cfg == nil || cfg.Config.Version != knowledge.NeuralCompositionResolutionV5 {
+	if cfg == nil || !knowledge.IsNumericalCompositionVersion(cfg.Config.Version) {
 		return nil, errors.New("HNL/1 requires the explicitly enabled numerical V5 research contract")
 	}
 	r := &Response{}
@@ -193,7 +193,7 @@ func (b Bridge) Exchange(data []byte) ([]byte, error) {
 		}
 		r.Sequence = out.Sequence
 		r.Status = 1
-		if out.Status == "uncertain-numerical-state" {
+		if out.Status == "uncertain-numerical-state" || (out.NResolution != nil && !out.Accepted && out.Status != "untrained-n-resolution") {
 			r.Status = 2
 		}
 		if out.Accepted {

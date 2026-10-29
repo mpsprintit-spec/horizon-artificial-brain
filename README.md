@@ -25,6 +25,16 @@ Business logic, AI processing, and HC-002 features are intentionally outside thi
 
 See `docs/HC-001-foundation.md` for the completion analysis and component map.
 
+## Trained contextual dialogue
+
+The optional [grounded dialogue bundle](models/grounded-dialogue-v1/README.md)
+includes an authenticated V6 trained Brain, matching journal, neutral I/O codec,
+and frozen evaluation. It answers bounded Indonesian questions about an observed
+simulated room through native numerical composition and learned spelling.
+See the bundle instructions to prepare a new state directory and run the CLI or
+select this Brain at production startup. Existing serving memory is never
+automatically replaced. This is a research profile, not unrestricted conversation.
+
 ## Development
 
 ```bash

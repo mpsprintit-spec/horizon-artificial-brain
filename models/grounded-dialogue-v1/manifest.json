@@ -1,0 +1,75 @@
+{
+  "version": "grounded-dialogue-bundle-v1",
+  "composition": "synaptic-metric-context-v6",
+  "brain_identity": "horizon-primary-brain",
+  "sequence": 126,
+  "learned_n": 27,
+  "query_heads": 29,
+  "total_units": 521,
+  "input_forms": 21,
+  "output_forms": 17,
+  "output_slots": 6,
+  "provenance": {
+    "experiment": 19,
+    "trained_on": "2026-10-28",
+    "base_commit": "69a00c244a87df1a9975e97d52a600501dd1ef94",
+    "source_patch_sha256": "adb6a0acf5cf29709cf954dea5b5de92686f812fa13e31c874301049d8ec997d",
+    "fresh_brain": true,
+    "trained_v5_migration": false
+  },
+  "evaluation": {
+    "substantive_correct": 480,
+    "substantive_total": 480,
+    "clarifications_correct": 16,
+    "clarifications_total": 16,
+    "outside_scope": 16,
+    "outside_scope_success_claimed": false
+  },
+  "files": [
+    {
+      "source": "language-brain.json.gz",
+      "target": "language-brain.json",
+      "encoding": "gzip",
+      "bytes": 125527,
+      "sha256": "b47f48ea35cc88508e2dfc0959ce5b6d43b24f56ff1944161b91b52885a0e05d",
+      "unpacked_bytes": 7341233,
+      "unpacked_sha256": "b8828cdb5d43adfd728ed99f07a9b8ceea381a50f69b74da9a2396aeb629d309"
+    },
+    {
+      "source": "events.jsonl.gz",
+      "target": "events.jsonl",
+      "encoding": "gzip",
+      "bytes": 39089,
+      "sha256": "fbebef4bc5b8c2c1e9e3f187c35dcb1e638d8fa56771d1149bda23515b756470",
+      "unpacked_bytes": 3232158,
+      "unpacked_sha256": "720f03278388e8ce802c03e2db42af2e83fd8b6929a2c27069d045fcabfe892f"
+    },
+    {
+      "source": "codec.json",
+      "target": "codec.json",
+      "encoding": "identity",
+      "bytes": 3202,
+      "sha256": "2c191099f73bb403d5bfd77f9ede91cc08a23ac9fee0a45ee22df37f9affba01",
+      "unpacked_bytes": 3202,
+      "unpacked_sha256": "2c191099f73bb403d5bfd77f9ede91cc08a23ac9fee0a45ee22df37f9affba01"
+    },
+    {
+      "source": "evaluation.json.gz",
+      "target": "evaluation.json",
+      "encoding": "gzip",
+      "bytes": 6134,
+      "sha256": "08c2b94bdceb5129bff4cc0c671665f87768270a1d0dbcac3c110c3cfca68773",
+      "unpacked_bytes": 338095,
+      "unpacked_sha256": "5ad04f2b7963b895746770290c9535d1f7a9035ecea809309f8de8724a36eaee"
+    },
+    {
+      "source": "start.json.gz",
+      "target": "start.json",
+      "encoding": "gzip",
+      "bytes": 19697,
+      "sha256": "d937b7dd45031b52cacbc2f3c3cfb28b3d788fe8c01a810b9941d2d63575bc72",
+      "unpacked_bytes": 1452030,
+      "unpacked_sha256": "e4b645f4708c72e815acea0c5c68cf67969998d862ee2ef867744542685cb6f0"
+    }
+  ]
+}

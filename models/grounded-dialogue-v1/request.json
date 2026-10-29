@@ -1,0 +1,24 @@
+{
+  "text": "Bagaimana keadaan lampu?",
+  "history": [],
+  "room": {
+    "current": [
+      1,
+      -1,
+      1
+    ],
+    "previous": [
+      -1,
+      1,
+      -1
+    ],
+    "kinds": [
+      1,
+      1,
+      -1
+    ],
+    "observed_at": "2026-10-28T13:59:59Z",
+    "previous_at": "2026-10-28T13:00:00Z"
+  },
+  "at": "2026-10-28T14:00:00Z"
+}
