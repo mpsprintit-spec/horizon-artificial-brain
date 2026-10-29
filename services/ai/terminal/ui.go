@@ -25,20 +25,20 @@ func rejectionMessage(reply runtime.GroundedDialogueReadout) string {
 	}
 	switch reply.Reason {
 	case "untrained-token":
-		return "Kosakata pesan belum seluruhnya dipelajari. Coba: Bagaimana keadaan lampu?"
+		return "Pesan belum dipahami oleh Brain. /diagnosis untuk rinciannya."
 	case "unsupported-composition":
-		return "Gabungan kata ini belum membentuk pertanyaan yang didukung. Coba: Bagaimana keadaan lampu?"
+		return "Pesan belum dipahami oleh Brain. /diagnosis untuk rinciannya."
 	case "utterance-bound":
-		return "Pertanyaan saat ini dibatasi 1–8 kata. Coba: Bagaimana keadaan lampu?"
+		return "Pesan melampaui bentuk masukan yang didukung Brain saat ini. /diagnosis untuk rinciannya."
 	case "unresolved-meaning":
 		if reply.Focus == 0 && reply.Text != "" {
 			// No single referent was resolved by the learned reference head:
 			// preserve the native question for genuine reference ambiguity.
 			return ""
 		}
-		return "Hubungan objek dan keadaan pada pertanyaan belum dapat dipahami. Lihat contoh di /bantuan."
+		return "Horizon belum dapat menyimpulkan jawaban. /diagnosis untuk rinciannya."
 	default:
-		return "Pembacaan Brain belum menghasilkan jawaban yang dapat digunakan. Coba /bantuan."
+		return "Pembacaan Brain belum menghasilkan jawaban yang dapat digunakan. /diagnosis untuk rinciannya."
 	}
 }
 
@@ -79,29 +79,76 @@ func Run(session *Session, input io.Reader, output io.Writer, options Options) e
 	}
 	help := func() {
 		fmt.Fprintln(output, "\nPerintah:")
-		fmt.Fprintln(output, "  /ruang                   Lihat pengamatan ruangan")
-		fmt.Fprintln(output, "  /set lampu nyala         Lampu: nyala atau mati")
-		fmt.Fprintln(output, "  /set kipas mati          Kipas: nyala atau mati")
-		fmt.Fprintln(output, "  /set pintu buka          Pintu: buka atau tutup")
+		fmt.Fprintln(output, "  /brain                   Periksa Brain dan sumber hasil latihan")
+		fmt.Fprintln(output, "  /kemampuan               Lihat kemampuan yang sudah diverifikasi")
+		fmt.Fprintln(output, "  /diagnosis               Periksa pembacaan untuk pesan terakhir")
 		fmt.Fprintln(output, "  /riwayat                 Lihat 16 pesan konteks terakhir")
 		fmt.Fprintln(output, "  /baru                    Mulai konteks percakapan baru")
+		fmt.Fprintln(output, "  /lab                     Buka pengamatan simulasi bila diperlukan")
 		fmt.Fprintln(output, "  /keluar                  Tutup Horizon")
-		fmt.Fprintln(output, "\nContoh pertanyaan:")
-		fmt.Fprintln(output, "  Bagaimana keadaan lampu?")
-		fmt.Fprintln(output, "  Bagaimana keadaannya?")
-		fmt.Fprintln(output, "  Apakah lampu masih nyala sekarang?")
-		fmt.Fprintln(output, "  Bagaimana keadaan pintu tadi?")
 		fmt.Fprintln(output)
 	}
-	fmt.Fprintf(output, "\n%s%sHORIZON%s\n%sPercakapan neural · lokal · tanpa LLM%s\n%s\n", bold, cyan, reset, dim, reset, line)
-	system("Bahasa terlatih: keadaan lampu, kipas dan pintu. Belum percakapan umum.")
-	system("Konteks sesi tersimpan lokal; mengobrol tidak melatih ulang Brain.")
-	system("Contoh: Bagaimana keadaan lampu? Sapaan dan definisi belum dilatih.")
+	brain := func() {
+		info := session.BrainInfo()
+		fmt.Fprintf(output, "\nBRAIN AKTIF\n  Identitas: %s\n  Revisi: %d\n  Profil: %s\n", cleanText(info.Identity), info.Sequence, cleanText(info.Directory))
+		fmt.Fprintf(output, "  Sidik berkas dimuat: sha256:%s\n  Sidik keadaan neural: %s\n", info.SourceFingerprint, info.CanonicalStateHash)
+		fmt.Fprintf(output, "  Komposisi: %s\n  Unit: %d · Bentuk masukan: %d · Bentuk keluaran: %d\n", cleanText(info.Composition), info.Units, info.InputForms, info.OutputForms)
+		if info.MatchesBundle {
+			system("Berkas cocok dengan paket hasil latihan " + info.BundleTrainedOn + " yang disertakan versi program ini.")
+		} else {
+			system("Profil aktif berbeda dari paket bawaan. Riwayat pelatihannya belum diverifikasi oleh konsol ini.")
+			system("Untuk memilih paket yang disertakan kode ini: keluar, lalu jalankan bash scripts/horizon-chat.sh -latest. Profil lama tetap tersedia melalui -state.")
+		}
+		system("Mengobrol memakai pembacaan Brain aktif. Penyimpanan konteks percakapan tidak melatih sinaps.")
+	}
+	capabilities := func() {
+		fmt.Fprintln(output, "\nKEMAMPUAN KOMUNIKASI")
+		if session.BrainInfo().MatchesBundle {
+			fmt.Fprintln(output, "  Cakupan yang diuji pada paket hasil latihan ini:")
+			for _, skill := range session.release.Communication.VerifiedSkills {
+				fmt.Fprintln(output, "  · "+cleanText(skill))
+			}
+			for _, example := range session.release.Communication.Examples {
+				fmt.Fprintln(output, "  Contoh: "+cleanText(example))
+			}
+			for _, limit := range session.release.Communication.Limits {
+				fmt.Fprintln(output, "  Batas: "+cleanText(limit))
+			}
+		} else {
+			fmt.Fprintln(output, "  Belum ada daftar kemampuan yang diverifikasi untuk profil pilihan ini.")
+		}
+		system("Anda dapat mengirim pesan umum. Kemampuan menjawab bergantung pada hasil latihan yang dimuat dan jalur bahasa yang mendukungnya.")
+	}
+	diagnosis := func() {
+		if session.last == nil {
+			system("Belum ada pesan yang dapat diperiksa dalam sesi ini.")
+			return
+		}
+		reply := session.last
+		accepted := 0
+		for _, trace := range reply.Trace {
+			if trace.Readout.Accepted && trace.Readout.NResolution != nil {
+				accepted++
+			}
+		}
+		fmt.Fprintf(output, "\nDIAGNOSIS PESAN\n  Pesan: %s\n  Status native: %s\n  Alasan native: %s\n", cleanText(session.lastText), cleanText(reply.Status), cleanText(reply.Reason))
+		fmt.Fprintf(output, "  Makna diterima: %t\n  Revisi Brain: %d\n  Pembacaan N diterima: %d/%d\n  Kata dari ejaan sinaptik: %d\n", reply.MeaningValid, session.BrainInfo().Sequence, accepted, len(reply.Trace), len(reply.Words))
+		if reply.Text != "" {
+			fmt.Fprintf(output, "  Teks native: %s\n", cleanText(reply.Text))
+		}
+		system("Teks native di sini dapat berupa klarifikasi umum yang belum sesuai pesan. Diagnosis ini adalah laporan konsol, bukan ucapan Horizon.")
+	}
+	lab := func() {
+		room()
+		fmt.Fprintln(output, "Sensor simulasi: /set lampu nyala|mati · /set kipas nyala|mati · /set pintu buka|tutup")
+		fmt.Fprintln(output, "Contoh pesan: Bagaimana keadaan lampu? · Bagaimana keadaannya tadi?")
+	}
+	fmt.Fprintf(output, "\n%s%sHORIZON%s\n%sKomunikasi lokal · Brain aktif%s\n%s\n", bold, cyan, reset, dim, reset, line)
+	system(fmt.Sprintf("Brain siap · revisi %d. /brain untuk memeriksa sumber hasil latihan.", session.BrainInfo().Sequence))
 	if len(session.state.History) > 0 {
 		system(fmt.Sprintf("Melanjutkan %d pesan konteks. /baru untuk memulai lagi.", len(session.state.History)))
 	}
-	room()
-	fmt.Fprintln(output, "/bantuan · /ruang · /baru · /keluar")
+	fmt.Fprintln(output, "/bantuan · /brain · /kemampuan · /baru · /keluar")
 	scanner := bufio.NewScanner(input)
 	scanner.Buffer(make([]byte, 1024), 16<<10)
 	for {
@@ -128,13 +175,21 @@ func Run(session *Session, input io.Reader, output io.Writer, options Options) e
 				return nil
 			case "/bantuan", "/help":
 				help()
+			case "/brain":
+				brain()
+			case "/kemampuan":
+				capabilities()
+			case "/diagnosis":
+				diagnosis()
+			case "/lab":
+				lab()
 			case "/ruang":
 				room()
 			case "/baru":
 				if err := session.NewConversation(); err != nil {
 					system(err.Error())
 				} else {
-					system("Konteks percakapan dikosongkan; keadaan ruangan tetap.")
+					system("Konteks percakapan dikosongkan.")
 				}
 			case "/riwayat":
 				if len(session.state.History) == 0 {
@@ -174,6 +229,12 @@ func Run(session *Session, input io.Reader, output io.Writer, options Options) e
 			system("Horizon belum menghasilkan jawaban untuk pesan ini. Coba /bantuan.")
 			continue
 		}
-		fmt.Fprintf(output, "\n%s%sHorizon%s %s· %.1f ms%s\n  %s\n", bold, cyan, reset, dim, elapsed, reset, cleanText(reply.Text))
+		context := ""
+		if reply.MeaningValid {
+			// This adapter supplies simulated observations, not phone sensors.
+			// Keep the evidence source visible even when the lab panel is closed.
+			context = " · simulasi"
+		}
+		fmt.Fprintf(output, "\n%s%sHorizon%s %s· %.1f ms%s%s\n  %s\n", bold, cyan, reset, dim, elapsed, context, reset, cleanText(reply.Text))
 	}
 }

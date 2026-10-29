@@ -149,6 +149,57 @@ func TestGroundedDialoguePersistenceContextAndSynapticAblation(t *testing.T) {
 	dialogueSave(t, "recovery_and_ablation.json", map[string]any{"full_replay_equal": true, "context_changes_reference": true, "context_absence_clarifies": true, "normal": baseline, "changed_context": changed, "missing_context": missing, "spelling_ablation": ablated})
 }
 
+func TestGroundedDialogueMeaningSynapticAblation(t *testing.T) {
+	// This standalone restored copy is disposable. Published files and the
+	// managed serving Brain are never modified by the intervention.
+	r, codec, _ := dialogueLoadModel(t)
+	request := dialogueSealedCases()[0].Request
+	normal, err := r.ReadGroundedDialogue(codec, request)
+	compositionCheck(t, err)
+	if !normal.MeaningValid || normal.Focus != .25 {
+		t.Fatal("the learned model did not resolve the named lamp")
+	}
+	var query []knowledge.NodeID
+	for _, population := range r.brain.ProjectionPopulations {
+		if reflect.DeepEqual(population.Prototype, DialogueQuestion(7)) {
+			for _, unit := range population.Units {
+				query = append(query, unit.NodeID)
+			}
+			break
+		}
+	}
+	if len(query) == 0 {
+		t.Fatal("learned reference query was not found")
+	}
+	zeroed := 0
+	for _, feature := range r.brain.BrainState.NResolution.Features {
+		node := r.brain.Registry.GetByID(feature.Node)
+		for _, target := range query {
+			for _, edge := range node.Synapses[target] {
+				if edge.Dynamic.Weight != 0 {
+					zeroed++
+				}
+				edge.Dynamic.Weight = 0
+			}
+		}
+	}
+	if zeroed == 0 {
+		t.Fatal("the intervention removed no learned reference contributions")
+	}
+	ablated, err := r.ReadGroundedDialogue(codec, request)
+	compositionCheck(t, err)
+	if ablated.MeaningValid || ablated.Focus == normal.Focus || ablated.Text == normal.Text {
+		t.Fatal("named-object understanding survived removal of its learned contributions")
+	}
+	spelling, err := r.ReadLearnedSpelling(codec.Output[0].Population)
+	compositionCheck(t, err)
+	if spelling.Status != knowledge.SpellingDecoded || spelling.Text != "lampu" {
+		t.Fatal("meaning intervention unexpectedly damaged learned spelling")
+	}
+	dialogueSave(t, "meaning_synaptic_ablation.json", map[string]any{"normal": normal, "reference_ablation": ablated, "spelling_retained": spelling, "nonzero_contributions_removed": zeroed})
+	t.Logf("native=%q focus=%g; after reference-synapse ablation=%q focus=%g valid=%t; spelling retained=%q", normal.Text, normal.Focus, ablated.Text, ablated.Focus, ablated.MeaningValid, spelling.Text)
+}
+
 func TestGroundedDialogueStandaloneLatency(t *testing.T) {
 	if os.Getenv("HORIZON_DIALOGUE_TIMING") == "" {
 		t.Skip("explicit isolated timing required")

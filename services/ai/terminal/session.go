@@ -27,17 +27,26 @@ type sessionState struct {
 }
 
 type Session struct {
-	engine  *core.HorizonEngine
-	journal *runtime.EventLog
-	codec   runtime.DialogueCodec
-	state   sessionState
-	path    string
-	now     func() time.Time
+	engine   *core.HorizonEngine
+	journal  *runtime.EventLog
+	codec    runtime.DialogueCodec
+	state    sessionState
+	path     string
+	info     BrainInfo
+	release  profile.Release
+	last     *runtime.GroundedDialogueReadout
+	lastText string
+	now      func() time.Time
 }
 
 // Open selects a dedicated profile. Only a missing directory is initialized;
 // existing Brain files must pass the normal authenticated recovery path.
 func Open(directory string) (*Session, error) {
+	var err error
+	directory, err = filepath.Abs(directory)
+	if err != nil {
+		return nil, err
+	}
 	if _, err := os.Stat(directory); errors.Is(err, os.ErrNotExist) {
 		if err := os.MkdirAll(filepath.Dir(directory), 0700); err != nil {
 			return nil, err
@@ -87,6 +96,11 @@ func Open(directory string) (*Session, error) {
 	if err := s.state.validate(); err != nil {
 		_ = s.Close()
 		return nil, err
+	}
+	s.info, err = s.inspectBrain(directory)
+	if err != nil {
+		_ = s.Close()
+		return nil, fmt.Errorf("periksa Brain aktif: %w", err)
 	}
 	return s, nil
 }
@@ -197,6 +211,7 @@ func (s *Session) Ask(text string) (runtime.GroundedDialogueReadout, error) {
 	if err := s.save(next); err != nil {
 		return out, fmt.Errorf("konteks belum tersimpan: %w", err)
 	}
+	s.last, s.lastText = &out, text
 	return out, nil
 }
 
@@ -242,5 +257,13 @@ func (s *Session) SetRoom(entity, state string) error {
 	return s.save(next)
 }
 
-func (s *Session) NewConversation() error { next := s.state; next.History = nil; return s.save(next) }
-func (s *Session) Close() error           { return errors.Join(s.engine.Supervisor().Close(), s.journal.Close()) }
+func (s *Session) NewConversation() error {
+	next := s.state
+	next.History = nil
+	if err := s.save(next); err != nil {
+		return err
+	}
+	s.last, s.lastText = nil, ""
+	return nil
+}
+func (s *Session) Close() error { return errors.Join(s.engine.Supervisor().Close(), s.journal.Close()) }

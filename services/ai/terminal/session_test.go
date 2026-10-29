@@ -118,7 +118,7 @@ func TestTerminalTranscriptCommandsAndPlainOutput(t *testing.T) {
 		t.Fatal(err)
 	}
 	text := output.String()
-	for _, want := range []string{"HORIZON", "Belum percakapan umum", "Lampu itu sekarang menyala.", "Lampu itu sekarang padam.", "Lampu itu tadi menyala.", "Objek yang mana?", "Pintu itu sekarang terbuka.", "1024 byte", "Perintah tidak dikenal", "Sesi ditutup", " ms"} {
+	for _, want := range []string{"HORIZON", "Komunikasi lokal", "Lampu itu sekarang menyala.", "Lampu itu sekarang padam.", "Lampu itu tadi menyala.", "Objek yang mana?", "Pintu itu sekarang terbuka.", "1024 byte", "Perintah tidak dikenal", "Sesi ditutup", " ms"} {
 		if !strings.Contains(text, want) {
 			t.Errorf("transcript missing %q", want)
 		}

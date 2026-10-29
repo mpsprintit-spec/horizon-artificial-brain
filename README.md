@@ -31,6 +31,13 @@ For an interactive terminal UI on Android, see [Termux chat](docs/TERMUX_CHAT.md
 Run `bash scripts/horizon-chat.sh` after installing Go. The program includes the
 trained profile, remembers bounded session context, and answers through the
 active canonical Brain without an LLM or API key.
+The default view is a communication console; `/brain` identifies the loaded
+training artifacts and live neural state, `/kemampuan` reports their evaluated
+scope, and `/diagnosis` inspects the last native readout. `/lab` opens simulated
+room observations only when needed. After updating code, `-latest` explicitly
+selects its bundled training artifacts in a profile named by their checksums;
+existing profiles are retained. The console accepts general messages, while the
+connected language adapter currently supports only the bounded task below.
 
 The optional [grounded dialogue bundle](models/grounded-dialogue-v1/README.md)
 includes an authenticated V6 trained Brain, matching journal, neutral I/O codec,

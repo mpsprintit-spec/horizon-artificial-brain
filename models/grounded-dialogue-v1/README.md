@@ -16,7 +16,13 @@ curriculum and its supplied meanings remain test-only code.
 ## Prepare and use
 
 For interactive terminal chat, run `bash scripts/horizon-chat.sh`; see the
-[Termux guide](../../docs/TERMUX_CHAT.md). The Go serving package embeds only the
+[Termux guide](../../docs/TERMUX_CHAT.md). `/brain` identifies the loaded source
+files and live canonical state, `/kemampuan` reads the matching release's bounded
+evaluation description, and `/diagnosis` exposes the latest native readout.
+`bash scripts/horizon-chat.sh -latest` explicitly selects this code's bundled
+trained model in a separate profile named by the serving checksums. Updating code
+alone does not overwrite existing profiles or combine previous experiments.
+The Go serving package embeds only the
 final checkpoint, matching journal and codec. Frozen evaluation answers and the
 replay starting checkpoint stay in the repository, outside the chat binary.
 The Python preparation command below still extracts the complete evaluation bundle.
@@ -61,7 +67,7 @@ the checkpoint with another journal or overwrite an existing Brain's files.
 HORIZON_DIALOGUE_MODEL=/tmp/horizon-dialogue-state \
 HORIZON_DIALOGUE_FINAL_CASES=/tmp/horizon-dialogue-state/evaluation.json \
 go test ./services/ai/runtime \
-  -run '^TestGroundedDialogue(FreshEvaluation|PersistenceContextAndSynapticAblation)$' -count=1
+  -run '^TestGroundedDialogue(FreshEvaluation|PersistenceContextAndSynapticAblation|MeaningSynapticAblation)$' -count=1
 
 HORIZON_DIALOGUE_MODEL=/tmp/horizon-dialogue-state \
 go test ./services/ai -run '^TestProductionGroundedDialogueBundle$' -count=1
@@ -78,7 +84,10 @@ timestamps, then checkpoints and restarts. This bounded check does not establish
 long-term retention under arbitrary continuous learning. Evaluation also checks
 that read-only answers do not mutate the Brain, that context changes reference,
 that full journal replay preserves outputs, and that removing learned spelling
-synapses removes the answer.
+synapses removes the answer. A separate intervention removes only learned
+reference contributions: object resolution and the substantive answer disappear
+while spelling remains available. Both interventions use disposable restored
+copies and leave published and serving files unchanged.
 
 The frozen evaluation contains 480 supported questions, 16 ambiguous questions
 requiring clarification, and 16 outside-scope probes. The published checkpoint

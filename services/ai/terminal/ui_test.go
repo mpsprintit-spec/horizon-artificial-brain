@@ -50,11 +50,11 @@ func TestTerminalReportedUnsupportedConversation(t *testing.T) {
 	if strings.Contains(text, "Objek yang mana?") {
 		t.Error("unsupported words/question forms were misreported as a missing object")
 	}
-	if got := strings.Count(text, "Kosakata pesan belum seluruhnya dipelajari."); got != 3 {
-		t.Errorf("got %d vocabulary diagnostics, want 3", got)
+	if got := strings.Count(text, "Pesan belum dipahami oleh Brain."); got != 4 {
+		t.Errorf("got %d rejection notices, want 4", got)
 	}
-	if !strings.Contains(text, "Gabungan kata ini belum membentuk pertanyaan yang didukung.") {
-		t.Error("missing question-form diagnostic for a recognized noun")
+	if strings.Contains(text, "Coba: Bagaimana keadaan lampu?") {
+		t.Error("unsupported messages forced a room-training prompt into conversation")
 	}
 	if !strings.Contains(text, "Lampu itu sekarang padam.") || strings.Count(text, "Horizon ·") != 1 {
 		t.Error("supported question did not remain a native Horizon answer")

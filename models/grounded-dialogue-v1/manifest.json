@@ -9,6 +9,22 @@
   "input_forms": 21,
   "output_forms": 17,
   "output_slots": 6,
+  "communication": {
+    "adapter": "grounded-dialogue-io-v1",
+    "verified_skills": [
+      "Pertanyaan keadaan lampu, kipas dan pintu berdasarkan pengamatan yang diberikan.",
+      "Rujukan dari konteks percakapan, satu negasi, serta keadaan sekarang dan sebelumnya."
+    ],
+    "examples": [
+      "Bagaimana keadaan lampu?",
+      "Bagaimana keadaannya tadi?"
+    ],
+    "limits": [
+      "Percakapan umum, sapaan dan definisi belum dikuasai paket ini.",
+      "Paket berasal dari Brain baru untuk latihan bahasa; semua eksperimen terdahulu belum digabung menjadi pengetahuan percakapan.",
+      "Keadaan ruangan berasal dari sensor simulasi; batas jalur bahasa ini adalah 8 kata dan 16 pesan konteks."
+    ]
+  },
   "provenance": {
     "experiment": 19,
     "trained_on": "2026-10-28",
