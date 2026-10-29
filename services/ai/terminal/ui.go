@@ -6,12 +6,40 @@ import (
 	"io"
 	"strings"
 	"time"
+
+	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 type Options struct {
 	Color     bool
 	EchoInput bool // Piped transcripts have no terminal echo.
 	Width     int
+}
+
+// The finite training curriculum uses the same native clarification for many
+// rejected meanings. Report the actual rejection as UI feedback; do not present
+// that generic text as a relevant answer or invent a replacement Brain reply.
+func rejectionMessage(reply runtime.GroundedDialogueReadout) string {
+	if reply.MeaningValid {
+		return ""
+	}
+	switch reply.Reason {
+	case "untrained-token":
+		return "Kosakata pesan belum seluruhnya dipelajari. Coba: Bagaimana keadaan lampu?"
+	case "unsupported-composition":
+		return "Gabungan kata ini belum membentuk pertanyaan yang didukung. Coba: Bagaimana keadaan lampu?"
+	case "utterance-bound":
+		return "Pertanyaan saat ini dibatasi 1–8 kata. Coba: Bagaimana keadaan lampu?"
+	case "unresolved-meaning":
+		if reply.Focus == 0 && reply.Text != "" {
+			// No single referent was resolved by the learned reference head:
+			// preserve the native question for genuine reference ambiguity.
+			return ""
+		}
+		return "Hubungan objek dan keadaan pada pertanyaan belum dapat dipahami. Lihat contoh di /bantuan."
+	default:
+		return "Pembacaan Brain belum menghasilkan jawaban yang dapat digunakan. Coba /bantuan."
+	}
 }
 
 // Run is a line-oriented terminal UI: no raw-mode changes, mouse, screen
@@ -68,6 +96,7 @@ func Run(session *Session, input io.Reader, output io.Writer, options Options) e
 	fmt.Fprintf(output, "\n%s%sHORIZON%s\n%sPercakapan neural · lokal · tanpa LLM%s\n%s\n", bold, cyan, reset, dim, reset, line)
 	system("Bahasa terlatih: keadaan lampu, kipas dan pintu. Belum percakapan umum.")
 	system("Konteks sesi tersimpan lokal; mengobrol tidak melatih ulang Brain.")
+	system("Contoh: Bagaimana keadaan lampu? Sapaan dan definisi belum dilatih.")
 	if len(session.state.History) > 0 {
 		system(fmt.Sprintf("Melanjutkan %d pesan konteks. /baru untuk memulai lagi.", len(session.state.History)))
 	}
@@ -137,13 +166,14 @@ func Run(session *Session, input io.Reader, output io.Writer, options Options) e
 			system(err.Error())
 			continue
 		}
+		if message := rejectionMessage(reply); message != "" {
+			system(fmt.Sprintf("%s (%.1f ms)", message, elapsed))
+			continue
+		}
 		if reply.Text == "" {
 			system("Horizon belum menghasilkan jawaban untuk pesan ini. Coba /bantuan.")
 			continue
 		}
 		fmt.Fprintf(output, "\n%s%sHorizon%s %s· %.1f ms%s\n  %s\n", bold, cyan, reset, dim, elapsed, reset, cleanText(reply.Text))
-		if !reply.MeaningValid && reply.Reason != "" {
-			system("Jawaban belum menyatakan keadaan objek. Gunakan nama objek dan kosakata terlatih.")
-		}
 	}
 }

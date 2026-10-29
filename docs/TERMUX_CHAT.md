@@ -68,9 +68,24 @@ yang diperlukan agar ucapan mempunyai konteks.
 
 Bahasa terlatih masih terbatas pada lampu, kipas, pintu, rujukan percakapan,
 negasi, serta keadaan sekarang/sebelumnya. Ini belum chatbot percakapan umum.
-Kata di luar kosakata dapat menghasilkan permintaan klarifikasi yang belum
-natural, misalnya `Halo` dijawab `Objek yang mana?`. UI menandai batas ini dan
-tidak membuat jawaban pengganti atas nama Horizon.
+Sapaan, definisi benda dan penyebutan nama benda saja belum dilatih. UI
+membedakan kata yang belum dipelajari dari gabungan kata yang belum didukung:
+
+| Pesan | Perilaku saat ini |
+| --- | --- |
+| `hallo` | Sistem menjelaskan bahwa kosakata pesan belum seluruhnya dipelajari |
+| `apa itu lampu?` | Kata `apa` belum dipelajari; pertanyaan definisi belum didukung |
+| `lampu?` | Nama lampu dikenal, tetapi pesan belum membentuk pertanyaan keadaan yang didukung |
+| `Bagaimana keadaan lampu?` | Brain menjawab berdasarkan keadaan ruangan |
+| `Bagaimana keadaannya?` tanpa rujukan | Brain meminta klarifikasi objek |
+
+Diagnosis ditandai `Sistem` dan tetap menampilkan waktu pembacaan Brain.
+Penjelasan ini berasal dari alasan penolakan native, bukan jawaban bahasa yang
+dipelajari. Brain masih dapat menghasilkan klarifikasi umum `Objek yang mana?`
+untuk kata asing melalui API langsung; UI tidak menampilkannya sebagai jawaban
+atas sapaan atau pertanyaan definisi. Perbaikan tampilan ini tidak menambah
+kosakata, kemampuan percakapan atau pengetahuan definisi pada sinaps. Tidak ada
+jawaban pengganti atas nama Horizon.
 
 Ruangan adalah simulasi yang diatur pengguna, bukan hasil kamera HP. “Tadi”
 mengacu pada pengamatan lengkap sebelum perintah `/set` terakhir. Mengobrol
@@ -105,7 +120,7 @@ lanjutan, gunakan API engine dan prosedur jurnal, bukan mengedit file sinaps.
 
 ```bash
 go test ./models/grounded-dialogue-v1 ./services/ai/terminal ./cmd/horizon-chat
-go test -race ./services/ai/terminal -run '^TestTerminalTranscriptCommandsAndPlainOutput$'
+go test -race ./services/ai/terminal -run '^TestTerminal(TranscriptCommandsAndPlainOutput|ReportedUnsupportedConversation)$'
 ```
 
 Tes memakai Brain asli yang disertakan: pertanyaan dan rujukan, perubahan
@@ -113,5 +128,10 @@ pengamatan sekarang/tadi, restart, batas riwayat, penolakan writer kedua,
 penolakan konteks rusak, output terminal, serta checkpoint/jurnal yang tetap
 identik setelah percakapan. Pengujian Linux dan kompilasi lintas target tidak
 menggantikan pengujian pada perangkat Android/Termux fisik.
+
+Tes regresi juga mengulang percakapan awal pengguna (`hallo`, `apa itu lampu?`,
+`lampu?`) untuk memastikan penolakan kosakata/bentuk pertanyaan tidak ditampilkan
+sebagai kehilangan rujukan objek. Pertanyaan keadaan terlatih tetap dijawab
+oleh Brain, dan baris kosong diabaikan.
 
 Referensi pengelola paket: [dokumentasi resmi Termux](https://github.com/termux/termux-tools/blob/master/doc/termux.1.md.in).
