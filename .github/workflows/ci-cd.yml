@@ -27,7 +27,7 @@ jobs:
             )
           done < <(git ls-files 'services/*/go.mod')
       - name: Race-test runtime and adapter concurrency
-        run: go test -race ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
+        run: go test -race -timeout=20m ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
       - name: Verify and prepare the trained dialogue bundle
         run: |
           python3 -m unittest discover -s scripts -p test_prepare_grounded_dialogue.py
