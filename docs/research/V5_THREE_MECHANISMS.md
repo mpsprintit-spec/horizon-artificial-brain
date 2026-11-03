@@ -36,6 +36,8 @@ terminal-policy payout - cost. It is neither perfect-information value nor an
 optimal-controller oracle. Full non-myopic BMPS mixture/GP search remains in the
 historical research APIs; it is not claimed validated for this coordinated route.
 The terminal continuation masks operations, preserving all answers and abstain.
+It uses argmax in greedy mode and the actor probability mixture in stochastic
+mode; no stochastic continuation is silently substituted during greedy evaluation.
 An informative outcome can still be unprofitable if this neural policy cannot use
 it. Neural actor probabilities determine the final legal action; BMPS never
 replaces that action. MUSE self-regulation is through these learned payoff and

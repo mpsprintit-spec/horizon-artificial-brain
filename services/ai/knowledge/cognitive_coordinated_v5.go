@@ -147,9 +147,12 @@ func coordinatedFeaturesV5(s *CognitiveModelState, w, temps, h, x, joint []float
 	f[48] = float64(remaining) / float64(c.Horizon-1)
 	return f, comp, u
 }
-func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64) float64 {
+func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64, greedy bool) float64 {
 	mask := []bool{false, false, false, true, true, true, true, true}
 	_, p, _ := phase4Forward(s.Phase4V5, w, f, mask)
+	if greedy {
+		return u[maxIndex(p)-3]
+	}
 	v := 0.
 	for a := 3; a < 8; a++ {
 		v += p[a] * u[a-3]
@@ -169,7 +172,7 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 	if drop.MUSE {
 		clear(f[32:42])
 	}
-	base := coordinatedTerminalValueV5(s, w, f, u)
+	base := coordinatedTerminalValueV5(s, w, f, u, last.NeuralMeta.Greedy)
 	voc := make([]float64, 3)
 	// Finite Bayesian one-step metalevel value, with a realizable neural
 	// continuation instead of max utility of a different terminal selector.
@@ -204,7 +207,7 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 			if drop.MUSE {
 				clear(ff[32:42])
 			}
-			future += po * coordinatedTerminalValueV5(s, w, ff, uu)
+			future += po * coordinatedTerminalValueV5(s, w, ff, uu, last.NeuralMeta.Greedy)
 		}
 		voc[op] = future - base - last.NeuralMeta.Costs[op]
 		f[42+op] = voc[op]

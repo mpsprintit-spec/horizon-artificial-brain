@@ -146,3 +146,25 @@ func TestCoordinatedV5ContinuationCostAndMechanismInterventions(t *testing.T) {
 		t.Fatal("preview mutated N")
 	}
 }
+
+func TestCoordinatedV5ContinuationMatchesGreedyAndStochasticMode(t *testing.T) {
+	b := coordinatedFixtureV5(t)
+	s := b.BrainState.CognitiveModel
+	w, _ := b.CognitiveParameters()
+	p, e := b.PreviewCoordinatedV5(coordinatedTraceV5(), Phase4DropV5{})
+	if e != nil {
+		t.Fatal(e)
+	}
+	u := []float64{.1, .2, .8, .4, .35}
+	mask := []bool{false, false, false, true, true, true, true, true}
+	_, pi, _ := phase4Forward(s.Phase4V5, w, p.Features, mask)
+	mean := 0.
+	for a := 3; a < 8; a++ {
+		mean += pi[a] * u[a-3]
+	}
+	greedy := coordinatedTerminalValueV5(s, w, p.Features, u, true)
+	stochastic := coordinatedTerminalValueV5(s, w, p.Features, u, false)
+	if greedy != u[maxIndex(pi)-3] || math.Abs(stochastic-mean) > 1e-14 || math.Abs(greedy-stochastic) < 1e-5 {
+		t.Fatal("continuation ignored execution mode", greedy, stochastic)
+	}
+}
