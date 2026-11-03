@@ -10,6 +10,21 @@ import (
 // Reject foreign payloads rather than replaying only the recognized fraction
 // of a mixed record. Legacy process/think retain their lower-level meaning.
 func validateJournalPayload(event LoggedEvent) error {
+	if event.SchemaVersion == coordinatedJournalSchemaVersion && (event.Type != EventTypeCognitiveModel || event.CognitiveModel == nil || event.CognitiveModel.Coordinated == nil) {
+		return errors.New("schema13 reserved for coordinated V5")
+	}
+	if event.SchemaVersion == terminalExposureJournalSchemaVersion && event.Type != EventTypeCognitiveModel {
+		return errors.New("schema12 reserved for controlled terminal exposure")
+	}
+	if event.SchemaVersion == phase4JournalSchemaVersion && event.Type != EventTypeCognitiveModel {
+		return errors.New("schema11 reserved for V5 Phase IV")
+	}
+	if event.SchemaVersion == phase3JournalSchemaVersion && event.Type != EventTypeCognitiveModel {
+		return errors.New("journal schema10 is reserved for explicit phase3 commands")
+	}
+	if event.SchemaVersion == phase2JournalSchemaVersion && event.Type != EventTypeCognitiveModel {
+		return errors.New("journal schema9 is reserved for explicit phase2 commands")
+	}
 	if event.CompositionEncoding != "" && (!knowledge.SupportedCompositionVersion(event.CompositionEncoding) || event.SchemaVersion < compositionJournalSchemaVersion) {
 		return errors.New("unsupported composition journal contract")
 	}
@@ -84,6 +99,8 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	var required []string
 	switch event.Type {
+	case EventTypeCognitiveModel:
+		required = []string{"cognitive_model"}
 	case EventTypeCompositionMigration:
 		required = []string{"composition_migration"}
 	case EventTypeCompositionPerception:
@@ -119,7 +136,7 @@ func validateJournalPayload(event LoggedEvent) error {
 	default:
 		return fmt.Errorf("unknown event type %q", event.Type)
 	}
-	present := map[string]bool{"event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
+	present := map[string]bool{"cognitive_model": event.CognitiveModel != nil, "event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
 	present["written_grounding_migration"] = event.WrittenGroundingMigration != nil
 	present["spelling_exposure"] = event.SpellingExposure != nil
 	present["composition_migration"] = event.CompositionMigration != nil
@@ -137,6 +154,53 @@ func validateJournalPayload(event LoggedEvent) error {
 		}
 	}
 	switch event.Type {
+	case EventTypeCognitiveModel:
+		if (event.SchemaVersion != coordinatedJournalSchemaVersion && event.SchemaVersion != terminalExposureJournalSchemaVersion && event.SchemaVersion != phase4JournalSchemaVersion && event.SchemaVersion != phase3JournalSchemaVersion && event.SchemaVersion != phase2JournalSchemaVersion && event.SchemaVersion != cognitiveModelJournalSchemaVersion && event.SchemaVersion != neuralMetaJournalSchemaVersion && event.SchemaVersion != terminalReadoutJournalSchemaVersion && event.SchemaVersion != componentLearningJournalSchemaVersion) || event.Timestamp.IsZero() {
+			return errors.New("invalid cognitive journal contract")
+		}
+		if err := event.CognitiveModel.Validate(); err != nil {
+			return err
+		}
+		c := event.CognitiveModel
+		if (c.Coordinated != nil) != (event.SchemaVersion == coordinatedJournalSchemaVersion) {
+			return errors.New("coordinated update requires schema13")
+		}
+		terminalExposure := c.Phase4Training != nil && c.Phase4Training.Protocol == knowledge.Phase4TerminalProtocolV5
+		if terminalExposure != (event.SchemaVersion == terminalExposureJournalSchemaVersion) {
+			return errors.New("terminal exposure requires explicit schema12")
+		}
+		if (c.Phase4Init != nil || c.Phase4Training != nil) != (event.SchemaVersion == phase4JournalSchemaVersion || event.SchemaVersion == terminalExposureJournalSchemaVersion) {
+			return errors.New("Phase IV requires explicit schema11 or terminal schema12")
+		}
+		if (event.CognitiveModel.Phase3Training != nil) != (event.SchemaVersion == phase3JournalSchemaVersion) {
+			return errors.New("phase3 learning requires explicit schema10")
+		}
+		phase2 := event.CognitiveModel.Phase2Init != nil || event.CognitiveModel.Phase2Training != nil
+		if phase2 != (event.SchemaVersion == phase2JournalSchemaVersion) {
+			return errors.New("phase2 commands require their explicit journal schema9")
+		}
+		if c := event.CognitiveModel; c.Calibration != nil && c.Calibration.TerminalReadoutOnly && event.SchemaVersion != terminalReadoutJournalSchemaVersion {
+			return errors.New("terminal readout calibration requires journal schema 7")
+		}
+		if event.CognitiveModel.Training != nil && event.CognitiveModel.Training.TerminalReadoutOnly && event.SchemaVersion != terminalReadoutJournalSchemaVersion {
+			return errors.New("terminal readout fitting requires journal schema 7")
+		}
+		if c := event.CognitiveModel; (c.Training != nil && (c.Training.ComponentV4 != "" || c.Training.EntropyWeightV4 != nil) || c.Calibration != nil && (c.Calibration.ComponentV4 != "" || c.Calibration.EntropyWeightV4 != nil)) && event.SchemaVersion != componentLearningJournalSchemaVersion {
+			return errors.New("component learning requires journal schema 8")
+		}
+		if event.SchemaVersion != coordinatedJournalSchemaVersion && event.SchemaVersion != terminalExposureJournalSchemaVersion && event.SchemaVersion != phase4JournalSchemaVersion && event.SchemaVersion != phase3JournalSchemaVersion && event.SchemaVersion != phase2JournalSchemaVersion && event.SchemaVersion != neuralMetaJournalSchemaVersion && event.SchemaVersion != terminalReadoutJournalSchemaVersion && event.SchemaVersion != componentLearningJournalSchemaVersion {
+			c := event.CognitiveModel
+			if c.Calibration != nil || (c.Initialize != nil && c.Initialize.Version == knowledge.CognitiveModelV2) || (c.Input != nil && c.Input.NeuralMeta != nil) {
+				return errors.New("native neural metareasoning requires journal schema 6")
+			}
+			if c.Training != nil {
+				for _, e := range c.Training.Episodes {
+					if e.VerifiedTarget != nil || len(e.VerifiedOperations) > 0 {
+						return errors.New("native verified learning requires journal schema 6")
+					}
+				}
+			}
+		}
 	case EventTypeCompositionMigration:
 		if event.SchemaVersion < compositionJournalSchemaVersion || event.Timestamp.IsZero() || event.CompositionEncoding != "" {
 			return errors.New("composition migration requires an initial versioned command")

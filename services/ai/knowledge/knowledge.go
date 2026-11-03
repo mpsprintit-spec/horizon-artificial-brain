@@ -13,18 +13,20 @@ import (
 )
 
 type NeuralRegistry struct {
-	mu       sync.RWMutex
-	nextID   NodeID
-	byID     map[NodeID]*ConceptNode
+	mu     sync.RWMutex
+	nextID NodeID
+	byID   map[NodeID]*ConceptNode
 }
 
-func NewNeuralRegistry() *NeuralRegistry { return &NeuralRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode)} }
+func NewNeuralRegistry() *NeuralRegistry {
+	return &NeuralRegistry{nextID: 1, byID: make(map[NodeID]*ConceptNode)}
+}
 
 // TokenRegistry is retained only as a source-compatibility alias during migration.
 // It is not token-indexed and stores no lexical identity.
 type TokenRegistry = NeuralRegistry
 
-func NewTokenRegistry() *TokenRegistry { return NewNeuralRegistry() }
+func NewTokenRegistry() *TokenRegistry   { return NewNeuralRegistry() }
 func canonicalToken(token string) string { return strings.ToLower(strings.TrimSpace(token)) }
 
 func (r *NeuralRegistry) GetOrCreate(token string) (*ConceptNode, bool, error) {
@@ -89,13 +91,17 @@ func (r *TokenRegistry) Nodes() []*ConceptNode {
 // is formed by population projection, while this compatibility path preserves
 // exact repeated numeric observations without collapsing merely similar ones.
 func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold float64) (*ConceptNode, bool, error) {
-	if vector.Empty() { return nil, false, errors.New("neural vector is empty") }
+	if vector.Empty() {
+		return nil, false, errors.New("neural vector is empty")
+	}
 	_ = clamp(threshold, 0, 1) // retained for source compatibility; not used as identity.
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	for _, node := range r.byID {
-		if len(node.Representation) != len(vector.Values) { continue }
+		if len(node.Representation) != len(vector.Values) {
+			continue
+		}
 		score := NewNeuralVector(node.Representation).Similarity(vector)
 		if score >= 0.999999999 {
 			node.Frequency++
@@ -116,64 +122,80 @@ func (r *TokenRegistry) GetOrCreateRepresentation(vector NeuralVector, threshold
 // dynamic connections. ProjectionPopulations records distributed receptive
 // fields so repeated experiences can recover the same population without
 // turning similar experiences into one identical representation.
-type BootstrapProvenance struct { Origin string `json:"origin"`; DirectExperience bool `json:"direct_experience"`; Status string `json:"status"`; SourceHash string `json:"source_hash,omitempty"` }
+type BootstrapProvenance struct {
+	Origin           string `json:"origin"`
+	DirectExperience bool   `json:"direct_experience"`
+	Status           string `json:"status"`
+	SourceHash       string `json:"source_hash,omitempty"`
+}
 
-type BootstrapExperience struct { ID string `json:"id"`; Populations []NodeID `json:"populations"`; TemporalTrace []time.Time `json:"temporal_trace,omitempty"`; Activation float64 `json:"activation"`; Confidence float64 `json:"confidence"`; Provenance BootstrapProvenance `json:"provenance"` }
+type BootstrapExperience struct {
+	ID            string              `json:"id"`
+	Populations   []NodeID            `json:"populations"`
+	TemporalTrace []time.Time         `json:"temporal_trace,omitempty"`
+	Activation    float64             `json:"activation"`
+	Confidence    float64             `json:"confidence"`
+	Provenance    BootstrapProvenance `json:"provenance"`
+}
 
 type LearningPolicyState struct {
-	NoveltySensitivity float64 `json:"novelty_sensitivity"`
+	NoveltySensitivity     float64 `json:"novelty_sensitivity"`
 	UncertaintySensitivity float64 `json:"uncertainty_sensitivity"`
-	MemoryRetention float64 `json:"memory_retention"`
-	CuriosityPressure float64 `json:"curiosity_pressure"`
-	ExplorationBias float64 `json:"exploration_bias"`
-	RepeatObservationBias float64 `json:"repeat_observation_bias"`
-	DeferConclusionBias float64 `json:"defer_conclusion_bias"`
+	MemoryRetention        float64 `json:"memory_retention"`
+	CuriosityPressure      float64 `json:"curiosity_pressure"`
+	ExplorationBias        float64 `json:"exploration_bias"`
+	RepeatObservationBias  float64 `json:"repeat_observation_bias"`
+	DeferConclusionBias    float64 `json:"defer_conclusion_bias"`
 }
 
 type InquiryState struct {
-	Sequence uint64 `json:"sequence"`
-	LastUpdated time.Time `json:"last_updated"`
-	Pending bool `json:"pending"`
-	SelectedAction string `json:"selected_action,omitempty"`
-	Uncertainty float64 `json:"uncertainty"`
-	ExpectedInformationGain float64 `json:"expected_information_gain"`
-	SelectedScore float64 `json:"selected_score"`
-	ObservedInformationGain float64 `json:"observed_information_gain"`
-	OutcomePredictionError float64 `json:"outcome_prediction_error"`
+	Sequence                uint64    `json:"sequence"`
+	LastUpdated             time.Time `json:"last_updated"`
+	Pending                 bool      `json:"pending"`
+	SelectedAction          string    `json:"selected_action,omitempty"`
+	Uncertainty             float64   `json:"uncertainty"`
+	ExpectedInformationGain float64   `json:"expected_information_gain"`
+	SelectedScore           float64   `json:"selected_score"`
+	ObservedInformationGain float64   `json:"observed_information_gain"`
+	OutcomePredictionError  float64   `json:"outcome_prediction_error"`
 }
 
 type BrainState struct {
-	NResolution *NResolutionState `json:"n_resolution,omitempty"`
-	MemoryDecay *MemoryDecayState `json:"memory_decay,omitempty"`
-	SensoryTraces []SensoryExperienceTrace `json:"sensory_traces,omitempty"`
-	AttentionState map[string]float64 `json:"attention_state,omitempty"`
-	CuriosityState map[string]float64 `json:"curiosity_state,omitempty"`
-	PredictionState map[string]float64 `json:"prediction_state,omitempty"`
-	PlasticityState map[string]float64 `json:"plasticity_state,omitempty"`
-	MemoryState map[string]float64 `json:"memory_state,omitempty"`
-	SelfModelState map[string]float64 `json:"self_model_state,omitempty"`
-	SocialModelState map[string]float64 `json:"social_model_state,omitempty"`
-	ValueState map[string]float64 `json:"value_state,omitempty"`
-	LearningPolicyState LearningPolicyState `json:"learning_policy_state"`
-	InquiryState InquiryState `json:"inquiry_state"`
-	BootstrapExperiences []BootstrapExperience `json:"bootstrap_experiences,omitempty"`
-	Episodes []BootstrapExperience `json:"episodes,omitempty"`
-	ExperienceTraces []ExperienceTrace `json:"experience_traces,omitempty"`
+	CognitiveModel           *CognitiveModelState      `json:"cognitive_model,omitempty"`
+	NResolution              *NResolutionState         `json:"n_resolution,omitempty"`
+	MemoryDecay              *MemoryDecayState         `json:"memory_decay,omitempty"`
+	SensoryTraces            []SensoryExperienceTrace  `json:"sensory_traces,omitempty"`
+	AttentionState           map[string]float64        `json:"attention_state,omitempty"`
+	CuriosityState           map[string]float64        `json:"curiosity_state,omitempty"`
+	PredictionState          map[string]float64        `json:"prediction_state,omitempty"`
+	PlasticityState          map[string]float64        `json:"plasticity_state,omitempty"`
+	MemoryState              map[string]float64        `json:"memory_state,omitempty"`
+	SelfModelState           map[string]float64        `json:"self_model_state,omitempty"`
+	SocialModelState         map[string]float64        `json:"social_model_state,omitempty"`
+	ValueState               map[string]float64        `json:"value_state,omitempty"`
+	LearningPolicyState      LearningPolicyState       `json:"learning_policy_state"`
+	InquiryState             InquiryState              `json:"inquiry_state"`
+	BootstrapExperiences     []BootstrapExperience     `json:"bootstrap_experiences,omitempty"`
+	Episodes                 []BootstrapExperience     `json:"episodes,omitempty"`
+	ExperienceTraces         []ExperienceTrace         `json:"experience_traces,omitempty"`
 	DevelopmentalExperiences []DevelopmentalExperience `json:"developmental_experiences,omitempty"`
 }
 
 type KnowledgeBase struct {
+	cognitiveDigestMu      sync.Mutex
+	cognitiveDigestWeights []float64 // exact-array SHA memoization only; never used for inference
+	cognitiveDigestValue   string
 	// Ownership is a monotonic, non-serialized guard against legacy
 	// adapters mutating the canonical brain after a runtime handover.
 	// An atomic flag lives WITH the substrate rather than a global map,
 	// so retired brains remain guarded without leaking all old pointers.
-	runtimeOwned atomic.Bool
-	runtimeBound atomic.Bool
+	runtimeOwned          atomic.Bool
+	runtimeBound          atomic.Bool
 	Registry              *NeuralRegistry
 	Patterns              *PatternIndex
 	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
-	BrainState            BrainState `json:"brain_state"`
-	SurfaceAnnotations    []SurfaceAnnotation `json:"surface_annotations,omitempty"`
+	BrainState            BrainState             `json:"brain_state"`
+	SurfaceAnnotations    []SurfaceAnnotation    `json:"surface_annotations,omitempty"`
 	projectionMu          sync.RWMutex
 	annotationMu          sync.RWMutex
 	mu                    sync.RWMutex
@@ -182,7 +204,9 @@ type KnowledgeBase struct {
 // MarkRuntimeOwned prevents legacy GroundingIntegration from bypassing the
 // runtime owner. This flag cannot be cleared, including after a handover.
 func (k *KnowledgeBase) MarkRuntimeOwned() {
-	if k != nil { k.runtimeOwned.Store(true) }
+	if k != nil {
+		k.runtimeOwned.Store(true)
+	}
 }
 
 func (k *KnowledgeBase) RuntimeOwned() bool {
@@ -197,38 +221,56 @@ func (k *KnowledgeBase) BindRuntime() bool {
 }
 
 // Lock serializes mutations to the canonical neural substrate.
-func (k *KnowledgeBase) Lock() { if k != nil { k.mu.Lock() } }
-func (k *KnowledgeBase) Unlock() { if k != nil { k.mu.Unlock() } }
-func (k *KnowledgeBase) RLock() { if k != nil { k.mu.RLock() } }
-func (k *KnowledgeBase) RUnlock() { if k != nil { k.mu.RUnlock() } }
+func (k *KnowledgeBase) Lock() {
+	if k != nil {
+		k.mu.Lock()
+	}
+}
+func (k *KnowledgeBase) Unlock() {
+	if k != nil {
+		k.mu.Unlock()
+	}
+}
+func (k *KnowledgeBase) RLock() {
+	if k != nil {
+		k.mu.RLock()
+	}
+}
+func (k *KnowledgeBase) RUnlock() {
+	if k != nil {
+		k.mu.RUnlock()
+	}
+}
 
 func NewKnowledgeBase() *KnowledgeBase {
 	return &KnowledgeBase{
 		Registry: NewTokenRegistry(),
 		Patterns: NewPatternIndex(),
 		BrainState: BrainState{
-			AttentionState: map[string]float64{},
-			CuriosityState: map[string]float64{},
-			PredictionState: map[string]float64{},
-			PlasticityState: map[string]float64{},
-			MemoryState: map[string]float64{},
-			SelfModelState: map[string]float64{},
+			AttentionState:   map[string]float64{},
+			CuriosityState:   map[string]float64{},
+			PredictionState:  map[string]float64{},
+			PlasticityState:  map[string]float64{},
+			MemoryState:      map[string]float64{},
+			SelfModelState:   map[string]float64{},
 			SocialModelState: map[string]float64{},
-			ValueState: map[string]float64{},
+			ValueState:       map[string]float64{},
 			LearningPolicyState: LearningPolicyState{
-				NoveltySensitivity: 0.70,
+				NoveltySensitivity:     0.70,
 				UncertaintySensitivity: 0.80,
-				MemoryRetention: 0.60,
-				CuriosityPressure: 0.65,
-				ExplorationBias: 0.30,
-				RepeatObservationBias: 0.20,
-				DeferConclusionBias: 0.20,
+				MemoryRetention:        0.60,
+				CuriosityPressure:      0.65,
+				ExplorationBias:        0.30,
+				RepeatObservationBias:  0.20,
+				DeferConclusionBias:    0.20,
 			},
 		},
 	}
 }
 func (k *KnowledgeBase) Fetch(token string) *ConceptNode {
-	if k == nil || k.Registry == nil { return nil }
+	if k == nil || k.Registry == nil {
+		return nil
+	}
 	if node := k.Registry.Get(token); node != nil {
 		return node
 	}
@@ -282,25 +324,35 @@ func (k *KnowledgeBase) recordSurfaceAnnotation(surface, modality string, nodeID
 		Population: append([]NodeID(nil), population...), LastSeen: now,
 	})
 }
+
 // SurfaceForNode resolves adapter metadata for a neural node without making
 // the surface form part of neural identity. A distributed population is
 // represented by one annotation anchored at its first member, so resolution
 // also checks population membership.
 func (k *KnowledgeBase) SurfaceForNode(id NodeID, modality string) string {
-	if k == nil || id == 0 { return "" }
+	if k == nil || id == 0 {
+		return ""
+	}
 	k.annotationMu.RLock()
 	defer k.annotationMu.RUnlock()
 	best := ""
 	var bestSeen time.Time
 	for _, annotation := range k.SurfaceAnnotations {
-		if modality != "" && CanonicalSurfaceModality(annotation.Modality) != CanonicalSurfaceModality(modality) { continue }
+		if modality != "" && CanonicalSurfaceModality(annotation.Modality) != CanonicalSurfaceModality(modality) {
+			continue
+		}
 		match := annotation.NodeID == id
 		if !match {
 			for _, member := range annotation.Population {
-				if member == id { match = true; break }
+				if member == id {
+					match = true
+					break
+				}
 			}
 		}
-		if !match || annotation.Surface == "" { continue }
+		if !match || annotation.Surface == "" {
+			continue
+		}
 		if best == "" || annotation.LastSeen.After(bestSeen) {
 			best = annotation.Surface
 			bestSeen = annotation.LastSeen
@@ -329,52 +381,98 @@ func (k *KnowledgeBase) Store(token string) *ConceptNode {
 // by language and other sources. The result is an internal activation pattern,
 // not a separate vector memory database.
 func (k *KnowledgeBase) ProjectVector(vector NeuralVector, threshold float64) (NodeID, float64, bool, error) {
-	if k == nil { return 0, 0, false, errors.New("brain is nil") }
+	if k == nil {
+		return 0, 0, false, errors.New("brain is nil")
+	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	node, created, err := k.Registry.GetOrCreateRepresentation(vector, threshold)
-	if err != nil { return 0, 0, false, err }
+	if err != nil {
+		return 0, 0, false, err
+	}
 	score := 1.0
-	if !created { score = NewNeuralVector(node.Representation).Similarity(vector) }
+	if !created {
+		score = NewNeuralVector(node.Representation).Similarity(vector)
+	}
 	node.Activation = score
 	node.LastActivation = time.Now().UTC()
 	return node.ID, score, created, nil
 }
 
 func (k *KnowledgeBase) Connect(source, target *ConceptNode, weight, confidence float64, inhibitory bool) {
-	if source == nil || target == nil { return }
+	if source == nil || target == nil {
+		return
+	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
-	now := time.Now().UTC(); if source.Synapses == nil { source.Synapses = make(map[NodeID]SynapseList) }
-	list := source.Synapses[target.ID]; s := list.FindDynamic(inhibitory)
-	if s == nil { s = &Synapse{TargetID: target.ID, Weight: clamp01(weight), Confidence: clamp01(confidence), Inhibitory: inhibitory}; source.Synapses[target.ID] = append(list, s) }
-	s.Dynamic.Reinforce(weight, confidence, 1, now); syncSynapseLegacyState(s); source.LastActivation = now
+	now := time.Now().UTC()
+	if source.Synapses == nil {
+		source.Synapses = make(map[NodeID]SynapseList)
+	}
+	list := source.Synapses[target.ID]
+	s := list.FindDynamic(inhibitory)
+	if s == nil {
+		s = &Synapse{TargetID: target.ID, Weight: clamp01(weight), Confidence: clamp01(confidence), Inhibitory: inhibitory}
+		source.Synapses[target.ID] = append(list, s)
+	}
+	s.Dynamic.Reinforce(weight, confidence, 1, now)
+	syncSynapseLegacyState(s)
+	source.LastActivation = now
 }
 
 func (k *KnowledgeBase) ConnectKind(source, target *ConceptNode, kind RelationKind, weight, confidence float64, inhibitory bool) {
-	if source == nil || target == nil { return }
+	if source == nil || target == nil {
+		return
+	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
-	now := time.Now().UTC(); if source.Synapses == nil { source.Synapses = make(map[NodeID]SynapseList) }
-	list := source.Synapses[target.ID]; s := list.Find(kind, inhibitory)
-	if s == nil { s = &Synapse{TargetID: target.ID, Kind: kind, Weight: weight, Confidence: confidence, Inhibitory: inhibitory}; source.Synapses[target.ID] = append(list, s) }
-	s.Dynamic.Reinforce(weight, confidence, 1, now); syncSynapseLegacyState(s); source.LastActivation = now
+	now := time.Now().UTC()
+	if source.Synapses == nil {
+		source.Synapses = make(map[NodeID]SynapseList)
+	}
+	list := source.Synapses[target.ID]
+	s := list.Find(kind, inhibitory)
+	if s == nil {
+		s = &Synapse{TargetID: target.ID, Kind: kind, Weight: weight, Confidence: confidence, Inhibitory: inhibitory}
+		source.Synapses[target.ID] = append(list, s)
+	}
+	s.Dynamic.Reinforce(weight, confidence, 1, now)
+	syncSynapseLegacyState(s)
+	source.LastActivation = now
 }
 
 func syncSynapseLegacyState(s *Synapse) {
-	if s == nil { return }; s.Weight = s.Dynamic.Weight; s.Confidence = s.Dynamic.Confidence; s.Frequency = s.Dynamic.Frequency; s.Activation = s.Dynamic.Activation; s.LastActivation = s.Dynamic.LastActivation
+	if s == nil {
+		return
+	}
+	s.Weight = s.Dynamic.Weight
+	s.Confidence = s.Dynamic.Confidence
+	s.Frequency = s.Dynamic.Frequency
+	s.Activation = s.Dynamic.Activation
+	s.LastActivation = s.Dynamic.LastActivation
 }
 func hydrateSynapseDynamicState(s *Synapse) {
-	if s == nil { return }; if s.Dynamic.Frequency == 0 && s.Frequency > 0 { s.Dynamic.Weight = clamp01(s.Weight); s.Dynamic.Confidence = clamp01(s.Confidence); s.Dynamic.Activation = clamp01(s.Activation); s.Dynamic.Frequency = s.Frequency; s.Dynamic.LastActivation = s.LastActivation; s.Dynamic.LastModification = s.LastActivation }; syncSynapseLegacyState(s)
+	if s == nil {
+		return
+	}
+	if s.Dynamic.Frequency == 0 && s.Frequency > 0 {
+		s.Dynamic.Weight = clamp01(s.Weight)
+		s.Dynamic.Confidence = clamp01(s.Confidence)
+		s.Dynamic.Activation = clamp01(s.Activation)
+		s.Dynamic.Frequency = s.Frequency
+		s.Dynamic.LastActivation = s.LastActivation
+		s.Dynamic.LastModification = s.LastActivation
+	}
+	syncSynapseLegacyState(s)
 }
 
 type persistedGraph struct {
-	SchemaVersion          int                    `json:"schema_version,omitempty"`
-	BrainIdentity          string                 `json:"brain_identity,omitempty"`
-	Nodes                  []*ConceptNode         `json:"nodes"`
-	Patterns               []*PatternSynapse      `json:"patterns,omitempty"`
-	ProjectionPopulations  []ProjectionPopulation `json:"projection_populations,omitempty"`
-	BrainState              BrainState             `json:"brain_state"`
+	SchemaVersion         int                    `json:"schema_version,omitempty"`
+	BrainIdentity         string                 `json:"brain_identity,omitempty"`
+	Nodes                 []*ConceptNode         `json:"nodes"`
+	Patterns              []*PatternSynapse      `json:"patterns,omitempty"`
+	ProjectionPopulations []ProjectionPopulation `json:"projection_populations,omitempty"`
+	BrainState            BrainState             `json:"brain_state"`
 }
 
 func (k *KnowledgeBase) Load(path string) error {
@@ -388,39 +486,89 @@ func (k *KnowledgeBase) LoadStandalone(path string) error {
 }
 
 func (k *KnowledgeBase) load(path string, standalone bool) error {
-	if k == nil { return ErrNilBrain }
+	if k == nil {
+		return ErrNilBrain
+	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
-	b, err := os.ReadFile(path); if err != nil { return err }
-	if standalone { if err := ValidateWrittenNumericState(b, false); err != nil { return err } }
-	var envelope struct { SchemaVersion int `json:"schema_version"` }
-	if err := json.Unmarshal(b, &envelope); err != nil { return err }
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return err
+	}
+	if standalone {
+		if err := ValidateCognitiveModelState(b, false); err != nil {
+			return err
+		}
+		if err := ValidateWrittenNumericState(b, false); err != nil {
+			return err
+		}
+	}
+	var envelope struct {
+		SchemaVersion int `json:"schema_version"`
+	}
+	if err := json.Unmarshal(b, &envelope); err != nil {
+		return err
+	}
 	// Legacy graph files need dynamic-state hydration. Canonical v2 already
 	// persists exact dynamic AND legacy fields; hydration changes their values
 	// and makes deterministic checkpoint continuation diverge.
 	legacy := envelope.SchemaVersion < 2
 	nodes, patterns, populations, state, err := loadCanonicalBrain(b)
-	if err != nil { return err }
-	registry := NewTokenRegistry(); var maxID NodeID
+	if err != nil {
+		return err
+	}
+	registry := NewTokenRegistry()
+	var maxID NodeID
 	for _, node := range nodes {
-		if node == nil { continue }
-		if node.Synapses == nil { node.Synapses = map[NodeID]SynapseList{} }
+		if node == nil {
+			continue
+		}
+		if node.Synapses == nil {
+			node.Synapses = map[NodeID]SynapseList{}
+		}
 		if legacy {
 			for _, synapses := range node.Synapses {
-				for _, synapse := range synapses { hydrateSynapseDynamicState(synapse) }
+				for _, synapse := range synapses {
+					hydrateSynapseDynamicState(synapse)
+				}
 			}
 		}
 		registry.byID[node.ID] = node
-		if node.ID > maxID { maxID = node.ID }
+		if node.ID > maxID {
+			maxID = node.ID
+		}
 	}
-	registry.nextID = maxID + 1; if registry.nextID < 1 { registry.nextID = 1 }; k.Registry = registry
-	patternIndex := NewPatternIndex(); var maxPatternID PatternID; for _, ps := range patterns { if ps == nil { continue }; patternIndex.patterns[ps.ID] = ps; if ps.ID > maxPatternID { maxPatternID = ps.ID } }; patternIndex.nextID = maxPatternID + 1; if patternIndex.nextID < 1 { patternIndex.nextID = 1 }; k.Patterns = patternIndex
-	k.projectionMu.Lock(); k.ProjectionPopulations = append([]ProjectionPopulation(nil), populations...); k.projectionMu.Unlock()
+	registry.nextID = maxID + 1
+	if registry.nextID < 1 {
+		registry.nextID = 1
+	}
+	k.Registry = registry
+	patternIndex := NewPatternIndex()
+	var maxPatternID PatternID
+	for _, ps := range patterns {
+		if ps == nil {
+			continue
+		}
+		patternIndex.patterns[ps.ID] = ps
+		if ps.ID > maxPatternID {
+			maxPatternID = ps.ID
+		}
+	}
+	patternIndex.nextID = maxPatternID + 1
+	if patternIndex.nextID < 1 {
+		patternIndex.nextID = 1
+	}
+	k.Patterns = patternIndex
+	k.projectionMu.Lock()
+	k.ProjectionPopulations = append([]ProjectionPopulation(nil), populations...)
+	k.projectionMu.Unlock()
 	k.BrainState = state
 	k.normalizeBrainState()
 	// Canonical state already records population provenance explicitly. Only
 	// legacy migration may synthesize missing bootstrap metadata.
-	if legacy { k.normalizeBootstrapState() }
+	if legacy {
+		k.normalizeBootstrapState()
+	}
 
 	return nil
 }
@@ -458,19 +606,27 @@ func (k *KnowledgeBase) normalizeBootstrapState() {
 		}
 		if len(population.PredictionTargets) == 0 {
 			targetIndex := i + 1
-			if targetIndex >= len(k.ProjectionPopulations) { targetIndex = i }
+			if targetIndex >= len(k.ProjectionPopulations) {
+				targetIndex = i
+			}
 			for _, unit := range k.ProjectionPopulations[targetIndex].Units {
-				if unit.NodeID != 0 { population.PredictionTargets = append(population.PredictionTargets, unit.NodeID) }
+				if unit.NodeID != 0 {
+					population.PredictionTargets = append(population.PredictionTargets, unit.NodeID)
+				}
 			}
 		}
 		if len(population.ErrorTargets) == 0 && len(k.ProjectionPopulations) > 10 {
 			for _, unit := range k.ProjectionPopulations[10].Units {
-				if unit.NodeID != 0 { population.ErrorTargets = append(population.ErrorTargets, unit.NodeID) }
+				if unit.NodeID != 0 {
+					population.ErrorTargets = append(population.ErrorTargets, unit.NodeID)
+				}
 			}
 		}
 		if len(population.PlasticityTargets) == 0 {
 			for _, unit := range population.Units {
-				if unit.NodeID != 0 { population.PlasticityTargets = append(population.PlasticityTargets, unit.NodeID) }
+				if unit.NodeID != 0 {
+					population.PlasticityTargets = append(population.PlasticityTargets, unit.NodeID)
+				}
 			}
 		}
 		if population.BootstrapExperienceID == "" {
@@ -545,8 +701,12 @@ func (k *KnowledgeBase) normalizeBrainState() {
 // RecordInquirySelection persists the internal inquiry decision without
 // executing the selected action. Only the numeric trajectory is persisted.
 func (k *KnowledgeBase) RecordInquirySelection(sequence uint64, action string, uncertainty, informationGain, score float64, now time.Time) {
-	if k == nil || action == "" { return }
-	if now.IsZero() { now = time.Now().UTC() }
+	if k == nil || action == "" {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
 	k.BrainState.InquiryState = InquiryState{
@@ -563,22 +723,34 @@ func (k *KnowledgeBase) RecordInquirySelection(sequence uint64, action string, u
 // and persisted with the canonical BrainState; it does not assign semantic value
 // to the action and does not create a question or curiosity label.
 func (k *KnowledgeBase) RecordInquiryInformationExperience(action string, informationGain, reliability float64, now time.Time) {
-	if k == nil || action == "" { return }
-	if now.IsZero() { now = time.Now().UTC() }
+	if k == nil || action == "" {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
 	informationGain = clamp01(informationGain)
 	reliability = clamp01(reliability)
 	k.mu.Lock()
 	defer k.mu.Unlock()
-	if k.BrainState.PredictionState == nil { k.BrainState.PredictionState = map[string]float64{} }
+	if k.BrainState.PredictionState == nil {
+		k.BrainState.PredictionState = map[string]float64{}
+	}
 	prefix := "inquiry_info:" + action
 	samples := k.BrainState.PredictionState[prefix+":samples"]
-	if samples < 0 { samples = 0 }
+	if samples < 0 {
+		samples = 0
+	}
 	alpha := 1.0 / (samples + 1.0)
-	if alpha > 0.25 { alpha = 0.25 }
+	if alpha > 0.25 {
+		alpha = 0.25
+	}
 	previous := clamp01(k.BrainState.PredictionState[prefix+":ema"])
 	reliabilityWeight := 0.25 + 0.75*reliability
 	alpha *= reliabilityWeight
-	if alpha > 0.25 { alpha = 0.25 }
+	if alpha > 0.25 {
+		alpha = 0.25
+	}
 	next := previous + alpha*(informationGain-previous)
 	k.BrainState.PredictionState[prefix+":ema"] = clamp01(next)
 	k.BrainState.PredictionState[prefix+":reliability"] = reliability
@@ -589,18 +761,26 @@ func (k *KnowledgeBase) RecordInquiryInformationExperience(action string, inform
 // InquiryInformationExperience returns the learned empirical information yield
 // for an action. Samples are weighted by observation reliability.
 func (k *KnowledgeBase) InquiryInformationExperience(action string) (yield, reliability float64, samples float64, learned bool) {
-	if k == nil || action == "" { return 0, 0, 0, false }
+	if k == nil || action == "" {
+		return 0, 0, 0, false
+	}
 	k.mu.RLock()
 	defer k.mu.RUnlock()
 	prefix := "inquiry_info:" + action
 	samples = k.BrainState.PredictionState[prefix+":samples"]
-	if samples <= 0 { return 0, 0, 0, false }
+	if samples <= 0 {
+		return 0, 0, 0, false
+	}
 	return clamp01(k.BrainState.PredictionState[prefix+":ema"]), clamp01(k.BrainState.PredictionState[prefix+":reliability"]), samples, true
 }
 
 func (k *KnowledgeBase) RecordInquiryOutcome(observedInformationGain, predictionError float64, now time.Time) {
-	if k == nil { return }
-	if now.IsZero() { now = time.Now().UTC() }
+	if k == nil {
+		return
+	}
+	if now.IsZero() {
+		now = time.Now().UTC()
+	}
 	observedInformationGain = clamp01(observedInformationGain)
 	predictionError = clamp01(predictionError)
 	k.mu.Lock()
@@ -621,18 +801,40 @@ func (k *KnowledgeBase) RecordInquiryOutcome(observedInformationGain, prediction
 }
 
 func (k *KnowledgeBase) Save(path string) error {
-	if k == nil { return ErrNilBrain }
+	if k == nil {
+		return ErrNilBrain
+	}
 	k.mu.RLock()
 	defer k.mu.RUnlock()
-		dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil { return err }
+	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
 	tmp, err := os.CreateTemp(dir, ".brain-memory-*.tmp")
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 	tmpName := tmp.Name()
 	defer os.Remove(tmpName)
-	if err := writeCanonicalBrain(tmp,k,true,""); err != nil { _ = tmp.Close(); return err }
-	if err := tmp.Sync(); err != nil { _ = tmp.Close(); return err }
-	if err := tmp.Close(); err != nil { return err }
+	if err := writeCanonicalBrain(tmp, k, true, ""); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
 	return os.Rename(tmpName, path)
 }
-func clamp01(v float64) float64 { if v < 0 { return 0 }; if v > 1 { return 1 }; return v }
+func clamp01(v float64) float64 {
+	if v < 0 {
+		return 0
+	}
+	if v > 1 {
+		return 1
+	}
+	return v
+}

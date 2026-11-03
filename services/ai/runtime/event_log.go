@@ -13,64 +13,69 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/project-horizon/horizon-core/services/ai/learning"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 )
 
 const EventLogSchemaVersion = 3
 
-func supportedEventLogSchema(version int) bool { return version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion }
+func supportedEventLogSchema(version int) bool {
+	return version == coordinatedJournalSchemaVersion || version == terminalExposureJournalSchemaVersion || version == phase4JournalSchemaVersion || version == phase3JournalSchemaVersion || version == phase2JournalSchemaVersion || version == componentLearningJournalSchemaVersion || version == terminalReadoutJournalSchemaVersion || version == neuralMetaJournalSchemaVersion || version == cognitiveModelJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
+}
 
 type LoggedEvent struct {
-	CompositionPerception *CompositionPerception `json:"composition_perception,omitempty"`
-	CompositionEncoding string `json:"composition_encoding,omitempty"`
-	CompositionMigration *CompositionMigration `json:"composition_migration,omitempty"`
-	CompositionExposure *knowledge.CompositionExposure `json:"composition_exposure,omitempty"`
-	SpellingExposure *knowledge.SpellingExposure `json:"spelling_exposure,omitempty"`
-	WrittenGroundingMigration *WrittenGroundingMigration `json:"written_grounding_migration,omitempty"`
-	DynamicsEncoding knowledge.DynamicsEncoding `json:"dynamics_encoding,omitempty"`
-	SurfaceRebinding *WrittenSurfaceRebinding `json:"surface_rebinding,omitempty"`
-	SurfaceEncoding knowledge.SurfaceEncoding `json:"surface_encoding,omitempty"`
-	InquiryOutcome *InquiryOutcomeCommand `json:"inquiry_outcome,omitempty"`
-	ObservationCommand *ObservationCommand `json:"observation_command,omitempty"`
-	ActionBinding *ActionBinding `json:"action_binding,omitempty"`
-	SchemaVersion int                  `json:"schema_version"`
-	BrainIdentity string               `json:"brain_identity"`
-	Sequence      uint64               `json:"sequence"`
-	Type          string               `json:"type"`
-	Timestamp     time.Time            `json:"timestamp"`
-	Event         *Event               `json:"event,omitempty"`
-	Experience    *learning.Experience `json:"experience,omitempty"`
-	KnowledgeDocument *knowledge.KnowledgeDocument `json:"knowledge_document,omitempty"`
-	Vector *knowledge.NeuralVector `json:"vector,omitempty"`
-	Outcome       *OutcomeEvent        `json:"outcome,omitempty"`
-	Consequence  *InquiryConsequenceEvent `json:"consequence,omitempty"`
-	IntentHash   string `json:"intent_hash,omitempty"`
+	CognitiveModel            *CognitiveModelCommand         `json:"cognitive_model,omitempty"`
+	CompositionPerception     *CompositionPerception         `json:"composition_perception,omitempty"`
+	CompositionEncoding       string                         `json:"composition_encoding,omitempty"`
+	CompositionMigration      *CompositionMigration          `json:"composition_migration,omitempty"`
+	CompositionExposure       *knowledge.CompositionExposure `json:"composition_exposure,omitempty"`
+	SpellingExposure          *knowledge.SpellingExposure    `json:"spelling_exposure,omitempty"`
+	WrittenGroundingMigration *WrittenGroundingMigration     `json:"written_grounding_migration,omitempty"`
+	DynamicsEncoding          knowledge.DynamicsEncoding     `json:"dynamics_encoding,omitempty"`
+	SurfaceRebinding          *WrittenSurfaceRebinding       `json:"surface_rebinding,omitempty"`
+	SurfaceEncoding           knowledge.SurfaceEncoding      `json:"surface_encoding,omitempty"`
+	InquiryOutcome            *InquiryOutcomeCommand         `json:"inquiry_outcome,omitempty"`
+	ObservationCommand        *ObservationCommand            `json:"observation_command,omitempty"`
+	ActionBinding             *ActionBinding                 `json:"action_binding,omitempty"`
+	SchemaVersion             int                            `json:"schema_version"`
+	BrainIdentity             string                         `json:"brain_identity"`
+	Sequence                  uint64                         `json:"sequence"`
+	Type                      string                         `json:"type"`
+	Timestamp                 time.Time                      `json:"timestamp"`
+	Event                     *Event                         `json:"event,omitempty"`
+	Experience                *learning.Experience           `json:"experience,omitempty"`
+	KnowledgeDocument         *knowledge.KnowledgeDocument   `json:"knowledge_document,omitempty"`
+	Vector                    *knowledge.NeuralVector        `json:"vector,omitempty"`
+	Outcome                   *OutcomeEvent                  `json:"outcome,omitempty"`
+	Consequence               *InquiryConsequenceEvent       `json:"consequence,omitempty"`
+	IntentHash                string                         `json:"intent_hash,omitempty"`
 }
 
 const (
-	EventTypeProcess = "process"
-	EventTypeObservation = "observation"
+	EventTypeProcess          = "process"
+	EventTypeObservation      = "observation"
 	EventTypeCognitiveProcess = "cognitive_process"
-	EventTypeCognitiveThink = "cognitive_think"
-	EventTypeActionBinding = "action_binding"
-	EventTypeInquiryOutcome = "inquiry_outcome"
-	EventTypeLearn = "learn"
-	EventTypeThink = "think"
-	EventTypeOutcome = "outcome"
-	EventTypeConsequence = "consequence"
-	EventTypeSensorIntent = "sensor_intent"
-	EventTypeSensorCommit = "sensor_commit"
+	EventTypeCognitiveThink   = "cognitive_think"
+	EventTypeActionBinding    = "action_binding"
+	EventTypeInquiryOutcome   = "inquiry_outcome"
+	EventTypeLearn            = "learn"
+	EventTypeThink            = "think"
+	EventTypeOutcome          = "outcome"
+	EventTypeConsequence      = "consequence"
+	EventTypeSensorIntent     = "sensor_intent"
+	EventTypeSensorCommit     = "sensor_commit"
 	// A document import is one durable revision, even if it performs multiple
 	// ordered neural exposure updates in that same revision.
 	EventTypeKnowledgeImport = "knowledge_import"
-	EventTypeVectorGround = "vector_ground"
+	EventTypeVectorGround    = "vector_ground"
 )
 
 type EventLog struct {
-	mu sync.Mutex
-	file *os.File
+	mu       sync.Mutex
+	file     *os.File
 	lockFile *os.File
+	// Also detect in-place truncation, which preserves the inode.
+	acknowledgedSize int64
 	// Test-only fault injection; guarded by mu like file writes.
 	beforeAppend func(LoggedEvent) error
 }
@@ -93,23 +98,87 @@ func OpenEventLog(path string) (*EventLog, error) {
 		lockFile.Close()
 		return nil, fmt.Errorf("open event log: %w", err)
 	}
-	return &EventLog{file: file, lockFile: lockFile}, nil
+	info, err := file.Stat()
+	if err != nil {
+		file.Close()
+		syscall.Flock(int(lockFile.Fd()), syscall.LOCK_UN)
+		lockFile.Close()
+		return nil, err
+	}
+	if err := syncJournalDirectory(filepath.Dir(path)); err != nil {
+		file.Close()
+		syscall.Flock(int(lockFile.Fd()), syscall.LOCK_UN)
+		lockFile.Close()
+		return nil, err
+	}
+	return &EventLog{file: file, lockFile: lockFile, acknowledgedSize: info.Size()}, nil
+}
+
+func syncJournalDirectory(path string) error {
+	dir, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer dir.Close()
+	return dir.Sync()
 }
 
 func (l *EventLog) Append(event LoggedEvent) error {
-	if l == nil { return errors.New("event log is not initialized") }
-	if event.SchemaVersion == 0 { event.SchemaVersion = EventLogSchemaVersion }
-	if event.BrainIdentity == "" { event.BrainIdentity = BrainIdentity }
+	if l == nil {
+		return errors.New("event log is not initialized")
+	}
+	if event.SchemaVersion == 0 {
+		event.SchemaVersion = EventLogSchemaVersion
+	}
+	if event.BrainIdentity == "" {
+		event.BrainIdentity = BrainIdentity
+	}
 	data, err := json.Marshal(event)
-	if err != nil { return fmt.Errorf("encode logged event: %w", err) }
+	if err != nil {
+		return fmt.Errorf("encode logged event: %w", err)
+	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
-	if l.file == nil || l.lockFile == nil { return errors.New("event log is not initialized") }
-	if l.beforeAppend != nil {
-		if err := l.beforeAppend(event); err != nil { return fmt.Errorf("inject event log append failure: %w", err) }
+	if l.file == nil || l.lockFile == nil {
+		return errors.New("event log is not initialized")
 	}
-	if _, err := l.file.Write(append(data, '\n')); err != nil { return fmt.Errorf("append logged event: %w", err) }
-	if err := l.file.Sync(); err != nil { return fmt.Errorf("sync event log: %w", err) }
+	// A workspace supervisor or external copier may replace an open path.
+	// Appending to the old, unlinked inode would acknowledge lost history.
+	opened, err := l.file.Stat()
+	if err != nil {
+		return err
+	}
+	visible, err := os.Stat(l.file.Name())
+	if err != nil {
+		return fmt.Errorf("journal pathname unavailable: %w", err)
+	}
+	if !os.SameFile(opened, visible) {
+		return errors.New("journal pathname replaced while writer was open; recovery required")
+	}
+	if opened.Size() != l.acknowledgedSize || visible.Size() != l.acknowledgedSize {
+		return errors.New("journal physical length changed outside writer; recovery required")
+	}
+	if l.beforeAppend != nil {
+		if err := l.beforeAppend(event); err != nil {
+			return fmt.Errorf("inject event log append failure: %w", err)
+		}
+	}
+	if _, err := l.file.Write(append(data, '\n')); err != nil {
+		return fmt.Errorf("append logged event: %w", err)
+	}
+	if err := l.file.Sync(); err != nil {
+		return fmt.Errorf("sync event log: %w", err)
+	}
+	expected := l.acknowledgedSize + int64(len(data)+1)
+	opened, err = l.file.Stat()
+	if err != nil {
+		return err
+	}
+	visible, err = os.Stat(l.file.Name())
+	if err != nil || !os.SameFile(opened, visible) || opened.Size() != expected || visible.Size() != expected {
+		return errors.New("journal changed during append/fsync; recovery required")
+	}
+	l.acknowledgedSize = expected
 	return nil
 }
 
@@ -135,7 +204,6 @@ func (l *EventLog) Close() error {
 	}
 	return closeErr
 }
-
 
 // RepairConflictingSequences repairs a legacy log written by multiple runtimes
 // that each maintained their own sequence counter. It only proceeds when every
@@ -188,7 +256,9 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		if !supportedEventLogSchema(event.SchemaVersion) {
 			return "", fmt.Errorf("cannot repair unsupported schema version %d at line %d", event.SchemaVersion, lineNumber)
 		}
-		if err := validateJournalPayload(event); err != nil { return "", fmt.Errorf("cannot repair invalid payload at line %d: %w", lineNumber, err) }
+		if err := validateJournalPayload(event); err != nil {
+			return "", fmt.Errorf("cannot repair invalid payload at line %d: %w", lineNumber, err)
+		}
 		if event.BrainIdentity != BrainIdentity {
 			return "", fmt.Errorf("cannot repair event for brain %q at line %d", event.BrainIdentity, lineNumber)
 		}
@@ -289,6 +359,9 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		reopened, reopenErr := os.OpenFile(path, os.O_APPEND|os.O_WRONLY, 0600)
 		if reopenErr == nil {
 			l.file = reopened
+			if st, e := reopened.Stat(); e == nil {
+				l.acknowledgedSize = st.Size()
+			}
 		}
 		return "", fmt.Errorf("atomically replace event log: %w", err)
 	}
@@ -297,6 +370,14 @@ func (l *EventLog) RepairConflictingSequences() (string, error) {
 		return "", fmt.Errorf("reopen recovered event log (backup at %s): %w", backupPath, err)
 	}
 	l.file = reopened
+	if st, e := reopened.Stat(); e == nil {
+		l.acknowledgedSize = st.Size()
+	} else {
+		return "", e
+	}
+	if err := syncJournalDirectory(filepath.Dir(path)); err != nil {
+		return "", err
+	}
 	return backupPath, nil
 }
 
@@ -365,7 +446,9 @@ func ReadEventLog(path string) ([]LoggedEvent, error) {
 		}
 
 		if pending != nil {
-			if err := validateJournalPayload(event); err != nil { return nil, fmt.Errorf("invalid sensor commit at line %d: %w", lineNumber, err) }
+			if err := validateJournalPayload(event); err != nil {
+				return nil, fmt.Errorf("invalid sensor commit at line %d: %w", lineNumber, err)
+			}
 			if event.Type != EventTypeSensorCommit {
 				return nil, fmt.Errorf("%w: sensor intent at sequence %d interrupted by %q at line %d", ErrUncommittedSensorTransaction, expected, event.Type, lineNumber)
 			}
@@ -515,21 +598,38 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		}
 	}
 	brainRuntime.mu.Lock()
-	if brainRuntime.supervised { brainRuntime.mu.Unlock(); return ErrManagedRuntimeAccess }
+	if brainRuntime.supervised {
+		brainRuntime.mu.Unlock()
+		return ErrManagedRuntimeAccess
+	}
 	// Validate the whole contract timeline before the first mutation. A v2
 	// command cannot bypass its migration, nor can serving silently revert.
 	migrated := brainRuntime.neuralWrittenGrounding
 	compositionEncoding := ""
-	if brainRuntime.composition != nil { compositionEncoding = brainRuntime.composition.Config.Version }
+	if brainRuntime.composition != nil {
+		compositionEncoding = brainRuntime.composition.Config.Version
+	}
 	for _, logged := range events {
-		if logged.CompositionEncoding != compositionEncoding { brainRuntime.mu.Unlock();return errors.New("composition contract changed without its migration") }
-		if logged.Type == EventTypeCompositionMigration { if compositionEncoding != "" { brainRuntime.mu.Unlock();return errors.New("duplicate composition migration") };compositionEncoding=logged.CompositionMigration.Plan.Config.Version }
+		if logged.CompositionEncoding != compositionEncoding {
+			brainRuntime.mu.Unlock()
+			return errors.New("composition contract changed without its migration")
+		}
+		if logged.Type == EventTypeCompositionMigration {
+			if compositionEncoding != "" {
+				brainRuntime.mu.Unlock()
+				return errors.New("duplicate composition migration")
+			}
+			compositionEncoding = logged.CompositionMigration.Plan.Config.Version
+		}
 		if (logged.SurfaceEncoding == knowledge.NeuralWrittenEncoding) != migrated {
 			brainRuntime.mu.Unlock()
 			return errors.New("written grounding contract changed without its migration")
 		}
 		if logged.Type == EventTypeWrittenGroundingMigration {
-			if migrated { brainRuntime.mu.Unlock(); return errors.New("duplicate written grounding migration") }
+			if migrated {
+				brainRuntime.mu.Unlock()
+				return errors.New("duplicate written grounding migration")
+			}
 			migrated = true
 		}
 	}
@@ -542,7 +642,9 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.mu.Lock()
 		brainRuntime.eventLog = originalLog
 		brainRuntime.surfaceEncoding = originalEncoding
-		if brainRuntime.neuralWrittenGrounding { brainRuntime.surfaceEncoding = knowledge.NeuralWrittenEncoding }
+		if brainRuntime.neuralWrittenGrounding {
+			brainRuntime.surfaceEncoding = knowledge.NeuralWrittenEncoding
+		}
 		brainRuntime.dynamicsEncoding = originalDynamics
 		brainRuntime.mu.Unlock()
 	}()
@@ -564,21 +666,37 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeCognitiveModel:
+			if _, err := brainRuntime.ApplyCognitiveModel(*logged.CognitiveModel, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeCompositionMigration:
 			brainRuntime.mu.Lock()
-			err := brainRuntime.applyCompositionMigrationLocked(*logged.CompositionMigration,logged.Timestamp)
+			err := brainRuntime.applyCompositionMigrationLocked(*logged.CompositionMigration, logged.Timestamp)
 			brainRuntime.mu.Unlock()
-			if err != nil { return err }
+			if err != nil {
+				return err
+			}
 		case EventTypeCompositionPerception:
- if _,err:=brainRuntime.ObserveCompositionInput(*logged.CompositionPerception,logged.Timestamp);err!=nil{return err}
- case EventTypeCompositionExposure:
-			if _,err:=brainRuntime.LearnComposition(*logged.CompositionExposure,logged.Timestamp);err!=nil{return err}
+			if _, err := brainRuntime.ObserveCompositionInput(*logged.CompositionPerception, logged.Timestamp); err != nil {
+				return err
+			}
+		case EventTypeCompositionExposure:
+			if _, err := brainRuntime.LearnComposition(*logged.CompositionExposure, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeSpellingExposure:
-			if _, err := brainRuntime.LearnSpelling(*logged.SpellingExposure, logged.Timestamp); err != nil { return err }
+			if _, err := brainRuntime.LearnSpelling(*logged.SpellingExposure, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeWrittenGroundingMigration:
-			if err := brainRuntime.replayWrittenGroundingMigration(*logged.WrittenGroundingMigration, logged.Timestamp); err != nil { return err }
+			if err := brainRuntime.replayWrittenGroundingMigration(*logged.WrittenGroundingMigration, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeSurfaceRebinding:
-			if err := brainRuntime.ApplyWrittenSurfaceRebinding(*logged.SurfaceRebinding, logged.Timestamp); err != nil { return err }
+			if err := brainRuntime.ApplyWrittenSurfaceRebinding(*logged.SurfaceRebinding, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeVectorGround:
 			if logged.Vector == nil {
 				return errors.New("numeric grounding record has no vector")
