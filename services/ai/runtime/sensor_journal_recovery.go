@@ -19,7 +19,9 @@ import (
 // Only call this method on the exclusive EventLog writer. Never call it while
 // BrainRuntime is processing events.
 func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
-	if l == nil { return "", errors.New("event log is not initialized") }
+	if l == nil {
+		return "", errors.New("event log is not initialized")
+	}
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.file == nil || l.lockFile == nil {
@@ -27,7 +29,9 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 	}
 	path := l.file.Name()
 	data, err := os.ReadFile(path)
-	if err != nil { return "", fmt.Errorf("read journal for recovery: %w", err) }
+	if err != nil {
+		return "", fmt.Errorf("read journal for recovery: %w", err)
+	}
 	if len(data) == 0 || data[len(data)-1] != '\n' {
 		return "", errors.New("journal does not end with a complete newline-terminated record")
 	}
@@ -39,7 +43,9 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 	if err := json.Unmarshal(lines[len(lines)-1], &tail); err != nil {
 		return "", fmt.Errorf("decode journal tail: %w", err)
 	}
-	if err := validateJournalPayload(tail); err != nil { return "", err }
+	if err := validateJournalPayload(tail); err != nil {
+		return "", err
+	}
 	if tail.Type != EventTypeSensorIntent || !supportedEventLogSchema(tail.SchemaVersion) ||
 		tail.BrainIdentity != BrainIdentity || tail.Event == nil ||
 		tail.Event.SensorObservation == nil || tail.Event.ID == "" ||
@@ -57,25 +63,48 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 	// including hashes, sequence continuity, and all prior commit pairs.
 	dir := filepath.Dir(path)
 	staged, err := os.CreateTemp(dir, ".horizon-journal-prefix-*.tmp")
-	if err != nil { return "", fmt.Errorf("stage journal prefix: %w", err) }
+	if err != nil {
+		return "", fmt.Errorf("stage journal prefix: %w", err)
+	}
 	stagedPath := staged.Name()
 	defer os.Remove(stagedPath)
-	if _, err := staged.Write(prefix); err != nil { staged.Close(); return "", err }
-	if err := staged.Close(); err != nil { return "", err }
+	if _, err := staged.Write(prefix); err != nil {
+		staged.Close()
+		return "", err
+	}
+	if err := staged.Close(); err != nil {
+		return "", err
+	}
 	events, err := ReadEventLog(stagedPath)
-	if err != nil { return "", fmt.Errorf("journal prefix is not fully committed: %w", err) }
+	if err != nil {
+		return "", fmt.Errorf("journal prefix is not fully committed: %w", err)
+	}
 	if tail.Sequence != uint64(len(events))+1 {
 		return "", fmt.Errorf("uncommitted intent sequence %d does not follow committed prefix %d", tail.Sequence, len(events))
 	}
 
 	backup, err := os.CreateTemp(dir, ".horizon-journal-recovery-*.backup")
-	if err != nil { return "", fmt.Errorf("create journal backup: %w", err) }
+	if err != nil {
+		return "", fmt.Errorf("create journal backup: %w", err)
+	}
 	backupPath := backup.Name()
 	backupValid := false
-	defer func() { if !backupValid { _ = os.Remove(backupPath) } }()
-	if _, err := backup.Write(data); err != nil { backup.Close(); return "", fmt.Errorf("write journal backup: %w", err) }
-	if err := backup.Sync(); err != nil { backup.Close(); return "", fmt.Errorf("sync journal backup: %w", err) }
-	if err := backup.Close(); err != nil { return "", fmt.Errorf("close journal backup: %w", err) }
+	defer func() {
+		if !backupValid {
+			_ = os.Remove(backupPath)
+		}
+	}()
+	if _, err := backup.Write(data); err != nil {
+		backup.Close()
+		return "", fmt.Errorf("write journal backup: %w", err)
+	}
+	if err := backup.Sync(); err != nil {
+		backup.Close()
+		return "", fmt.Errorf("sync journal backup: %w", err)
+	}
+	if err := backup.Close(); err != nil {
+		return "", fmt.Errorf("close journal backup: %w", err)
+	}
 	backupValid = true
 
 	if err := l.file.Truncate(int64(len(prefix))); err != nil {
@@ -87,5 +116,23 @@ func (l *EventLog) RecoverTrailingSensorIntent() (string, error) {
 	if _, err := ReadEventLog(path); err != nil {
 		return backupPath, fmt.Errorf("verify recovered journal (backup at %s): %w", backupPath, err)
 	}
+	// Existing explicit recovery is the sole authorized truncation path. After
+	// strict prefix verification, update the writer boundary without weakening
+	// rejection of external replacement or truncation.
+	opened, err := l.file.Stat()
+	if err != nil {
+		return backupPath, err
+	}
+	visible, err := os.Stat(path)
+	if err != nil {
+		return backupPath, err
+	}
+	if !os.SameFile(opened, visible) || opened.Size() != int64(len(prefix)) || visible.Size() != int64(len(prefix)) {
+		return backupPath, errors.New("journal changed during verified sensor recovery")
+	}
+	if err = syncJournalDirectory(dir); err != nil {
+		return backupPath, err
+	}
+	l.acknowledgedSize = opened.Size()
 	return backupPath, nil
 }

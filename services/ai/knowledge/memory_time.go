@@ -107,17 +107,21 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 // Canonical v3/checkpoint v10 authenticate the new clock; old state stays v2.
 func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 	var raw struct {
-		SchemaVersion int               `json:"schema_version"`
-		MemoryDecay   *MemoryDecayState `json:"memory_decay,omitempty"`
-		BrainState    struct {
+		SchemaVersion  int                  `json:"schema_version"`
+		MemoryDecay    *MemoryDecayState    `json:"memory_decay,omitempty"`
+		CognitiveModel *CognitiveModelState `json:"cognitive_model,omitempty"`
+		BrainState     struct {
 			MemoryDecay *MemoryDecayState `json:"memory_decay,omitempty"`
 		} `json:"brain_state"`
 	}
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	if raw.SchemaVersion > 3 {
+	if raw.SchemaVersion > 6 {
 		return errors.New("unsupported canonical brain version")
+	}
+	if raw.SchemaVersion >= 4 && (raw.CognitiveModel == nil || (raw.SchemaVersion == 4 && raw.CognitiveModel.Config.Version != CognitiveModelVersion) || (raw.SchemaVersion >= 5 && raw.CognitiveModel.Config.Version != CognitiveModelV2)) {
+		return errors.New("canonical v4 requires its cognitive model contract")
 	}
 	if raw.BrainState.MemoryDecay != nil {
 		return errors.New("legacy graph cannot carry physical memory state")
@@ -128,7 +132,7 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 		}
 		return nil
 	}
-	if !allowPhysical || raw.SchemaVersion != 3 {
+	if !allowPhysical || (raw.SchemaVersion != 3 && raw.SchemaVersion != 4 && raw.SchemaVersion != 5 && raw.SchemaVersion != 6) {
 		return errors.New("legacy checkpoint/brain cannot carry physical memory state")
 	}
 	if raw.MemoryDecay.Encoding != PhysicalMemoryDynamics || raw.MemoryDecay.AppliedAt.IsZero() {

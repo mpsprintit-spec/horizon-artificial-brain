@@ -93,6 +93,21 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 // checkpointLocked is also used to persist a private pre-migration backup
 // while the same owner lock protects its reference and journal receipt.
 func (r *BrainRuntime) checkpointLocked(path string) error {
+	if r.brain.HasCoordinatedV5() {
+		return r.checkpointVersionLocked(path, coordinatedCheckpointSchemaVersion)
+	}
+	if r.brain.HasPhase4V5() {
+		return r.checkpointVersionLocked(path, phase4CheckpointSchemaVersion)
+	}
+	if r.brain.HasPhase2V5() {
+		return r.checkpointVersionLocked(path, phase2CheckpointSchemaVersion)
+	}
+	if cfg, e := r.brain.CognitiveConfig(); e == nil {
+		if cfg.Version == knowledge.CognitiveModelV2 {
+			return r.checkpointVersionLocked(path, neuralMetaCheckpointSchemaVersion)
+		}
+		return r.checkpointVersionLocked(path, cognitiveModelCheckpointSchemaVersion)
+	}
 	if r.composition != nil {
 		return r.checkpointVersionLocked(path, compositionBrainSnapshotSchemaVersion)
 	}
@@ -100,6 +115,21 @@ func (r *BrainRuntime) checkpointLocked(path string) error {
 }
 
 func (r *BrainRuntime) checkpointVersionLocked(path string, version int) error {
+	if r.brain.HasCoordinatedV5() && version != coordinatedCheckpointSchemaVersion {
+		return errors.New("coordinated snapshot downgrade")
+	}
+	if r.brain.HasPhase4V5() && version != phase4CheckpointSchemaVersion && version != coordinatedCheckpointSchemaVersion {
+		return errors.New("Phase IV snapshot downgrade")
+	}
+	if r.brain.HasPhase2V5() && version < phase2CheckpointSchemaVersion {
+		return errors.New("experimental phase2 checkpoint downgraded")
+	}
+	if cfg, e := r.brain.CognitiveConfig(); e == nil && cfg.Version == knowledge.CognitiveModelV2 && version < neuralMetaCheckpointSchemaVersion {
+		return errors.New("V2 requires checkpoint schema 16")
+	}
+	if r.brain.HasCognitiveModel() && version < cognitiveModelCheckpointSchemaVersion {
+		return errors.New("cognitive model requires checkpoint schema 15")
+	}
 	if r.composition != nil && version < compositionBrainSnapshotSchemaVersion {
 		return errors.New("composition continuation requires checkpoint schema 14")
 	}
@@ -154,7 +184,7 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return fmt.Errorf("decode checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != compositionBrainSnapshotSchemaVersion && snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != coordinatedCheckpointSchemaVersion && snapshot.SchemaVersion != phase4CheckpointSchemaVersion && snapshot.SchemaVersion != phase2CheckpointSchemaVersion && snapshot.SchemaVersion != neuralMetaCheckpointSchemaVersion && snapshot.SchemaVersion != cognitiveModelCheckpointSchemaVersion && snapshot.SchemaVersion != compositionBrainSnapshotSchemaVersion && snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion && snapshot.SchemaVersion != neuralBrainSnapshotSchemaVersion && snapshot.SchemaVersion != priorBrainSnapshotSchemaVersion && snapshot.SchemaVersion != legacyBrainSnapshotSchemaVersion {
 		return fmt.Errorf("unsupported checkpoint schema version %d", snapshot.SchemaVersion)
 	}
 	if snapshot.SchemaVersion < neuralWrittenBrainSnapshotSchemaVersion && snapshot.NeuralWrittenGrounding {
@@ -162,6 +192,27 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	}
 	if snapshot.Composition != nil && (snapshot.SchemaVersion < compositionBrainSnapshotSchemaVersion || !snapshot.NeuralWrittenGrounding) {
 		return errors.New("composition requires checkpoint schema 14 and numeric written grounding")
+	}
+	var metaHeader struct {
+		Model *knowledge.CognitiveModelState `json:"cognitive_model"`
+	}
+	if err := json.Unmarshal(snapshot.Brain, &metaHeader); err != nil {
+		return err
+	}
+	if (metaHeader.Model != nil && metaHeader.Model.Phase2V5 != nil) != (snapshot.SchemaVersion == phase2CheckpointSchemaVersion || snapshot.SchemaVersion == phase4CheckpointSchemaVersion || snapshot.SchemaVersion == coordinatedCheckpointSchemaVersion) {
+		return errors.New("phase2 state requires checkpoint17; historical state keeps original schema")
+	}
+	if (metaHeader.Model != nil && metaHeader.Model.Phase4V5 != nil) != (snapshot.SchemaVersion == phase4CheckpointSchemaVersion || snapshot.SchemaVersion == coordinatedCheckpointSchemaVersion) {
+		return errors.New("Phase IV metadata requires snapshot18")
+	}
+	if metaHeader.Model != nil && metaHeader.Model.Config.Version == knowledge.CognitiveModelV2 && snapshot.SchemaVersion < neuralMetaCheckpointSchemaVersion {
+		return errors.New("V2 checkpoint downgraded")
+	}
+	if (metaHeader.Model != nil && metaHeader.Model.Phase4V5 != nil && metaHeader.Model.Phase4V5.Contract != "") != (snapshot.SchemaVersion == coordinatedCheckpointSchemaVersion) {
+		return errors.New("coordinated checkpoint19 required")
+	}
+	if err := knowledge.ValidateCognitiveModelState(snapshot.Brain, snapshot.SchemaVersion >= cognitiveModelCheckpointSchemaVersion); err != nil {
+		return err
 	}
 	if err := snapshot.Composition.validate(); err != nil {
 		return err
@@ -293,12 +344,13 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	r.lastObservationPopulation = append([]knowledge.NodeID(nil), snapshot.LastObservationPopulation...)
 	r.lastObservationAt = snapshot.LastObservationAt
 	r.processedEvents = cloneProcessedEventIndex(snapshot.ProcessedEvents)
+	r.cognitiveCommandIndex = nil
 	return nil
 }
 
 func checkpointChecksumForSchema(snapshot BrainSnapshot) (string, error) {
 	switch snapshot.SchemaVersion {
-	case compositionBrainSnapshotSchemaVersion:
+	case coordinatedCheckpointSchemaVersion, phase4CheckpointSchemaVersion, phase2CheckpointSchemaVersion, neuralMetaCheckpointSchemaVersion, cognitiveModelCheckpointSchemaVersion, compositionBrainSnapshotSchemaVersion:
 		return checkpointChecksumV9(snapshot)
 	case neuralWrittenBrainSnapshotSchemaVersion:
 		return checkpointChecksumV8(snapshot)
