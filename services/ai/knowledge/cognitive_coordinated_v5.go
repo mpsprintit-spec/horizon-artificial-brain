@@ -6,6 +6,7 @@ package knowledge
 import (
 	"errors"
 	"math"
+	"slices"
 	"time"
 )
 
@@ -147,8 +148,7 @@ func coordinatedFeaturesV5(s *CognitiveModelState, w, temps, h, x, joint []float
 	f[48] = float64(remaining) / float64(c.Horizon-1)
 	return f, comp, u
 }
-func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64, greedy bool) float64 {
-	mask := []bool{false, false, false, true, true, true, true, true}
+func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64, mask []bool, greedy bool) float64 {
 	_, p, _ := phase4Forward(s.Phase4V5, w, f, mask)
 	if greedy {
 		return u[maxIndex(p)-3]
@@ -167,12 +167,17 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 	}
 	last := trace[len(trace)-1]
 	n := *s.Config.NeuralMeta
+	terminalMask := append([]bool(nil), last.Mask...)
+	clear(terminalMask[:n.Computations])
+	if !slices.Contains(terminalMask, true) {
+		return out, errors.New("coordinated continuation requires a legal terminal action")
+	}
 	f, comp, u := coordinatedFeaturesV5(s, w, temps, h, x, joint, last.NeuralMeta.Remaining)
 	copy(f[45:48], last.NeuralMeta.Costs)
 	if drop.MUSE {
 		clear(f[32:42])
 	}
-	base := coordinatedTerminalValueV5(s, w, f, u, last.NeuralMeta.Greedy)
+	base := coordinatedTerminalValueV5(s, w, f, u, terminalMask, last.NeuralMeta.Greedy)
 	voc := make([]float64, 3)
 	// Finite Bayesian one-step metalevel value, with a realizable neural
 	// continuation instead of max utility of a different terminal selector.
@@ -196,6 +201,9 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 			next.Reset = false
 			meta := *last.NeuralMeta
 			meta.Remaining--
+			if meta.Remaining == 0 {
+				clear(next.Mask[:n.Computations])
+			}
 			next.NeuralMeta = &meta
 			tt := append(append([]CognitiveInput(nil), trace...), next)
 			hh, xx, jj, err := coordinatedStateV5(s, w, temps, tt)
@@ -207,7 +215,7 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 			if drop.MUSE {
 				clear(ff[32:42])
 			}
-			future += po * coordinatedTerminalValueV5(s, w, ff, uu, last.NeuralMeta.Greedy)
+			future += po * coordinatedTerminalValueV5(s, w, ff, uu, terminalMask, last.NeuralMeta.Greedy)
 		}
 		voc[op] = future - base - last.NeuralMeta.Costs[op]
 		f[42+op] = voc[op]

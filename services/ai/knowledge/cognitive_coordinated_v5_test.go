@@ -162,9 +162,52 @@ func TestCoordinatedV5ContinuationMatchesGreedyAndStochasticMode(t *testing.T) {
 	for a := 3; a < 8; a++ {
 		mean += pi[a] * u[a-3]
 	}
-	greedy := coordinatedTerminalValueV5(s, w, p.Features, u, true)
-	stochastic := coordinatedTerminalValueV5(s, w, p.Features, u, false)
+	greedy := coordinatedTerminalValueV5(s, w, p.Features, u, mask, true)
+	stochastic := coordinatedTerminalValueV5(s, w, p.Features, u, mask, false)
 	if greedy != u[maxIndex(pi)-3] || math.Abs(stochastic-mean) > 1e-14 || math.Abs(greedy-stochastic) < 1e-5 {
 		t.Fatal("continuation ignored execution mode", greedy, stochastic)
+	}
+}
+
+func TestCoordinatedV5ContinuationRespectsTerminalLegality(t *testing.T) {
+	b := coordinatedFixtureV5(t)
+	tr := coordinatedTraceV5()
+	tr[0].Mask = []bool{true, true, true, false, false, false, false, true}
+	for _, greedy := range []bool{true, false} {
+		tr[0].NeuralMeta.Greedy = greedy
+		p, err := b.PreviewCoordinatedV5(tr, Phase4DropV5{})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if math.Abs(p.ContinuationUtility-.35) > 1e-14 {
+			t.Fatalf("continuation chose an unavailable answer, greedy=%t utility=%g", greedy, p.ContinuationUtility)
+		}
+		for op, cost := range tr[0].NeuralMeta.Costs {
+			if math.Abs(p.VOC[op]+cost) > 1e-14 {
+				t.Fatalf("abstain-only continuation has no information gain, op=%d VOC=%g", op, p.VOC[op])
+			}
+		}
+	}
+}
+
+func TestCoordinatedV5OneComputationBudgetWithMultipleLegalChoices(t *testing.T) {
+	b := coordinatedFixtureV5(t)
+	tr := coordinatedTraceV5()
+	for a := 0; a < 3; a++ {
+		tr[0].Mask[a] = true
+	}
+	tr[0].NeuralMeta.Remaining = 1
+	p, err := b.PreviewCoordinatedV5(tr, Phase4DropV5{})
+	if err != nil {
+		t.Fatalf("one computation budget permits choosing among three operations: %v", err)
+	}
+	for a := 0; a < 3; a++ {
+		if !finiteNumber(p.VOC[a]) || p.Policy[a] <= 0 {
+			t.Fatalf("legal operation %d not valued", a)
+		}
+	}
+	clear(tr[0].Mask[3:])
+	if _, err := b.PreviewCoordinatedV5(tr, Phase4DropV5{}); err == nil {
+		t.Fatal("stop value is undefined without a legal terminal action")
 	}
 }
