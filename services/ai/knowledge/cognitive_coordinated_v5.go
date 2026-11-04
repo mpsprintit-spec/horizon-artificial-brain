@@ -12,6 +12,29 @@ import (
 
 const CoordinatedContractV5 = "v5-coordinated-payoff-continuation-v1"
 
+// CoordinatedExploreV5 is an opt-in stochastic behavior mode. The mode is
+// persisted in every observed trace so redo uses the same sampling objective.
+const CoordinatedExploreV5 = "recurrent-explore-v5"
+
+func coordinatedExplorationV5(x CognitiveInput) float64 {
+	if x.NeuralMeta != nil && x.NeuralMeta.Mode == CoordinatedExploreV5 {
+		return .25
+	}
+	return 0
+}
+
+func validateCoordinatedInputV5(x CognitiveInput, c CognitiveModelConfig) error {
+	if coordinatedExplorationV5(x) != 0 {
+		if x.NeuralMeta.Greedy {
+			return errors.New("V5 exploration requires stochastic behavior")
+		}
+		meta := *x.NeuralMeta
+		meta.Mode = "recurrent"
+		x.NeuralMeta = &meta
+	}
+	return x.Validate(c)
+}
+
 type CoordinatedPredictionV5 struct {
 	Phase4PredictionV5
 	Competence, TerminalUtility, VOC []float64
@@ -41,7 +64,7 @@ func coordinatedStateV5(s *CognitiveModelState, w, temps []float64, trace []Cogn
 	observed := map[int]int{}
 	var x []float64
 	for _, f := range trace {
-		if e := f.Validate(c); e != nil {
+		if e := validateCoordinatedInputV5(f, c); e != nil {
 			return nil, nil, nil, e
 		}
 		if f.Belief != nil || f.NeuralMeta == nil || f.NeuralMeta.Mode == "adapter-bmps" || f.NeuralMeta.Candidate != nil || f.Regulate {
@@ -148,11 +171,12 @@ func coordinatedFeaturesV5(s *CognitiveModelState, w, temps, h, x, joint []float
 	f[48] = float64(remaining) / float64(c.Horizon-1)
 	return f, comp, u
 }
-func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64, mask []bool, greedy bool) float64 {
+func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64, mask []bool, greedy bool, exploration float64) float64 {
 	_, p, _ := phase4Forward(s.Phase4V5, w, f, mask)
 	if greedy {
 		return u[maxIndex(p)-3]
 	}
+	p = phase4BehaviorPolicy(p, mask, exploration)
 	v := 0.
 	for a := 3; a < 8; a++ {
 		v += p[a] * u[a-3]
@@ -177,7 +201,8 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 	if drop.MUSE {
 		clear(f[32:42])
 	}
-	base := coordinatedTerminalValueV5(s, w, f, u, terminalMask, last.NeuralMeta.Greedy)
+	exploration := coordinatedExplorationV5(last)
+	base := coordinatedTerminalValueV5(s, w, f, u, terminalMask, last.NeuralMeta.Greedy, exploration)
 	voc := make([]float64, 3)
 	// Finite Bayesian one-step metalevel value, with a realizable neural
 	// continuation instead of max utility of a different terminal selector.
@@ -215,7 +240,7 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 			if drop.MUSE {
 				clear(ff[32:42])
 			}
-			future += po * coordinatedTerminalValueV5(s, w, ff, uu, terminalMask, last.NeuralMeta.Greedy)
+			future += po * coordinatedTerminalValueV5(s, w, ff, uu, terminalMask, last.NeuralMeta.Greedy, exploration)
 		}
 		voc[op] = future - base - last.NeuralMeta.Costs[op]
 		f[42+op] = voc[op]
@@ -224,6 +249,7 @@ func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []Co
 		clear(f[42:45])
 	} // old actor/critic slots49:58 intentionally unused
 	_, pi, value := phase4Forward(s.Phase4V5, w, f, last.Mask)
+	pi = phase4BehaviorPolicy(pi, last.Mask, exploration)
 	action := samplePolicy(pi, last.Draw)
 	if last.NeuralMeta.Greedy {
 		action = maxIndex(pi)
@@ -331,7 +357,7 @@ func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b Co
 				return errors.New("missing observed prefix")
 			}
 			last := tr[len(tr)-1]
-			if e := last.Validate(s.Config); e != nil {
+			if e := validateCoordinatedInputV5(last, s.Config); e != nil {
 				return e
 			}
 			if last.NeuralMeta.Greedy {
@@ -418,12 +444,17 @@ func (k *KnowledgeBase) LearnCoordinatedV5(b CoordinatedBatchV5, at time.Time) (
 	}
 	p := s.Phase4V5
 	policy := Phase4BatchV5{}
-	for _, ep := range b.Episodes {
+	exploration := make([][]float64, len(b.Episodes))
+	for i, ep := range b.Episodes {
 		policy.Episodes = append(policy.Episodes, Phase4EpisodeV5{Frames: ep.Frames})
+		exploration[i] = make([]float64, len(ep.Frames))
+		for t, trace := range ep.Traces {
+			exploration[i][t] = coordinatedExplorationV5(trace[len(trace)-1])
+		}
 	}
 	a, r := phase4Targets(p, w, policy)
 	var g []float64
-	out.Policy, g = phase4Objective(p, w, policy, a, r)
+	out.Policy, g = phase4ExplorationObjective(p, w, policy, a, r, exploration)
 	assessment, reward, mg, e := coordinatedMUSEObjectiveV5(s, w, temps, b)
 	if e != nil {
 		return out, e

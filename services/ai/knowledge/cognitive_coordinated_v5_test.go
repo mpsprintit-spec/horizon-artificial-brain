@@ -162,8 +162,8 @@ func TestCoordinatedV5ContinuationMatchesGreedyAndStochasticMode(t *testing.T) {
 	for a := 3; a < 8; a++ {
 		mean += pi[a] * u[a-3]
 	}
-	greedy := coordinatedTerminalValueV5(s, w, p.Features, u, mask, true)
-	stochastic := coordinatedTerminalValueV5(s, w, p.Features, u, mask, false)
+	greedy := coordinatedTerminalValueV5(s, w, p.Features, u, mask, true, 0)
+	stochastic := coordinatedTerminalValueV5(s, w, p.Features, u, mask, false, 0)
 	if greedy != u[maxIndex(pi)-3] || math.Abs(stochastic-mean) > 1e-14 || math.Abs(greedy-stochastic) < 1e-5 {
 		t.Fatal("continuation ignored execution mode", greedy, stochastic)
 	}
@@ -209,5 +209,51 @@ func TestCoordinatedV5OneComputationBudgetWithMultipleLegalChoices(t *testing.T)
 	clear(tr[0].Mask[3:])
 	if _, err := b.PreviewCoordinatedV5(tr, Phase4DropV5{}); err == nil {
 		t.Fatal("stop value is undefined without a legal terminal action")
+	}
+}
+
+func TestCoordinatedV5ExplorationRespectsMaskAndContinuation(t *testing.T) {
+	b := coordinatedFixtureV5(t)
+	tr := coordinatedTraceV5()
+	tr[0].Mask[0] = true
+	tr[0].NeuralMeta.Mode = CoordinatedExploreV5
+	p, err := b.PreviewCoordinatedV5(tr, Phase4DropV5{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := b.BrainState.CognitiveModel
+	w, _ := b.CognitiveParameters()
+	_, native, _ := phase4Forward(s.Phase4V5, w, p.Features, tr[0].Mask)
+	total := 0.
+	for a, allowed := range tr[0].Mask {
+		want := 0.
+		if allowed {
+			want = .75*native[a] + .25/6
+		}
+		if math.Abs(p.Policy[a]-want) > 1e-14 {
+			t.Fatalf("action %d mixed probability %g, want %g", a, p.Policy[a], want)
+		}
+		total += p.Policy[a]
+	}
+	if math.Abs(total-1) > 1e-14 || p.Action != samplePolicy(p.Policy, tr[0].Draw) {
+		t.Fatal("invalid behavior policy")
+	}
+	stop := append([]float64(nil), p.Features...)
+	clear(stop[42:45])
+	terminal := []bool{false, false, false, true, true, true, true, true}
+	_, pi, _ := phase4Forward(s.Phase4V5, w, stop, terminal)
+	want := 0.
+	for a := 3; a < 8; a++ {
+		want += (.75*pi[a] + .25/5) * p.TerminalUtility[a-3]
+	}
+	if math.Abs(want-p.ContinuationUtility) > 1e-14 {
+		t.Fatal("BMPS did not use mixed stop policy")
+	}
+	if tr[0].Validate(s.Config) == nil {
+		t.Fatal("exploration mode leaked into legacy input validation")
+	}
+	tr[0].NeuralMeta.Greedy = true
+	if _, err := b.PreviewCoordinatedV5(tr, Phase4DropV5{}); err == nil {
+		t.Fatal("greedy exploration was accepted")
 	}
 }

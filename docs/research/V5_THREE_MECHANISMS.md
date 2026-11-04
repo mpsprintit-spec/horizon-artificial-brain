@@ -88,3 +88,24 @@ in experiment_test.go seals new splits and tests one candidate and one historica
 control. Scientific success additionally needs at least+0.02 realized net return
 versus abstain and a relevant control, with paired uncertainty excluding zero.
 Technical integration alone must not be described as evidence of that benefit.
+
+## Phase V exploratory training behavior
+
+Coordinated V5 accepts the explicit stochastic mode `recurrent-explore-v5`.
+For each state, the sampling policy is
+`q = 0.75 * pi + 0.25 * Uniform(legal actions)`. Illegal actions have zero
+mass. BMPS uses the same mixture for its pre-VOC stop continuation with the
+terminal mask. Standard recurrent and greedy calls use the original policy.
+
+The on-policy score is differentiated through the mixture:
+`grad log q(a) = 0.75*pi(a)/q(a) * grad log pi(a)`. Critic targets use the
+actual net return, entropy regularizes pi, and MUSE receives only the chosen
+terminal outcome. This optimizes the exploratory behavior objective during
+training. Greedy evaluation still tests the learned policy separately.
+
+The existing trace mode field records this behavior in WAL13. A historical
+reader rejects mixed trace replay as an unknown mode. Current readers retain
+historical redo semantics and checkpoint19 uses the same parameter layout.
+Phase V uses this opt-in mode to test an action visitation hypothesis.
+Greater exploration or better calibration alone does not pass the net-return
+gate.

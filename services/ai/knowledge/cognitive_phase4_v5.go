@@ -347,6 +347,30 @@ func (k *KnowledgeBase) ValidatePhase4BatchV5(b Phase4BatchV5) error {
 // Returns and advantages are detached exactly as in native recurrent actor-critic.
 // Frozen 58dim feature tensors receive no gradient; only these six new N tensors do.
 func phase4Objective(p *Phase4StateV5, w []float64, b Phase4BatchV5, advantages, returns [][]float64) (Phase4LearningV5, []float64) {
+	return phase4ExplorationObjective(p, w, b, advantages, returns, nil)
+}
+
+func phase4BehaviorPolicy(prob []float64, mask []bool, exploration float64) []float64 {
+	if exploration == 0 {
+		return prob
+	}
+	legal := 0
+	for _, allowed := range mask {
+		if allowed {
+			legal++
+		}
+	}
+	floor := exploration / float64(legal)
+	behavior := make([]float64, len(prob))
+	for a, allowed := range mask {
+		if allowed {
+			behavior[a] = (1-exploration)*prob[a] + floor
+		}
+	}
+	return behavior
+}
+
+func phase4ExplorationObjective(p *Phase4StateV5, w []float64, b Phase4BatchV5, advantages, returns, exploration [][]float64) (Phase4LearningV5, []float64) {
 	st := Phase4LearningV5{Episodes: len(b.Episodes), AdvantageMin: math.Inf(1), AdvantageMax: math.Inf(-1)}
 	g := make([]float64, len(w))
 	norm := 1. / float64(len(b.Episodes))
@@ -355,13 +379,20 @@ func phase4Objective(p *Phase4StateV5, w []float64, b Phase4BatchV5, advantages,
 		for t, f := range ep.Frames {
 			h, prob, v := phase4Forward(p, w, f.Features, f.Mask)
 			adv, ret := advantages[ei][t], returns[ei][t]
+			behavior, policyAdv := prob, adv
+			if exploration != nil && exploration[ei][t] != 0 {
+				eps := exploration[ei][t]
+				behavior = phase4BehaviorPolicy(prob, f.Mask, eps)
+				// Differentiate log q for q=(1-eps)*pi+eps*uniform.
+				policyAdv *= (1 - eps) * prob[f.Action] / behavior[f.Action]
+			}
 			st.Frames++
 			advSum += adv
 			advSq += adv * adv
 			st.AdvantageMin = math.Min(st.AdvantageMin, adv)
 			st.AdvantageMax = math.Max(st.AdvantageMax, adv)
 			st.MeanReturn += ret
-			st.Policy -= norm * adv * math.Log(math.Max(1e-15, prob[f.Action]))
+			st.Policy -= norm * adv * math.Log(math.Max(1e-15, behavior[f.Action]))
 			el := 0.
 			for _, q := range prob {
 				if q > 0 {
@@ -372,9 +403,9 @@ func phase4Objective(p *Phase4StateV5, w []float64, b Phase4BatchV5, advantages,
 			dy := make([]float64, 8)
 			for a, q := range prob {
 				if q > 0 {
-					dy[a] = norm * (adv*q + p.Spec.EntropyWeight*q*(math.Log(q)-el))
+					dy[a] = norm * (policyAdv*q + p.Spec.EntropyWeight*q*(math.Log(q)-el))
 					if a == f.Action {
-						dy[a] -= norm * adv
+						dy[a] -= norm * policyAdv
 					}
 				}
 			}
