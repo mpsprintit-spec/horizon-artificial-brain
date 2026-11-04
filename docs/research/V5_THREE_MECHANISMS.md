@@ -35,9 +35,14 @@ E[payout of current terminal policy after the observed outcome] - current
 terminal-policy payout - cost. It is neither perfect-information value nor an
 optimal-controller oracle. Full non-myopic BMPS mixture/GP search remains in the
 historical research APIs; it is not claimed validated for this coordinated route.
-The terminal continuation masks operations, preserving all answers and abstain.
+The terminal continuation masks operations and preserves the caller's legal
+terminal options. It requires at least one legal terminal option. Exhausting
+the budget in a simulated branch disables every computation in that branch.
 It uses argmax in greedy mode and the actor probability mixture in stochastic
 mode; no stochastic continuation is silently substituted during greedy evaluation.
+Continuation uses the pre-VOC features to avoid recursive evaluation. The final
+actor receives the computed VOC, so the two conditional terminal distributions
+can differ. Treat that difference separately from the legality of either policy.
 An informative outcome can still be unprofitable if this neural policy cannot use
 it. Neural actor probabilities determine the final legal action; BMPS never
 replaces that action. MUSE self-regulation is through these learned payoff and
