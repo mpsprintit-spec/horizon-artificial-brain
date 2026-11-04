@@ -109,3 +109,28 @@ historical redo semantics and checkpoint19 uses the same parameter layout.
 Phase V uses this opt-in mode to test an action visitation hypothesis.
 Greater exploration or better calibration alone does not pass the net-return
 gate.
+
+## Phase VI target-policy credit
+
+The optional `recurrent-target-v5` mode samples the Phase V mixture q on legal
+actions. It learns from complete stochastic episodes. The runtime validates
+each recorded behavior probability and reconstructs ordinary recurrent target
+features, including its unmixed BMPS continuation, from the same observations.
+
+For rho_t = pi(a_t|h_t)/q(a_t|h_t), the detached return is
+G_t = r_t + rho_(t+1) G_(t+1), and the detached state-action weight is
+W_t = product(rho_i, i <= t). The actor uses W_t (G_t - V_t) grad log pi_t.
+The critic fits G_t with W_t. Entropy of pi uses W_(t-1) as a detached
+visitation weight. This is a local entropy regularizer. It is not a gradient
+through the occupancy distribution of an entropy-augmented objective. The
+reward score is exact in expectation for stochastic pi with fixed features,
+prior to finite-sample optimization and existing gradient clipping. Greedy
+performance requires separate measurement.
+
+The MUSE loss still uses only the selected terminal outcome, with the same
+ownership and optimizer. Features and estimator ratios do not backpropagate
+through the frozen recurrent substrate or the BMPS search. Mixed target and
+legacy objectives in one batch are rejected. WAL13 records the new trace
+mode and checkpoint19 keeps the established parameter layout. Readers that
+do not support the new mode cannot apply its suffix. Existing modes retain
+their behavior, and the new mode is opt-in.

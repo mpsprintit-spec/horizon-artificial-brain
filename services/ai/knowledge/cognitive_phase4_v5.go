@@ -371,6 +371,14 @@ func phase4BehaviorPolicy(prob []float64, mask []bool, exploration float64) []fl
 }
 
 func phase4ExplorationObjective(p *Phase4StateV5, w []float64, b Phase4BatchV5, advantages, returns, exploration [][]float64) (Phase4LearningV5, []float64) {
+	return phase4WeightedObjective(p, w, b, advantages, returns, exploration, nil)
+}
+
+type phase4VisitationWeights struct {
+	before, through [][]float64
+}
+
+func phase4WeightedObjective(p *Phase4StateV5, w []float64, b Phase4BatchV5, advantages, returns, exploration [][]float64, weights *phase4VisitationWeights) (Phase4LearningV5, []float64) {
 	st := Phase4LearningV5{Episodes: len(b.Episodes), AdvantageMin: math.Inf(1), AdvantageMax: math.Inf(-1)}
 	g := make([]float64, len(w))
 	norm := 1. / float64(len(b.Episodes))
@@ -379,6 +387,10 @@ func phase4ExplorationObjective(p *Phase4StateV5, w []float64, b Phase4BatchV5, 
 		for t, f := range ep.Frames {
 			h, prob, v := phase4Forward(p, w, f.Features, f.Mask)
 			adv, ret := advantages[ei][t], returns[ei][t]
+			weight, entropyWeight := 1., 1.
+			if weights != nil {
+				weight, entropyWeight = weights.through[ei][t], weights.before[ei][t]
+			}
 			behavior, policyAdv := prob, adv
 			if exploration != nil && exploration[ei][t] != 0 {
 				eps := exploration[ei][t]
@@ -386,24 +398,25 @@ func phase4ExplorationObjective(p *Phase4StateV5, w []float64, b Phase4BatchV5, 
 				// Differentiate log q for q=(1-eps)*pi+eps*uniform.
 				policyAdv *= (1 - eps) * prob[f.Action] / behavior[f.Action]
 			}
+			policyAdv *= weight
 			st.Frames++
 			advSum += adv
 			advSq += adv * adv
 			st.AdvantageMin = math.Min(st.AdvantageMin, adv)
 			st.AdvantageMax = math.Max(st.AdvantageMax, adv)
 			st.MeanReturn += ret
-			st.Policy -= norm * adv * math.Log(math.Max(1e-15, behavior[f.Action]))
+			st.Policy -= norm * weight * adv * math.Log(math.Max(1e-15, behavior[f.Action]))
 			el := 0.
 			for _, q := range prob {
 				if q > 0 {
 					el += q * math.Log(q)
 				}
 			}
-			st.Entropy += norm * el
+			st.Entropy += norm * entropyWeight * el
 			dy := make([]float64, 8)
 			for a, q := range prob {
 				if q > 0 {
-					dy[a] = norm * (policyAdv*q + p.Spec.EntropyWeight*q*(math.Log(q)-el))
+					dy[a] = norm * (policyAdv*q + entropyWeight*p.Spec.EntropyWeight*q*(math.Log(q)-el))
 					if a == f.Action {
 						dy[a] -= norm * policyAdv
 					}
@@ -412,8 +425,8 @@ func phase4ExplorationObjective(p *Phase4StateV5, w []float64, b Phase4BatchV5, 
 			dh := make([]float64, 16)
 			cognitiveLinearBackward(g, dh, w, h, dy, p.Actor, p.ActorBias)
 			delta := v - ret
-			st.Value += norm * .5 * delta * delta
-			cognitiveLinearBackward(g, dh, w, h, []float64{norm * p.Spec.ValueWeight * delta}, p.Critic, p.CriticBias)
+			st.Value += norm * weight * .5 * delta * delta
+			cognitiveLinearBackward(g, dh, w, h, []float64{norm * weight * p.Spec.ValueWeight * delta}, p.Critic, p.CriticBias)
 			for j := range dh {
 				dh[j] *= 1 - h[j]*h[j]
 			}
