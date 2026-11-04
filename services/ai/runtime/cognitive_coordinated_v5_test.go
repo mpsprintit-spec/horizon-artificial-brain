@@ -12,7 +12,12 @@ import (
 
 func coordinatedRuntimeBatch(t *testing.T, rt *BrainRuntime) k.CoordinatedBatchV5 {
 	t.Helper()
-	x := k.CognitiveInput{Features: make([]float64, 28), Mask: []bool{false, false, false, true, true, true, true, true}, Reset: true, Draw: .1, NeuralMeta: &k.NeuralMetaInput{Mode: "recurrent", Costs: []float64{.025, .03, .035}, Remaining: 3}}
+	return coordinatedRuntimeBatchWithMode(t, rt, "recurrent")
+}
+
+func coordinatedRuntimeBatchWithMode(t *testing.T, rt *BrainRuntime, mode string) k.CoordinatedBatchV5 {
+	t.Helper()
+	x := k.CognitiveInput{Features: make([]float64, 28), Mask: []bool{false, false, false, true, true, true, true, true}, Reset: true, Draw: .1, NeuralMeta: &k.NeuralMetaInput{Mode: mode, Costs: []float64{.025, .03, .035}, Remaining: 3}}
 	x.Features[0] = 1
 	tr := []k.CognitiveInput{x}
 	p, e := rt.PreviewCoordinatedV5(tr, k.Phase4DropV5{})
@@ -25,13 +30,22 @@ func coordinatedRuntimeBatch(t *testing.T, rt *BrainRuntime) k.CoordinatedBatchV
 	return b
 }
 func TestCoordinatedV5Schema19Schema13ReplayGuardsAndRestart(t *testing.T) {
+	testCoordinatedV5Replay(t, "recurrent")
+}
+
+func TestCoordinatedV5ExplorationJournalReplayAndRestart(t *testing.T) {
+	testCoordinatedV5Replay(t, k.CoordinatedExploreV5)
+}
+
+func testCoordinatedV5Replay(t *testing.T, mode string) {
+	t.Helper()
 	rt, wal, base := phase4Fixture(t)
 	spec := k.Phase4SpecV5{Version: k.Phase4VersionV5, Seed: 101, LearningRate: .003, EntropyWeight: .08, ValueWeight: .2}
 	at := time.Unix(2200400000, 0)
 	if _, e := rt.ApplyCognitiveModel(CognitiveModelCommand{ID: "head", Phase4Init: &spec}, at); e != nil {
 		t.Fatal(e)
 	}
-	b := coordinatedRuntimeBatch(t, rt)
+	b := coordinatedRuntimeBatchWithMode(t, rt, mode)
 	cmd := CognitiveModelCommand{ID: "learn-coordinated", Coordinated: &b}
 	result, e := rt.ApplyCognitiveModel(cmd, at.Add(time.Second))
 	if e != nil {
@@ -49,7 +63,7 @@ func TestCoordinatedV5Schema19Schema13ReplayGuardsAndRestart(t *testing.T) {
 		t.Fatal(e)
 	}
 	last := events[len(events)-1]
-	if last.SchemaVersion != 13 {
+	if last.SchemaVersion != 13 || last.CognitiveModel.Coordinated.Episodes[0].Traces[0][0].NeuralMeta.Mode != mode {
 		t.Fatal("incorrect journal schema")
 	}
 	last.SchemaVersion = 11
