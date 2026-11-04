@@ -37,6 +37,10 @@ func TestCoordinatedV5ExplorationJournalReplayAndRestart(t *testing.T) {
 	testCoordinatedV5Replay(t, k.CoordinatedExploreV5)
 }
 
+func TestCoordinatedV5TargetJournalReplayAndRestart(t *testing.T) {
+	testCoordinatedV5Replay(t, k.CoordinatedTargetV5)
+}
+
 func testCoordinatedV5Replay(t *testing.T, mode string) {
 	t.Helper()
 	rt, wal, base := phase4Fixture(t)

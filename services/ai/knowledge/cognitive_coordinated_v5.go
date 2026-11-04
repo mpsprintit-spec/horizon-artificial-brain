@@ -16,8 +16,12 @@ const CoordinatedContractV5 = "v5-coordinated-payoff-continuation-v1"
 // persisted in every observed trace so redo uses the same sampling objective.
 const CoordinatedExploreV5 = "recurrent-explore-v5"
 
+// CoordinatedTargetV5 samples the same behavior as CoordinatedExploreV5,
+// but trains the ordinary recurrent policy using recorded propensities.
+const CoordinatedTargetV5 = "recurrent-target-v5"
+
 func coordinatedExplorationV5(x CognitiveInput) float64 {
-	if x.NeuralMeta != nil && x.NeuralMeta.Mode == CoordinatedExploreV5 {
+	if x.NeuralMeta != nil && (x.NeuralMeta.Mode == CoordinatedExploreV5 || x.NeuralMeta.Mode == CoordinatedTargetV5) {
 		return .25
 	}
 	return 0
@@ -347,7 +351,8 @@ func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b Co
 	if b.Evidence.Digest != CognitiveDigest(b.Episodes) {
 		return errors.New("coordinated evidence mismatch")
 	}
-	for _, ep := range b.Episodes {
+	target := false
+	for ei, ep := range b.Episodes {
 		if len(ep.Frames) == 0 || len(ep.Frames) > 4 || len(ep.Traces) != len(ep.Frames) {
 			return errors.New("coordinated trajectory shape")
 		}
@@ -361,7 +366,17 @@ func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b Co
 				return e
 			}
 			if last.NeuralMeta.Greedy {
-				return errors.New("greedy traces cannot train on-policy")
+				return errors.New("greedy traces cannot train the stochastic objective")
+			}
+			isTarget := last.NeuralMeta.Mode == CoordinatedTargetV5
+			if ei == 0 && t == 0 {
+				target = isTarget
+			}
+			if isTarget != target || target && t == 0 && len(tr) != 1 {
+				return errors.New("target V5 requires complete episodes and one batch objective")
+			}
+			if target && (!finiteNumber(f.BehaviorProbability) || f.BehaviorProbability <= 0) {
+				return errors.New("target V5 requires a finite positive behavior propensity")
 			}
 			if t > 0 {
 				prior := ep.Traces[t-1]
@@ -452,9 +467,19 @@ func (k *KnowledgeBase) LearnCoordinatedV5(b CoordinatedBatchV5, at time.Time) (
 			exploration[i][t] = coordinatedExplorationV5(trace[len(trace)-1])
 		}
 	}
-	a, r := phase4Targets(p, w, policy)
 	var g []float64
-	out.Policy, g = phase4ExplorationObjective(p, w, policy, a, r, exploration)
+	first := b.Episodes[0].Traces[0]
+	if first[len(first)-1].NeuralMeta.Mode == CoordinatedTargetV5 {
+		policy, err := coordinatedTargetFramesV5(s, w, temps, b)
+		if err != nil {
+			return out, err
+		}
+		a, r, weights := phase4ImportanceTargets(p, w, policy)
+		out.Policy, g = phase4WeightedObjective(p, w, policy, a, r, nil, &weights)
+	} else {
+		a, r := phase4Targets(p, w, policy)
+		out.Policy, g = phase4ExplorationObjective(p, w, policy, a, r, exploration)
+	}
 	assessment, reward, mg, e := coordinatedMUSEObjectiveV5(s, w, temps, b)
 	if e != nil {
 		return out, e
