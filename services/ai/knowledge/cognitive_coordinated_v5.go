@@ -49,6 +49,7 @@ type CoordinatedEpisodeV5 struct {
 	Frames []Phase4FrameV5
 }
 type CoordinatedBatchV5 struct {
+	TerminalUtility *TerminalUtilityBatchV5 `json:",omitempty"`
 	Episodes       []CoordinatedEpisodeV5
 	ParametersHash string
 	Evidence       CognitiveEvidence
@@ -342,6 +343,9 @@ func coordinatedMUSEObjectiveV5(s *CognitiveModelState, w, temps []float64, b Co
 	return assessment, reward, g, nil
 }
 func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b CoordinatedBatchV5) error {
+	if b.TerminalUtility != nil {
+		return validateTerminalUtilityV5(s, w, temps, b)
+	}
 	if s == nil || s.Phase4V5 == nil || len(b.Episodes) == 0 || len(b.Episodes) > 128 || CognitiveDigest(w) != b.ParametersHash {
 		return errors.New("invalid/stale coordinated batch")
 	}
@@ -456,6 +460,9 @@ func (k *KnowledgeBase) LearnCoordinatedV5(b CoordinatedBatchV5, at time.Time) (
 	}
 	if e = validateCoordinatedBatchV5(s, w, temps, b); e != nil {
 		return out, e
+	}
+	if b.TerminalUtility != nil {
+		return k.learnTerminalUtilityV5(s, w, temps, b, at)
 	}
 	p := s.Phase4V5
 	policy := Phase4BatchV5{}
