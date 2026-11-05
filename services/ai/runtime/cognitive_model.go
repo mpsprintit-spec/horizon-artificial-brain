@@ -198,7 +198,7 @@ func (r *BrainRuntime) ApplyCognitiveModel(command CognitiveModelCommand, at tim
 			return out, err
 		}
 	}
-	if r.brain.HasPhase4V5() && c.Phase4Training == nil && c.Coordinated == nil {
+	if r.brain.HasPhase4V5() && c.Phase4Training == nil && c.Coordinated == nil && !(r.brain.HasCoordinatedV5() && len(c.Search) > 0) {
 		return out, errors.New("Phase IV frozen substrate requires explicit metapolicy update")
 	}
 	if c.Phase4Init != nil {

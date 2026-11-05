@@ -28,6 +28,11 @@ func coordinatedExplorationV5(x CognitiveInput) float64 {
 }
 
 func validateCoordinatedInputV5(x CognitiveInput, c CognitiveModelConfig) error {
+	if x.NeuralMeta != nil && x.NeuralMeta.Mode == CoordinatedFidelityV5 {
+		meta := *x.NeuralMeta
+		meta.Mode = "recurrent"
+		x.NeuralMeta = &meta
+	}
 	if coordinatedExplorationV5(x) != 0 {
 		if x.NeuralMeta.Greedy {
 			return errors.New("V5 exploration requires stochastic behavior")
@@ -41,6 +46,8 @@ func validateCoordinatedInputV5(x CognitiveInput, c CognitiveModelConfig) error 
 
 type CoordinatedPredictionV5 struct {
 	Phase4PredictionV5
+	BMPS                             *BMPSDecision `json:",omitempty"`
+	PredictedJoint                   []float64     `json:",omitempty"`
 	Competence, TerminalUtility, VOC []float64
 	ContinuationUtility              float64
 }
@@ -49,15 +56,18 @@ type CoordinatedEpisodeV5 struct {
 	Frames []Phase4FrameV5
 }
 type CoordinatedBatchV5 struct {
+	Fidelity        *FidelityLearningV5     `json:",omitempty"`
 	TerminalUtility *TerminalUtilityBatchV5 `json:",omitempty"`
-	Episodes       []CoordinatedEpisodeV5
-	ParametersHash string
-	Evidence       CognitiveEvidence
+	Episodes        []CoordinatedEpisodeV5
+	ParametersHash  string
+	Evidence        CognitiveEvidence
 }
 type CoordinatedLearningV5 struct {
 	Policy                                       Phase4LearningV5
 	AssessmentLoss, RewardLoss, MUSEGradientNorm float64
 	UpdatedHead, UpdatedMUSE                     int
+	UpdatedRecurrent                             int
+	RecurrentGradientNorm                        float64
 }
 
 func coordinatedStateV5(s *CognitiveModelState, w, temps []float64, trace []CognitiveInput) ([]float64, []float64, []float64, error) {
@@ -189,6 +199,9 @@ func coordinatedTerminalValueV5(s *CognitiveModelState, w, f, u []float64, mask 
 	return v
 }
 func coordinatedForwardV5(s *CognitiveModelState, w, temps []float64, trace []CognitiveInput, drop Phase4DropV5) (CoordinatedPredictionV5, error) {
+	if len(trace) > 0 && trace[len(trace)-1].NeuralMeta != nil && trace[len(trace)-1].NeuralMeta.Mode == CoordinatedFidelityV5 {
+		return fidelityForwardV5(s, w, temps, trace, drop)
+	}
 	out := CoordinatedPredictionV5{}
 	h, x, joint, e := coordinatedStateV5(s, w, temps, trace)
 	if e != nil {
@@ -343,6 +356,9 @@ func coordinatedMUSEObjectiveV5(s *CognitiveModelState, w, temps []float64, b Co
 	return assessment, reward, g, nil
 }
 func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b CoordinatedBatchV5) error {
+	if err := validateFidelityContractV5(s, b); err != nil {
+		return err
+	}
 	if b.TerminalUtility != nil {
 		return validateTerminalUtilityV5(s, w, temps, b)
 	}
@@ -352,7 +368,7 @@ func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b Co
 	if e := b.Evidence.Validate(); e != nil {
 		return e
 	}
-	if b.Evidence.Digest != CognitiveDigest(b.Episodes) {
+	if b.Evidence.Digest != CoordinatedEvidenceDigestV5(b) {
 		return errors.New("coordinated evidence mismatch")
 	}
 	target := false
@@ -417,6 +433,10 @@ func validateCoordinatedBatchV5(s *CognitiveModelState, w, temps []float64, b Co
 			if e != nil {
 				return e
 			}
+			if b.Fidelity != nil && b.Fidelity.AssessmentOnly {
+				p.Policy = FidelityAssessmentPolicyV5(p.Policy, last.Mask)
+				p.Action = samplePolicy(p.Policy, last.Draw)
+			}
 			if CognitiveDigest(p.Features) != CognitiveDigest(f.Features) || p.Action != f.Action || math.Abs(p.Policy[f.Action]-f.BehaviorProbability) > 1e-12 || math.Abs(p.Value-f.BehaviorValue) > 1e-12 || f.Draw != last.Draw {
 				return errors.New("stale behavior/features")
 			}
@@ -460,6 +480,9 @@ func (k *KnowledgeBase) LearnCoordinatedV5(b CoordinatedBatchV5, at time.Time) (
 	}
 	if e = validateCoordinatedBatchV5(s, w, temps, b); e != nil {
 		return out, e
+	}
+	if b.Fidelity != nil {
+		return k.learnFidelityV5(s, w, temps, b, at)
 	}
 	if b.TerminalUtility != nil {
 		return k.learnTerminalUtilityV5(s, w, temps, b, at)
