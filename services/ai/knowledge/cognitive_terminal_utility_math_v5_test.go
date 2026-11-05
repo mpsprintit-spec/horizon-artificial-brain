@@ -66,3 +66,40 @@ func TestTerminalUtilityV5AllHeadGradientsAndPropensityExpectation(t *testing.T)
 		})
 	}
 }
+
+func TestTerminalUtilityV5RareActionLogscoreGradient(t *testing.T) {
+	p := &Phase4StateV5{Spec: Phase4SpecV5{EntropyWeight: .02},
+		BaseParameters: 7, WI: CognitiveTensor{7, 16, 58}, BI: CognitiveTensor{935, 16, 1},
+		Actor: CognitiveTensor{951, 8, 16}, ActorBias: CognitiveTensor{1079, 8, 1}, Critic: CognitiveTensor{1087, 1, 16}, CriticBias: CognitiveTensor{1103, 1, 1}}
+	w := make([]float64, 1104)
+	for i := 0; i < 16; i++ {
+		w[p.BI.Offset+i] = 7
+		w[p.Actor.Offset+3*16+i] = -7
+		w[p.Actor.Offset+7*16+i] = 7
+	}
+	x := make([]float64, 58)
+	_, probability, _ := phase4Forward(p, w, x, []bool{false, false, false, true, true, true, true, true})
+	if probability[3] <= 0 || probability[3] >= 1e-15 {
+		t.Fatal("test must exercise a representable very rare legal action")
+	}
+	rows := []terminalUtilityRowV5{{F: x, U: [5]float64{.5, .125, .25, .125, .35}}}
+	loss, gradient := terminalUtilityObjectiveV5(p, w, rows, "logscore")
+	if !finiteNumber(loss) {
+		t.Fatal("rare-action loss is not finite")
+	}
+	maxError := 0.
+	for i := p.BaseParameters; i < len(w); i++ {
+		value := w[i]
+		const epsilon = 1e-5
+		w[i] = value + epsilon
+		positive, _ := terminalUtilityObjectiveV5(p, w, rows, "logscore")
+		w[i] = value - epsilon
+		negative, _ := terminalUtilityObjectiveV5(p, w, rows, "logscore")
+		w[i] = value
+		maxError = math.Max(maxError, math.Abs((positive-negative)/(2*epsilon)-gradient[i]))
+	}
+	if maxError > 1e-7 {
+		t.Fatalf("rare-action gradient error %g", maxError)
+	}
+	t.Logf("rare legal action probability %g; 1097-coordinate maximum error %g", probability[3], maxError)
+}

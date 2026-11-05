@@ -135,7 +135,7 @@ func terminalUtilityObjectiveV5(p *Phase4StateV5, w []float64, rows []terminalUt
 				el += q * math.Log(q)
 			}
 			if kind == "logscore" {
-				loss -= norm * u * math.Log(math.Max(q, 1e-15))
+				loss -= norm * u * math.Log(q)
 			}
 		}
 		if kind == "policy_value" {
@@ -153,7 +153,7 @@ func terminalUtilityObjectiveV5(p *Phase4StateV5, w []float64, rows []terminalUt
 			default:
 				panic("unknown outcome objective")
 			}
-			dz[a+3] = norm * (dz[a+3] + p.Spec.EntropyWeight*q*(math.Log(math.Max(q, 1e-15))-el))
+			dz[a+3] = norm * (dz[a+3] + p.Spec.EntropyWeight*q*(math.Log(q)-el))
 		}
 		dh := make([]float64, 16)
 		cognitiveLinearBackward(g, dh, w, h, dz, p.Actor, p.ActorBias)
@@ -172,6 +172,9 @@ func (k *KnowledgeBase) learnTerminalUtilityV5(s *CognitiveModelState, w, temps 
 	}
 	p := s.Phase4V5
 	loss, g := terminalUtilityObjectiveV5(p, w, rows, b.TerminalUtility.Objective)
+	if !finiteNumber(loss) {
+		return out, errors.New("nonfinite terminal utility loss")
+	}
 	norm := 0.
 	for _, v := range g {
 		if !finiteNumber(v) {
