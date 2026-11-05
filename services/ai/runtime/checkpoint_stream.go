@@ -81,5 +81,19 @@ func (r *BrainRuntime) writeCheckpointLocked(path string, snapshot BrainSnapshot
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	return os.Rename(tmp.Name(), path)
+	return commitCheckpointFile(tmp.Name(), path, syncJournalDirectory)
+}
+
+
+// commitCheckpointFile publishes a synced snapshot and persists its directory
+// entry. A directory sync error leaves the published file in place and reports
+// uncertain durability to the caller.
+func commitCheckpointFile(temp, path string, syncDirectory func(string) error) error {
+	if err := os.Rename(temp, path); err != nil {
+		return err
+	}
+	if err := syncDirectory(filepath.Dir(path)); err != nil {
+		return fmt.Errorf("sync checkpoint directory: %w", err)
+	}
+	return nil
 }
