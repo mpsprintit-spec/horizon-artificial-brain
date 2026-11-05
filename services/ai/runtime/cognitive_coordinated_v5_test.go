@@ -26,7 +26,11 @@ func coordinatedRuntimeBatchWithMode(t *testing.T, rt *BrainRuntime, mode string
 	}
 	ep := k.CoordinatedEpisodeV5{Traces: [][]k.CognitiveInput{tr}, Frames: []k.Phase4FrameV5{{Features: p.Features, Mask: x.Mask, Action: p.Action, Reward: 1, Draw: x.Draw, BehaviorProbability: p.Policy[p.Action], BehaviorValue: p.Value}}}
 	b := k.CoordinatedBatchV5{Episodes: []k.CoordinatedEpisodeV5{ep}, ParametersHash: p.ParametersHash}
+	if mode == k.CoordinatedFidelityV5 {
+		b.Fidelity = &k.FidelityLearningV5{}
+	}
 	b.Evidence = k.CognitiveEvidence{ID: "actual-terminal", Source: "unit", Verifier: "actual selected result", Digest: k.CognitiveDigest(b.Episodes)}
+	b.Evidence.Digest = k.CoordinatedEvidenceDigestV5(b)
 	return b
 }
 func TestCoordinatedV5Schema19Schema13ReplayGuardsAndRestart(t *testing.T) {
@@ -39,6 +43,10 @@ func TestCoordinatedV5ExplorationJournalReplayAndRestart(t *testing.T) {
 
 func TestCoordinatedV5TargetJournalReplayAndRestart(t *testing.T) {
 	testCoordinatedV5Replay(t, k.CoordinatedTargetV5)
+}
+
+func TestCoordinatedV5FidelityJournalReplayAndRestart(t *testing.T) {
+	testCoordinatedV5Replay(t, k.CoordinatedFidelityV5)
 }
 
 func testCoordinatedV5Replay(t *testing.T, mode string) {

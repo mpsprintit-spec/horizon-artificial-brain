@@ -208,6 +208,13 @@ func metaUtilities(s *CognitiveModelState, w, h, x, p, temps []float64, useMUSE 
 	return u, competence
 }
 func metaBelief(s *CognitiveModelState, joint, classes []float64, utilities [][]float64, input CognitiveInput) (MetaBelief, []int, error) {
+	return metaBeliefSupport(s, joint, classes, utilities, input, false)
+}
+
+// Observed Bayesian conditioning creates exact zero-probability tuples. Their
+// utility rows are immaterial and may be zero; legacy unconditioned callers
+// retain their original strict support guard.
+func metaBeliefSupport(s *CognitiveModelState, joint, classes []float64, utilities [][]float64, input CognitiveInput, observedZeros bool) (MetaBelief, []int, error) {
 	n := *s.Config.NeuralMeta
 	// The metalevel parameter is the tuple of observable computation results.
 	// Irreducible goal noise is integrated into utility, NOT revealed by VPI.
@@ -225,6 +232,10 @@ func metaBelief(s *CognitiveModelState, joint, classes []float64, utilities [][]
 			}
 		}
 		if mass <= 0 {
+			if mass == 0 && observedZeros {
+				b.Utilities[theta] = u
+				continue
+			}
 			return b, nil, errors.New("neural tuple probability underflow; no oracle fallback")
 		}
 		for a := range u {
