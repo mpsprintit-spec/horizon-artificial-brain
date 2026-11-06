@@ -58,7 +58,9 @@ func (n *ConceptNode) OutboundAll() []*Synapse {
 	}
 	var out []*Synapse
 	for _, list := range n.Synapses {
-		out = append(out, list.All()...)
+		for _, s := range list {
+			if s != nil { out = append(out, s) }
+		}
 	}
 	return out
 }

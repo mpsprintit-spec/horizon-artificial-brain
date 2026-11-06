@@ -166,8 +166,9 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 	state=cloneState(state); confidence=cloneState(confidence)
 	for i:=0;i<cycles;i++ {
 		next:=map[knowledge.NodeID]float64{}; nextConfidence:=map[knowledge.NodeID]float64{}
-		for _,id:=range sortedNodeIDs(state) { n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; adaptive:=n.Threshold-(n.Importance*.05)-(float64(n.Frequency)*.001); n.Threshold=clamp(adaptive,.12,.8); next[id]=n.RestingActivation }
-		for _,id:=range sortedNodeIDs(state) {
+		ids := sortedNodeIDs(state)
+		for _,id:=range ids { n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; adaptive:=n.Threshold-(n.Importance*.05)-(float64(n.Frequency)*.001); n.Threshold=clamp(adaptive,.12,.8); next[id]=n.RestingActivation }
+		for _,id:=range ids {
 			level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}
 			next[id]+=level*(1-e.Decay); nextConfidence[id]=max(nextConfidence[id],confidence[id])
 			synapses:=n.OutboundAll(); sort.Slice(synapses,func(i,j int)bool{return synapses[i].TargetID<synapses[j].TargetID})

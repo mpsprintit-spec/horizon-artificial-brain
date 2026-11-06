@@ -85,6 +85,18 @@ func (r *TokenRegistry) Nodes() []*ConceptNode {
 	return nodes
 }
 
+// VisitNodes visits canonical node addresses without allocating or sorting.
+// Only use this for independent, order-insensitive per-node updates. The caller
+// holds the Brain lock; visit must not add/remove registry entries or re-enter
+// the registry. Ordered reductions and persistence must continue using Nodes.
+func (r *NeuralRegistry) VisitNodes(visit func(*ConceptNode)) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	for _, node := range r.byID {
+		visit(node)
+	}
+}
+
 // GetOrCreateRepresentation recovers only an exact learned observation.
 // Similarity is deliberately not an identity test: two nearby experiences may
 // share structure without becoming the same neural unit. Distributed overlap

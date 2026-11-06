@@ -55,54 +55,56 @@ func (e *Engine) applyActivityPlasticity(preState, postState map[knowledge.NodeI
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
 
-	for _, source := range e.Memory.Registry.Nodes() {
+	e.Memory.Registry.VisitNodes(func(source *knowledge.ConceptNode) {
 		pre := clamp01(preState[source.ID])
-		for _, synapse := range source.OutboundAll() {
-			if synapse == nil {
-				continue
-			}
+		for _, list := range source.Synapses {
+			for _, synapse := range list {
+				if synapse == nil {
+					continue
+				}
 
-			target := clamp01(postState[synapse.TargetID])
-			coactivity := pre * target
-			eligibility := decayEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
+				target := clamp01(postState[synapse.TargetID])
+				coactivity := pre * target
+				eligibility := decayEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
 
-			if local {
-				// Only elapsed time forgets eligibility. Actual co-activity
-				// adds bounded evidence; empty calls cannot multiply it away.
-				eligibility = clamp01(eligibility + .15*coactivity*(1-eligibility))
-			} else {
-				eligibility = clamp01(eligibility*0.85 + coactivity*0.15)
-			}
-			synapse.Dynamic.Eligibility = eligibility
-			if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
-				synapse.Dynamic.LastEligibilityUpdate = now
-			}
+				if local {
+					// Only elapsed time forgets eligibility. Actual co-activity
+					// adds bounded evidence; empty calls cannot multiply it away.
+					eligibility = clamp01(eligibility + .15*coactivity*(1-eligibility))
+				} else {
+					eligibility = clamp01(eligibility*0.85 + coactivity*0.15)
+				}
+				synapse.Dynamic.Eligibility = eligibility
+				if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
+					synapse.Dynamic.LastEligibilityUpdate = now
+				}
 
-			if synapse.Inhibitory {
+				if synapse.Inhibitory {
+					if coactivity >= activityPlasticityMinActive {
+						delta := activityPlasticityLearningRate * coactivity * eligibility
+						synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+delta, activityPlasticityMinWeight, activityPlasticityMaxWeight)
+						synapse.Dynamic.LastModification = now
+					}
+					synapse.Weight = synapse.Dynamic.Weight
+					continue
+				}
+
 				if coactivity >= activityPlasticityMinActive {
 					delta := activityPlasticityLearningRate * coactivity * eligibility
 					synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+delta, activityPlasticityMinWeight, activityPlasticityMaxWeight)
+					synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + delta*0.5)
+					synapse.Dynamic.Frequency++
+					synapse.Dynamic.LastActivation = now
 					synapse.Dynamic.LastModification = now
+				} else if !local {
+					decay := activityPlasticityDecayRate * (1 - eligibility)
+					synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-decay, activityPlasticityMinWeight, activityPlasticityMaxWeight)
+					synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - decay*0.25)
 				}
+
 				synapse.Weight = synapse.Dynamic.Weight
-				continue
+				synapse.Confidence = synapse.Dynamic.Confidence
 			}
-
-			if coactivity >= activityPlasticityMinActive {
-				delta := activityPlasticityLearningRate * coactivity * eligibility
-				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+delta, activityPlasticityMinWeight, activityPlasticityMaxWeight)
-				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + delta*0.5)
-				synapse.Dynamic.Frequency++
-				synapse.Dynamic.LastActivation = now
-				synapse.Dynamic.LastModification = now
-			} else if !local {
-				decay := activityPlasticityDecayRate * (1 - eligibility)
-				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-decay, activityPlasticityMinWeight, activityPlasticityMaxWeight)
-				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - decay*0.25)
-			}
-
-			synapse.Weight = synapse.Dynamic.Weight
-			synapse.Confidence = synapse.Dynamic.Confidence
 		}
-	}
+	})
 }
