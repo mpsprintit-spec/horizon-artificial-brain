@@ -85,6 +85,7 @@ type SynapseBinding struct {
 }
 
 type BrainRuntime struct {
+	nativeCommandIndex    map[string]string
 	cognitiveCommandIndex map[string]string // derived dedup cache; rebuilt from authenticated processedEvents
 	composition           *CompositionContinuation
 	brain                 *knowledge.Brain
@@ -123,7 +124,7 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil {
 		brain = knowledge.NewBootstrapBrain()
 	}
-	if brain.HasCognitiveModel() || brain.HasNeuralWrittenProjection() || brain.HasNeuralComposition() {
+	if brain.HasNativeControl() || brain.HasCognitiveModel() || brain.HasNeuralWrittenProjection() || brain.HasNeuralComposition() {
 		return nil
 	} // Recover versioned serving through its complete checkpoint.
 	if !brain.BindRuntime() {
@@ -176,7 +177,7 @@ func (r *BrainRuntime) SaveBrain(path string) error {
 	if err := r.ensureWritableLocked(); err != nil {
 		return err
 	}
-	if r.composition != nil || r.brain.HasCognitiveModel() {
+	if r.composition != nil || r.brain.HasNativeControl() || r.brain.HasCognitiveModel() {
 		return r.checkpointLocked(path)
 	}
 	return r.brain.Save(path)

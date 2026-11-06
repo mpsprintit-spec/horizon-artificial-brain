@@ -109,6 +109,7 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 	var raw struct {
 		SchemaVersion  int                  `json:"schema_version"`
 		MemoryDecay    *MemoryDecayState    `json:"memory_decay,omitempty"`
+		NativeControl  *NativeControlState  `json:"native_control,omitempty"`
 		CognitiveModel *CognitiveModelState `json:"cognitive_model,omitempty"`
 		BrainState     struct {
 			MemoryDecay *MemoryDecayState `json:"memory_decay,omitempty"`
@@ -117,11 +118,14 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	if raw.SchemaVersion > 6 {
+	if raw.SchemaVersion > 7 {
 		return errors.New("unsupported canonical brain version")
 	}
-	if raw.SchemaVersion >= 4 && (raw.CognitiveModel == nil || (raw.SchemaVersion == 4 && raw.CognitiveModel.Config.Version != CognitiveModelVersion) || (raw.SchemaVersion >= 5 && raw.CognitiveModel.Config.Version != CognitiveModelV2)) {
+	if raw.SchemaVersion >= 4 && raw.SchemaVersion <= 6 && (raw.CognitiveModel == nil || (raw.SchemaVersion == 4 && raw.CognitiveModel.Config.Version != CognitiveModelVersion) || (raw.SchemaVersion >= 5 && raw.CognitiveModel.Config.Version != CognitiveModelV2)) {
 		return errors.New("canonical v4 requires its cognitive model contract")
+	}
+	if raw.SchemaVersion == 7 && raw.NativeControl == nil {
+		return errors.New("canonical7 requires native control")
 	}
 	if raw.BrainState.MemoryDecay != nil {
 		return errors.New("legacy graph cannot carry physical memory state")
@@ -132,7 +136,7 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 		}
 		return nil
 	}
-	if !allowPhysical || (raw.SchemaVersion != 3 && raw.SchemaVersion != 4 && raw.SchemaVersion != 5 && raw.SchemaVersion != 6) {
+	if !allowPhysical || (raw.SchemaVersion != 3 && raw.SchemaVersion != 4 && raw.SchemaVersion != 5 && raw.SchemaVersion != 6 && raw.SchemaVersion != 7) {
 		return errors.New("legacy checkpoint/brain cannot carry physical memory state")
 	}
 	if raw.MemoryDecay.Encoding != PhysicalMemoryDynamics || raw.MemoryDecay.AppliedAt.IsZero() {
