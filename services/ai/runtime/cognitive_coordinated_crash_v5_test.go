@@ -19,7 +19,15 @@ func TestFidelityV5ProcessExitAfterFsync(t *testing.T) {
 	testCoordinatedCrashV5(t, k.CoordinatedFidelityV5)
 }
 
-func testCoordinatedCrashV5(t *testing.T, mode string) {
+func TestFidelityV5FullGradientProcessExitAfterFsync(t *testing.T) {
+	testCoordinatedCrashV5(t, k.CoordinatedFidelityV5, true)
+}
+
+func testCoordinatedCrashV5(t *testing.T, mode string, full ...bool) {
+	useFull := len(full) > 0 && full[0]
+	if os.Getenv("HORIZON_COORDINATED_FULL_GRADIENT") == "1" {
+		useFull = true
+	}
 	if requested := os.Getenv("HORIZON_COORDINATED_TEST_MODE"); requested != "" {
 		mode = requested
 	}
@@ -33,7 +41,7 @@ func testCoordinatedCrashV5(t *testing.T, mode string) {
 			t.Fatal(e)
 		}
 		rt.SetEventLog(wal)
-		b := coordinatedRuntimeBatchWithMode(t, rt, mode)
+		b := coordinatedRuntimeBatchWithMode(t, rt, mode, useFull)
 		wal.beforeAppend = func(ev LoggedEvent) error {
 			if ev.SchemaVersion != 13 {
 				t.Fatal("not schema13")
@@ -63,7 +71,7 @@ func testCoordinatedCrashV5(t *testing.T, mode string) {
 	if e := rt.Checkpoint(cp); e != nil {
 		t.Fatal(e)
 	}
-	b := coordinatedRuntimeBatchWithMode(t, rt, mode)
+	b := coordinatedRuntimeBatchWithMode(t, rt, mode, useFull)
 	expected, e := rt.ApplyCognitiveModel(CognitiveModelCommand{ID: "terminal-crash", Coordinated: &b}, time.Unix(2400000001, 0))
 	if e != nil {
 		t.Fatal(e)
@@ -87,6 +95,9 @@ func testCoordinatedCrashV5(t *testing.T, mode string) {
 	}
 	child := exec.Command(os.Args[0], "-test.run=^TestCoordinatedV5ProcessExitAfterFsync$")
 	child.Env = append(os.Environ(), "HORIZON_COORDINATED_CRASH_WAL="+childPath, "HORIZON_COORDINATED_CRASH_CP="+cp, "HORIZON_COORDINATED_TEST_MODE="+mode)
+	if useFull {
+		child.Env = append(child.Env, "HORIZON_COORDINATED_FULL_GRADIENT=1")
+	}
 	if x, ok := child.Run().(*exec.ExitError); !ok || x.ExitCode() != 76 {
 		t.Fatal("child did not exit after durable append")
 	}
