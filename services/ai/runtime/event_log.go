@@ -20,10 +20,11 @@ import (
 const EventLogSchemaVersion = 3
 
 func supportedEventLogSchema(version int) bool {
-	return version == coordinatedJournalSchemaVersion || version == terminalExposureJournalSchemaVersion || version == phase4JournalSchemaVersion || version == phase3JournalSchemaVersion || version == phase2JournalSchemaVersion || version == componentLearningJournalSchemaVersion || version == terminalReadoutJournalSchemaVersion || version == neuralMetaJournalSchemaVersion || version == cognitiveModelJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
+	return version == nativeJournalSchemaVersion || version == coordinatedJournalSchemaVersion || version == terminalExposureJournalSchemaVersion || version == phase4JournalSchemaVersion || version == phase3JournalSchemaVersion || version == phase2JournalSchemaVersion || version == componentLearningJournalSchemaVersion || version == terminalReadoutJournalSchemaVersion || version == neuralMetaJournalSchemaVersion || version == cognitiveModelJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
 }
 
 type LoggedEvent struct {
+	NativeControl             *NativeControlCommand          `json:"native_control,omitempty"`
 	CognitiveModel            *CognitiveModelCommand         `json:"cognitive_model,omitempty"`
 	CompositionPerception     *CompositionPerception         `json:"composition_perception,omitempty"`
 	CompositionEncoding       string                         `json:"composition_encoding,omitempty"`
@@ -666,6 +667,10 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeNativeControl:
+			if _, err := brainRuntime.ApplyNativeControl(*logged.NativeControl, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeCognitiveModel:
 			if _, err := brainRuntime.ApplyCognitiveModel(*logged.CognitiveModel, logged.Timestamp); err != nil {
 				return err
