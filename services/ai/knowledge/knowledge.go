@@ -13,9 +13,10 @@ import (
 )
 
 type NeuralRegistry struct {
-	mu     sync.RWMutex
-	nextID NodeID
-	byID   map[NodeID]*ConceptNode
+	mu      sync.RWMutex
+	nextID  NodeID
+	byID    map[NodeID]*ConceptNode
+	ordered []*ConceptNode // derived addresses only; registry membership is append-only
 }
 
 func NewNeuralRegistry() *NeuralRegistry {
@@ -72,17 +73,48 @@ func (r *TokenRegistry) GetByID(id NodeID) *ConceptNode {
 }
 
 func (r *TokenRegistry) Nodes() []*ConceptNode {
-	r.mu.RLock()
+	r.orderedReadLock()
 	defer r.mu.RUnlock()
-	nodes := make([]*ConceptNode, 0, len(r.byID))
-	for _, n := range r.byID {
-		nodes = append(nodes, n)
-	}
-	// The registry is keyed by a map, so iteration order is undefined.
-	// Checkpoints must serialize the same neural substrate identically across
-	// replay/restart, independent of map iteration order.
-	sort.Slice(nodes, func(i, j int) bool { return nodes[i].ID < nodes[j].ID })
+	nodes := make([]*ConceptNode, len(r.ordered))
+	copy(nodes, r.ordered)
 	return nodes
+}
+
+// orderedReadLock returns with RLock held and a current, ordered address index.
+// Every production membership mutation appends a fresh ID; restore constructs
+// a fresh registry. Cardinality therefore invalidates this transient index.
+// No weights, activations or learned state are duplicated or persisted here.
+func (r *NeuralRegistry) orderedReadLock() {
+	for {
+		r.mu.RLock()
+		if len(r.ordered) == len(r.byID) {
+			return
+		}
+		r.mu.RUnlock()
+		r.mu.Lock()
+		if len(r.ordered) != len(r.byID) {
+			r.ordered = make([]*ConceptNode, 0, len(r.byID))
+			for _, node := range r.byID {
+				r.ordered = append(r.ordered, node)
+			}
+			sort.Slice(r.ordered, func(i, j int) bool { return r.ordered[i].ID < r.ordered[j].ID })
+		}
+		r.mu.Unlock()
+	}
+}
+
+// VisitNodes visits canonical node addresses in stable order without allocating
+// or sorting after membership changes have been indexed. Stable ID traversal
+// retains locality: random map traversal was slower despite fewer allocations.
+// Only use this for independent, order-insensitive per-node updates. The caller
+// holds the Brain lock; visit must not add/remove registry entries or re-enter
+// the registry. Ordered reductions and persistence must continue using Nodes.
+func (r *NeuralRegistry) VisitNodes(visit func(*ConceptNode)) {
+	r.orderedReadLock()
+	defer r.mu.RUnlock()
+	for _, node := range r.ordered {
+		visit(node)
+	}
 }
 
 // GetOrCreateRepresentation recovers only an exact learned observation.

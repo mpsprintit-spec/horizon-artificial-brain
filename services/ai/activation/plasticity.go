@@ -55,46 +55,64 @@ func (e *Engine) applyPredictionErrorPlasticity(predicted, actual map[knowledge.
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
 
-	for _, source := range e.Memory.Registry.Nodes() {
+	visit := func(source *knowledge.ConceptNode) {
 		if local && max(clamp01(predicted[source.ID]), clamp01(actual[source.ID])) < activityPlasticityMinActive {
-			continue
+			return
 		}
-		for _, synapse := range source.OutboundAll() {
-			if synapse == nil || synapse.Inhibitory {
-				continue
-			}
-			targetActual := actual[synapse.TargetID]
-			targetPredicted := predicted[synapse.TargetID]
-			direction := targetActual - targetPredicted
-			if abs(direction) < 0.001 {
-				continue
-			}
+		for _, list := range source.Synapses {
+			for _, synapse := range list {
+				if synapse == nil || synapse.Inhibitory {
+					continue
+				}
+				targetActual := actual[synapse.TargetID]
+				targetPredicted := predicted[synapse.TargetID]
+				direction := targetActual - targetPredicted
+				if abs(direction) < 0.001 {
+					continue
+				}
 
-			eligibility := decayPredictionEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
-			if eligibility <= 0 {
-				eligibility = clamp01(source.Activation * synapse.Activation)
-			}
-			if eligibility <= 0 {
-				continue
-			}
+				eligibility := decayPredictionEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
+				if eligibility <= 0 {
+					eligibility = clamp01(source.Activation * synapse.Activation)
+				}
+				if eligibility <= 0 {
+					continue
+				}
 
-			synapse.Dynamic.Eligibility = eligibility
-			if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
-				synapse.Dynamic.LastEligibilityUpdate = now
-			}
-			magnitude := predictionLearningRate * errorSignal * clamp01(abs(direction)) * eligibility
-			if direction > 0 {
-				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+magnitude, predictionMinWeight, predictionMaxWeight)
-				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + magnitude*0.5)
-			} else {
-				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-magnitude, predictionMinWeight, predictionMaxWeight)
-				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - magnitude*0.5)
-			}
-			synapse.Dynamic.LastModification = now
+				synapse.Dynamic.Eligibility = eligibility
+				if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
+					synapse.Dynamic.LastEligibilityUpdate = now
+				}
+				magnitude := predictionLearningRate * errorSignal * clamp01(abs(direction)) * eligibility
+				if direction > 0 {
+					synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+magnitude, predictionMinWeight, predictionMaxWeight)
+					synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + magnitude*0.5)
+				} else {
+					synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-magnitude, predictionMinWeight, predictionMaxWeight)
+					synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - magnitude*0.5)
+				}
+				synapse.Dynamic.LastModification = now
 
-			synapse.Weight = synapse.Dynamic.Weight
-			synapse.Confidence = synapse.Dynamic.Confidence
+				synapse.Weight = synapse.Dynamic.Weight
+				synapse.Confidence = synapse.Dynamic.Confidence
+			}
 		}
+	}
+	if local {
+		ids := cloneState(predicted)
+		for id, value := range actual {
+			ids[id] = max(ids[id], value)
+		}
+		for id, value := range ids {
+			if clamp01(value) < activityPlasticityMinActive {
+				continue
+			}
+			if source := e.Memory.Registry.GetByID(id); source != nil {
+				visit(source)
+			}
+		}
+	} else {
+		e.Memory.Registry.VisitNodes(visit)
 	}
 
 	// Prediction error also informs structural competition. This is a bounded
@@ -136,30 +154,32 @@ func (e *Engine) applyConsequencePlasticity(valence, informationGain float64, no
 	informationGain = clamp01(informationGain)
 	gain := 0.5 + 0.5*informationGain
 
-	for _, source := range e.Memory.Registry.Nodes() {
-		for _, synapse := range source.OutboundAll() {
-			if synapse == nil || synapse.Inhibitory {
-				continue
+	e.Memory.Registry.VisitNodes(func(source *knowledge.ConceptNode) {
+		for _, list := range source.Synapses {
+			for _, synapse := range list {
+				if synapse == nil || synapse.Inhibitory {
+					continue
+				}
+				eligibility := decayPredictionEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
+				if eligibility <= 0 {
+					continue
+				}
+				magnitude := consequenceLearningRate * abs(valence) * gain * eligibility
+				if valence > 0 {
+					synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+magnitude, predictionMinWeight, predictionMaxWeight)
+					synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + magnitude*0.5)
+				} else {
+					synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-magnitude, predictionMinWeight, predictionMaxWeight)
+					synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - magnitude*0.5)
+				}
+				synapse.Dynamic.LastModification = now
+				if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
+					synapse.Dynamic.LastEligibilityUpdate = now
+				}
+				synapse.Dynamic.Eligibility = eligibility
+				synapse.Weight = synapse.Dynamic.Weight
+				synapse.Confidence = synapse.Dynamic.Confidence
 			}
-			eligibility := decayPredictionEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)
-			if eligibility <= 0 {
-				continue
-			}
-			magnitude := consequenceLearningRate * abs(valence) * gain * eligibility
-			if valence > 0 {
-				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight+magnitude, predictionMinWeight, predictionMaxWeight)
-				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence + magnitude*0.5)
-			} else {
-				synapse.Dynamic.Weight = clamp(synapse.Dynamic.Weight-magnitude, predictionMinWeight, predictionMaxWeight)
-				synapse.Dynamic.Confidence = clamp01(synapse.Dynamic.Confidence - magnitude*0.5)
-			}
-			synapse.Dynamic.LastModification = now
-			if !local || synapse.Dynamic.LastEligibilityUpdate.IsZero() || now.After(synapse.Dynamic.LastEligibilityUpdate) {
-				synapse.Dynamic.LastEligibilityUpdate = now
-			}
-			synapse.Dynamic.Eligibility = eligibility
-			synapse.Weight = synapse.Dynamic.Weight
-			synapse.Confidence = synapse.Dynamic.Confidence
 		}
-	}
+	})
 }

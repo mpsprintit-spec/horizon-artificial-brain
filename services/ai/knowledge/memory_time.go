@@ -67,9 +67,9 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 		return expDecay(now.Sub(created).Hours() * rate * scale)
 	}
 	protectedN := k.protectedNParameter()
-	for _, source := range k.Registry.Nodes() {
+	k.Registry.VisitNodes(func(source *ConceptNode) {
 		if source == nil {
-			continue
+			return
 		}
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
@@ -90,7 +90,7 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 				syncSynapseLegacyState(synapse)
 			}
 		}
-	}
+	})
 	for i := range state.ExperienceTraces {
 		trace := &state.ExperienceTraces[i]
 		trace.MemoryPriority = clamp01(trace.MemoryPriority * factorSince(trace.CurrentAt, 1))
