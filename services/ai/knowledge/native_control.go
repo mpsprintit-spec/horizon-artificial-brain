@@ -15,6 +15,7 @@ import (
 )
 
 const NativeControlVersion = "native-operation-control-v1"
+const NativeControlRelationalVersion = "native-operation-control-v2"
 
 func NativeDigest(v any) string {
 	b, e := json.Marshal(v)
@@ -55,6 +56,9 @@ func (o NativeOperation) Validate() error {
 }
 
 type NativeControlConfig struct {
+	ContrastMean    bool              `json:"contrast_mean,omitempty"`
+	Epsilon         float64           `json:"epsilon,omitempty"`
+	Encoder         string            `json:"encoder,omitempty"`
 	MaxActiveNodes  int               `json:"max_active_nodes"`
 	MaxSynapseReads int               `json:"max_synapse_reads"`
 	Version         string            `json:"version"`
@@ -73,7 +77,7 @@ func (c NativeControlConfig) Validate() error {
 	if c.MaxActiveNodes < 1 || c.MaxActiveNodes > 1000000 || c.MaxSynapseReads < 1 || c.MaxSynapseReads > 10000000 {
 		return errors.New("invalid native work budget")
 	}
-	if c.Version != NativeControlVersion || len(c.Sources) < 1 || len(c.Sources) > 4096 || len(c.Operations) < 2 || len(c.Operations) > 16 || c.MaxSteps < 1 || c.MaxSteps > 64 {
+	if (c.Version != NativeControlVersion && c.Version != NativeControlRelationalVersion) || len(c.Sources) < 1 || len(c.Sources) > 4096 || len(c.Operations) < 2 || len(c.Operations) > 16 || c.MaxSteps < 1 || c.MaxSteps > 64 {
 		return errors.New("invalid native control dimensions/version")
 	}
 	for _, v := range []float64{c.LearningRate, c.Gamma, c.Lambda, c.Temperature} {
@@ -83,6 +87,15 @@ func (c NativeControlConfig) Validate() error {
 	}
 	if c.LearningRate <= 0 || c.LearningRate > 1 || c.Gamma < 0 || c.Gamma > 1 || c.Lambda < 0 || c.Lambda > 1 || c.Temperature <= 0 || c.Temperature > 10 {
 		return errors.New("invalid native learning bounds")
+	}
+	if c.Encoder != "" && c.Encoder != "local-relational-v1" || c.Encoder != "" && c.Version != NativeControlRelationalVersion {
+		return errors.New("unsupported native encoder/version")
+	}
+	if c.ContrastMean && c.Version != NativeControlRelationalVersion {
+		return errors.New("contrast calibration requires version2")
+	}
+	if !nativeFinite(c.Epsilon) || c.Epsilon < 0 || c.Epsilon > 1 || c.Epsilon > 0 && c.Version != NativeControlRelationalVersion {
+		return errors.New("invalid exploration configuration")
 	}
 	seen := map[NodeID]bool{}
 	for _, id := range c.Sources {
@@ -109,11 +122,13 @@ func (c NativeControlConfig) Validate() error {
 // These are only references into N plus bounded transient experience. No
 // learned weight is stored here: every value is read from canonical synapses.
 type NativeControlState struct {
-	Config  NativeControlConfig `json:"config"`
-	Bias    NodeID              `json:"bias"`
-	Outputs [][]NodeID          `json:"outputs"`
-	Updates uint64              `json:"updates"`
-	Episode *NativeEpisode      `json:"episode,omitempty"`
+	Features        []NodeID            `json:"features,omitempty"`
+	PendingContrast *NativeContrast     `json:"pending_contrast,omitempty"`
+	Config          NativeControlConfig `json:"config"`
+	Bias            NodeID              `json:"bias"`
+	Outputs         [][]NodeID          `json:"outputs"`
+	Updates         uint64              `json:"updates"`
+	Episode         *NativeEpisode      `json:"episode,omitempty"`
 }
 type NativeDecision struct {
 	State         map[NodeID]float64 `json:"state"`
@@ -126,19 +141,24 @@ type NativeDecision struct {
 	At            time.Time          `json:"at"`
 }
 type NativeEpisode struct {
-	ID        string           `json:"id"`
-	Training  bool             `json:"training"`
-	Started   time.Time        `json:"started"`
-	Decisions []NativeDecision `json:"decisions,omitempty"`
-	Stopped   bool             `json:"stopped"`
-	Truncated bool             `json:"truncated"`
+	Intervention bool             `json:"intervention,omitempty"`
+	ID           string           `json:"id"`
+	Training     bool             `json:"training"`
+	Started      time.Time        `json:"started"`
+	Decisions    []NativeDecision `json:"decisions,omitempty"`
+	Stopped      bool             `json:"stopped"`
+	Truncated    bool             `json:"truncated"`
 }
 type NativeReadout struct {
-	Values        []float64 `json:"values"`
-	Probabilities []float64 `json:"probabilities"`
-	Action        int       `json:"action"`
+	ParameterReads  int       `json:"parameter_reads"`
+	StructuralReads int       `json:"structural_reads"`
+	Values          []float64 `json:"values"`
+	Probabilities   []float64 `json:"probabilities"`
+	Action          int       `json:"action"`
 }
 type NativeLearning struct {
+	ContrastPending bool    `json:"contrast_pending,omitempty"`
+	Contrast        bool    `json:"contrast,omitempty"`
 	Return          float64 `json:"return"`
 	UpdatedSynapses int     `json:"updated_synapses"`
 	MaxDelta        float64 `json:"max_delta"`
@@ -156,9 +176,42 @@ func (k *KnowledgeBase) NativeControlSnapshot() *NativeControlState {
 	if k.BrainState.NativeControl == nil {
 		return nil
 	}
-	b, _ := json.Marshal(k.BrainState.NativeControl)
-	var out NativeControlState
-	_ = json.Unmarshal(b, &out)
+	s := k.BrainState.NativeControl
+	out := *s
+	out.Config.Sources = append([]NodeID(nil), s.Config.Sources...)
+	out.Config.Operations = append([]NativeOperation(nil), s.Config.Operations...)
+	out.Features = append([]NodeID(nil), s.Features...)
+	out.Outputs = make([][]NodeID, len(s.Outputs))
+	for i, group := range s.Outputs {
+		out.Outputs[i] = append([]NodeID(nil), group...)
+	}
+	out.Episode = cloneNativeEpisode(s.Episode)
+	if s.PendingContrast != nil {
+		p := *s.PendingContrast
+		p.Episode = cloneNativeEpisode(p.Episode)
+		out.PendingContrast = &p
+	}
+	return &out
+}
+func cloneNativeEpisode(ep *NativeEpisode) *NativeEpisode {
+	if ep == nil {
+		return nil
+	}
+	out := *ep
+	if ep.Decisions != nil {
+		out.Decisions = make([]NativeDecision, len(ep.Decisions))
+	}
+	for i, d := range ep.Decisions {
+		out.Decisions[i] = d
+		out.Decisions[i].Values = append([]float64(nil), d.Values...)
+		out.Decisions[i].Probabilities = append([]float64(nil), d.Probabilities...)
+		if d.State != nil {
+			out.Decisions[i].State = make(map[NodeID]float64, len(d.State))
+			for id, v := range d.State {
+				out.Decisions[i].State[id] = v
+			}
+		}
+	}
 	return &out
 }
 func (k *KnowledgeBase) ValidateNativeInit(c NativeControlConfig) error {
@@ -202,13 +255,18 @@ func (k *KnowledgeBase) InitializeNativeControl(c NativeControlConfig, at time.T
 		return n.ID
 	}
 	s.Bias = alloc()
+	if c.Encoder != "" {
+		for i := 0; i < 4; i++ {
+			s.Features = append(s.Features, alloc())
+		}
+	}
 	s.Outputs = make([][]NodeID, len(c.Operations))
 	rng := rand.New(rand.NewSource(c.Seed))
 	for a := range s.Outputs {
 		for j := 0; j < 4; j++ {
 			id := alloc()
 			s.Outputs[a] = append(s.Outputs[a], id)
-			for _, from := range append(append([]NodeID(nil), c.Sources...), s.Bias) {
+			for _, from := range s.ParameterSources() {
 				w := (rng.Float64() - .5) * .02
 				syn := &Synapse{TargetID: id, Weight: math.Abs(w), Confidence: 1, Inhibitory: w < 0, Dynamic: DynamicState{Weight: math.Abs(w), Confidence: 1, LastModification: at}}
 				n := k.Registry.GetByID(from)
@@ -234,7 +292,10 @@ func nativeWeight(s *Synapse) float64 {
 	}
 	return w
 }
-func (k *KnowledgeBase) nativeFeatures(s *NativeControlState, state map[NodeID]float64) map[NodeID]float64 {
+func (k *KnowledgeBase) nativeFeatures(s *NativeControlState, state map[NodeID]float64, reads ...*int) (map[NodeID]float64, error) {
+	if s.Config.Encoder != "" {
+		return nativeRelationalFeatures(s, state, k.Registry.GetByID, reads...)
+	}
 	x := make(map[NodeID]float64)
 	x[s.Bias] = 1
 	for _, id := range s.Config.Sources {
@@ -242,7 +303,7 @@ func (k *KnowledgeBase) nativeFeatures(s *NativeControlState, state map[NodeID]f
 			x[id] = v
 		}
 	}
-	return x
+	return x, nil
 }
 func (k *KnowledgeBase) nativeReadout(s *NativeControlState, state map[NodeID]float64, greedy bool, u float64) (NativeReadout, error) {
 	out := NativeReadout{Values: make([]float64, len(s.Outputs)), Probabilities: make([]float64, len(s.Outputs))}
@@ -251,12 +312,19 @@ func (k *KnowledgeBase) nativeReadout(s *NativeControlState, state map[NodeID]fl
 			return out, errors.New("invalid native state")
 		}
 	}
-	x := k.nativeFeatures(s, state)
+	x, err := k.nativeFeatures(s, state, &out.StructuralReads)
+	if err != nil {
+		return out, err
+	}
 	ids := nativeIDs(x)
 	for a, targets := range s.Outputs {
 		for _, id := range ids {
 			n := k.Registry.GetByID(id)
 			for _, target := range targets {
+				out.ParameterReads++
+				if s.Config.Version == NativeControlRelationalVersion && out.ParameterReads+out.StructuralReads > s.Config.MaxSynapseReads {
+					return out, errors.New("native policy read budget exceeded")
+				}
 				list := n.Synapses[target]
 				if len(list) != 1 || list[0] == nil {
 					return out, errors.New("native parameter missing")
@@ -271,14 +339,7 @@ func (k *KnowledgeBase) nativeReadout(s *NativeControlState, state map[NodeID]fl
 			best = a
 		}
 	}
-	sum := 0.0
-	for a, q := range out.Values {
-		out.Probabilities[a] = math.Exp((q - out.Values[best]) / s.Config.Temperature)
-		sum += out.Probabilities[a]
-	}
-	for a := range out.Values {
-		out.Probabilities[a] /= sum
-	}
+	out.Probabilities = nativeProbabilities(out.Values, s.Config.Temperature, s.Config.Epsilon)
 	out.Action = best
 	if !greedy {
 		if !nativeFinite(u) || u < 0 || u >= 1 {
@@ -304,14 +365,21 @@ func (k *KnowledgeBase) NativePolicy(state map[NodeID]float64, greedy bool, u fl
 	}
 	return k.nativeReadout(s, state, greedy, u)
 }
-func (k *KnowledgeBase) BeginNativeEpisode(id string, training bool, at time.Time) error {
+func (k *KnowledgeBase) BeginNativeEpisode(id string, training bool, at time.Time, intervention ...bool) error {
 	k.Lock()
 	defer k.Unlock()
 	s := k.BrainState.NativeControl
 	if s == nil || s.Episode != nil || id == "" || at.IsZero() {
 		return errors.New("invalid native episode boundary")
 	}
-	s.Episode = &NativeEpisode{ID: id, Training: training, Started: at}
+	if p := s.PendingContrast; p != nil && at.Before(p.Episode.Decisions[len(p.Episode.Decisions)-1].At) {
+		return errors.New("native clock rollback across contrast trials")
+	}
+	intervened := len(intervention) > 0 && intervention[0]
+	if intervened && (!training || s.Config.Version != NativeControlRelationalVersion || s.Config.Lambda != 1) {
+		return errors.New("intervention requires version2 Monte Carlo training")
+	}
+	s.Episode = &NativeEpisode{ID: id, Training: training, Started: at, Intervention: intervened}
 	return nil
 }
 func (k *KnowledgeBase) AppendNativeDecision(d NativeDecision) error {
@@ -344,6 +412,9 @@ func (k *KnowledgeBase) LearnNativeOutcome(reward float64, learn bool, at time.T
 	if s == nil || s.Episode == nil || !s.Episode.Stopped || len(s.Episode.Decisions) == 0 || !nativeFinite(reward) || reward < -1 || reward > 1 {
 		return out, errors.New("native outcome has no completed episode")
 	}
+	if s.PendingContrast != nil && learn {
+		return out, errors.New("pending contrast freezes learning")
+	}
 	ep := s.Episode
 	out.Return = reward
 	for _, d := range ep.Decisions {
@@ -366,7 +437,10 @@ func (k *KnowledgeBase) LearnNativeOutcome(reward float64, learn bool, at time.T
 		}
 		delta := g - d.Values[d.Action]
 		out.TDError += math.Abs(delta)
-		x := k.nativeFeatures(s, d.State)
+		x, err := k.nativeFeatures(s, d.State)
+		if err != nil {
+			return out, err
+		}
 		norm := 0.0
 		for _, id := range nativeIDs(x) {
 			norm += x[id] * x[id]
@@ -408,4 +482,32 @@ func (k *KnowledgeBase) LearnNativeOutcome(reward float64, learn bool, at time.T
 	s.Updates++
 	s.Episode = nil
 	return out, nil
+}
+
+// Epsilon-greedy is an optional training distribution. It changes exploration,
+// not greedy action values or the available operations. V1 retains softmax.
+func nativeProbabilities(values []float64, temperature, epsilon float64) []float64 {
+	out := make([]float64, len(values))
+	best := 0
+	for a, q := range values {
+		if q > values[best] {
+			best = a
+		}
+	}
+	if epsilon > 0 {
+		for a := range out {
+			out[a] = epsilon / float64(len(out))
+		}
+		out[best] += 1 - epsilon
+		return out
+	}
+	sum := 0.0
+	for a, q := range values {
+		out[a] = math.Exp((q - values[best]) / temperature)
+		sum += out[a]
+	}
+	for a := range out {
+		out[a] /= sum
+	}
+	return out
 }

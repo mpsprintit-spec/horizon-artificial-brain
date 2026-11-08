@@ -18,16 +18,19 @@ type NativeObservation struct {
 	State    map[knowledge.NodeID]float64 `json:"state"`
 }
 type NativeBegin struct {
-	EpisodeID   string             `json:"episode_id"`
-	Training    bool               `json:"training"`
-	Observation *NativeObservation `json:"observation,omitempty"`
+	Intervention bool               `json:"intervention,omitempty"` // explicit controlled experiment, not an on-policy sample
+	EpisodeID    string             `json:"episode_id"`
+	Training     bool               `json:"training"`
+	Observation  *NativeObservation `json:"observation,omitempty"`
 }
 type NativeStep struct {
-	ActionOverride *int    `json:"action_override,omitempty"` // evaluation ablation only; never eligible for learning
-	EpisodeID      string  `json:"episode_id"`
-	Sample         float64 `json:"sample"`
+	ExperimentAction *int    `json:"experiment_action,omitempty"`
+	ActionOverride   *int    `json:"action_override,omitempty"` // evaluation ablation only; never eligible for learning
+	EpisodeID        string  `json:"episode_id"`
+	Sample           float64 `json:"sample"`
 }
 type NativeOutcome struct {
+	ContrastID  string  `json:"contrast_id,omitempty"` // two observed, matched-action trajectories
 	EpisodeID   string  `json:"episode_id"`
 	TraceDigest string  `json:"trace_digest"`
 	Source      string  `json:"source"`
@@ -37,11 +40,12 @@ type NativeOutcome struct {
 	Learn       bool    `json:"learn"`
 }
 type NativeControlCommand struct {
-	ID         string                         `json:"id"`
-	Initialize *knowledge.NativeControlConfig `json:"initialize,omitempty"`
-	Begin      *NativeBegin                   `json:"begin,omitempty"`
-	Step       *NativeStep                    `json:"step,omitempty"`
-	Outcome    *NativeOutcome                 `json:"outcome,omitempty"`
+	DiscardContrastID string                         `json:"discard_contrast_id,omitempty"` // abandon pending trial; retain its journal evidence
+	ID                string                         `json:"id"`
+	Initialize        *knowledge.NativeControlConfig `json:"initialize,omitempty"`
+	Begin             *NativeBegin                   `json:"begin,omitempty"`
+	Step              *NativeStep                    `json:"step,omitempty"`
+	Outcome           *NativeOutcome                 `json:"outcome,omitempty"`
 }
 type NativeControlResult struct {
 	Sequence    uint64                          `json:"sequence"`
@@ -60,6 +64,12 @@ func (c NativeControlCommand) Validate() error {
 		return errors.New("native command needs bounded slash-free ID")
 	}
 	n := 0
+	if c.DiscardContrastID != "" {
+		n++
+		if len(c.DiscardContrastID) > 256 || strings.Contains(c.DiscardContrastID, "/") {
+			return errors.New("invalid discarded contrast")
+		}
+	}
 	if c.Initialize != nil {
 		n++
 		if e := c.Initialize.Validate(); e != nil {
@@ -85,6 +95,9 @@ func (c NativeControlCommand) Validate() error {
 	}
 	if o := c.Outcome; o != nil {
 		n++
+		if len(o.ContrastID) > 256 || strings.Contains(o.ContrastID, "/") {
+			return errors.New("invalid contrast ID")
+		}
 		if o.EpisodeID == "" || o.OutcomeID == "" || o.Source == "" || len(o.TraceDigest) != 64 || o.Reward < -1 || o.Reward > 1 || o.Reward != o.Reward || (o.Provenance != "observed-environment" && o.Provenance != "observed-sensor") {
 			return errors.New("native feedback requires observed outcome provenance")
 		}
@@ -145,7 +158,18 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 	} else if s == nil {
 		return out, errors.New("native control is not initialized")
 	}
+	if c.DiscardContrastID != "" {
+		if s == nil || s.Episode != nil || s.PendingContrast == nil || s.PendingContrast.ID != c.DiscardContrastID {
+			return out, errors.New("discard requires matching idle pending contrast")
+		}
+	}
 	if c.Begin != nil {
+		if p := s.PendingContrast; p != nil && at.Before(p.Episode.Decisions[len(p.Episode.Decisions)-1].At) {
+			return out, errors.New("native clock rollback across contrast trials")
+		}
+		if c.Begin.Intervention && (!c.Begin.Training || s.Config.Version != knowledge.NativeControlRelationalVersion || s.Config.Lambda != 1) {
+			return out, errors.New("invalid intervention experiment mode")
+		}
 		if s.Episode != nil {
 			return out, errors.New("native episode already open")
 		}
@@ -169,6 +193,11 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 				}
 			}
 		}
+		for _, id := range s.Features {
+			if _, ok := state[id]; ok {
+				return out, errors.New("native observation cannot inject feature activity")
+			}
+		}
 		if _, ok := state[s.Bias]; ok {
 			return out, errors.New("native observation cannot inject bias")
 		}
@@ -184,6 +213,15 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		p, e := r.brain.NativePolicy(r.activation.CurrentState(), !ep.Training, c.Step.Sample)
 		if e != nil {
 			return out, e
+		}
+		if ep.Intervention != (c.Step.ExperimentAction != nil) {
+			return out, errors.New("intervention action missing or unauthorized")
+		}
+		if a := c.Step.ExperimentAction; a != nil {
+			if *a < 0 || *a >= len(p.Values) || c.Step.ActionOverride != nil {
+				return out, errors.New("invalid experiment action")
+			}
+			p.Action = *a
 		}
 		if c.Step.ActionOverride != nil {
 			if ep.Training || *c.Step.ActionOverride < 0 || *c.Step.ActionOverride >= len(p.Values) {
@@ -202,6 +240,14 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		if ep == nil || ep.ID != o.EpisodeID || !ep.Stopped || len(ep.Decisions) == 0 || o.TraceDigest != knowledge.NativeDigest(ep) || at.Before(ep.Decisions[len(ep.Decisions)-1].At) {
 			return out, errors.New("native outcome does not bind completed trajectory")
 		}
+		if err = r.brain.ValidateNativeContrast(o.ContrastID, o.Source, o.OutcomeID, o.Learn); err != nil {
+			return out, err
+		}
+		if o.ContrastID != "" {
+			if _, used := r.processedEvents["native-contrast/"+knowledge.NativeDigest([]string{o.Source, o.ContrastID})]; used {
+				return out, errors.New("contrast already consumed")
+			}
+		}
 		if o.Learn && !ep.Training {
 			return out, errors.New("greedy evaluation cannot train")
 		}
@@ -209,6 +255,11 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 	err = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeNativeControl, Timestamp: at, NativeControl: &c}, func() error {
 		if c.Initialize != nil {
 			if e := r.brain.InitializeNativeControl(*c.Initialize, at); e != nil {
+				return e
+			}
+		}
+		if c.DiscardContrastID != "" {
+			if e := r.brain.DiscardNativeContrast(c.DiscardContrastID); e != nil {
 				return e
 			}
 		}
@@ -227,7 +278,7 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 				snapshot.ContextState = nil
 				r.activation.RestoreState(snapshot)
 			}
-			if e := r.brain.BeginNativeEpisode(c.Begin.EpisodeID, c.Begin.Training, at); e != nil {
+			if e := r.brain.BeginNativeEpisode(c.Begin.EpisodeID, c.Begin.Training, at, c.Begin.Intervention); e != nil {
 				return e
 			}
 		}
@@ -251,11 +302,14 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 			out.TraceDigest = knowledge.NativeDigest(ep)
 		}
 		if o := c.Outcome; o != nil {
-			learning, e := r.brain.LearnNativeOutcome(o.Reward, o.Learn, at)
+			learning, e := r.brain.LearnNativeObservedOutcome(o.Reward, o.Learn, o.ContrastID, o.Source, o.OutcomeID, at)
 			if e != nil {
 				return e
 			}
 			out.Learning = &learning
+			if learning.Contrast && !learning.ContrastPending {
+				r.processedEvents["native-contrast/"+knowledge.NativeDigest([]string{o.Source, o.ContrastID})] = r.seq + 1
+			}
 		}
 		r.seq++
 		r.processedEvents[key] = r.seq

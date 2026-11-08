@@ -38,6 +38,9 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 	reserved := map[knowledge.NodeID]bool{}
 	if c := e.Memory.BrainState.NativeControl; c != nil {
 		reserved[c.Bias] = true
+		for _, id := range c.Features {
+			reserved[id] = true
+		}
 		for _, group := range c.Outputs {
 			for _, id := range group {
 				reserved[id] = true
