@@ -126,3 +126,68 @@ func TestNativeActionContrastMatchingAndPendingReplay(t *testing.T) {
 		t.Fatal("duplicate outcome not deduplicated")
 	}
 }
+
+// A first stop makes the rest of an otherwise fixed continuation unreachable.
+// The contrast must include the full cost of the completed alternative.
+func TestNativeActionContrastDelayedContinuationVersusAbsorbingStop(t *testing.T) {
+	rt, ids := nativeFixture(t)
+	cfg := nativeControlConfig(ids)
+	cfg.Version = k.NativeControlCausalVersion
+	nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
+	state := map[k.NodeID]float64{ids[0]: .8}
+	before, _ := rt.brain.NativePolicy(state, true, 0)
+	nativeApply(t, rt, actionTrial(t, rt, state, "a", "delayed", []int{0, 0, 3}, .4))
+	nativeApply(t, rt, actionTrial(t, rt, state, "b", "delayed", []int{3}, 0))
+	after, _ := rt.brain.NativePolicy(state, true, 0)
+	if after.Values[0]-after.Values[3] <= before.Values[0]-before.Values[3] {
+		t.Fatal("delayed operation advantage not learned against stop")
+	}
+}
+
+// This records the remaining localization limitation, separately from learned
+// effect accuracy: same-state action credit initially touches active nuisances.
+func TestNativeActionContrastLocalizationLimit(t *testing.T) {
+	rt, ids := nativeFixture(t)
+	cfg := nativeControlConfig(ids)
+	cfg.Version = k.NativeControlCausalVersion
+	nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
+	s := rt.brain.NativeControlSnapshot()
+	original := map[k.NodeID][]float64{}
+	for _, from := range []k.NodeID{ids[0], ids[6]} {
+		for _, a := range []int{0, 3} {
+			for _, to := range s.Outputs[a] {
+				syn := rt.brain.Registry.GetByID(from).Synapses[to][0]
+				v := syn.Weight
+				if syn.Inhibitory {
+					v = -v
+				}
+				original[from] = append(original[from], v)
+			}
+		}
+	}
+	state := map[k.NodeID]float64{ids[0]: .8, ids[6]: .8}
+	nativeApply(t, rt, actionTrial(t, rt, state, "a", "localization", []int{0, 3}, .4))
+	nativeApply(t, rt, actionTrial(t, rt, state, "b", "localization", []int{3}, 0))
+	changed := []int{}
+	for _, from := range []k.NodeID{ids[0], ids[6]} {
+		count, index := 0, 0
+		for _, a := range []int{0, 3} {
+			for _, to := range s.Outputs[a] {
+				syn := rt.brain.Registry.GetByID(from).Synapses[to][0]
+				v := syn.Weight
+				if syn.Inhibitory {
+					v = -v
+				}
+				if v != original[from][index] {
+					count++
+				}
+				index++
+			}
+		}
+		changed = append(changed, count)
+	}
+	t.Logf("first action pair: relevant changed=%d, active nuisance changed=%d; exclusive non-bias precision=%g", changed[0], changed[1], float64(changed[0])/float64(changed[0]+changed[1]))
+	if changed[0] == 0 || changed[1] == 0 {
+		t.Fatal("localization assumptions changed; re-audit claim and gate")
+	}
+}

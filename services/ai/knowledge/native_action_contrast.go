@@ -23,21 +23,13 @@ func validateNativeActionContrast(s *NativeControlState, id, source, outcome str
 	if p.Mode != "action" || p.ID != id || p.Source != source || p.OutcomeID == outcome || a.ID == b.ID || a.MatchKey != b.MatchKey || a.Decisions[0].Before != b.Decisions[0].Before || a.Decisions[0].Action == b.Decisions[0].Action {
 		return errors.New("unmatched action contrast")
 	}
-	// Terminal stop is absorbing. Pad a stopped single-decision arm with stop so
-	// propagate->stop versus stop is a valid controlled comparison. Reject a
-	// change in a later nonterminal operation; it would change two treatments.
-	for i := 1; i < max(len(a.Decisions), len(b.Decisions)); i++ {
-		x, y := "stop", "stop"
-		ax, bx := -1, -1
-		if i < len(a.Decisions) {
-			ax = a.Decisions[i].Action
-			x = s.Config.Operations[ax].Kind
-		}
-		if i < len(b.Decisions) {
-			bx = b.Decisions[i].Action
-			y = s.Config.Operations[bx].Kind
-		}
-		if x != y || x != "stop" && ax != bx {
+	// Stop in the first decision is absorbing: later treatment-schedule steps
+	// cannot execute in that arm. Where both arms continue, the assigned suffix
+	// must be identical. This admits propagate->propagate->stop versus stop,
+	// but rejects propagate->stop versus relax->propagate->stop (the first
+	// continuation decision differs while both arms are still able to act).
+	for i := 1; i < min(len(a.Decisions), len(b.Decisions)); i++ {
+		if a.Decisions[i].Action != b.Decisions[i].Action {
 			return errors.New("action contrast changed continuation")
 		}
 	}

@@ -11,11 +11,13 @@ import (
 )
 
 type Phase3CreditResult struct {
-	Seed              int64  `json:"seed"`
-	Arm               string `json:"arm"`
-	Blocks            int    `json:"blocks"`
-	Episodes          int    `json:"executed_training_episodes"`
-	Noise             bool   `json:"shared_reward_offset"`
+	TaskGroups        map[string]Metrics `json:"task_groups,omitempty"`
+	Depth             int                `json:"max_training_depth"`
+	Seed              int64              `json:"seed"`
+	Arm               string             `json:"arm"`
+	Blocks            int                `json:"blocks"`
+	Episodes          int                `json:"executed_training_episodes"`
+	Noise             bool               `json:"shared_reward_offset"`
 	Before, After     Metrics
 	Baselines         map[string]Metrics `json:"baselines"`
 	Training          Metrics            `json:"randomized_intervention_training"`
@@ -37,13 +39,19 @@ type Phase3CreditResult struct {
 // It is not observed by the learner and is never included in policy features.
 // The environment computes every reward AFTER executing the native operation.
 // Goal IDs and analytical effects remain evaluator-only.
-func phase3CreditTrial(rt *r.BrainRuntime, state map[k.NodeID]float64, action int, pair, mode, block string, offset float64) Metrics {
+func phase3CreditTrial(rt *r.BrainRuntime, state map[k.NodeID]float64, action int, pair, mode, block string, offset float64, depth int) Metrics {
 	id := fmt.Sprintf("p3-trial-%d", rt.LastSequence()+1)
 	apply(rt, r.NativeControlCommand{ID: id, Begin: &r.NativeBegin{EpisodeID: id, Training: true, Intervention: true, MatchKey: block, Observation: &r.NativeObservation{Source: "phase3-factorial-environment", SampleID: id, State: state}}})
 	out := apply(rt, r.NativeControlCommand{ID: id + "-action", Step: &r.NativeStep{EpisodeID: id, ExperimentAction: &action}})
 	cost, operations := 0.0, 0.0
 	if !out.Stopped {
 		operations, cost = 1, .04 // Config fixes the diagnostic tariff at .04.
+		for step := 1; step < depth; step++ {
+			propagate := 0
+			out = apply(rt, r.NativeControlCommand{ID: fmt.Sprintf("%s-continue-%d", id, step), Step: &r.NativeStep{EpisodeID: id, ExperimentAction: &propagate}})
+			operations++
+			cost += .04
+		}
 		stop := 3
 		out = apply(rt, r.NativeControlCommand{ID: id + "-stop", Step: &r.NativeStep{EpisodeID: id, ExperimentAction: &stop}})
 	}
@@ -55,11 +63,14 @@ func phase3CreditTrial(rt *r.BrainRuntime, state map[k.NodeID]float64, action in
 	return Metrics{Return: reward - cost, Reward: reward, Operations: operations, Cases: 1, Stops: 1}
 }
 
-func phase3CreditTasks(seed int64, cases int) []Phase2Task {
+func phase3CreditTasks(seed int64, cases, depth int) []Phase2Task {
 	rng := rand.New(rand.NewSource(seed))
 	tasks := make([]Phase2Task, cases)
 	for i := range tasks {
 		stage := 4
+		if depth > 1 {
+			stage = 5 - depth + rng.Intn(depth)
+		}
 		if rng.Intn(4) == 0 {
 			stage = 5
 		}
@@ -76,9 +87,12 @@ func phase3CreditTasks(seed int64, cases int) []Phase2Task {
 	return tasks
 }
 
-func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases int, stream int64, noisy bool, encoder string) (Phase3CreditResult, error) {
+func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases int, stream int64, noisy bool, encoder string, depth int) (Phase3CreditResult, error) {
 	start := time.Now()
-	result := Phase3CreditResult{Seed: seed, Arm: arm, Blocks: blocks, Noise: noisy, Encoder: encoder}
+	result := Phase3CreditResult{Seed: seed, Arm: arm, Blocks: blocks, Noise: noisy, Encoder: encoder, Depth: depth}
+	if depth < 1 || depth > 2 {
+		return result, fmt.Errorf("Phase III diagnostic supports depths one or two")
+	}
 	if encoder != "identity" && encoder != "relational" {
 		return result, fmt.Errorf("invalid Phase III encoder")
 	}
@@ -102,14 +116,14 @@ func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases in
 	cfg.ContrastMean = arm == "feature"
 	apply(rt, r.NativeControlCommand{ID: "init", Initialize: &cfg})
 	before := parameters(brain)
-	data := phase3CreditTasks(stream+seed, cases)
+	data := phase3CreditTasks(stream+seed, cases, depth)
 	result.Before = phase3CreditEvaluate(rt, data, stream+seed+100000)
 	result.Baselines = map[string]Metrics{}
-	for _, arm := range []string{"static0", "static1", "random"} {
+	for _, arm := range []string{"static0", "static1", "static2", "random"} {
 		result.Baselines[arm] = phase3CreditEvaluate(rt, data, stream+seed+100000, arm)
 	}
-	trial := func(state map[k.NodeID]float64, action int, pair, mode, block string, offset float64) {
-		m := phase3CreditTrial(rt, state, action, pair, mode, block, offset)
+	trial := func(state map[k.NodeID]float64, action int, pair, mode, block string, offset float64, steps int) {
+		m := phase3CreditTrial(rt, state, action, pair, mode, block, offset, steps)
 		result.Training.Cases++
 		result.Training.Return += m.Return
 		result.Training.Reward += m.Reward
@@ -119,6 +133,9 @@ func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases in
 	unmatchedRNG := rand.New(rand.NewSource(seed + 15100000))
 	for i := 0; i < blocks; i++ {
 		stage := 4
+		if depth > 1 {
+			stage = 5 - depth + rng.Intn(depth)
+		}
 		if rng.Intn(4) == 0 {
 			stage = 5
 		}
@@ -149,8 +166,8 @@ func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases in
 		if arm == "feature" {
 			for j, action := range []int{a, b} {
 				pair := fmt.Sprintf("feature-%d-%d", i, j)
-				trial(s0, action, pair, "", block, offset)
-				trial(s1, action, pair, "", block, offset)
+				trial(s0, action, pair, "", block, offset, max(1, 5-stage))
+				trial(s1, action, pair, "", block, offset, max(1, 5-stage))
 			}
 		} else {
 			for j, state := range []map[k.NodeID]float64{s0, s1} {
@@ -159,14 +176,14 @@ func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases in
 					pair = fmt.Sprintf("action-%d-%d", i, j)
 					mode = "action"
 				}
-				trial(state, a, pair, mode, block, offset)
+				trial(state, a, pair, mode, block, offset, max(1, 5-stage))
 				secondOffset := offset
 				// Negative control deliberately violates the adapter assumption while
 				// keeping its claimed key: a key is not a certificate of hidden matching.
 				if arm == "unmatched" && noisy {
 					secondOffset = .6*(2*unmatchedRNG.Float64()-1) + .1*math.Sin(6*z)
 				}
-				trial(state, b, pair, mode, block, secondOffset)
+				trial(state, b, pair, mode, block, secondOffset, max(1, 5-stage))
 			}
 		}
 		result.Episodes += 4
@@ -176,8 +193,20 @@ func Phase3CreditExperiment(dir string, seed int64, arm string, blocks, cases in
 	result.Training.Operations /= float64(result.Training.Cases)
 	result.Training.Stops = 1
 	result.After = phase3CreditEvaluate(rt, data, stream+seed+100000)
+	result.TaskGroups = map[string]Metrics{}
+	for _, stage := range []int{3, 4, 5} {
+		group := []Phase2Task{}
+		for _, task := range data {
+			if task.State[unit(stage, 0)] > 0 {
+				group = append(group, task)
+			}
+		}
+		if len(group) > 0 {
+			result.TaskGroups[fmt.Sprintf("depth%d", 5-stage)] = phase3CreditEvaluate(rt, group, stream+seed+100000)
+		}
+	}
 	for _, task := range data {
-		result.OracleReturn += math.Max(.25*task.State[unit(5, 0)], .25*task.State[unit(4, 0)]-.04) / float64(cases)
+		result.OracleReturn += phase3CreditOptimum(task) / float64(cases)
 	}
 	result.Regret = result.OracleReturn - result.After.Return
 	after := parameters(brain)
@@ -255,7 +284,7 @@ func phase3CreditEvaluate(rt *r.BrainRuntime, tasks []Phase2Task, seed int64, ar
 	out := Metrics{Cases: len(tasks)}
 	for i, task := range tasks {
 		m := phase2Evaluate(rt, []Phase2Task{task}, false, seed+int64(i), arm)
-		optimum := math.Max(.25*task.State[unit(5, 0)], .25*task.State[unit(4, 0)]-.04)
+		optimum := phase3CreditOptimum(task)
 		out.Return += m.Return
 		out.Reward += m.Reward
 		out.Operations += m.Operations
@@ -273,4 +302,13 @@ func phase3CreditEvaluate(rt *r.BrainRuntime, tasks []Phase2Task, seed int64, ar
 	out.Truncations /= n
 	out.Accuracy /= n
 	return out
+}
+
+// Only used by the evaluator. The policy never receives a stage or this value.
+func phase3CreditOptimum(task Phase2Task) float64 {
+	best := .25 * task.State[unit(5, 0)]
+	for stage := 0; stage < 5; stage++ {
+		best = math.Max(best, .25*task.State[unit(stage, 0)]-.04*float64(5-stage))
+	}
+	return best
 }

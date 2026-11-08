@@ -104,3 +104,30 @@ update active irrelevant features. Effective causal influence accuracy is distin
 from exclusive synaptic credit precision. Nor can identity-readout credit results
 pass Gate C, H, or runtime integration. These remain separate mandatory gates.
 No changes after final evaluation will be tuned against this holdout.
+
+## Extension: absorbing stop and delayed action effects
+
+After candidate-1 confirmation was sealed, inspection found the initial suffix
+validator too restrictive for adaptive computation: a first `stop` necessarily
+prevents any later scheduled primitive. The extension compares suffix decisions
+where both arms are still active; an absorbing first stop may have no suffix.
+Different suffix decisions while both arms continue are still rejected. This is
+a computation/experimental matching contract, not a mandatory policy schedule.
+
+The `-phase3-depth 2` environment samples depths 0,1,2. Training interventions
+share `propagate -> stop` continuation for depth 2; the terminal reward is only
+submitted after the entire executed sequence. Greedy evaluation is unconstrained
+and must learn both continuation and stopping. Each block still uses four factual
+trials, identical across controls. It never tells the learner the depth or optimum.
+
+Development 5003/5011 and validation 6007/6011 at 512 blocks are promising. Keep
+512 blocks, .15 learning rate and all other settings. New confirmation seeds:
+8009,8011,8017,8039,8053; test stream 19100000; 512 cases. Run action, feature,
+unpaired and unmatched, noisy and clean. Reuse the numerical candidate criteria
+above, reporting depth-specific behavior separately. These seeds are not the
+candidate-1 final holdout. Failure is retained; no retuning on either final set.
+
+The research parameter-inspection helper was corrected to enumerate canonical
+ParameterSources, so the existing relational encoder can be ablated too. Its
+first failed executions are retained; they produced no claimed scores. Relational
+ablation uses development seeds only and is not broad generalization evidence.

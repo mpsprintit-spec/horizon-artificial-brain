@@ -24,6 +24,7 @@ func main() {
 	boundary := flag.String("credit-boundary", "", "evaluate frozen checkpoint around operation-cost boundary")
 	retention := flag.String("retention-baseline", "", "frozen Phase II checkpoint for matched old-task evaluation")
 	phase3 := flag.String("phase3-credit", "", "Phase III action, feature, unpaired or unmatched factual contrasts")
+	phase3Depth := flag.Int("phase3-depth", 1, "maximum factual continuation depth, one or two")
 	phase3Encoder := flag.String("phase3-encoder", "identity", "Phase III identity or relational readout ablation")
 	noisy := flag.Bool("reward-offset", true, "Phase III shared exogenous reward offset")
 	flag.Parse()
@@ -94,7 +95,7 @@ func main() {
 		}
 
 		if *phase3 != "" {
-			result, err := nf.Phase3CreditExperiment(fmt.Sprintf("%s/seed%d", *dir, seed), seed, *phase3, *episodes, *cases, *stream, *noisy, *phase3Encoder)
+			result, err := nf.Phase3CreditExperiment(fmt.Sprintf("%s/seed%d", *dir, seed), seed, *phase3, *episodes, *cases, *stream, *noisy, *phase3Encoder, *phase3Depth)
 			if err != nil {
 				panic(err)
 			}
