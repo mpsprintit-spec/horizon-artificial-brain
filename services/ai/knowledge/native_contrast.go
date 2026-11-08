@@ -8,9 +8,11 @@ import (
 
 // A bounded pending empirical trial, not another model or a replay database.
 // No weight changes until its matched observed trial arrives. Both trials must
-// execute the same actions under unchanged parameters. Randomization/matching
+// keep parameters unchanged. Feature contrasts hold actions fixed; action
+// contrasts hold the initial state and continuation fixed. Randomization/matching
 // of external conditions is the experiment adapter's responsibility.
 type NativeContrast struct {
+	Mode      string         `json:"mode,omitempty"`
 	ID        string         `json:"id"`
 	Source    string         `json:"source"`
 	OutcomeID string         `json:"outcome_id"`
@@ -18,7 +20,10 @@ type NativeContrast struct {
 	Episode   *NativeEpisode `json:"episode"`
 }
 
-func validateNativeContrast(s *NativeControlState, id, source, outcome string, learn bool) error {
+func validateNativeContrast(s *NativeControlState, id, source, outcome string, learn bool, mode string) error {
+	if mode != "" && (mode != "action" || id == "") {
+		return errors.New("invalid contrast mode")
+	}
 	if s == nil {
 		return errors.New("missing native controller")
 	}
@@ -28,12 +33,15 @@ func validateNativeContrast(s *NativeControlState, id, source, outcome string, l
 		}
 		return nil
 	}
-	if s.Config.Version != NativeControlRelationalVersion || s.Config.Lambda != 1 || !learn || s.Episode == nil || !s.Episode.Training || !s.Episode.Stopped || source == "" || outcome == "" {
-		return errors.New("contrast requires version2, lambda1, completed observed training trials")
+	if !s.Config.SupportsExperiments() || s.Config.Lambda != 1 || !learn || s.Episode == nil || !s.Episode.Training || !s.Episode.Stopped || source == "" || outcome == "" {
+		return errors.New("contrast requires version2 or later, lambda1, completed observed training trials")
+	}
+	if mode == "action" {
+		return validateNativeActionContrast(s, id, source, outcome)
 	}
 	if p := s.PendingContrast; p != nil {
 		ep := s.Episode
-		if p.ID != id || p.Source != source || p.OutcomeID == outcome || p.Episode.ID == ep.ID || len(p.Episode.Decisions) != len(ep.Decisions) {
+		if p.Mode != mode || p.ID != id || p.Source != source || p.OutcomeID == outcome || p.Episode.ID == ep.ID || len(p.Episode.Decisions) != len(ep.Decisions) {
 			return errors.New("unmatched contrast")
 		}
 		for i, d := range ep.Decisions {
@@ -45,10 +53,14 @@ func validateNativeContrast(s *NativeControlState, id, source, outcome string, l
 	return nil
 }
 
-func (k *KnowledgeBase) ValidateNativeContrast(id, source, outcome string, learn bool) error {
+func (k *KnowledgeBase) ValidateNativeContrast(id, source, outcome string, learn bool, modes ...string) error {
+	mode := ""
+	if len(modes) > 0 {
+		mode = modes[0]
+	}
 	k.RLock()
 	defer k.RUnlock()
-	return validateNativeContrast(k.BrainState.NativeControl, id, source, outcome, learn)
+	return validateNativeContrast(k.BrainState.NativeControl, id, source, outcome, learn, mode)
 }
 
 // Paired return regression minimizes ((G_A-G_B)-(Q_A-Q_B))^2. Shared
@@ -59,8 +71,12 @@ func (k *KnowledgeBase) ValidateNativeContrast(id, source, outcome string, learn
 // bias synapses only. This calibrates the otherwise unidentified intercept,
 // without assigning common feature weights a causal effect. It is an explicit
 // experimental option, not a general solution to nonlinear/contextual credit.
-func (k *KnowledgeBase) LearnNativeObservedOutcome(reward float64, learn bool, id, source, outcome string, at time.Time) (NativeLearning, error) {
-	if err := k.ValidateNativeContrast(id, source, outcome, learn); err != nil {
+func (k *KnowledgeBase) LearnNativeObservedOutcome(reward float64, learn bool, id, source, outcome string, at time.Time, modes ...string) (NativeLearning, error) {
+	mode := ""
+	if len(modes) > 0 {
+		mode = modes[0]
+	}
+	if err := k.ValidateNativeContrast(id, source, outcome, learn, mode); err != nil {
 		return NativeLearning{}, err
 	}
 	if id == "" {
@@ -69,7 +85,7 @@ func (k *KnowledgeBase) LearnNativeObservedOutcome(reward float64, learn bool, i
 	k.Lock()
 	defer k.Unlock()
 	s := k.BrainState.NativeControl
-	if err := validateNativeContrast(s, id, source, outcome, learn); err != nil {
+	if err := validateNativeContrast(s, id, source, outcome, learn, mode); err != nil {
 		return NativeLearning{}, err
 	}
 	if !nativeFinite(reward) || reward < -1 || reward > 1 {
@@ -81,10 +97,13 @@ func (k *KnowledgeBase) LearnNativeObservedOutcome(reward float64, learn bool, i
 		out.Return -= d.Cost
 	}
 	if s.PendingContrast == nil {
-		s.PendingContrast = &NativeContrast{ID: id, Source: source, OutcomeID: outcome, Reward: reward, Episode: ep}
+		s.PendingContrast = &NativeContrast{Mode: mode, ID: id, Source: source, OutcomeID: outcome, Reward: reward, Episode: ep}
 		s.Episode = nil
 		out.ContrastPending = true
 		return out, nil
+	}
+	if mode == "action" {
+		return k.learnNativeActionContrast(reward, at)
 	}
 	p := s.PendingContrast
 	type edge struct{ from, to NodeID }

@@ -16,6 +16,11 @@ import (
 
 const NativeControlVersion = "native-operation-control-v1"
 const NativeControlRelationalVersion = "native-operation-control-v2"
+const NativeControlCausalVersion = "native-operation-control-v3"
+
+func (c NativeControlConfig) SupportsExperiments() bool {
+	return c.Version == NativeControlRelationalVersion || c.Version == NativeControlCausalVersion
+}
 
 func NativeDigest(v any) string {
 	b, e := json.Marshal(v)
@@ -77,7 +82,7 @@ func (c NativeControlConfig) Validate() error {
 	if c.MaxActiveNodes < 1 || c.MaxActiveNodes > 1000000 || c.MaxSynapseReads < 1 || c.MaxSynapseReads > 10000000 {
 		return errors.New("invalid native work budget")
 	}
-	if (c.Version != NativeControlVersion && c.Version != NativeControlRelationalVersion) || len(c.Sources) < 1 || len(c.Sources) > 4096 || len(c.Operations) < 2 || len(c.Operations) > 16 || c.MaxSteps < 1 || c.MaxSteps > 64 {
+	if (c.Version != NativeControlVersion && !c.SupportsExperiments()) || len(c.Sources) < 1 || len(c.Sources) > 4096 || len(c.Operations) < 2 || len(c.Operations) > 16 || c.MaxSteps < 1 || c.MaxSteps > 64 {
 		return errors.New("invalid native control dimensions/version")
 	}
 	for _, v := range []float64{c.LearningRate, c.Gamma, c.Lambda, c.Temperature} {
@@ -88,13 +93,13 @@ func (c NativeControlConfig) Validate() error {
 	if c.LearningRate <= 0 || c.LearningRate > 1 || c.Gamma < 0 || c.Gamma > 1 || c.Lambda < 0 || c.Lambda > 1 || c.Temperature <= 0 || c.Temperature > 10 {
 		return errors.New("invalid native learning bounds")
 	}
-	if c.Encoder != "" && c.Encoder != "local-relational-v1" || c.Encoder != "" && c.Version != NativeControlRelationalVersion {
+	if c.Encoder != "" && c.Encoder != "local-relational-v1" || c.Encoder != "" && !c.SupportsExperiments() {
 		return errors.New("unsupported native encoder/version")
 	}
-	if c.ContrastMean && c.Version != NativeControlRelationalVersion {
+	if c.ContrastMean && !c.SupportsExperiments() {
 		return errors.New("contrast calibration requires version2")
 	}
-	if !nativeFinite(c.Epsilon) || c.Epsilon < 0 || c.Epsilon > 1 || c.Epsilon > 0 && c.Version != NativeControlRelationalVersion {
+	if !nativeFinite(c.Epsilon) || c.Epsilon < 0 || c.Epsilon > 1 || c.Epsilon > 0 && !c.SupportsExperiments() {
 		return errors.New("invalid exploration configuration")
 	}
 	seen := map[NodeID]bool{}
@@ -141,6 +146,7 @@ type NativeDecision struct {
 	At            time.Time          `json:"at"`
 }
 type NativeEpisode struct {
+	MatchKey     string           `json:"match_key,omitempty"`
 	Intervention bool             `json:"intervention,omitempty"`
 	ID           string           `json:"id"`
 	Training     bool             `json:"training"`
@@ -322,7 +328,7 @@ func (k *KnowledgeBase) nativeReadout(s *NativeControlState, state map[NodeID]fl
 			n := k.Registry.GetByID(id)
 			for _, target := range targets {
 				out.ParameterReads++
-				if s.Config.Version == NativeControlRelationalVersion && out.ParameterReads+out.StructuralReads > s.Config.MaxSynapseReads {
+				if s.Config.SupportsExperiments() && out.ParameterReads+out.StructuralReads > s.Config.MaxSynapseReads {
 					return out, errors.New("native policy read budget exceeded")
 				}
 				list := n.Synapses[target]
@@ -366,6 +372,10 @@ func (k *KnowledgeBase) NativePolicy(state map[NodeID]float64, greedy bool, u fl
 	return k.nativeReadout(s, state, greedy, u)
 }
 func (k *KnowledgeBase) BeginNativeEpisode(id string, training bool, at time.Time, intervention ...bool) error {
+	return k.BeginNativeTrial(id, training, at, len(intervention) > 0 && intervention[0], "")
+}
+
+func (k *KnowledgeBase) BeginNativeTrial(id string, training bool, at time.Time, intervened bool, matchKey string) error {
 	k.Lock()
 	defer k.Unlock()
 	s := k.BrainState.NativeControl
@@ -375,11 +385,13 @@ func (k *KnowledgeBase) BeginNativeEpisode(id string, training bool, at time.Tim
 	if p := s.PendingContrast; p != nil && at.Before(p.Episode.Decisions[len(p.Episode.Decisions)-1].At) {
 		return errors.New("native clock rollback across contrast trials")
 	}
-	intervened := len(intervention) > 0 && intervention[0]
-	if intervened && (!training || s.Config.Version != NativeControlRelationalVersion || s.Config.Lambda != 1) {
+	if intervened && (!training || !s.Config.SupportsExperiments() || s.Config.Lambda != 1) {
 		return errors.New("intervention requires version2 Monte Carlo training")
 	}
-	s.Episode = &NativeEpisode{ID: id, Training: training, Started: at, Intervention: intervened}
+	if matchKey != "" && (s.Config.Version != NativeControlCausalVersion || !intervened || len(matchKey) > 256) {
+		return errors.New("invalid native trial matching scope")
+	}
+	s.Episode = &NativeEpisode{ID: id, Training: training, Started: at, Intervention: intervened, MatchKey: matchKey}
 	return nil
 }
 func (k *KnowledgeBase) AppendNativeDecision(d NativeDecision) error {

@@ -12,8 +12,9 @@ import (
 )
 
 func contrastCrashOutcome(t *testing.T, rt *BrainRuntime) NativeControlResult {
-	ep := rt.brain.NativeControlSnapshot().Episode
-	return nativeApply(t, rt, NativeControlCommand{ID: "second-out", Outcome: &NativeOutcome{EpisodeID: ep.ID, TraceDigest: k.NativeDigest(ep), Source: "crash-environment", OutcomeID: "second", Provenance: "observed-environment", Reward: .2, Learn: true, ContrastID: "pair"}})
+	snapshot := rt.brain.NativeControlSnapshot()
+	ep := snapshot.Episode
+	return nativeApply(t, rt, NativeControlCommand{ID: "second-out", Outcome: &NativeOutcome{EpisodeID: ep.ID, TraceDigest: k.NativeDigest(ep), Source: "crash-environment", OutcomeID: "second", Provenance: "observed-environment", Reward: .2, Learn: true, ContrastID: "pair", ContrastMode: snapshot.PendingContrast.Mode}})
 }
 func TestNativeContrastCrashBoundary(t *testing.T) {
 	if path := os.Getenv("HORIZON_PAIR_CRASH_WAL"); path != "" {
@@ -45,6 +46,12 @@ func TestNativeContrastCrashBoundary(t *testing.T) {
 		contrastCrashOutcome(t, rt)
 		t.Fatal("no exit")
 	}
+	for _, kind := range []string{"feature", "action"} {
+		t.Run(kind, func(t *testing.T) { nativeContrastCrashBoundary(t, kind) })
+	}
+}
+
+func nativeContrastCrashBoundary(t *testing.T, kind string) {
 	rt, ids := nativeFixture(t)
 	path := filepath.Join(t.TempDir(), "events.jsonl")
 	wal, err := OpenEventLog(path)
@@ -56,17 +63,29 @@ func TestNativeContrastCrashBoundary(t *testing.T) {
 	cfg := nativeControlConfig(ids)
 	cfg.Version = k.NativeControlRelationalVersion
 	cfg.Encoder = "local-relational-v1"
+	match, contrastMode := "", ""
+	if kind == "action" {
+		cfg.Version = k.NativeControlCausalVersion
+		match, contrastMode = "fixed-world-block", "action"
+	}
 	nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
 	for trial, v := range []float64{.8, .2} {
+		if kind == "action" {
+			v = .8
+		}
 		id := fmt.Sprintf("trial%d", trial)
-		nativeApply(t, rt, NativeControlCommand{ID: id, Begin: &NativeBegin{EpisodeID: id, Training: true, Intervention: true, Observation: &NativeObservation{Source: "crash-environment", SampleID: id, State: map[k.NodeID]float64{ids[0]: v, ids[6]: .8}}}})
-		for j, a := range []int{0, 3} {
+		nativeApply(t, rt, NativeControlCommand{ID: id, Begin: &NativeBegin{EpisodeID: id, Training: true, Intervention: true, MatchKey: match, Observation: &NativeObservation{Source: "crash-environment", SampleID: id, State: map[k.NodeID]float64{ids[0]: v, ids[6]: .8}}}})
+		actions := []int{0, 3}
+		if kind == "action" && trial == 1 {
+			actions = []int{3}
+		}
+		for j, a := range actions {
 			action := a
 			nativeApply(t, rt, NativeControlCommand{ID: fmt.Sprintf("%s-%d", id, j), Step: &NativeStep{EpisodeID: id, ExperimentAction: &action}})
 		}
 		if trial == 0 {
 			ep := rt.brain.NativeControlSnapshot().Episode
-			nativeApply(t, rt, NativeControlCommand{ID: "first-out", Outcome: &NativeOutcome{EpisodeID: id, TraceDigest: k.NativeDigest(ep), Source: "crash-environment", OutcomeID: "first", Provenance: "observed-environment", Reward: .8, Learn: true, ContrastID: "pair"}})
+			nativeApply(t, rt, NativeControlCommand{ID: "first-out", Outcome: &NativeOutcome{EpisodeID: id, TraceDigest: k.NativeDigest(ep), Source: "crash-environment", OutcomeID: "first", Provenance: "observed-environment", Reward: .8, Learn: true, ContrastID: "pair", ContrastMode: contrastMode}})
 		}
 	}
 	cp := filepath.Join(t.TempDir(), "before.json")
