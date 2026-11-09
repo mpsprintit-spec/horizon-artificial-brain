@@ -251,7 +251,7 @@ func evaluate(rt *r.BrainRuntime, data []Task, train bool, seed int64, arm strin
 func parameters(brain *k.Brain) []float64 {
 	s := brain.NativeControlSnapshot()
 	out := []float64{}
-	for _, id := range append(s.Config.Sources, s.Bias) {
+	for _, id := range s.ParameterSources() {
 		for _, group := range s.Outputs {
 			for _, target := range group {
 				e := brain.Registry.GetByID(id).Synapses[target][0]

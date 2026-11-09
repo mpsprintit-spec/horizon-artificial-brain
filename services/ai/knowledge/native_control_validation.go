@@ -133,8 +133,11 @@ func ValidateNativeControlState(data []byte, enabled bool) error {
 	}
 	episodes := []*NativeEpisode{s.Episode}
 	if p := s.PendingContrast; p != nil {
-		if s.Config.Version != NativeControlRelationalVersion || s.Config.Lambda != 1 || p.ID == "" || p.Source == "" || p.OutcomeID == "" || !nativeFinite(p.Reward) || p.Reward < -1 || p.Reward > 1 || p.Episode == nil || !p.Episode.Training || !p.Episode.Stopped || len(p.Episode.Decisions) == 0 {
+		if !s.Config.SupportsExperiments() || s.Config.Lambda != 1 || p.ID == "" || p.Source == "" || p.OutcomeID == "" || !nativeFinite(p.Reward) || p.Reward < -1 || p.Reward > 1 || p.Episode == nil || !p.Episode.Training || !p.Episode.Stopped || len(p.Episode.Decisions) == 0 {
 			return errors.New("invalid pending contrast")
+		}
+		if p.Mode != "" && (p.Mode != "action" || s.Config.Version != NativeControlCausalVersion || s.Config.Gamma != 1 || s.Config.ContrastMean || p.Episode.MatchKey == "" || !p.Episode.Intervention || p.Episode.Truncated) {
+			return errors.New("invalid persisted action contrast")
 		}
 		if s.Episode != nil && (s.Episode.ID == p.Episode.ID || s.Episode.Started.Before(p.Episode.Decisions[len(p.Episode.Decisions)-1].At)) {
 			return errors.New("overlapping contrast episodes")
@@ -146,7 +149,10 @@ func ValidateNativeControlState(data []byte, enabled bool) error {
 			if ep.ID == "" || ep.Started.IsZero() || len(ep.Decisions) > s.Config.MaxSteps || ep.Truncated && (!ep.Stopped || len(ep.Decisions) != s.Config.MaxSteps) {
 				return errors.New("invalid native episode")
 			}
-			if ep.Intervention && (!ep.Training || s.Config.Version != NativeControlRelationalVersion || s.Config.Lambda != 1) {
+			if len(ep.MatchKey) > 256 || ep.MatchKey != "" && (s.Config.Version != NativeControlCausalVersion || !ep.Intervention) {
+				return errors.New("invalid persisted match scope")
+			}
+			if ep.Intervention && (!ep.Training || !s.Config.SupportsExperiments() || s.Config.Lambda != 1) {
 				return errors.New("invalid persisted intervention mode")
 			}
 			previous := ep.Started

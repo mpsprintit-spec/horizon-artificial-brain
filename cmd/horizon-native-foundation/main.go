@@ -23,6 +23,10 @@ func main() {
 	epsilon := flag.Float64("epsilon", 0, "optional Phase II epsilon-greedy exploration")
 	boundary := flag.String("credit-boundary", "", "evaluate frozen checkpoint around operation-cost boundary")
 	retention := flag.String("retention-baseline", "", "frozen Phase II checkpoint for matched old-task evaluation")
+	phase3 := flag.String("phase3-credit", "", "Phase III action, feature, unpaired or unmatched factual contrasts")
+	phase3Depth := flag.Int("phase3-depth", 1, "maximum factual continuation depth, one or two")
+	phase3Encoder := flag.String("phase3-encoder", "identity", "Phase III identity or relational readout ablation")
+	noisy := flag.Bool("reward-offset", true, "Phase III shared exogenous reward offset")
 	flag.Parse()
 	if *retention != "" {
 		seed, err := strconv.ParseInt(*seeds, 10, 64)
@@ -68,7 +72,9 @@ func main() {
 	}
 	if *recovery {
 		var err error
-		if *phase2 != "" {
+		if *phase3 != "" {
+			err = nf.Phase3RecoveryAudit(*dir)
+		} else if *phase2 != "" {
 			err = nf.Phase2RecoveryAudit(*dir)
 		} else {
 			err = nf.RecoveryAudit(*dir)
@@ -88,6 +94,22 @@ func main() {
 		seed, e := strconv.ParseInt(s, 10, 64)
 		if e != nil {
 			panic(e)
+		}
+
+		if *phase3 != "" {
+			result, err := nf.Phase3CreditExperiment(fmt.Sprintf("%s/seed%d", *dir, seed), seed, *phase3, *episodes, *cases, *stream, *noisy, *phase3Encoder, *phase3Depth)
+			if err != nil {
+				panic(err)
+			}
+			data, err := json.MarshalIndent(result, "", "  ")
+			if err != nil {
+				panic(err)
+			}
+			if err = os.WriteFile(fmt.Sprintf("%s/seed%d.json", *dir, seed), data, 0600); err != nil {
+				panic(err)
+			}
+			fmt.Printf("phase3 seed=%d arm=%s return=%g regret=%g effectPrecision=%g seconds=%.2f\n", seed, *phase3, result.After.Return, result.Regret, result.EffectPrecision, result.Seconds)
+			continue
 		}
 		if *credit != "" {
 			if *credit != "paired" && *credit != "unpaired" && *credit != "paired-centered" {

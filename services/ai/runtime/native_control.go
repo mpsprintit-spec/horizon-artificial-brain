@@ -18,6 +18,7 @@ type NativeObservation struct {
 	State    map[knowledge.NodeID]float64 `json:"state"`
 }
 type NativeBegin struct {
+	MatchKey     string             `json:"match_key,omitempty"`
 	Intervention bool               `json:"intervention,omitempty"` // explicit controlled experiment, not an on-policy sample
 	EpisodeID    string             `json:"episode_id"`
 	Training     bool               `json:"training"`
@@ -30,14 +31,15 @@ type NativeStep struct {
 	Sample           float64 `json:"sample"`
 }
 type NativeOutcome struct {
-	ContrastID  string  `json:"contrast_id,omitempty"` // two observed, matched-action trajectories
-	EpisodeID   string  `json:"episode_id"`
-	TraceDigest string  `json:"trace_digest"`
-	Source      string  `json:"source"`
-	OutcomeID   string  `json:"outcome_id"`
-	Provenance  string  `json:"provenance"` // observed-environment or observed-sensor
-	Reward      float64 `json:"reward"`
-	Learn       bool    `json:"learn"`
+	ContrastMode string  `json:"contrast_mode,omitempty"`
+	ContrastID   string  `json:"contrast_id,omitempty"` // two observed, matched-action trajectories
+	EpisodeID    string  `json:"episode_id"`
+	TraceDigest  string  `json:"trace_digest"`
+	Source       string  `json:"source"`
+	OutcomeID    string  `json:"outcome_id"`
+	Provenance   string  `json:"provenance"` // observed-environment or observed-sensor
+	Reward       float64 `json:"reward"`
+	Learn        bool    `json:"learn"`
 }
 type NativeControlCommand struct {
 	DiscardContrastID string                         `json:"discard_contrast_id,omitempty"` // abandon pending trial; retain its journal evidence
@@ -95,6 +97,9 @@ func (c NativeControlCommand) Validate() error {
 	}
 	if o := c.Outcome; o != nil {
 		n++
+		if o.ContrastMode != "" && (o.ContrastMode != "action" || o.ContrastID == "") {
+			return errors.New("invalid native contrast mode")
+		}
 		if len(o.ContrastID) > 256 || strings.Contains(o.ContrastID, "/") {
 			return errors.New("invalid contrast ID")
 		}
@@ -150,7 +155,7 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		return NativeControlResult{Sequence: r.processedEvents[old], Duplicate: true}, nil
 	}
 	var transition *activation.NativeTransition
-	s := r.brain.NativeControlSnapshot()
+	s := r.brain.NativeControlRuntimeView(c.Outcome != nil)
 	if c.Initialize != nil {
 		if err = r.brain.ValidateNativeInit(*c.Initialize); err != nil {
 			return out, err
@@ -164,10 +169,13 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		}
 	}
 	if c.Begin != nil {
-		if p := s.PendingContrast; p != nil && at.Before(p.Episode.Decisions[len(p.Episode.Decisions)-1].At) {
+		if len(c.Begin.MatchKey) > 256 || c.Begin.MatchKey != "" && (s.Config.Version != knowledge.NativeControlCausalVersion || !c.Begin.Intervention) {
+			return out, errors.New("invalid native trial match key")
+		}
+		if p := s.PendingContrast; p != nil && at.Before(p.Episode.LastDecisionAt) {
 			return out, errors.New("native clock rollback across contrast trials")
 		}
-		if c.Begin.Intervention && (!c.Begin.Training || s.Config.Version != knowledge.NativeControlRelationalVersion || s.Config.Lambda != 1) {
+		if c.Begin.Intervention && (!c.Begin.Training || !s.Config.SupportsExperiments() || s.Config.Lambda != 1) {
 			return out, errors.New("invalid intervention experiment mode")
 		}
 		if s.Episode != nil {
@@ -204,10 +212,10 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 	}
 	if c.Step != nil {
 		ep := s.Episode
-		if ep == nil || ep.ID != c.Step.EpisodeID || ep.Stopped || len(ep.Decisions) >= s.Config.MaxSteps || at.Before(ep.Started) {
+		if ep == nil || ep.ID != c.Step.EpisodeID || ep.Stopped || ep.DecisionCount >= s.Config.MaxSteps || at.Before(ep.Started) {
 			return out, errors.New("native step outside active episode")
 		}
-		if len(ep.Decisions) > 0 && at.Before(ep.Decisions[len(ep.Decisions)-1].At) {
+		if ep.DecisionCount > 0 && at.Before(ep.LastDecisionAt) {
 			return out, errors.New("native clock rollback")
 		}
 		p, e := r.brain.NativePolicy(r.activation.CurrentState(), !ep.Training, c.Step.Sample)
@@ -237,10 +245,10 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 	}
 	if o := c.Outcome; o != nil {
 		ep := s.Episode
-		if ep == nil || ep.ID != o.EpisodeID || !ep.Stopped || len(ep.Decisions) == 0 || o.TraceDigest != knowledge.NativeDigest(ep) || at.Before(ep.Decisions[len(ep.Decisions)-1].At) {
+		if ep == nil || ep.ID != o.EpisodeID || !ep.Stopped || ep.DecisionCount == 0 || o.TraceDigest != ep.TraceDigest || at.Before(ep.LastDecisionAt) {
 			return out, errors.New("native outcome does not bind completed trajectory")
 		}
-		if err = r.brain.ValidateNativeContrast(o.ContrastID, o.Source, o.OutcomeID, o.Learn); err != nil {
+		if err = r.brain.ValidateNativeContrast(o.ContrastID, o.Source, o.OutcomeID, o.Learn, o.ContrastMode); err != nil {
 			return out, err
 		}
 		if o.ContrastID != "" {
@@ -278,7 +286,7 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 				snapshot.ContextState = nil
 				r.activation.RestoreState(snapshot)
 			}
-			if e := r.brain.BeginNativeEpisode(c.Begin.EpisodeID, c.Begin.Training, at, c.Begin.Intervention); e != nil {
+			if e := r.brain.BeginNativeTrial(c.Begin.EpisodeID, c.Begin.Training, at, c.Begin.Intervention, c.Begin.MatchKey); e != nil {
 				return e
 			}
 		}
@@ -297,12 +305,12 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 				return e
 			}
 			out.State = after
-			ep := r.brain.NativeControlSnapshot().Episode
+			ep := r.brain.NativeControlRuntimeView(true).Episode
 			out.Stopped, out.Truncated = ep.Stopped, ep.Truncated
-			out.TraceDigest = knowledge.NativeDigest(ep)
+			out.TraceDigest = ep.TraceDigest
 		}
 		if o := c.Outcome; o != nil {
-			learning, e := r.brain.LearnNativeObservedOutcome(o.Reward, o.Learn, o.ContrastID, o.Source, o.OutcomeID, at)
+			learning, e := r.brain.LearnNativeObservedOutcome(o.Reward, o.Learn, o.ContrastID, o.Source, o.OutcomeID, at, o.ContrastMode)
 			if e != nil {
 				return e
 			}

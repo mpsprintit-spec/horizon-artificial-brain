@@ -61,7 +61,9 @@ func BenchmarkNativeRelationalPolicy(b *testing.B) {
 	}
 }
 
-func BenchmarkNativeRelationalPersistence(b *testing.B) {
+func BenchmarkNativeRelationalPersistence(b *testing.B) { benchmarkNativePairedPersistence(b, false) }
+func BenchmarkNativeActionPersistence(b *testing.B)     { benchmarkNativePairedPersistence(b, true) }
+func benchmarkNativePairedPersistence(b *testing.B, causal bool) {
 	for _, n := range []int{1000, 4000, 40000} {
 		for _, mode := range []string{"checkpoint", "restore-pending", "replay-pair"} {
 			b.Run(fmt.Sprintf("nodes=%d/mode=%s", n, mode), func(b *testing.B) {
@@ -81,6 +83,13 @@ func BenchmarkNativeRelationalPersistence(b *testing.B) {
 				cfg.Version = k.NativeControlRelationalVersion
 				cfg.Encoder = "local-relational-v1"
 				cfg.ContrastMean = true
+				match, contrastMode := "", ""
+				if causal {
+					cfg.Version = k.NativeControlCausalVersion
+					cfg.ContrastMean = false
+					match = "pair"
+					contrastMode = "action"
+				}
 				at := time.Date(2026, 11, 7, 0, 0, 0, 0, time.UTC)
 				apply := func(c NativeControlCommand) NativeControlResult {
 					out, err := rt.ApplyNativeControl(c, at.Add(time.Duration(rt.LastSequence()+1)*time.Millisecond))
@@ -94,14 +103,21 @@ func BenchmarkNativeRelationalPersistence(b *testing.B) {
 					state := map[k.NodeID]float64{}
 					for _, node := range ids {
 						state[node] = v
+						if causal {
+							state[node] = .8
+						}
 					}
-					apply(NativeControlCommand{ID: id, Begin: &NativeBegin{EpisodeID: id, Training: true, Intervention: true, Observation: &NativeObservation{Source: "synthetic-benchmark", SampleID: id, State: state}}})
+					apply(NativeControlCommand{ID: id, Begin: &NativeBegin{EpisodeID: id, Training: true, Intervention: true, MatchKey: match, Observation: &NativeObservation{Source: "synthetic-benchmark", SampleID: id, State: state}}})
 					var out NativeControlResult
-					for j, a := range []int{0, 3} {
+					actions := []int{0, 3}
+					if causal && id == "second" {
+						actions = []int{3}
+					}
+					for j, a := range actions {
 						action := a
 						out = apply(NativeControlCommand{ID: fmt.Sprintf("%s-%d", id, j), Step: &NativeStep{EpisodeID: id, ExperimentAction: &action}})
 					}
-					apply(NativeControlCommand{ID: id + "-out", Outcome: &NativeOutcome{EpisodeID: id, TraceDigest: out.TraceDigest, Source: "synthetic-benchmark", OutcomeID: id, Provenance: "observed-environment", Reward: v, Learn: true, ContrastID: "pair"}})
+					apply(NativeControlCommand{ID: id + "-out", Outcome: &NativeOutcome{EpisodeID: id, TraceDigest: out.TraceDigest, Source: "synthetic-benchmark", OutcomeID: id, Provenance: "observed-environment", Reward: v, Learn: true, ContrastID: "pair", ContrastMode: contrastMode}})
 				}
 				trial("first", .8)
 				cp := filepath.Join(dir, "pending.json")
