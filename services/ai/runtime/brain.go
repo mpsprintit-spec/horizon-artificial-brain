@@ -805,34 +805,62 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		nodeID knowledge.NodeID
 		score  float64
 	}
-	candidates := make([]candidate, 0)
-	for _, node := range r.brain.Registry.Nodes() {
-		if node == nil {
-			continue
-		}
+	scoreNode := func(node *knowledge.ConceptNode) float64 {
 		usage := 1.0 / (1.0 + float64(maxInt64(node.Frequency, 0)))
 		underActivation := clamp01(1.0 - node.Activation)
 		novelty := clamp01(usage * clamp01(policy.NoveltySensitivity))
 		uncertainty := clamp01((0.5*underActivation)+(0.5*predictionError)) * clamp01(policy.UncertaintySensitivity)
-		score := clamp01(policy.CuriosityPressure) * clamp01(novelty+uncertainty)
-		if score <= 0 {
-			continue
+		return clamp01(policy.CuriosityPressure) * clamp01(novelty+uncertainty)
+	}
+	// Only the winning candidate is consumed. A lexicographic maximum is
+	// order-independent and preserves the old score/lowest-ID tie break without
+	// allocating or sorting a full population. VisitNodes holds the registry
+	// address index stable; this callback never mutates membership or re-enters it.
+	var best candidate
+	found, nonfinite := false, false
+	r.brain.Registry.VisitNodes(func(node *knowledge.ConceptNode) {
+		if node == nil {
+			return
 		}
-		candidates = append(candidates, candidate{nodeID: node.ID, score: score})
+		score := scoreNode(node)
+		if score <= 0 {
+			return
+		}
+		if score != score {
+			nonfinite = true
+		}
+		if !found || score > best.score || score == best.score && node.ID < best.nodeID {
+			best, found = candidate{node.ID, score}, true
+		}
+	})
+	// Preserve the historical stable-sort behavior even for nonfinite in-memory
+	// states (which cannot be persisted as valid canonical JSON). Normal finite
+	// neural states never allocate this fallback population.
+	var candidates []candidate
+	if nonfinite {
+		r.brain.Registry.VisitNodes(func(node *knowledge.ConceptNode) {
+			if node != nil {
+				if score := scoreNode(node); !(score <= 0) {
+					candidates = append(candidates, candidate{node.ID, score})
+				}
+			}
+		})
 	}
 	r.brain.RUnlock()
-
-	if len(candidates) == 0 {
+	if !found {
 		return nil
 	}
-	sort.SliceStable(candidates, func(i, j int) bool {
-		if candidates[i].score == candidates[j].score {
-			return candidates[i].nodeID < candidates[j].nodeID
-		}
-		return candidates[i].score > candidates[j].score
-	})
+	if nonfinite {
+		sort.SliceStable(candidates, func(i, j int) bool {
+			if candidates[i].score == candidates[j].score {
+				return candidates[i].nodeID < candidates[j].nodeID
+			}
+			return candidates[i].score > candidates[j].score
+		})
+		best = candidates[0]
+	}
 
-	boost := clamp01(candidates[0].score * 0.30)
+	boost := clamp01(best.score * 0.30)
 	if boost <= 0 {
 		return nil
 	}
@@ -842,11 +870,11 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 		r.brain.BrainState.CuriosityState = map[string]float64{}
 	}
 	r.brain.BrainState.CuriosityState["drive"] = boost
-	r.brain.BrainState.CuriosityState["target_node"] = float64(candidates[0].nodeID)
+	r.brain.BrainState.CuriosityState["target_node"] = float64(best.nodeID)
 	r.brain.BrainState.CuriosityState["updated_unix"] = float64(now.UnixNano())
 	r.brain.Unlock()
 
-	return map[knowledge.NodeID]float64{candidates[0].nodeID: boost}
+	return map[knowledge.NodeID]float64{best.nodeID: boost}
 }
 func maxInt64(value int64, floor int64) int64 {
 	if value < floor {

@@ -72,7 +72,9 @@ func main() {
 	}
 	if *recovery {
 		var err error
-		if *phase2 != "" {
+		if *phase3 != "" {
+			err = nf.Phase3RecoveryAudit(*dir)
+		} else if *phase2 != "" {
 			err = nf.Phase2RecoveryAudit(*dir)
 		} else {
 			err = nf.RecoveryAudit(*dir)

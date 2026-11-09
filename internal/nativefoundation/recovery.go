@@ -75,7 +75,11 @@ func RecoveryAudit(dir string) error {
 
 // Phase2RecoveryAudit retains real files with a pending first trial and a WAL
 // suffix that completes its matched trial. It never overwrites prior evidence.
-func Phase2RecoveryAudit(dir string) error {
+func Phase2RecoveryAudit(dir string) error { return nativePairedRecoveryAudit(dir, false) }
+
+func Phase3RecoveryAudit(dir string) error { return nativePairedRecoveryAudit(dir, true) }
+
+func nativePairedRecoveryAudit(dir string, causal bool) error {
 	if err := preparePhase2Directory(dir); err != nil {
 		return err
 	}
@@ -95,6 +99,10 @@ func Phase2RecoveryAudit(dir string) error {
 	cfg.Encoder = "local-relational-v1"
 	cfg.Epsilon = .1
 	cfg.ContrastMean = true
+	if causal {
+		cfg.Version = k.NativeControlCausalVersion
+		cfg.ContrastMean = false
+	}
 	apply(rt, r.NativeControlCommand{ID: "init", Initialize: &cfg})
 	evaluate(rt, tasks(840002, 64, "train"), true, 840003, "trained")
 	state := func(x float64) map[k.NodeID]float64 {
@@ -105,12 +113,20 @@ func Phase2RecoveryAudit(dir string) error {
 		}
 		return out
 	}
-	creditTrial(rt, state(.8), []int{0, 3}, "durable-pair")
+	if causal {
+		phase3CreditTrial(rt, state(.8), 0, "durable-pair", "action", "recovery-world", .1, 2)
+	} else {
+		creditTrial(rt, state(.8), []int{0, 3}, "durable-pair")
+	}
 	before := filepath.Join(dir, "before.json")
 	if err = rt.Checkpoint(before); err != nil {
 		return err
 	}
-	creditTrial(rt, state(.2), []int{0, 3}, "durable-pair")
+	if causal {
+		phase3CreditTrial(rt, state(.8), 3, "durable-pair", "action", "recovery-world", .1, 2)
+	} else {
+		creditTrial(rt, state(.2), []int{0, 3}, "durable-pair")
+	}
 	after := filepath.Join(dir, "after.json")
 	if err = rt.Checkpoint(after); err != nil {
 		return err

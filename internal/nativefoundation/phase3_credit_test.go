@@ -25,3 +25,9 @@ func TestPhase3CreditBothEncodersAndCheckpoint(t *testing.T) {
 		})
 	}
 }
+
+func TestPhase3RecoveryAuditPreservesPendingWAL(t *testing.T) {
+	if err := Phase3RecoveryAudit(filepath.Join(t.TempDir(), "audit")); err != nil {
+		t.Fatal(err)
+	}
+}

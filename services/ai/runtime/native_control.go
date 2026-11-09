@@ -155,7 +155,7 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		return NativeControlResult{Sequence: r.processedEvents[old], Duplicate: true}, nil
 	}
 	var transition *activation.NativeTransition
-	s := r.brain.NativeControlSnapshot()
+	s := r.brain.NativeControlRuntimeView(c.Outcome != nil)
 	if c.Initialize != nil {
 		if err = r.brain.ValidateNativeInit(*c.Initialize); err != nil {
 			return out, err
@@ -172,7 +172,7 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		if len(c.Begin.MatchKey) > 256 || c.Begin.MatchKey != "" && (s.Config.Version != knowledge.NativeControlCausalVersion || !c.Begin.Intervention) {
 			return out, errors.New("invalid native trial match key")
 		}
-		if p := s.PendingContrast; p != nil && at.Before(p.Episode.Decisions[len(p.Episode.Decisions)-1].At) {
+		if p := s.PendingContrast; p != nil && at.Before(p.Episode.LastDecisionAt) {
 			return out, errors.New("native clock rollback across contrast trials")
 		}
 		if c.Begin.Intervention && (!c.Begin.Training || !s.Config.SupportsExperiments() || s.Config.Lambda != 1) {
@@ -212,10 +212,10 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 	}
 	if c.Step != nil {
 		ep := s.Episode
-		if ep == nil || ep.ID != c.Step.EpisodeID || ep.Stopped || len(ep.Decisions) >= s.Config.MaxSteps || at.Before(ep.Started) {
+		if ep == nil || ep.ID != c.Step.EpisodeID || ep.Stopped || ep.DecisionCount >= s.Config.MaxSteps || at.Before(ep.Started) {
 			return out, errors.New("native step outside active episode")
 		}
-		if len(ep.Decisions) > 0 && at.Before(ep.Decisions[len(ep.Decisions)-1].At) {
+		if ep.DecisionCount > 0 && at.Before(ep.LastDecisionAt) {
 			return out, errors.New("native clock rollback")
 		}
 		p, e := r.brain.NativePolicy(r.activation.CurrentState(), !ep.Training, c.Step.Sample)
@@ -245,7 +245,7 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 	}
 	if o := c.Outcome; o != nil {
 		ep := s.Episode
-		if ep == nil || ep.ID != o.EpisodeID || !ep.Stopped || len(ep.Decisions) == 0 || o.TraceDigest != knowledge.NativeDigest(ep) || at.Before(ep.Decisions[len(ep.Decisions)-1].At) {
+		if ep == nil || ep.ID != o.EpisodeID || !ep.Stopped || ep.DecisionCount == 0 || o.TraceDigest != ep.TraceDigest || at.Before(ep.LastDecisionAt) {
 			return out, errors.New("native outcome does not bind completed trajectory")
 		}
 		if err = r.brain.ValidateNativeContrast(o.ContrastID, o.Source, o.OutcomeID, o.Learn, o.ContrastMode); err != nil {
@@ -305,9 +305,9 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 				return e
 			}
 			out.State = after
-			ep := r.brain.NativeControlSnapshot().Episode
+			ep := r.brain.NativeControlRuntimeView(true).Episode
 			out.Stopped, out.Truncated = ep.Stopped, ep.Truncated
-			out.TraceDigest = knowledge.NativeDigest(ep)
+			out.TraceDigest = ep.TraceDigest
 		}
 		if o := c.Outcome; o != nil {
 			learning, e := r.brain.LearnNativeObservedOutcome(o.Reward, o.Learn, o.ContrastID, o.Source, o.OutcomeID, at, o.ContrastMode)
