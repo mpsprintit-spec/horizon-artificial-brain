@@ -1,0 +1,45 @@
+name: Neural Factor Composition on Continued Brain
+
+on:
+  push:
+    branches:
+      - research/neural-factor-composition-continued-20261111
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  continued-factor-composition:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Restore ACTUAL 488-pattern trained Brain
+        uses: actions/download-artifact@v4
+        with:
+          name: horizon-context-alternate-relations-trained-brain
+          run-id: 43037032979
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/prior
+      - name: Train independently learned factors and test withheld compositions
+        env:
+          HORIZON_FACTOR_COMPOSITION_PRIOR_CHECKPOINT: ${{ runner.temp }}/prior/horizon-brain-context-structure.json
+          HORIZON_FACTOR_COMPOSITION_PRIOR_METRICS: ${{ runner.temp }}/prior/context-structure-metrics.json
+          HORIZON_FACTOR_COMPOSITION_OUTPUT_DIR: ${{ runner.temp }}/composition-trained
+        run: go test -count=1 -v -timeout=16m ./services/ai/runtime -run '^TestComposeTwoSeparatelyLearnedNeuralFactors$'
+      - name: Preserve continued trained Brain and results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: horizon-learned-factor-composition-brain
+          path: ${{ runner.temp }}/composition-trained/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Verify only isolated branch used
+        run: test "$GITHUB_REF_NAME" = "research/neural-factor-composition-continued-20261111"
