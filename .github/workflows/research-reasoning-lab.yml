@@ -30,12 +30,12 @@ jobs:
           mkdir -p "$RUNNER_TEMP/reasoning-output"
           go run ./cmd/horizon-reasoning-lab \
             -out "$RUNNER_TEMP/reasoning-output/seed73" \
-            -seed 73 -blocks 192 -cases 96
+            -seed 73 -blocks 2048 -cases 96
       - name: Preserve trained experimental checkpoint and metrics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: blank-brain-reasoning-seed73
+          name: blank-brain-reasoning-pilot2048-seed73
           path: ${{ runner.temp }}/reasoning-output/seed73/
           if-no-files-found: warn
           retention-days: 30
