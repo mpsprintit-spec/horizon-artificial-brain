@@ -15,7 +15,7 @@ func coordinatedRuntimeBatch(t *testing.T, rt *BrainRuntime) k.CoordinatedBatchV
 	return coordinatedRuntimeBatchWithMode(t, rt, "recurrent")
 }
 
-func coordinatedRuntimeBatchWithMode(t *testing.T, rt *BrainRuntime, mode string) k.CoordinatedBatchV5 {
+func coordinatedRuntimeBatchWithMode(t *testing.T, rt *BrainRuntime, mode string, full ...bool) k.CoordinatedBatchV5 {
 	t.Helper()
 	x := k.CognitiveInput{Features: make([]float64, 28), Mask: []bool{false, false, false, true, true, true, true, true}, Reset: true, Draw: .1, NeuralMeta: &k.NeuralMetaInput{Mode: mode, Costs: []float64{.025, .03, .035}, Remaining: 3}}
 	x.Features[0] = 1
@@ -28,6 +28,7 @@ func coordinatedRuntimeBatchWithMode(t *testing.T, rt *BrainRuntime, mode string
 	b := k.CoordinatedBatchV5{Episodes: []k.CoordinatedEpisodeV5{ep}, ParametersHash: p.ParametersHash}
 	if mode == k.CoordinatedFidelityV5 {
 		b.Fidelity = &k.FidelityLearningV5{}
+		b.Fidelity.FullFeatureGradient = len(full) > 0 && full[0]
 	}
 	b.Evidence = k.CognitiveEvidence{ID: "actual-terminal", Source: "unit", Verifier: "actual selected result", Digest: k.CognitiveDigest(b.Episodes)}
 	b.Evidence.Digest = k.CoordinatedEvidenceDigestV5(b)
@@ -49,7 +50,11 @@ func TestCoordinatedV5FidelityJournalReplayAndRestart(t *testing.T) {
 	testCoordinatedV5Replay(t, k.CoordinatedFidelityV5)
 }
 
-func testCoordinatedV5Replay(t *testing.T, mode string) {
+func TestCoordinatedV5FullGradientJournalReplayAndRestart(t *testing.T) {
+	testCoordinatedV5Replay(t, k.CoordinatedFidelityV5, true)
+}
+
+func testCoordinatedV5Replay(t *testing.T, mode string, full ...bool) {
 	t.Helper()
 	rt, wal, base := phase4Fixture(t)
 	spec := k.Phase4SpecV5{Version: k.Phase4VersionV5, Seed: 101, LearningRate: .003, EntropyWeight: .08, ValueWeight: .2}
@@ -57,7 +62,7 @@ func testCoordinatedV5Replay(t *testing.T, mode string) {
 	if _, e := rt.ApplyCognitiveModel(CognitiveModelCommand{ID: "head", Phase4Init: &spec}, at); e != nil {
 		t.Fatal(e)
 	}
-	b := coordinatedRuntimeBatchWithMode(t, rt, mode)
+	b := coordinatedRuntimeBatchWithMode(t, rt, mode, full...)
 	cmd := CognitiveModelCommand{ID: "learn-coordinated", Coordinated: &b}
 	result, e := rt.ApplyCognitiveModel(cmd, at.Add(time.Second))
 	if e != nil {

@@ -14,6 +14,8 @@ const CoordinatedFidelityV5 = "scientific-fidelity-v5"
 type FidelityLearningV5 struct {
 	AssessmentOnly   bool
 	FreezeRecurrence bool
+	// Omitted when false to preserve authenticated PR58 evidence and WAL replay.
+	FullFeatureGradient bool `json:",omitempty"`
 }
 
 // Research acquisition only. No actor score is fitted on these mixed-policy
@@ -33,6 +35,9 @@ func CoordinatedEvidenceDigestV5(b CoordinatedBatchV5) string {
 }
 
 func validateFidelityContractV5(s *CognitiveModelState, b CoordinatedBatchV5) error {
+	if b.Fidelity != nil && b.Fidelity.FullFeatureGradient && (b.Fidelity.AssessmentOnly || b.Fidelity.FreezeRecurrence) {
+		return errors.New("full feature gradient requires recurrent actor learning")
+	}
 	if b.Fidelity != nil && (s == nil || s.Config.NeuralMeta == nil || s.Config.Gamma != 1) {
 		return errors.New("fidelity requires the native undiscounted metalevel model")
 	}
@@ -272,6 +277,15 @@ func fidelityLogSumV5(x []float64) float64 {
 // returns and advantages. Recompute only the GRU block, preserve actual input
 // histories. No world labels or gradients through imagined outcomes are used.
 func fidelityPolicyObjectiveV5(s *CognitiveModelState, w []float64, b CoordinatedBatchV5, adv, returns [][]float64) (Phase4LearningV5, []float64) {
+	st, g, _ := fidelityPolicyObjectiveFullV5(s, w, nil, b, adv, returns)
+	return st, g
+}
+
+func fidelityPolicyObjectiveFullV5(s *CognitiveModelState, w, temps []float64, b CoordinatedBatchV5, adv, returns [][]float64) (Phase4LearningV5, []float64, error) {
+	full := b.Fidelity.FullFeatureGradient
+	if full && len(temps) != 6 {
+		return Phase4LearningV5{}, nil, errors.New("full feature gradient requires canonical temperatures")
+	}
 	p := s.Phase4V5
 	g := make([]float64, len(w))
 	st := Phase4LearningV5{Episodes: len(b.Episodes), AdvantageMin: math.Inf(1), AdvantageMax: math.Inf(-1)}
@@ -297,6 +311,15 @@ func fidelityPolicyObjectiveV5(s *CognitiveModelState, w []float64, b Coordinate
 			}
 			x := append([]float64(nil), frame.Features...)
 			copy(x, h)
+			var prediction CoordinatedPredictionV5
+			if full {
+				var err error
+				prediction, err = fidelityForwardV5(s, w, temps, trace, Phase4DropV5{})
+				if err != nil {
+					return st, nil, err
+				}
+				x = prediction.Features
+			}
 			hh, pi, value := phase4Forward(p, w, x, frame.Mask)
 			logits := mat(w, p.Actor, hh)
 			addBias(logits, w, p.ActorBias)
@@ -335,6 +358,11 @@ func fidelityPolicyObjectiveV5(s *CognitiveModelState, w []float64, b Coordinate
 			dx := make([]float64, 58)
 			cognitiveLinearBackward(g, dx, w, x, dh, p.WI, p.BI)
 			back := append([]float64(nil), dx[:32]...)
+			if full {
+				if err := fidelityFeaturesBackwardV5(s, w, temps, h, cache[len(cache)-1].x, trace[len(trace)-1], prediction, dx, g, back); err != nil {
+					return st, nil, err
+				}
+			}
 			for j := len(cache) - 1; j >= 0; j-- {
 				back = cognitiveGRUBackward(s.Config, s.Layout, w, g, cache[j], back)
 				if trace[j].Reset || trace[j].NoRecurrence {
@@ -369,7 +397,7 @@ func fidelityPolicyObjectiveV5(s *CognitiveModelState, w []float64, b Coordinate
 	st.GradientNorm = math.Sqrt(st.GradientNorm)
 	st.ActorGradientNorm = math.Sqrt(st.ActorGradientNorm)
 	st.CriticGradientNorm = math.Sqrt(st.CriticGradientNorm)
-	return st, g
+	return st, g, nil
 }
 
 func (k *KnowledgeBase) learnFidelityV5(s *CognitiveModelState, w, temps []float64, b CoordinatedBatchV5, at time.Time) (CoordinatedLearningV5, error) {
@@ -386,7 +414,10 @@ func (k *KnowledgeBase) learnFidelityV5(s *CognitiveModelState, w, temps []float
 			policy.Episodes = append(policy.Episodes, Phase4EpisodeV5{Frames: ep.Frames})
 		}
 		a, r := phase4Targets(s.Phase4V5, w, policy)
-		out.Policy, g = fidelityPolicyObjectiveV5(s, w, b, a, r)
+		out.Policy, g, err = fidelityPolicyObjectiveFullV5(s, w, temps, b, a, r)
+		if err != nil {
+			return out, err
+		}
 	}
 	for i := range g {
 		if !finiteNumber(g[i]) || !finiteNumber(mg[i]) {
