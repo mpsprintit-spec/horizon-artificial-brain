@@ -336,6 +336,36 @@ func TestComposeTwoSeparatelyLearnedNeuralFactors(t *testing.T){
     }
     trained,lessons,patternCount:=train(false)
     swapped,_,_:=train(true)
+    diag:=orderedFixtureClone(t,trained)
+    for _,contextName:=range []string{"old-a","previous-c","unpaired-u"} {
+        noActor:=&knowledge.ObservationTrace{
+            Stimulus:[][]knowledge.NodeID{env.Cues[0]},
+            Context:[][]knowledge.NodeID{env.Context[contextName]},
+        }
+        withActor:=&knowledge.ObservationTrace{
+            Stimulus:[][]knowledge.NodeID{genFrame(env.Cues[0],env.Actor)},
+            Context:[][]knowledge.NodeID{env.Context[contextName]},
+        }
+        pa:=diag.brain.Patterns.PredictOrdered(noActor)
+        pb:=diag.brain.Patterns.PredictOrdered(withActor)
+        ca,ma:=factorChoice(pa,env.ContextFactors)
+        cb,mb:=factorChoice(pb,env.ContextFactors)
+        t.Logf("DIAG context=%s predicted(noactor=%d/%.5f/%v withactor=%d/%.5f/%v) cue=%v actor=%v ctx=%v ctxfactors=%v",
+            contextName,ca,ma,pa.Strength,cb,mb,pb.Strength,
+            env.Cues[0],env.Actor,env.Context[contextName],env.ContextFactors)
+        found:=0
+        for _,p:=range diag.brain.Patterns.All() {
+            if p.Observation==nil||len(p.Observation.Stimulus)!=2||len(p.Observation.Context)!=1{continue}
+            if relationLabPopulationEquals(p.Observation.Stimulus[0],env.Cues[0])&&
+                relationLabPopulationEquals(p.Observation.Context[0],env.Context[contextName]) {
+                found++
+                if found<=3 {
+                    t.Logf("DIAG candidate id=%d result=%d weight=%.6f confidence=%.6f freq=%d",p.ID,p.Result,p.Weight,p.Confidence,p.Frequency)
+                }
+            }
+        }
+        t.Logf("DIAG context pattern count=%d",found)
+    }
     after:=eval(trained,false)
     ablated:=eval(trained,true)
     reversedTeacher:=eval(swapped,false)
