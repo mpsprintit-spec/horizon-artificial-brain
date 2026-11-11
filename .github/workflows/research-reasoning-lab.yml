@@ -1,0 +1,41 @@
+name: Blank-Brain Reasoning Lab (research)
+
+on:
+  push:
+    branches:
+      - research/blank-brain-reasoning-20261111
+    paths:
+      - internal/nativefoundation/reasoning_lab.go
+      - internal/nativefoundation/reasoning_lab_test.go
+      - cmd/horizon-reasoning-lab/main.go
+      - .github/workflows/research-reasoning-lab.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  train-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Verify empty Brain and factual native learning contract
+        run: go test ./internal/nativefoundation -run '^TestReasoning' -count=1 -v
+      - name: Train and evaluate from one fresh Brain
+        run: |
+          mkdir -p "$RUNNER_TEMP/reasoning-output"
+          go run ./cmd/horizon-reasoning-lab \
+            -out "$RUNNER_TEMP/reasoning-output/seed73" \
+            -seed 73 -blocks 192 -cases 96
+      - name: Preserve trained experimental checkpoint and metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: blank-brain-reasoning-seed73
+          path: ${{ runner.temp }}/reasoning-output/seed73/
+          if-no-files-found: warn
+          retention-days: 30
