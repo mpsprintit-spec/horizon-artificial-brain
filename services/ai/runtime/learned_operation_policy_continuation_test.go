@@ -387,8 +387,7 @@ func TestContinuedBrainLearnsOperationSelectionAndStopping(t *testing.T){
   if e:=os.MkdirAll(dest,0700);e!=nil{t.Fatal(e)}
   if e:=orderedFixtureClone(t,checkpoint).Checkpoint(filepath.Join(dest,"horizon-brain-learned-operation-policy.json"));e!=nil{t.Fatal(e)}
   blob,e:=json.MarshalIndent(report,"","  ");if e!=nil{t.Fatal(e)}
-  if e:=os.WriteFile(filepath.Join(dest,"learned-operation-policy-metrics.json"),append(blob,'
-'),0600);e!=nil{t.Fatal(e)}
+  if e:=os.WriteFile(filepath.Join(dest,"learned-operation-policy-metrics.json"),append(blob,byte(10)),0600);e!=nil{t.Fatal(e)}
   t.Log("PERSISTED trained 580-pattern Brain continuation and strict policy audit")
  }
  if countAfter<countBefore{t.Fatalf("learned policy regressed: %d<%d",countAfter,countBefore)}
