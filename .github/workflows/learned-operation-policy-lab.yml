@@ -31,9 +31,9 @@ jobs:
           go-version: '1.22'
       - name: Train learned neural operation-selection and stopping policy
         env:
-          HORIZON_POLICY_PRIOR_CHECKPOINT: research/checkpoints/2026-11-11-neural-factor-composition/horizon-brain-factor-composition.json
-          HORIZON_POLICY_PRIOR_METRICS: research/checkpoints/2026-11-11-neural-factor-composition/factor-composition-metrics.json
-          HORIZON_POLICY_PRIOR_SHA256: research/checkpoints/2026-11-11-neural-factor-composition/SHA256SUMS
+          HORIZON_POLICY_PRIOR_CHECKPOINT: ${{ github.workspace }}/research/checkpoints/2026-11-11-neural-factor-composition/horizon-brain-factor-composition.json
+          HORIZON_POLICY_PRIOR_METRICS: ${{ github.workspace }}/research/checkpoints/2026-11-11-neural-factor-composition/factor-composition-metrics.json
+          HORIZON_POLICY_PRIOR_SHA256: ${{ github.workspace }}/research/checkpoints/2026-11-11-neural-factor-composition/SHA256SUMS
           HORIZON_POLICY_OUTPUT_DIR: ${{ runner.temp }}/policy-out
         run: go test -count=1 -timeout=16m -v ./services/ai/runtime -run '^TestContinuedBrainLearnsOperationSelectionAndStopping$'
       - name: Archive trained checkpoint and metrics in Git, independent of artifact expiry
