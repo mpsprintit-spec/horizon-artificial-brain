@@ -263,28 +263,28 @@ func TestPhilosophyNeuralThinkingContinuesTrainedRelationalBrain(t *testing.T) {
     held=append(held,novelHeld...)
     correct:=0
     for i,c:=range train{
-        if trained[i].Selected==c.output && trained[i].Margin>.05 {correct++}
+        if trained[i].Selected==c.output && trained[i].Margin>.05 && trained[i].Unknown<.8 {correct++}
     }
     heldCorrect:=0
     for i,c:=range heldDefs {
-        if held[i].Selected==c.output && held[i].Margin>.05{heldCorrect++}
+        if held[i].Selected==c.output && held[i].Margin>.05 && held[i].Unknown<.8{heldCorrect++}
     }
     for i,c:=range []caseDef{{3,[]int{6},0},{4,[]int{7},1},{5,[]int{6,7},2}}{
         p:=novelHeld[i]
-        if p.Selected==c.output && p.Margin>.05{heldCorrect++}
+        if p.Selected==c.output && p.Margin>.05 && p.Unknown<.8{heldCorrect++}
     }
 
     t.Logf("PARENT checkpoint_sha256=%s seed=%d patterns=%d",hex.EncodeToString(digest[:]),previous.Seed,previous.PatternCount)
     t.Logf("RETAINED prior=%.5f/%.5f after=%.5f/%.5f new_patterns=%d",originalMargins[0],originalMargins[1],retained[0],retained[1],len(r.brain.Patterns.All()))
     for i,c:=range train{
-        t.Logf("TRAIN[%d] ctx=%d evidence=%v expected=%d blank=%v learned=%v ablated=%v",
-            i,c.context,c.evidence,c.output,baseline[i].Strengths,trained[i].Strengths,ablated[i].Strengths)
+        t.Logf("TRAIN[%d] ctx=%d evidence=%v expected=%d blank=%v learned=%v unknown=%.5f ablated=%v",
+            i,c.context,c.evidence,c.output,baseline[i].Strengths,trained[i].Strengths,trained[i].Unknown,ablated[i].Strengths)
     }
     for i,p:=range held {
         t.Logf("HELD[%d] novel=%t ctx=%d evidence=%v selected=%d scores=%v margin=%.5f unknown=%.5f",
             i,p.NovelSubject,p.Context,p.EvidenceOrder,p.Selected,p.Strengths,p.Margin,p.Unknown)
     }
-    t.Logf("OUTCOME trained=%d/%d heldout=%d/%d (selection and margin > .05; not semantic correctness)",
+    t.Logf("OUTCOME trained=%d/%d heldout=%d/%d (selection margin > .05 and unknown < .8; not semantic correctness)",
         correct,len(train),heldCorrect,len(held))
 
     report:=philosophyLabReport{
