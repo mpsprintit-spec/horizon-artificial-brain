@@ -65,6 +65,17 @@ Keberhasilan dinilai berdasarkan identitas populasi keluaran dan margin dukungan
 - **Artifact terlatih:** `horizon-learned-factor-composition-brain`, artifact ID `13864987050`, berisi `horizon-brain-factor-composition.json` dan `factor-composition-metrics.json`. Artifact GitHub Actions memiliki masa retensi dan dijadwalkan kedaluwarsa **11 Desember 2026**; tautan run/log tidak menjamin artifact masih dapat diunduh setelah masa itu.
 - **SHA commit source eksperimen yang teruji:** `5c181cbc56ec0191ce8761a1a60319de0736b33f`.
 
+## 5a. Arsip checkpoint permanen (11 November 2026)
+
+**Masalah masa simpan telah ditangani.** Artifact GitHub Actions `horizon-learned-factor-composition-brain` memang memiliki tanggal kedaluwarsa **11 Desember 2026**, tetapi salinan **checkpoint neural 580 pola** dan **metrik JSON** kini telah di-commit sebagai berkas Git berversi pada **branch penelitian ini**, bukan bergantung pada artifact yang akan kedaluwarsa.
+
+- [Checkpoint Brain 580 pola](../../research/checkpoints/2026-11-11-neural-factor-composition/horizon-brain-factor-composition.json)
+- [Metrik pengujian asli](../../research/checkpoints/2026-11-11-neural-factor-composition/factor-composition-metrics.json)
+- [Manifest sumber dan instruksi pemeliharaan](../../research/checkpoints/2026-11-11-neural-factor-composition/README.md)
+- [Checksum SHA-256 kedua berkas](../../research/checkpoints/2026-11-11-neural-factor-composition/SHA256SUMS)
+
+Berkas Git ini **tidak terkena kebijakan masa retensi artifact GitHub Actions**. Checkpoint hanya akan tetap tersedia selama repository dan ref/commit arsipnya dipertahankan. Tidak ada penyimpanan digital yang secara mutlak tidak dapat hilang; lakukan klon atau backup lain jika menginginkan redundansi.
+
 ## 6. Interpretasi dan batas klaim
 
 **Terbukti dalam batas eksperimen:** ketika dua faktor numerik dan satu operator neural telah dilatih secara terpisah, Horizon mampu menggunakan jalur learned-pattern pada Brain yang sama untuk menangani 24 kombinasi konteks–struktur yang tidak diberikan sebagai pasangan mentah saat pelatihan. Checkpoint hasil lanjutannya dapat dipulihkan dan tersimpan sebagai artifact.
