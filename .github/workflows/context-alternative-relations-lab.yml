@@ -1,0 +1,45 @@
+name: Continued Context and Alternative Relations Lab
+
+on:
+  push:
+    branches:
+      - research/unseen-context-alternate-relations-20261111
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  context-structure-learning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Restore trained Brain with 152 neural patterns
+        uses: actions/download-artifact@v4
+        with:
+          name: horizon-fused-generalization-brain
+          run-id: 43035418753
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/continued-brain
+      - name: Train unseen contexts and alternate relational structures
+        env:
+          HORIZON_CONTEXT_STRUCTURE_PRIOR_CHECKPOINT: ${{ runner.temp }}/continued-brain/horizon-brain-fused-generalization.json
+          HORIZON_CONTEXT_STRUCTURE_PRIOR_METRICS: ${{ runner.temp }}/continued-brain/fused-generalization-metrics.json
+          HORIZON_CONTEXT_STRUCTURE_OUTPUT_DIR: ${{ runner.temp }}/new-trained-brain
+        run: go test -count=1 -v -timeout=10m ./services/ai/runtime -run '^TestLearnUnseenContextAndAlternateRelationsFromTrainedBrain$'
+      - name: Save trained Brain checkpoint and evaluation outside repository
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: horizon-context-alternate-relations-trained-brain
+          path: ${{ runner.temp }}/new-trained-brain/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Verify main was never targeted
+        run: test "$GITHUB_REF_NAME" = "research/unseen-context-alternate-relations-20261111"
