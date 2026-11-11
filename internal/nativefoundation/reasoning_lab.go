@@ -193,11 +193,15 @@ func reasoningEpisode(rt *r.BrainRuntime, layout reasoningScaffold, task reasoni
         outcome.ContrastMode = "action"
     }
     apply(rt, r.NativeControlCommand{ID:id+"-out", Outcome:outcome})
+    // Exhausting the computation budget is NOT a valid abstention.
+    // A model must deliberately stop before its answer can be scored correct.
     accuracy := 0.0
-    if task.Truth == 0 {
-        if reward >= -.1 { accuracy = 1 }
-    } else if reward > .12 {
-        accuracy = 1
+    if out.Stopped && !out.Truncated {
+        if task.Truth == 0 {
+            if reward >= -.1 { accuracy = 1 }
+        } else if reward > .12 {
+            accuracy = 1
+        }
     }
     return Metrics{Cases:1, Return:reward-cost, Reward:reward, Accuracy:accuracy,
         Operations:float64(operations), Stops:reasoningBoolFloat(out.Stopped && !out.Truncated),
