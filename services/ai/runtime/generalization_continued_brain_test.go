@@ -283,6 +283,10 @@ func TestThinkingGeneralizesFromContinuedBrain(t *testing.T) {
             after[i].Selected,after[i].Margin,after[i].Unknown,
             ablated[i].Selected,ablated[i].Margin,ablated[i].Unknown,
             flipped[i].Selected,flipped[i].Margin,flipped[i].Unknown)
+        if held[i].kind=="novel-identity" && len(held[i].ev)==2 {
+            t.Logf("CONFLICT_DETAIL[%d] baselineStrength=%v trainedStrength=%v ablatedStrength=%v reversedStrength=%v",
+                i,before[i].Strength,after[i].Strength,ablated[i].Strength,flipped[i].Strength)
+        }
     }
     report:=genReport{
         Protocol:"structural-generalization-from-trained-brain-v1",
