@@ -265,8 +265,7 @@ func TestRelationalContradictionEmptyBrain(t *testing.T) {
                 if err != nil {
                     t.Fatal(err)
                 }
-                if err := os.WriteFile(filepath.Join(dir, "metrics-seed17.json"), append(data, '
-'), 0600); err != nil {
+                if err := os.WriteFile(filepath.Join(dir, "metrics-seed17.json"), append(data, byte(10)), 0600); err != nil {
                     t.Fatal(err)
                 }
                 t.Logf("exported isolated trained Brain checkpoint (%d bytes) to artifact directory", len(checkpoint))
