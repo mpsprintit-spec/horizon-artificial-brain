@@ -1,0 +1,106 @@
+name: Permanently archive neural factor composition checkpoint
+
+on:
+  push:
+    branches:
+      - research/neural-factor-composition-continued-20261111
+    paths:
+      - .github/workflows/archive-neural-factor-composition-checkpoint.yml
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  archive-provenance-and-checkpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Check out ONLY the isolated research branch
+        uses: actions/checkout@v4
+        with:
+          ref: research/neural-factor-composition-continued-20261111
+          persist-credentials: true
+      - name: Verify push target is never main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF_NAME" = "research/neural-factor-composition-continued-20261111"
+          test "$(git branch --show-current)" = "research/neural-factor-composition-continued-20261111"
+      - name: Recover authentic trained checkpoint and metrics from verified run
+        uses: actions/download-artifact@v4
+        with:
+          name: horizon-learned-factor-composition-brain
+          run-id: 43040477001
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/source-trained-brain
+      - name: Validate provenance and archive both JSON files
+        shell: bash
+        env:
+          ARCHIVE_INPUT: ${{ runner.temp }}/source-trained-brain
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil
+          origin = pathlib.Path(os.environ['ARCHIVE_INPUT'])
+          dest = pathlib.Path('research/checkpoints/2026-11-11-neural-factor-composition')
+          files = ('horizon-brain-factor-composition.json', 'factor-composition-metrics.json')
+          for name in files:
+              file = origin / name
+              if not file.is_file() or not (100 < file.stat().st_size < 50000000):
+                  raise SystemExit('Missing/invalid original checkpoint input: ' + str(file))
+          metrics = json.loads((origin / files[1]).read_text())
+          if not (metrics.get('protocol') == 'learned-two-factor-neural-composition-v1'
+                  and metrics.get('parent_patterns') == 488
+                  and metrics.get('continued_patterns') == 580
+                  and metrics.get('lessons') == 184):
+              raise SystemExit('Unexpected metrics: wrong trained checkpoint')
+          groups = {g['name']:(g['before'],g['after'],g['total']) for g in metrics.get('groups', [])}
+          expected = {
+            'never-paired-reverse-context':(0,6,6),
+            'previously-unknown-context':(0,3,3),
+            'new-structure-compositions':(0,15,15),
+            'strict-new-structure-control':(0,0,3),
+            'strict-new-context-control':(0,0,3),
+            'strict-both-new-control':(0,0,3),
+          }
+          if groups != expected:
+              raise SystemExit('Metrics differ from independently verified experiment')
+          checkpoint = json.loads((origin / files[0]).read_text())
+          if not isinstance(checkpoint, dict):
+              raise SystemExit('Invalid Brain JSON checkpoint')
+          if any((dest / f).exists() for f in files):
+              raise SystemExit('Destination already contains a checkpoint; refusing silent overwrite')
+          dest.mkdir(parents=True, exist_ok=True)
+          checksums = []
+          for name in files:
+              shutil.copyfile(origin / name, dest / name)
+              digest = hashlib.sha256((dest / name).read_bytes()).hexdigest()
+              checksums.append(f'{digest}  {name}')
+              print(f'ARCHIVED {name}: {digest}', flush=True)
+          (dest / 'SHA256SUMS').write_text('\n'.join(checksums) + '\n')
+          (dest / 'README.md').write_text(
+              '# Durable Horizon neural factor-composition checkpoint\n\n'
+              '- Source experiment run: https://github.com/mpsprintit-spec/horizon-artificial-brain/actions/runs/43040477001\n'
+              '- Artifact ID: `13864987050`, named `horizon-learned-factor-composition-brain`.\n'
+              '- Source: numerically trained Horizon Brain, previous checkpoint with 488 learned patterns.\n'
+              '- Continuation: 184 new experiences, 580 learned patterns.\n'
+              '- Evaluator: 24/24 heldout combinations of separately taught factors; 0/9 never-taught-factor controls.\n'
+              '- All experiment claims and limitations are in '
+              '[the research report](../../../docs/research/2026-11-11-neural-factor-composition-continuation.md).\n'
+              '- These checked-in JSON files are **versioned Git repository files**: '
+              'they do not inherit GitHub Actions artifact expiry. '
+              'Preserve this branch or its commit; deleting the branch can put these files at risk.\n'
+              '- `SHA256SUMS` authenticates copies of the original experiment artifact.\n'
+          )
+          PY
+      - name: Commit a durable copy ONLY on the research branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- research/checkpoints/2026-11-11-neural-factor-composition/
+          git diff --cached --quiet && { echo "No new files to archive"; exit 1; }
+          git commit -m "archive(research): preserve trained Horizon Brain 580 and experiment metrics"
+          git push origin "HEAD:refs/heads/research/neural-factor-composition-continued-20261111"
