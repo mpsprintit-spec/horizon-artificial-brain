@@ -79,8 +79,15 @@ func factorChoice(p knowledge.OrderedPatternPrediction, choices [][]knowledge.No
     best,runner:=0.0,0.0
     for i,ids:=range choices {
         var score float64
+        // Multiple numeric receptive populations share a generic anchor.
+        // A shared neuron is nondiscriminative common-mode activity, not
+        // evidence for one factor over the other. Read only distinctive units.
         for _,id:=range ids{
-            score=math.Max(score,p.Strength[id])
+            shared:=false
+            for j,others:=range choices{
+                if i!=j&&slices.Contains(others,id){shared=true;break}
+            }
+            if !shared{score=math.Max(score,p.Strength[id])}
         }
         if score>best {
             runner=best
