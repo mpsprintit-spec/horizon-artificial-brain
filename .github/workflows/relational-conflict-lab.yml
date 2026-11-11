@@ -22,9 +22,7 @@ jobs:
       - name: Run empty-brain neural relational experiment
         env:
           HORIZON_RELATIONAL_LAB_ARTIFACT_DIR: ${{ runner.temp }}/horizon-relational-lab
-        run: go test -count=1 -v -timeout=8m ./services/ai/runtime -run '^TestRelationalContradictionEmptyBrain      - name: Confirm target branch is not main
-        run: test "$GITHUB_REF_NAME" = "research/relational-conflict-empty-brain-20261111"
-
+        run: go test -count=1 -v -timeout=8m ./services/ai/runtime -run '^TestRelationalContradictionEmptyBrain$'
       - name: Preserve isolated trained Brain and metrics
         uses: actions/upload-artifact@v4
         with:
