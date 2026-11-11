@@ -51,6 +51,12 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	if command.CognitiveModel != nil && command.CognitiveModel.Coordinated != nil {
 		command.SchemaVersion = coordinatedJournalSchemaVersion
 	}
+	if command.Type == EventTypeNativeControl {
+		command.SchemaVersion = nativeJournalSchemaVersion
+	}
+	if r.brain.HasNativeControl() && command.Type != EventTypeNativeControl {
+		return fmt.Errorf("native experiment does not admit mixed legacy commands")
+	}
 	command.Timestamp = command.Timestamp.UTC()
 	if err := validateJournalPayload(command); err != nil {
 		return err
@@ -77,7 +83,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 		}
 	}()
 	switch command.Type {
-	case EventTypeCognitiveModel, EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeOutcome:
+	case EventTypeNativeControl, EventTypeCognitiveModel, EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeOutcome:
 		// Metadata-only changes do not advance neural time. Candidate outcomes
 		// settle retention only if their evidence actually promotes a synapse.
 	default:
@@ -94,6 +100,9 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 }
 
 func processedJournalEvent(logged LoggedEvent) *Event {
+	if logged.NativeControl != nil {
+		return &Event{ID: nativeCommandPrefix(*logged.NativeControl) + knowledge.NativeDigest(*logged.NativeControl)}
+	}
 	if logged.CognitiveModel != nil {
 		return &Event{ID: "cognitive/" + logged.CognitiveModel.ID + "/" + knowledge.CognitiveDigest(*logged.CognitiveModel)}
 	}
