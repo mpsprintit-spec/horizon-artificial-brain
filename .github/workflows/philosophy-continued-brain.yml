@@ -1,0 +1,45 @@
+name: Philosophical Thinking on Continued Brain
+
+on:
+  push:
+    branches:
+      - research/philosophical-reasoning-continued-brain-20261111
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  continued-brain-training:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Restore ACTUAL trained relational Brain from preceding workflow
+        uses: actions/download-artifact@v4
+        with:
+          name: horizon-contradiction-brain-seed17
+          run-id: 43029895990
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/relational-prior
+      - name: Continue learning on restored prior Brain
+        env:
+          HORIZON_PHILOSOPHY_PRIOR_CHECKPOINT: ${{ runner.temp }}/relational-prior/trained-brain-seed17.json
+          HORIZON_PHILOSOPHY_PRIOR_MANIFEST: ${{ runner.temp }}/relational-prior/metrics-seed17.json
+          HORIZON_PHILOSOPHY_OUTPUT_DIR: ${{ runner.temp }}/philosophy-continued
+        run: go test -count=1 -v -timeout=10m ./services/ai/runtime -run '^TestPhilosophyNeuralThinkingContinuesTrainedRelationalBrain$'
+      - name: Preserve continued trained Brain and evaluation metrics
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: horizon-thinking-continued-brain
+          path: ${{ runner.temp }}/philosophy-continued/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Assert main was not target
+        run: test "$GITHUB_REF_NAME" = "research/philosophical-reasoning-continued-brain-20261111"
