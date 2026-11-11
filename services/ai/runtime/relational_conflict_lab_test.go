@@ -5,9 +5,12 @@ package runtime
 // imports the user's persistent memory, the production CLI, or an external model.
 // The labels in this test describe the teacher's measurement protocol only.
 import (
+    "encoding/json"
     "fmt"
     "math"
     "math/rand"
+    "os"
+    "path/filepath"
     "slices"
     "testing"
     "time"
@@ -217,6 +220,56 @@ func TestRelationalContradictionEmptyBrain(t *testing.T) {
             }
             if math.IsNaN(contested) || math.IsInf(contested, 0) {
                 t.Fatal("contradictory case produced non-finite prediction")
+            }
+            // One reproducible trained Brain checkpoint is exported only when
+            // the isolated CI workflow supplies an explicit artifact directory.
+            // Nothing is written to production memory or repository main.
+            if dir := os.Getenv("HORIZON_RELATIONAL_LAB_ARTIFACT_DIR"); seed == 17 && dir != "" {
+                if err := os.MkdirAll(dir, 0700); err != nil {
+                    t.Fatal(err)
+                }
+                checkpoint, err := os.ReadFile(trainedPath)
+                if err != nil {
+                    t.Fatal(err)
+                }
+                if err := os.WriteFile(filepath.Join(dir, "trained-brain-seed17.json"), checkpoint, 0600); err != nil {
+                    t.Fatal(err)
+                }
+                report := struct {
+                    Experiment string `json:"experiment"`
+                    Seed int64 `json:"seed"`
+                    Origin string `json:"origin"`
+                    PopulationIDs [][]knowledge.NodeID `json:"population_ids"`
+                    Lessons int `json:"lessons"`
+                    PatternCount int `json:"pattern_count"`
+                    BaselineMargins [2]float64 `json:"baseline_margins"`
+                    LearnedMargins [2]float64 `json:"learned_margins"`
+                    ContestedMargin float64 `json:"contested_margin"`
+                    ContestedAmbiguity float64 `json:"contested_ambiguity"`
+                    PatternAblation [2]float64 `json:"pattern_ablation_margins"`
+                    ReversedTeacher [2]float64 `json:"reversed_teacher_margins"`
+                    Limitations string `json:"limitations"`
+                }{
+                    Experiment: "numeric-conditional-relational-contradiction-v1",
+                    Seed: seed, Origin: "knowledge.NewBrain(), no imported knowledge",
+                    PopulationIDs: populations, Lessons: lessonsPerArm * len(arms),
+                    PatternCount: len(trainedBrain.brain.Patterns.All()),
+                    BaselineMargins: [2]float64{baselineA, baselineB},
+                    LearnedMargins: [2]float64{trainedA, trainedB},
+                    ContestedMargin: contested, ContestedAmbiguity: assessment.Ambiguity,
+                    PatternAblation: [2]float64{ablatedA, ablatedB},
+                    ReversedTeacher: [2]float64{flippedA, flippedB},
+                    Limitations: "Teacher-supplied numeric factors; no demonstrated autonomous relation discovery, semantics, or real-world transfer.",
+                }
+                data, err := json.MarshalIndent(report, "", "  ")
+                if err != nil {
+                    t.Fatal(err)
+                }
+                if err := os.WriteFile(filepath.Join(dir, "metrics-seed17.json"), append(data, '
+'), 0600); err != nil {
+                    t.Fatal(err)
+                }
+                t.Logf("exported isolated trained Brain checkpoint (%d bytes) to artifact directory", len(checkpoint))
             }
         })
     }
