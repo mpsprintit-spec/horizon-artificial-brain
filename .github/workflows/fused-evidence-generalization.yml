@@ -1,0 +1,45 @@
+name: Fused Evidence Generalization on Trained Brain
+
+on:
+  push:
+    branches:
+      - research/fused-evidence-generalization-20261111
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  fused-generalization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Restore ACTUAL 120-pattern trained Brain
+        uses: actions/download-artifact@v4
+        with:
+          name: horizon-generalization-trained-brain
+          run-id: 43034669302
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/previous-trained-brain
+      - name: Train fused numerical evidence and test unseen conditions
+        env:
+          HORIZON_FUSION_PRIOR_CHECKPOINT: ${{ runner.temp }}/previous-trained-brain/horizon-brain-generalized.json
+          HORIZON_FUSION_PRIOR_METRICS: ${{ runner.temp }}/previous-trained-brain/generalization-metrics.json
+          HORIZON_FUSION_OUTPUT_DIR: ${{ runner.temp }}/trained-fusion
+        run: go test -count=1 -v -timeout=10m ./services/ai/runtime -run '^TestFusionContinuationGeneralizesNovelConflicts$'
+      - name: Publish trained checkpoint and strict evaluation
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: horizon-fused-generalization-brain
+          path: ${{ runner.temp }}/trained-fusion/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Confirm ONLY isolated branch was used
+        run: test "$GITHUB_REF_NAME" = "research/fused-evidence-generalization-20261111"
