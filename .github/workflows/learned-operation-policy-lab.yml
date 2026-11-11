@@ -1,0 +1,81 @@
+name: Horizon Learned Operation Policy Lab
+
+on:
+  push:
+    branches:
+      - research/learned-operation-policy-continued-20261111
+    paths:
+      - services/ai/runtime/learned_operation_policy_continuation_test.go
+      - .github/workflows/learned-operation-policy-lab.yml
+
+permissions:
+  contents: write
+
+jobs:
+  continued-neural-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout isolated research branch and canonical archived Brain
+        uses: actions/checkout@v4
+        with:
+          ref: research/learned-operation-policy-continued-20261111
+          persist-credentials: true
+      - name: Verify isolated research target
+        run: |
+          test "$GITHUB_REF_NAME" = "research/learned-operation-policy-continued-20261111"
+          test "$(git branch --show-current)" = "research/learned-operation-policy-continued-20261111"
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Train learned neural operation-selection and stopping policy
+        env:
+          HORIZON_POLICY_PRIOR_CHECKPOINT: research/checkpoints/2026-11-11-neural-factor-composition/horizon-brain-factor-composition.json
+          HORIZON_POLICY_PRIOR_METRICS: research/checkpoints/2026-11-11-neural-factor-composition/factor-composition-metrics.json
+          HORIZON_POLICY_PRIOR_SHA256: research/checkpoints/2026-11-11-neural-factor-composition/SHA256SUMS
+          HORIZON_POLICY_OUTPUT_DIR: ${{ runner.temp }}/policy-out
+        run: go test -count=1 -timeout=16m -v ./services/ai/runtime -run '^TestContinuedBrainLearnsOperationSelectionAndStopping$'
+      - name: Archive trained checkpoint and metrics in Git, independent of artifact expiry
+        shell: bash
+        env:
+          TRAINED: ${{ runner.temp }}/policy-out
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import hashlib, json, os, pathlib, shutil
+          source=pathlib.Path(os.environ['TRAINED'])
+          metrics=json.loads((source/'learned-operation-policy-metrics.json').read_text())
+          if metrics['protocol']!='learned-native-operation-policy-continuation-v1' or metrics['parent_patterns']!=580:
+              raise SystemExit('Incorrect parent Brain or protocol')
+          if metrics['after_success'] < metrics['before_success']:
+              raise SystemExit('Policy continuation regressed')
+          files=['horizon-brain-learned-operation-policy.json','learned-operation-policy-metrics.json']
+          dest=pathlib.Path('research/checkpoints/2026-11-11-learned-operation-policy')
+          dest.mkdir(parents=True,exist_ok=True)
+          checks=[]
+          for f in files:
+              if not (source/f).is_file():raise SystemExit('Missing checkpoint/metrics '+f)
+              if (dest/f).exists():raise SystemExit('Refusing overwrite '+str(dest/f))
+              shutil.copyfile(source/f,dest/f)
+              checks.append(hashlib.sha256((dest/f).read_bytes()).hexdigest()+'  '+f)
+          (dest/'SHA256SUMS').write_text('\n'.join(checks)+'\n')
+          (dest/'README.md').write_text(
+              '# Horizon learned operation-policy lab\n\n'
+              '- This continuation restores the **real 580-pattern Brain** from the earlier repository archive.\n'
+              '- It teaches a numerical policy to select READ_CONTEXT, READ_RELATION, COMPOSE or STOP.\n'
+              '- Its **learned action policy** resides in the same canonical Brain; an experimental executor interprets its output.\n'
+              '- This is a research-only test, not integrated production autonomy.\n'
+              '- Held-out pairs and all controls are included in learned-operation-policy-metrics.json.\n'
+              '- The checksum in SHA256SUMS covers both archived JSON files.\n'
+              '- The Git archive has no GitHub Actions artifact expiration, as long as its repository and refs are retained.\n'
+              '- No changes to main, no pull request and no merge.\n'
+          )
+          print('Policy results:',metrics['before_success'],metrics['after_success'],metrics['total'])
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -- research/checkpoints/2026-11-11-learned-operation-policy/
+          git diff --cached --quiet && { echo "No archive changes"; exit 1; }
+          git commit -m 'archive(research): preserve learned neural operation policy checkpoint and metrics'
+          git push origin "HEAD:refs/heads/research/learned-operation-policy-continued-20261111"
