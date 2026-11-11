@@ -1,0 +1,25 @@
+name: Empty Brain Relational Conflict Lab
+
+on:
+  push:
+    branches:
+      - research/relational-conflict-empty-brain-20261111
+
+permissions:
+  contents: read
+
+jobs:
+  relational-lab:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout isolated research branch
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Run empty-brain neural relational experiment
+        run: go test -count=1 -v -timeout=8m ./services/ai/runtime -run '^TestRelationalContradictionEmptyBrain$'
+      - name: Confirm target branch is not main
+        run: test "$GITHUB_REF_NAME" = "research/relational-conflict-empty-brain-20261111"
