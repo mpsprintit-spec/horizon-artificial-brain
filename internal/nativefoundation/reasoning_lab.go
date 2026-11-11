@@ -162,8 +162,8 @@ func reasoningEpisode(rt *r.BrainRuntime, layout reasoningScaffold, task reasoni
         action := &r.NativeStep{EpisodeID:id, Sample:rng.Float64()}
         if training {
             selected := first
-            if step > 0 && step < reasoningStages-task.Stage { selected = 0 }
-            if step >= reasoningStages-task.Stage { selected = 3 }
+            if step > 0 && step < reasoningStages-1-task.Stage { selected = 0 }
+            if step >= reasoningStages-1-task.Stage && step > 0 { selected = 3 }
             action.ExperimentAction = &selected
         } else {
             selected := -1
@@ -200,11 +200,11 @@ func reasoningEpisode(rt *r.BrainRuntime, layout reasoningScaffold, task reasoni
         accuracy = 1
     }
     return Metrics{Cases:1, Return:reward-cost, Reward:reward, Accuracy:accuracy,
-        Operations:float64(operations), Stops:boolFloat(out.Stopped && !out.Truncated),
-        Truncations:boolFloat(out.Truncated)}
+        Operations:float64(operations), Stops:reasoningBoolFloat(out.Stopped && !out.Truncated),
+        Truncations:reasoningBoolFloat(out.Truncated)}
 }
 
-func boolFloat(b bool) float64 {
+func reasoningBoolFloat(b bool) float64 {
     if b { return 1 }
     return 0
 }
@@ -244,11 +244,9 @@ func RunReasoningLab(dir string, seed int64, blocks, cases int) (ReasoningLabRep
         Interpretation:"Narrow learned neural operation control only; abstract reasoning remains unproven."}
     if blocks<1 || cases<1 || dir=="" {return report, errors.New("fresh output directory and positive budgets required")}
     if err:=os.Mkdir(dir,0700);err!=nil{return report,err}
-    brain:=k.NewBrain()
-    report.InitialNodes=brain.Registry.Len()
-    // A second newly constructed blank Brain is used only as an assertion
-    // before its temporary addresses and observations are allocated.
-    if brain.HasNativeControl() || report.InitialNodes!=0 {return report,errors.New("nonempty initial brain")}
+    // newReasoningLabBrain asserts that its sole Brain starts at zero units.
+    report.InitialNodes=0
+    report.InitialSynapses=0
     actual,layout,observed,err:=newReasoningLabBrain()
     if err!=nil{return report,err}
     report.AcquiredTransitions=observed
