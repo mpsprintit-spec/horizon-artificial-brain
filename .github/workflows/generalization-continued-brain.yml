@@ -1,0 +1,45 @@
+name: Continued Brain Generalization Lab
+
+on:
+  push:
+    branches:
+      - research/generalization-continued-brain-20261111
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  strict-generalization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Load last trained Brain checkpoint (40 neural patterns)
+        uses: actions/download-artifact@v4
+        with:
+          name: horizon-thinking-continued-brain
+          run-id: 43032495188
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/prior-brain
+      - name: Continue actual brain training and evaluate unseen cases
+        env:
+          HORIZON_GENERALIZATION_PRIOR_CHECKPOINT: ${{ runner.temp }}/prior-brain/horizon-brain-after-thinking.json
+          HORIZON_GENERALIZATION_PRIOR_METRICS: ${{ runner.temp }}/prior-brain/thinking-metrics.json
+          HORIZON_GENERALIZATION_OUT_DIR: ${{ runner.temp }}/generalization
+        run: go test -count=1 -v -timeout=10m ./services/ai/runtime -run '^TestThinkingGeneralizesFromContinuedBrain$'
+      - name: Keep trained checkpoint and diagnostic report outside repository
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: horizon-generalization-trained-brain
+          path: ${{ runner.temp }}/generalization/
+          if-no-files-found: warn
+          retention-days: 30
+      - name: Assert target is NOT main
+        run: test "$GITHUB_REF_NAME" = "research/generalization-continued-brain-20261111"
