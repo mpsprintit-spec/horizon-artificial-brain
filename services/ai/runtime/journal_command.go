@@ -14,6 +14,9 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	if err := r.admitCommandLocked(command.Type); err != nil {
 		return err
 	}
+	if err := r.admitJournalReferencesLocked(command); err != nil {
+		return err
+	}
 	command.SchemaVersion, command.BrainIdentity, command.Sequence = EventLogSchemaVersion, BrainIdentity, r.seq+1
 	command.SurfaceEncoding = r.surfaceEncoding
 	command.DynamicsEncoding = r.dynamicsEncoding

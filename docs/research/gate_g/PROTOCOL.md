@@ -169,3 +169,53 @@ Benchmark commands, fixed before confirmation:
   baseline mixed-workload measurement is permitted.
 
 All original numeric budgets and 100% exact-state criteria remain unchanged.
+
+### Pre-benchmark safety and validation amendment
+
+Additional adversarial probes showed that direct numeric experience, consequence
+and spelling payloads could name internal native policy units even at idle. All
+three failed before the repair (`development-learning-alias-before.txt`). Central
+pre-append reference admission now rejects those aliases, including inline
+observation experiences. Positive world-address learning remains tested. This
+extends the declared ownership consistency check without changing a learned law.
+
+The first full local race command reached its 20-minute process limit during the
+existing sealed composition curriculum, with no race report before timeout. The
+failure and stack are retained. A bounded before/after CPU-profile probe uses the
+same existing `separated/7` case, no data/seed/iteration change. Nil ownership-map
+lookups on an unconfigured production Brain are bypassed by a short-circuit;
+parameter protection with native enabled is retained. The original frozen-law
+and complete-state tests must still pass. Resource budgets are unchanged.
+
+The positive typed-learning control exposed another v1 ownership path:
+`ApplyObservedAssociationFeedback` treated a native policy edge as a competing
+world successor. Its complete parameter before/after failure is retained.
+That feedback now honors the same address ownership fence. Ordinary world
+experience, spelling and inquiry-consequence updates must remain functional and
+leave policy parameters unchanged in all three historical native versions.
+
+A development resource probe recorded native-idle p95 44.65ms versus baseline
+34.31ms on the old context-only 40k workload (not a confirmatory result). CPU
+profiling identified ownership membership hashes in the whole-graph activity and
+memory scans. A transient bounds-plus-exact-set index avoids world-edge hashes;
+the exact set still handles noncontiguous historical addresses. No weights or
+neural state are cached; all original resource budgets remain fixed.
+
+The initial 'sparse' timing fixture contained only ContextBoosts, which current
+production dynamics treats as recurrent thought. Activity grew from nine to809
+units rather than reseeding observed input. Confirmation now supplies real
+StimulusNodeIDs and an explicit independent observation episode before timing
+thought, implementing the original sparse/dense fixture intent. The important
+old context-only failure is retained as `BenchmarkGateGContextContinuity` and
+`BenchmarkGateGContextContinuityNativeIdle`: the 40k/non-dense/WAL cell is included
+in ABBA and candidate-only regression checks under the SAME numeric budgets.
+No failed workload is removed, and continuous-state functional tests are retained.
+
+Full-race execution timeout amendment: retain every test and assertion, increase
+only the full-suite operational deadline to40 minutes on this host/CI. The single
+unchanged separated/7 curriculum case took52.57s before the nil fast path and
+53.19s after; it did NOT demonstrate a speed improvement and is not reported as
+one. CPU samples were dominated by race instrumentation. The original20-minute
+failure remains a recorded negative result. This does not change any runtime
+latency/allocation budget, seed, neural test, durability rule or gate criterion.
+The workflow deadline is updated explicitly so the full suite can complete.

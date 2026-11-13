@@ -166,7 +166,7 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 	}
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
-	native := e.Memory.NativeReservedNodesLocked()
+	native := e.Memory.NativeOwnershipLocked()
 	state = cloneState(state)
 	confidence = cloneState(confidence)
 	for i := 0; i < cycles; i++ {
@@ -175,7 +175,7 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 		ids := sortedNodeIDs(state)
 		for _, id := range ids {
 			n := e.Memory.Registry.GetByID(id)
-			if n == nil || native[id] {
+			if n == nil || (native.Enabled() && native.Has(id)) {
 				continue
 			}
 			adaptive := n.Threshold - (n.Importance * .05) - (float64(n.Frequency) * .001)
@@ -185,7 +185,7 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 		for _, id := range ids {
 			level := state[id]
 			n := e.Memory.Registry.GetByID(id)
-			if n == nil || native[id] {
+			if n == nil || (native.Enabled() && native.Has(id)) {
 				continue
 			}
 			next[id] += level * (1 - e.Decay)
@@ -193,7 +193,7 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 			synapses := n.OutboundAll()
 			sort.Slice(synapses, func(i, j int) bool { return synapses[i].TargetID < synapses[j].TargetID })
 			for _, s := range synapses {
-				if native[s.TargetID] {
+				if native.Enabled() && native.Has(s.TargetID) {
 					continue
 				}
 				age := temporalPenalty(now, s.LastActivation)

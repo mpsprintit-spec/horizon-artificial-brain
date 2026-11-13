@@ -43,3 +43,61 @@ func (k *KnowledgeBase) NativeReservedNodesLocked() map[NodeID]bool {
 	}
 	return nil
 }
+
+// NativeOwnership is a transient address-set accelerator, not neural state.
+// Bounds avoid hashing every world edge when the policy cells lie outside it;
+// the canonical role addresses remain authoritative for sparse/noncontiguous imported IDs.
+type NativeOwnership struct {
+	state       *NativeControlState
+	First, Last NodeID
+}
+
+func (o NativeOwnership) Enabled() bool { return o.state != nil }
+func (o NativeOwnership) Has(id NodeID) bool {
+	if o.state == nil || id < o.First || id > o.Last {
+		return false
+	}
+	if id == o.state.Bias {
+		return true
+	}
+	for _, v := range o.state.Features {
+		if id == v {
+			return true
+		}
+	}
+	for _, group := range o.state.Outputs {
+		for _, v := range group {
+			if id == v {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// Caller holds the Brain lock throughout use. Only canonical role addresses
+// are read; no map, weights, episode or second neural representation is copied.
+func (k *KnowledgeBase) NativeOwnershipLocked() NativeOwnership {
+	o := NativeOwnership{state: k.BrainState.NativeControl}
+	if o.state == nil {
+		return o
+	}
+	o.First, o.Last = o.state.Bias, o.state.Bias
+	add := func(id NodeID) {
+		if id < o.First {
+			o.First = id
+		}
+		if id > o.Last {
+			o.Last = id
+		}
+	}
+	for _, id := range o.state.Features {
+		add(id)
+	}
+	for _, group := range o.state.Outputs {
+		for _, id := range group {
+			add(id)
+		}
+	}
+	return o
+}

@@ -54,13 +54,14 @@ func (e *Engine) applyActivityPlasticity(preState, postState map[knowledge.NodeI
 	}
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
-	native := e.Memory.NativeReservedNodesLocked()
+	native := e.Memory.NativeOwnershipLocked()
 
 	e.Memory.Registry.VisitNodes(func(source *knowledge.ConceptNode) {
+		if native.Enabled() && native.Has(source.ID) { return }
 		pre := clamp01(preState[source.ID])
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil || native[source.ID] || native[synapse.TargetID] {
+				if synapse == nil || (native.Enabled() && native.Has(synapse.TargetID)) {
 					continue
 				}
 

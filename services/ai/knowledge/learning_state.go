@@ -188,14 +188,14 @@ func (k *KnowledgeBase) ApplyMemoryDynamics(now time.Time) {
 	// forgetting. The floor prevents old traces from disappearing in one pass.
 	const halfLifeHours = 24.0
 	protectedN := k.protectedNParameter()
-	native := k.NativeReservedNodesLocked()
+	native := k.NativeOwnershipLocked()
 	for _, source := range k.Registry.Nodes() {
-		if source == nil {
+		if source == nil || (native.Enabled() && native.Has(source.ID)) {
 			continue
 		}
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil || native[source.ID] || native[synapse.TargetID] || synapse.Dynamic.LastModification.IsZero() {
+				if synapse == nil || (native.Enabled() && native.Has(synapse.TargetID)) || synapse.Dynamic.LastModification.IsZero() {
 					continue
 				}
 				ageHours := now.Sub(synapse.Dynamic.LastModification).Hours()

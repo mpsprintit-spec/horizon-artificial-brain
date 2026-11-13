@@ -14,9 +14,11 @@ import (
 
 // This harness is copied unchanged to the authentic baseline. Seeding is a
 // REAL journaled Process transaction outside the thought timing interval.
-func BenchmarkGateGThought(b *testing.B)           { benchmarkGateGThought(b, false) }
-func BenchmarkGateGThoughtNativeIdle(b *testing.B) { benchmarkGateGThought(b, true) }
-func benchmarkGateGThought(b *testing.B, nativeIdle bool) {
+func BenchmarkGateGThought(b *testing.B)                     { benchmarkGateGThought(b, false, false) }
+func BenchmarkGateGThoughtNativeIdle(b *testing.B)           { benchmarkGateGThought(b, true, false) }
+func BenchmarkGateGContextContinuity(b *testing.B)           { benchmarkGateGThought(b, false, true) }
+func BenchmarkGateGContextContinuityNativeIdle(b *testing.B) { benchmarkGateGThought(b, true, true) }
+func benchmarkGateGThought(b *testing.B, nativeIdle, contextOnly bool) {
 	for _, n := range []int{1000, 4000, 40000} {
 		for _, dense := range []bool{false, true} {
 			for _, journal := range []bool{false, true} {
@@ -43,8 +45,10 @@ func benchmarkGateGThought(b *testing.B, nativeIdle bool) {
 						count = n
 					}
 					context := map[k.NodeID]float64{}
+					inputs := make([]k.NodeID, 0, count)
 					for i := 1; i <= count; i++ {
 						context[k.NodeID(i)] = .8
+						inputs = append(inputs, k.NodeID(i))
 					}
 					samples := make([]float64, b.N)
 					var before, after gr.MemStats
@@ -54,7 +58,13 @@ func benchmarkGateGThought(b *testing.B, nativeIdle bool) {
 					b.StopTimer()
 					for i := 0; i < b.N; i++ {
 						at := time.Date(2026, 11, 6, 0, 0, 0, 0, time.UTC).Add(time.Duration(i) * time.Second)
-						if _, _, e := rt.Process(Event{ID: fmt.Sprintf("numeric-context-%d", i), Timestamp: at, Context: context, Cycles: 1}); e != nil {
+						event := Event{ID: fmt.Sprintf("numeric-context-%d", i), Timestamp: at, Context: context, Cycles: 1}
+						if !contextOnly {
+							event.StimulusNodeIDs = inputs
+							event.ResetContext = true
+							event.EpisodeID = event.ID
+						}
+						if _, _, e := rt.Process(event); e != nil {
 							b.Fatal(e)
 						}
 						rt.SetClock(NewFixedClock(at.Add(time.Millisecond)))

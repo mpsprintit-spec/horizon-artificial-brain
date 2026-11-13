@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	k "github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/learning"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -186,9 +187,39 @@ func TestGateGPolicyOwnershipAndHistoricalNativeVersions(t *testing.T) {
 			}
 			before := parameters()
 			world := mustGateGBrain(t, rt)
+			checkParams := func(stage string) {
+				t.Helper()
+				after := parameters()
+				if !bytes.Equal(before, after) {
+					var a, b []json.RawMessage
+					_ = json.Unmarshal(before, &a)
+					_ = json.Unmarshal(after, &b)
+					for i := range a {
+						if !bytes.Equal(a[i], b[i]) {
+							t.Fatalf("native parameter changed after %s index%d before=%s after=%s", stage, i, a[i], b[i])
+						}
+					}
+				}
+			}
 			gateGSensor(t, rt, "sensor-a")
 			gateGText(t, rt, "written")
 			gateGInquiry(t, rt, "inquiry")
+			if _, e := rt.LearnExperience(learning.Experience{NeuralSequence: [][]k.NodeID{ids[:1], ids[1:2]}, Weight: .8, Confidence: .8, Source: "numeric-observer", ExperienceID: "observed-world-experience", Reliability: .9}, gateGTime(rt)); e != nil {
+				t.Fatal(e)
+			}
+			checkParams("world experience")
+			spelling, e := k.NewSpellingExposure(ids[:1], "x", .8, .8)
+			if e != nil {
+				t.Fatal(e)
+			}
+			if _, e = rt.LearnSpelling(spelling, gateGTime(rt)); e != nil {
+				t.Fatal(e)
+			}
+			checkParams("spelling")
+			if _, e = rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{Action: InquiryFocus, Valence: .8, InformationGain: .6, Reliability: .9, TargetNodeIDs: ids[:1], OutcomeNodeIDs: ids[1:2], Source: "numeric-observer", CausalLink: "observed-world-consequence"}, gateGTime(rt)); e != nil {
+				t.Fatal(e)
+			}
+			checkParams("consequence")
 			rt.SetClock(NewFixedClock(gateGTime(rt)))
 			if _, e := rt.CognitiveThink(1); e != nil {
 				t.Fatal(e)
@@ -292,5 +323,40 @@ func TestGateGAlreadyEnabledCompositionSharesNativeJournal(t *testing.T) {
 			t.Fatal(e)
 		}
 		gateGCompare(t, rt, recovered)
+	}
+}
+
+func TestGateGDirectLearningCannotAliasNativePolicyUnits(t *testing.T) {
+	for _, kind := range []string{"experience", "consequence", "spelling"} {
+		t.Run(kind, func(t *testing.T) {
+			rt, ids := nativeFixture(t)
+			wal := openKnowledgeJournal(t)
+			rt.SetEventLog(wal)
+			cfg := nativeControlConfig(ids)
+			nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
+			reserved := rt.brain.NativeControlSnapshot().Outputs[0][0]
+			before := continuationBytes(t, rt)
+			raw, _ := os.ReadFile(wal.file.Name())
+			var err error
+			switch kind {
+			case "experience":
+				_, err = rt.LearnExperience(learning.Experience{NeuralSequence: [][]k.NodeID{{ids[0]}, {reserved}}, Weight: .8, Confidence: .8}, gateGTime(rt))
+			case "consequence":
+				_, err = rt.RecordInquiryConsequenceEvent(InquiryConsequenceEvent{Action: InquiryFocus, Valence: .8, InformationGain: .6, Reliability: .9, TargetNodeIDs: []k.NodeID{reserved}, OutcomeNodeIDs: ids[:1], Source: "observed", CausalLink: "observed-consequence"}, gateGTime(rt))
+			case "spelling":
+				exposure, e := k.NewSpellingExposure([]k.NodeID{reserved}, "x", .8, .8)
+				if e != nil {
+					t.Fatal(e)
+				}
+				_, err = rt.LearnSpelling(exposure, gateGTime(rt))
+			}
+			if err == nil {
+				t.Fatal("production learning aliased internal native policy units")
+			}
+			after, _ := os.ReadFile(wal.file.Name())
+			if !bytes.Equal(before, continuationBytes(t, rt)) || !bytes.Equal(raw, after) || rt.RecoveryRequired() {
+				t.Fatal("rejected policy alias was not atomic", err)
+			}
+		})
 	}
 }

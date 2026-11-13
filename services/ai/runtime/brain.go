@@ -518,6 +518,9 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	if err := r.admitCommandLocked(EventTypeLearn); err != nil {
 		return err
 	}
+	if err := r.admitWorldReferencesLocked(current); err != nil {
+		return err
+	}
 	if r.eventLog != nil {
 		return errors.New("standalone temporal reinforcement is forbidden with an attached journal; use ProcessObservation")
 	}
@@ -804,7 +807,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	// activation, and memory dynamics, so the continuous service can coexist
 	// with external observations without racing on BrainState.
 	r.brain.RLock()
-	native := r.brain.NativeReservedNodesLocked()
+	native := r.brain.NativeOwnershipLocked()
 	predictionError := clamp01(r.brain.BrainState.PredictionState["last_error"])
 	policy := r.brain.BrainState.LearningPolicyState
 
@@ -826,7 +829,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	var best candidate
 	found, nonfinite := false, false
 	r.brain.Registry.VisitNodes(func(node *knowledge.ConceptNode) {
-		if node == nil || native[node.ID] {
+		if node == nil || (native.Enabled() && native.Has(node.ID)) {
 			return
 		}
 		score := scoreNode(node)
@@ -846,7 +849,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	var candidates []candidate
 	if nonfinite {
 		r.brain.Registry.VisitNodes(func(node *knowledge.ConceptNode) {
-			if node != nil && !native[node.ID] {
+			if node != nil && (!native.Enabled() || !native.Has(node.ID)) {
 				if score := scoreNode(node); !(score <= 0) {
 					candidates = append(candidates, candidate{node.ID, score})
 				}

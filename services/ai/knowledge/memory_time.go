@@ -67,14 +67,14 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 		return expDecay(now.Sub(created).Hours() * rate * scale)
 	}
 	protectedN := k.protectedNParameter()
-	native := k.NativeReservedNodesLocked()
+	native := k.NativeOwnershipLocked()
 	k.Registry.VisitNodes(func(source *ConceptNode) {
-		if source == nil {
+		if source == nil || (native.Enabled() && native.Has(source.ID)) {
 			return
 		}
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil || native[source.ID] || native[synapse.TargetID] {
+				if synapse == nil || (native.Enabled() && native.Has(synapse.TargetID)) {
 					continue
 				}
 				d := &synapse.Dynamic

@@ -66,6 +66,13 @@ func (r *BrainRuntime) validateNeuralEventLocked(event Event) error {
 			return errors.New("production context cannot inject native policy activity")
 		}
 	}
+	if event.PredictionOverride != nil {
+		for id := range event.PredictionOverride.State {
+			if reserved[id] {
+				return errors.New("production prediction cannot inject native policy activity")
+			}
+		}
+	}
 	if event.NeuralTrace != nil && !r.dynamicsEncoding.HasOrderedObservations() {
 		return errors.New("neural trace requires ordered dynamics")
 	}

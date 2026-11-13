@@ -54,10 +54,12 @@ def run(label, root, bench, samples, expected=0):
 
 for label, root in [('A1', a.baseline), ('B1', a.candidate), ('B2', a.candidate), ('A2', a.baseline)]:
     run(label + '-thought', root, '^BenchmarkGateGThought$', 100)
+    run(label + '-context-continuity', root, '^BenchmarkGateGContextContinuity/nodes=40000/dense=false/journal=true$', 100)
     run(label + '-native', root, '^BenchmarkGateGNativeStages$', 20)
     run(label + '-append', root, '^BenchmarkGateGJournalAppend$', 100)
     run(label + '-persistence', root, '^BenchmarkNativeActionPersistence$', 3)
 run('candidate-native-idle-thought', a.candidate, '^BenchmarkGateGThoughtNativeIdle$', 100)
+run('candidate-native-idle-context-continuity', a.candidate, '^BenchmarkGateGContextContinuityNativeIdle/nodes=40000/dense=false/journal=true$', 100)
 run('candidate-admission', a.candidate, '^BenchmarkGateGAdmission$', 100000)
 run('candidate-handoff', a.candidate, '^BenchmarkGateGMixedHandoff$', 100)
 # An authentic baseline failure is recorded explicitly, never assigned a latency.
