@@ -22,8 +22,9 @@ type NativeEpisodeInfo struct {
 	TraceDigest                                string
 }
 type NativePendingInfo struct {
-	ID      string
-	Episode *NativeEpisodeInfo
+	ID                            string
+	Mode, MatchKey, InitialDigest string
+	Episode                       *NativeEpisodeInfo
 }
 
 func nativeEpisodeInfo(ep *NativeEpisode, digest bool) *NativeEpisodeInfo {
@@ -54,6 +55,13 @@ func (k *KnowledgeBase) NativeControlRuntimeView(digest bool) *NativeRuntimeView
 	}
 	if s.PendingContrast != nil {
 		out.PendingContrast = &NativePendingInfo{ID: s.PendingContrast.ID, Episode: nativeEpisodeInfo(s.PendingContrast.Episode, false)}
+		out.PendingContrast.Mode = s.PendingContrast.Mode
+		if ep := s.PendingContrast.Episode; ep != nil {
+			out.PendingContrast.MatchKey = ep.MatchKey
+			if len(ep.Decisions) > 0 {
+				out.PendingContrast.InitialDigest = ep.Decisions[0].Before
+			}
+		}
 	}
 	return out
 }

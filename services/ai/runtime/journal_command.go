@@ -11,7 +11,7 @@ import (
 // command is a redo commitment: recovery reapplies the entire transition even
 // if the live caller lost its acknowledgment. It is not a post-state snapshot.
 func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func() error) error {
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(command.Type); err != nil {
 		return err
 	}
 	command.SchemaVersion, command.BrainIdentity, command.Sequence = EventLogSchemaVersion, BrainIdentity, r.seq+1
@@ -54,10 +54,8 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	if command.Type == EventTypeNativeControl {
 		command.SchemaVersion = nativeJournalSchemaVersion
 	}
-	if r.brain.HasNativeControl() && command.Type != EventTypeNativeControl {
-		return fmt.Errorf("native experiment does not admit mixed legacy commands")
-	}
 	command.Timestamp = command.Timestamp.UTC()
+	r.transactionFaultLocked("payload-preparation")
 	if err := validateJournalPayload(command); err != nil {
 		return err
 	}
@@ -71,6 +69,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 		return fmt.Errorf("runtime command exceeds journal record limit")
 	}
 	if r.eventLog != nil {
+		r.transactionFaultLocked("before-append")
 		if err := r.eventLog.Append(command); err != nil {
 			r.markRecoveryRequiredLocked()
 			return fmt.Errorf("%w: append %s: %v", ErrRuntimeRecoveryRequired, command.Type, err)
@@ -95,6 +94,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	if r.seq != command.Sequence {
 		return fmt.Errorf("%w: %s revision mismatch", ErrRuntimeRecoveryRequired, command.Type)
 	}
+	r.transactionFaultLocked("after-apply-before-ack")
 	completed = true
 	return nil
 }
@@ -116,4 +116,35 @@ func processedJournalEvent(logged LoggedEvent) *Event {
 		return logged.Event
 	}
 	return nil
+}
+
+// journalProcessedIndex reconstructs receipts, including the consumed factual
+// pair receipt that is generated only by the SECOND outcome. Counting only
+// command IDs loses this dedup entry in a checkpoint taken after pair learning.
+func journalProcessedIndex(events []LoggedEvent) (map[string]uint64, error) {
+	index := make(map[string]uint64)
+	pending := ""
+	for _, logged := range events {
+		if input := processedJournalEvent(logged); input != nil && input.ID != "" {
+			if _, exists := index[input.ID]; exists {
+				return nil, fmt.Errorf("duplicate event ID %q", input.ID)
+			}
+			index[input.ID] = logged.Sequence
+		}
+		if c := logged.NativeControl; c != nil {
+			if c.DiscardContrastID != "" {
+				pending = ""
+			}
+			if o := c.Outcome; o != nil && o.Learn && o.ContrastID != "" {
+				key := "native-contrast/" + knowledge.NativeDigest([]string{o.Source, o.ContrastID})
+				if key == pending {
+					index[key] = logged.Sequence
+					pending = ""
+				} else {
+					pending = key
+				}
+			}
+		}
+	}
+	return index, nil
 }

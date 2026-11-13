@@ -54,6 +54,7 @@ func (e *Engine) applyPredictionErrorPlasticity(predicted, actual map[knowledge.
 	// KnowledgeBase lock when they mutate canonical synapse state.
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
+	native := e.Memory.NativeReservedNodesLocked()
 
 	visit := func(source *knowledge.ConceptNode) {
 		if local && max(clamp01(predicted[source.ID]), clamp01(actual[source.ID])) < activityPlasticityMinActive {
@@ -61,7 +62,7 @@ func (e *Engine) applyPredictionErrorPlasticity(predicted, actual map[knowledge.
 		}
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil || synapse.Inhibitory {
+				if synapse == nil || synapse.Inhibitory || native[source.ID] || native[synapse.TargetID] {
 					continue
 				}
 				targetActual := actual[synapse.TargetID]
@@ -145,6 +146,7 @@ func (e *Engine) applyConsequencePlasticity(valence, informationGain float64, no
 	// prediction plasticity and memory optimization.
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
+	native := e.Memory.NativeReservedNodesLocked()
 
 	if valence < -1 {
 		valence = -1
@@ -157,7 +159,7 @@ func (e *Engine) applyConsequencePlasticity(valence, informationGain float64, no
 	e.Memory.Registry.VisitNodes(func(source *knowledge.ConceptNode) {
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil || synapse.Inhibitory {
+				if synapse == nil || synapse.Inhibitory || native[source.ID] || native[synapse.TargetID] {
 					continue
 				}
 				eligibility := decayPredictionEligibility(synapse.Dynamic.Eligibility, synapse.Dynamic.LastEligibilityUpdate, now)

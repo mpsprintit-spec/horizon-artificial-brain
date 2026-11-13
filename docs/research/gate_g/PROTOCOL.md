@@ -120,3 +120,52 @@ Rollback uses the untouched pre-opt-in checkpoint and its matching journal prefi
 under a pinned old binary; archive the complete later journal, never silently
 truncate history. Older readers may reject mixed native history; rejection is
 safer than silently dropping native transitions. No automatic V5→native migration.
+
+## Development findings and confirmation freeze amendment
+
+Before confirmation, the development probes exposed (and retained in evidence):
+
+- Existing sensor/vector/import paths bypassed the global journal-command guard.
+- Generic world confidence decay made native policy checkpoints fail restore;
+  policy-parameter ownership must be honored inside the single canonical graph.
+- A resolved factual-pair receipt was missing from prefix-index reconstruction.
+- Invalid second action-trial input/block was previously rejected only at outcome.
+  Reject these start mismatches before append; the original negative probes remain
+  and now assert earlier atomic rejection. Invalid continuation still fails at
+  outcome. No failed case is removed or relabeled as a valid learned sample.
+- Initial test-harness errors (attempting to bind an already-bound genesis Brain,
+  omitted checkpoint envelope/anchor fields in a checksum comparison, and trying
+  to begin an episode after a deliberately extinguished activation) are retained.
+  Their fixes use an exact serialized genesis, the complete authenticated envelope,
+  and a new real production input. Valid crash and replay scenarios are retained.
+
+Confirmation adds native→recurrent thought→native as a ninth mixed order; three
+native model versions, enabled composition, the actual production startup path,
+facade legacy isolation, corrupt records, and an explicit matched-prefix rollback.
+The composition case uses two small existing-format exposures only; no scientific
+Gate C/D curriculum is repeated. Migrations must precede native opt-in; live
+serving migration with a configured native controller is deliberately refused.
+
+Benchmark commands, fixed before confirmation:
+
+- Matched sequential ABBA: baseline/candidate/candidate/baseline, identical common
+  harness, GOMAXPROCS=1/GOGC=100. Baseline is commit `1e12332` (authentic Phase III
+  plus current main/PR63 and this protocol, before any Gate G implementation).
+- `BenchmarkGateGThought`: 100 samples/cell/run, 1k/4k/40k, nine initial units or
+  all units, with/without WAL. The numeric Process used to seed the state is a
+  genuine command outside the timed thought interval. Its resource/GC activity
+  is included in descriptive whole-cell GC statistics, not thought B/op.
+- `BenchmarkGateGNativeStages`: 20 factual pairs/cell/run, same sizes and sparse/
+  dense states, durable WAL. Report begin, operation and observed-learning latency
+  separately. Twenty-sample p95/p99 are descriptive order statistics, not tail
+  probability estimates. Do not increase samples selectively to hide a failure.
+- `BenchmarkNativeActionPersistence`: three samples/cell/run on both revisions;
+  checkpoint, restore-pending and replay-pair; retain the original fixture.
+- `BenchmarkGateGJournalAppend`: 100 samples/run on both revisions.
+- Candidate-only: `BenchmarkGateGAdmission` 100,000 observations; actual mixed
+  sensor/native handoff 100 samples/size; `BenchmarkGateGThoughtNativeIdle` 100
+  samples/cell, compared against the same declared production regression budget.
+  The authentic baseline refuses native-idle production commands, so no invented
+  baseline mixed-workload measurement is permitted.
+
+All original numeric budgets and 100% exact-state criteria remain unchanged.

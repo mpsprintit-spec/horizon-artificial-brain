@@ -53,11 +53,24 @@ func freezeExperience(experience learning.Experience) (learning.Experience, erro
 }
 
 func (r *BrainRuntime) validateNeuralEventLocked(event Event) error {
+	r.brain.RLock()
+	reserved := r.brain.NativeReservedNodesLocked()
+	r.brain.RUnlock()
+	for _, id := range event.StimulusNodeIDs {
+		if reserved[id] {
+			return errors.New("production observation cannot inject native policy activity")
+		}
+	}
+	for id := range event.Context {
+		if reserved[id] {
+			return errors.New("production context cannot inject native policy activity")
+		}
+	}
 	if event.NeuralTrace != nil && !r.dynamicsEncoding.HasOrderedObservations() {
 		return errors.New("neural trace requires ordered dynamics")
 	}
 	if err := validateEpisodeControls(event, r.dynamicsEncoding); err != nil {
 		return err
 	}
-	return event.NeuralTrace.Validate(func(id knowledge.NodeID) bool { return r.brain.Registry.GetByID(id) != nil })
+	return event.NeuralTrace.Validate(func(id knowledge.NodeID) bool { return !reserved[id] && r.brain.Registry.GetByID(id) != nil })
 }

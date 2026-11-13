@@ -234,6 +234,7 @@ func (e *Engine) ApplySparseObservedPlasticity(pre, post map[knowledge.NodeID]fl
 	}
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
+	native := e.Memory.NativeReservedNodesLocked()
 	mutations := 0
 	visit := func(n *knowledge.ConceptNode) {
 		p := clamp01(pre[n.ID])
@@ -246,7 +247,7 @@ func (e *Engine) ApplySparseObservedPlasticity(pre, post map[knowledge.NodeID]fl
 				continue
 			}
 			for _, s := range list {
-				if s == nil {
+				if s == nil || native[n.ID] || native[target] {
 					continue
 				}
 				elig := decayEligibility(s.Dynamic.Eligibility, s.Dynamic.LastEligibilityUpdate, at)

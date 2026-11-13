@@ -78,7 +78,8 @@ type EventLog struct {
 	// Also detect in-place truncation, which preserves the inode.
 	acknowledgedSize int64
 	// Test-only fault injection; guarded by mu like file writes.
-	beforeAppend func(LoggedEvent) error
+	beforeAppend     func(LoggedEvent) error
+	transactionFault func(string, LoggedEvent) // unexported test hook, under mu
 }
 
 func OpenEventLog(path string) (*EventLog, error) {
@@ -167,8 +168,14 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	if _, err := l.file.Write(append(data, '\n')); err != nil {
 		return fmt.Errorf("append logged event: %w", err)
 	}
+	if l.transactionFault != nil {
+		l.transactionFault("after-write-before-sync", event)
+	}
 	if err := l.file.Sync(); err != nil {
 		return fmt.Errorf("sync event log: %w", err)
+	}
+	if l.transactionFault != nil {
+		l.transactionFault("after-sync-before-apply", event)
 	}
 	expected := l.acknowledgedSize + int64(len(data)+1)
 	opened, err = l.file.Stat()
@@ -599,9 +606,13 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		}
 	}
 	brainRuntime.mu.Lock()
-	if brainRuntime.supervised {
+	if brainRuntime.supervised || brainRuntime.eventLog != nil || brainRuntime.replaying {
 		brainRuntime.mu.Unlock()
 		return ErrManagedRuntimeAccess
+	}
+	if err := brainRuntime.ensureWritableLocked(); err != nil {
+		brainRuntime.mu.Unlock()
+		return err
 	}
 	// Validate the whole contract timeline before the first mutation. A v2
 	// command cannot bypass its migration, nor can serving silently revert.
@@ -610,7 +621,13 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	if brainRuntime.composition != nil {
 		compositionEncoding = brainRuntime.composition.Config.Version
 	}
+	contractSequence := firstSequence
 	for _, logged := range events {
+		if logged.BrainIdentity != BrainIdentity || !supportedEventLogSchema(logged.SchemaVersion) || logged.Sequence != contractSequence {
+			brainRuntime.mu.Unlock()
+			return errors.New("incompatible identity/schema or discontinuous replay sequence")
+		}
+		contractSequence++
 		if logged.CompositionEncoding != compositionEncoding {
 			brainRuntime.mu.Unlock()
 			return errors.New("composition contract changed without its migration")
@@ -638,9 +655,15 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	originalEncoding := brainRuntime.surfaceEncoding
 	originalDynamics := brainRuntime.dynamicsEncoding
 	brainRuntime.eventLog = nil
+	brainRuntime.replaying = true
 	brainRuntime.mu.Unlock()
+	complete := false
 	defer func() {
 		brainRuntime.mu.Lock()
+		brainRuntime.replaying = false
+		if !complete {
+			brainRuntime.markRecoveryRequiredLocked()
+		}
 		brainRuntime.eventLog = originalLog
 		brainRuntime.surfaceEncoding = originalEncoding
 		if brainRuntime.neuralWrittenGrounding {
@@ -810,5 +833,6 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 			return fmt.Errorf("replay event sequence mismatch after %q: got %d want %d", logged.Type, got, logged.Sequence)
 		}
 	}
+	complete = true
 	return nil
 }
