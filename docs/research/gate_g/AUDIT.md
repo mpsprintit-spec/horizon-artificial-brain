@@ -30,6 +30,19 @@ worktree, uncommitted benchmark, checkpoint, memory or user journal was replaced
    partially applied replay was not invariably retired. Recovery now requires a
    detached private runtime, prevalidates identity/schema/sequence and retires a
    partially failed replay. Supervisor publication remains exclusive.
+6. Numeric learning payloads could alias native policy addresses through direct
+   experience, consequence and spelling APIs. Central pre-append reference
+   admission closes all three paths, including inline observation experiences.
+   The positive world-learning control additionally exposed v1 policy edges
+   being treated as competing world successors by observed association feedback;
+   that feedback now uses the same canonical ownership fence.
+7. An automatic numeric projection equal to the bias prototype recruited that
+   internal unit by similarity, even without an explicit neural address. The
+   legacy and current dynamics both failed the added adversarial test. Generic
+   representation matching now excludes canonical native role addresses before
+   candidate selection; world projection and exact checkpoint recovery remain
+   tested. This repair follows the measuredaf3 code, whose failed resource result
+   is retained rather than attributed to the repaired descendant.
 
 ## Entry points and transaction effects
 
@@ -72,14 +85,21 @@ canonical graph. Tests compare the complete graph and continuation before/after
 restart, not only the chosen operation or text output.
 
 `NativeReservedNodesLocked` is a transient address-only ownership fence over the
-existing bias/feature/effector nodes. It contains no weights, examples or answers.
+existing bias/feature/effector nodes. Hot graph traversals use allocation-free
+`NativeOwnershipLocked`: a pointer to those canonical role addresses and their
+bounds, with exact membership checks for noncontiguous historical addresses.
+Callers hold the Brain lock throughout use. There are no copied weights,
+examples, episodes, learned caches or answers. An unconfigured Brain retains
+the original fast path without membership lookups.
 World propagation/curiosity cannot recruit the internal policy units as sensory
 relays. Generic activity, prediction, observed feedback, consequence, sparse
 plasticity and passive memory do not apply their incompatible weight/confidence
 law to policy parameters. Those parameters still learn in their existing native
 observed-credit method in the same registry. World synapses continue learning.
 External stimuli/context/action bindings cannot inject or authorize native policy
-units. Explicit NativeObservation retains the same anti-injection guard.
+units. Direct learning sequences, context/data populations, consequences and
+spelling populations receive the same pre-append address validation. Explicit
+NativeObservation retains the same anti-injection guard.
 
 ## Unified persistence and recovery
 

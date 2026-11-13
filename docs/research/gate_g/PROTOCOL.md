@@ -219,3 +219,70 @@ one. CPU samples were dominated by race instrumentation. The original20-minute
 failure remains a recorded negative result. This does not change any runtime
 latency/allocation budget, seed, neural test, durability rule or gate criterion.
 The workflow deadline is updated explicitly so the full suite can complete.
+
+### Benchmark process deadline amendment
+
+The first ABBA invocation stopped producing output in the baseline40k dense
+thought cell before any whole-command result was recorded. Its partial output
+is retained and is not assigned a passing status. Go1.23.2 testing.M explicitly
+stops the test alarm before runBenchmarks; `go test -timeout=20m` therefore does
+not bound benchmark execution. The runner now records the active process group
+before starting and enforces an external20-minute command deadline, preserving
+an explicit failed status on timeout. A fresh complete ABBA must be retained;
+sample counts, inputs, harness, budgets and comparison rules are unchanged.
+
+The first externally bounded attempt completed its baseline thought matrix but
+failed in the context-continuity command: the unanchored first regex segment also
+selected `BenchmarkGateGContextContinuityNativeIdle`, which baseline correctly
+rejects. The failure is retained. Each slash-separated selection segment is now
+anchored exactly, selecting the originally registered workload. A fresh ABBA is
+required; no failed runtime measurement is hidden and no budget is altered.
+
+### Backing-filesystem disclosure and supplementary append check
+
+Filesystem inspection during the resource audit identified `/tmp` as tmpfs and
+the checkouts as overlayfs. The common Go TempDir fixtures therefore measure
+software/process-crash behavior with every Sync call retained, not physical
+storage power-loss durability or Android fsync latency. This is disclosed for
+all primary measurements. No primary workload or acceptance threshold changes.
+
+After the main matrix, additionally run100 journal appends per revision in ABBA
+with TMPDIR explicitly set to a fresh directory on checkout overlayfs, same
+Go/GOMAXPROCS/GOGC/common harness. Before that supplementary measurement, fix its
+budget to candidate mean run p95 <=baseline*1.20+0.10ms and B/op <=baseline*1.10
++4096. Retain actual filesystem labels, raw results and any failure. This check
+does not establish device performance, power-loss durability or universal disk
+latency. Do not run it concurrently with the primary timing matrix.
+
+### Baseline diagnostic assumption failure — retained
+
+The complete primary timing matrix executed, but its final expected-refusal
+probe exited0 rather than1: baseline `BenchmarkGateGMixedHandoff` uses the sensor
+entry point, which bypassed the old blanket guard. This is an audit finding, not
+a fabricated baseline latency or a passing negative test. The original runs.json
+and runner exit remain unchanged. All90 resource comparisons are retained; this
+unexpected diagnostic exit also prevents calling that invocation protocol-clean.
+
+A separate corrected diagnostic uses the original Process-bearing native-idle
+thought fixture, exactly anchored at1k/non-dense/WAL, one sample. It must reject
+with the actual blanket-guard error. Future runner metadata identifies this as
+`baseline-global-guard-refusal`; the summary reader preserves the older diagnostic
+contract for the retained original matrix. Do not rerun/discard the resource
+matrix merely to hide this failed assumption, and do not reinterpret the sensor
+bypass as verified safe coexistence or a matched mixed-runtime speed baseline.
+
+### Post-confirmation projection ownership failure and repair
+
+After freezing and completing the resource matrix, an additional adversarial
+numeric input exactly equal to a native bias prototype recruited that private
+unit through the generic representation matcher. Both legacy and current
+dynamics failed. The original negative output is retained. The matcher must
+exclude canonical native role addresses before similarity selection, using the
+same ownership fence as explicit numeric IDs. World input still learns/reuses
+world populations, and the new case must round-trip checkpoint+suffix exactly.
+
+This is a real additional implementation change after measured codeaf3b946.
+Do not claim the recorded performance matrix benchmarks the repaired descendant
+or passes G8. Its failed budgets remain retained; the descendant needs technical
+regression/CI verification and a future fresh resource confirmation after any
+performance repair. No primary criterion or failed fixture is removed.
