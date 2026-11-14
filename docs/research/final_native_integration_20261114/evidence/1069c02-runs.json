@@ -1,0 +1,515 @@
+{
+  "baseline_head": "609ee918aa8533e0aca5706dea6046043bdc09bc",
+  "candidate_head": "1069c02e51f2df577b66b8c7193cc4ec69c0c603",
+  "baseline_tree": "bc640beec3f9e4da864f2df0fd1b92292c82d1b4",
+  "candidate_tree": "8f2c36b8cae145b9054495ca90d1b3aee8a598c2",
+  "harness_sha256": "f29039161c8e93d0f62c9e025a0473e3821399187daed5471dbb38629e6d6b48",
+  "runner_sha256": "086c27897a09fe227d7e215b137cf1ae235401aa4c162d2da4fec5a83dc0e3e9",
+  "go": "go version go1.23.2 linux/amd64",
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "GOMAXPROCS": 1,
+  "GOGC": 100,
+  "baseline_diagnostic_label": "baseline-global-guard-refusal",
+  "ordered_runs": [
+    {
+      "label": "A1-thought",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGThought$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 168.05169558525085
+    },
+    {
+      "label": "A1-context-continuity",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGContextContinuity$/nodes=40000$/dense=false$/journal=true$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 9.547558069229126
+    },
+    {
+      "label": "A1-native",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGNativeStages$",
+        "-benchtime=20x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 33.01074743270874
+    },
+    {
+      "label": "A1-append",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGJournalAppend$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 1.072028636932373
+    },
+    {
+      "label": "A1-persistence",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkNativeActionPersistence$",
+        "-benchtime=3x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 97.91751718521118
+    },
+    {
+      "label": "B1-thought",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGThought$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 129.35526514053345
+    },
+    {
+      "label": "B1-context-continuity",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGContextContinuity$/nodes=40000$/dense=false$/journal=true$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 9.656124591827393
+    },
+    {
+      "label": "B1-native",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGNativeStages$",
+        "-benchtime=20x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 31.841850996017456
+    },
+    {
+      "label": "B1-append",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGJournalAppend$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 0.916668176651001
+    },
+    {
+      "label": "B1-persistence",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkNativeActionPersistence$",
+        "-benchtime=3x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 96.0541923046112
+    },
+    {
+      "label": "B2-thought",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGThought$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 127.13118934631348
+    },
+    {
+      "label": "B2-context-continuity",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGContextContinuity$/nodes=40000$/dense=false$/journal=true$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 9.648316383361816
+    },
+    {
+      "label": "B2-native",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGNativeStages$",
+        "-benchtime=20x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 32.15647792816162
+    },
+    {
+      "label": "B2-append",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGJournalAppend$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 0.866814374923706
+    },
+    {
+      "label": "B2-persistence",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkNativeActionPersistence$",
+        "-benchtime=3x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 96.64749789237976
+    },
+    {
+      "label": "A2-thought",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGThought$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 158.45898342132568
+    },
+    {
+      "label": "A2-context-continuity",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGContextContinuity$/nodes=40000$/dense=false$/journal=true$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 10.068908452987671
+    },
+    {
+      "label": "A2-native",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGNativeStages$",
+        "-benchtime=20x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 32.55174684524536
+    },
+    {
+      "label": "A2-append",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGJournalAppend$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 0.8201167583465576
+    },
+    {
+      "label": "A2-persistence",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkNativeActionPersistence$",
+        "-benchtime=3x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 98.78186678886414
+    },
+    {
+      "label": "candidate-native-idle-thought",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGThoughtNativeIdle$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 128.97304773330688
+    },
+    {
+      "label": "candidate-native-idle-context-continuity",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGContextContinuityNativeIdle$/nodes=40000$/dense=false$/journal=true$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 9.346426248550415
+    },
+    {
+      "label": "candidate-admission",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGAdmission$",
+        "-benchtime=100000x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 1.0685560703277588
+    },
+    {
+      "label": "candidate-handoff",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGMixedHandoff$",
+        "-benchtime=100x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "returncode": 0,
+      "externally_timed_out": false,
+      "expected_exit": 0,
+      "seconds": 8.353486776351929
+    },
+    {
+      "label": "baseline-global-guard-refusal",
+      "command": [
+        "go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^$",
+        "-bench",
+        "^BenchmarkGateGThoughtNativeIdle$/nodes=1000$/dense=false$/journal=true$",
+        "-benchtime=1x",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "cwd": "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "returncode": 1,
+      "externally_timed_out": false,
+      "expected_exit": 1,
+      "seconds": 0.9170868396759033
+    }
+  ]
+}

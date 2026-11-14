@@ -1,0 +1,177 @@
+[
+  {
+    "name": "overlay-append",
+    "command": [
+      "python3",
+      "scripts/run_gate_g_overlay_append.py",
+      "--baseline",
+      "/workspace/scratch/8c3e784fd286/horizon-g8-authentic-baseline",
+      "--candidate",
+      "/workspace/scratch/8c3e784fd286/horizon-final-native",
+      "--output",
+      "/workspace/scratch/8c3e784fd286/final-native-evidence/overlay-append"
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 3.98341965675354,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "race-remaining",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "-count=1",
+      "-timeout=40m",
+      "github.com/project-horizon/horizon-core/cmd/api-gateway",
+      "github.com/project-horizon/horizon-core/cmd/horizon-chat",
+      "github.com/project-horizon/horizon-core/cmd/horizon-dialogue",
+      "github.com/project-horizon/horizon-core/cmd/horizon-hnl",
+      "github.com/project-horizon/horizon-core/cmd/horizon-metareasoning-v5",
+      "github.com/project-horizon/horizon-core/internal/cache",
+      "github.com/project-horizon/horizon-core/internal/config",
+      "github.com/project-horizon/horizon-core/internal/db",
+      "github.com/project-horizon/horizon-core/internal/logger",
+      "github.com/project-horizon/horizon-core/internal/middleware",
+      "github.com/project-horizon/horizon-core/internal/model",
+      "github.com/project-horizon/horizon-core/internal/mq",
+      "github.com/project-horizon/horizon-core/internal/utils",
+      "github.com/project-horizon/horizon-core/models/grounded-dialogue-v1",
+      "github.com/project-horizon/horizon-core/services/ai",
+      "github.com/project-horizon/horizon-core/services/ai/activation",
+      "github.com/project-horizon/horizon-core/services/ai/config",
+      "github.com/project-horizon/horizon-core/services/ai/context",
+      "github.com/project-horizon/horizon-core/services/ai/decision",
+      "github.com/project-horizon/horizon-core/services/ai/decision/api/grpc",
+      "github.com/project-horizon/horizon-core/services/ai/decision/api/http",
+      "github.com/project-horizon/horizon-core/services/ai/decision/internal/event",
+      "github.com/project-horizon/horizon-core/services/ai/decision/internal/handler",
+      "github.com/project-horizon/horizon-core/services/ai/decision/internal/model",
+      "github.com/project-horizon/horizon-core/services/ai/decision/internal/repository",
+      "github.com/project-horizon/horizon-core/services/ai/decision/internal/service",
+      "github.com/project-horizon/horizon-core/services/ai/dnf",
+      "github.com/project-horizon/horizon-core/services/ai/domain",
+      "github.com/project-horizon/horizon-core/services/ai/evolution",
+      "github.com/project-horizon/horizon-core/services/ai/execution",
+      "github.com/project-horizon/horizon-core/services/ai/hfcc",
+      "github.com/project-horizon/horizon-core/services/ai/internal/jsonstream",
+      "github.com/project-horizon/horizon-core/services/ai/language",
+      "github.com/project-horizon/horizon-core/services/ai/memory",
+      "github.com/project-horizon/horizon-core/services/ai/perception",
+      "github.com/project-horizon/horizon-core/services/ai/plugin",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/api/grpc",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/api/http",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/contracts",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/engine",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/estimator",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/filter",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/fusion",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/handler",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/model",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/repository",
+      "github.com/project-horizon/horizon-core/services/ai/sensor-fusion/service",
+      "github.com/project-horizon/horizon-core/services/ai/temporary/websearch",
+      "github.com/project-horizon/horizon-core/services/ai/terminal",
+      "github.com/project-horizon/horizon-core/services/ai/thinking",
+      "github.com/project-horizon/horizon-core/services/ai/understanding",
+      "github.com/project-horizon/horizon-core/services/ai/vision",
+      "github.com/project-horizon/horizon-core/services/ai/vision/api/grpc",
+      "github.com/project-horizon/horizon-core/services/ai/vision/api/http",
+      "github.com/project-horizon/horizon-core/services/ai/vision/internal/event",
+      "github.com/project-horizon/horizon-core/services/ai/vision/internal/handler",
+      "github.com/project-horizon/horizon-core/services/ai/vision/internal/model",
+      "github.com/project-horizon/horizon-core/services/ai/vision/internal/repository",
+      "github.com/project-horizon/horizon-core/services/ai/vision/internal/service",
+      "github.com/project-horizon/horizon-core/services/ai/websearch"
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 154.4214472770691,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "race-saved-continuation",
+    "command": [
+      "go",
+      "test",
+      "-race",
+      "./services/ai/runtime",
+      "-run",
+      "^TestNativeIntegrationSavedContinuation$",
+      "-count=1",
+      "-timeout=20m",
+      "-v"
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 153.72101163864136,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "vet",
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 6.322184085845947,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "build",
+    "command": [
+      "go",
+      "build",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 1.4150457382202148,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "android-cli",
+    "command": [
+      "go",
+      "build",
+      "-o",
+      "/workspace/scratch/8c3e784fd286/final-native-evidence/horizon-cli-android-arm64",
+      "./services/ai/cmd/horizon-cli"
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 11.358318090438843,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "android-chat",
+    "command": [
+      "go",
+      "build",
+      "-o",
+      "/workspace/scratch/8c3e784fd286/final-native-evidence/horizon-chat-android-arm64",
+      "./cmd/horizon-chat"
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 0.4854624271392822,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  },
+  {
+    "name": "android-production",
+    "command": [
+      "go",
+      "build",
+      "-o",
+      "/workspace/scratch/8c3e784fd286/final-native-evidence/horizon-production-android-arm64",
+      "./services/ai"
+    ],
+    "cwd": "/workspace/scratch/8c3e784fd286/horizon-final-native",
+    "exit": 0,
+    "seconds": 0.730339527130127,
+    "source": "cfeac007dec4c5d1fe86cc885a4ce12a07c9e144"
+  }
+]

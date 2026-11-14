@@ -1,0 +1,20 @@
+[
+  {
+    "target": "cli",
+    "bytes": 7549953,
+    "sha256": "42de409951744b07f43ea95aabbf4da4547e7b77729a3ad93411ee0033c81e92",
+    "buildinfo": "/workspace/scratch/8c3e784fd286/final-native-evidence/horizon-cli-android-arm64: go1.23.2\n\tpath\tgithub.com/project-horizon/horizon-core/services/ai/cmd/horizon-cli\n\tmod\tgithub.com/project-horizon/horizon-core\t(devel)\t\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=asynctimerchan=1,gotypesalias=0,httpservecontentkeepheaders=1,tls3des=1,tlskyber=0,x509keypairleaf=0,x509negativeserial=1\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=android\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=cfeac007dec4c5d1fe86cc885a4ce12a07c9e144\n\tbuild\tvcs.time=2026-11-14T17:18:32Z\n\tbuild\tvcs.modified=false\n"
+  },
+  {
+    "target": "chat",
+    "bytes": 8517692,
+    "sha256": "004b65afe2ba1371b3e864f42dc55c106a31301f990e2bcea046e9d03673d60c",
+    "buildinfo": "/workspace/scratch/8c3e784fd286/final-native-evidence/horizon-chat-android-arm64: go1.23.2\n\tpath\tgithub.com/project-horizon/horizon-core/cmd/horizon-chat\n\tmod\tgithub.com/project-horizon/horizon-core\t(devel)\t\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=asynctimerchan=1,gotypesalias=0,httpservecontentkeepheaders=1,tls3des=1,tlskyber=0,x509keypairleaf=0,x509negativeserial=1\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=android\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=cfeac007dec4c5d1fe86cc885a4ce12a07c9e144\n\tbuild\tvcs.time=2026-11-14T17:18:32Z\n\tbuild\tvcs.modified=false\n"
+  },
+  {
+    "target": "production",
+    "bytes": 12059461,
+    "sha256": "d7cde342ade391f2aa6373f37f42a202d31994bfb7f9c19dee0e620ad78b1f81",
+    "buildinfo": "/workspace/scratch/8c3e784fd286/final-native-evidence/horizon-production-android-arm64: go1.23.2\n\tpath\tgithub.com/project-horizon/horizon-core/services/ai\n\tmod\tgithub.com/project-horizon/horizon-core\t(devel)\t\n\tbuild\t-buildmode=exe\n\tbuild\t-compiler=gc\n\tbuild\tDefaultGODEBUG=asynctimerchan=1,gotypesalias=0,httpservecontentkeepheaders=1,tls3des=1,tlskyber=0,x509keypairleaf=0,x509negativeserial=1\n\tbuild\tCGO_ENABLED=0\n\tbuild\tGOARCH=arm64\n\tbuild\tGOOS=android\n\tbuild\tGOARM64=v8.0\n\tbuild\tvcs=git\n\tbuild\tvcs.revision=cfeac007dec4c5d1fe86cc885a4ce12a07c9e144\n\tbuild\tvcs.time=2026-11-14T17:18:32Z\n\tbuild\tvcs.modified=false\n"
+  }
+]

@@ -1,0 +1,16 @@
+[
+  {
+    "metric": "append_p95_ms",
+    "baseline": 0.43984999999999996,
+    "candidate": 2.7529500000000002,
+    "limit": 0.6278199999999999,
+    "passed": false
+  },
+  {
+    "metric": "B/op",
+    "baseline": 1995.5,
+    "candidate": 2020.0,
+    "limit": 6291.05,
+    "passed": true
+  }
+]
