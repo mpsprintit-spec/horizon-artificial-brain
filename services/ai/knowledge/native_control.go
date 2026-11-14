@@ -93,7 +93,7 @@ func (c NativeControlConfig) Validate() error {
 	if c.LearningRate <= 0 || c.LearningRate > 1 || c.Gamma < 0 || c.Gamma > 1 || c.Lambda < 0 || c.Lambda > 1 || c.Temperature <= 0 || c.Temperature > 10 {
 		return errors.New("invalid native learning bounds")
 	}
-	if c.Encoder != "" && c.Encoder != "local-relational-v1" || c.Encoder != "" && !c.SupportsExperiments() {
+	if c.Encoder != "" && (c.relationalFeatureCount() == 0 || !c.SupportsExperiments()) {
 		return errors.New("unsupported native encoder/version")
 	}
 	if c.ContrastMean && !c.SupportsExperiments() {
@@ -262,7 +262,7 @@ func (k *KnowledgeBase) InitializeNativeControl(c NativeControlConfig, at time.T
 	}
 	s.Bias = alloc()
 	if c.Encoder != "" {
-		for i := 0; i < 4; i++ {
+		for i := 0; i < c.relationalFeatureCount(); i++ {
 			s.Features = append(s.Features, alloc())
 		}
 	}

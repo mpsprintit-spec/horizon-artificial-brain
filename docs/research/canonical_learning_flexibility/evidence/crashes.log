@@ -1,0 +1,96 @@
+=== RUN   TestGateGProcessCrash
+=== RUN   TestGateGProcessCrash/payload
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=30c3d349ea1924ca168063d16146f2b944b5e280fe190a2d4a199035124b9b9c pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/before-append
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=d65d79b13a3e2391643dc537f8a61d5bbfe11228b8666ffe88da5a24bee03718 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/write-before-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=daec5cdc75020aa99af4d2a7d94e58c61b2d17f2a91d68c3100f457a66a7a2f8 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/fsync-before-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=4f26fad3f8515e57bdafa45a1eeeb4b8e5ec95ae19ee17648ed9edfdf3f46e7b pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/apply-before-ack
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=6e4ff3fb337afadd3ee2b71bc06cae66ecaf58b08095e22f14c89868a2c86a1c pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/sensor-intent
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=e17251afb3bd3a7552241cefbf5d30e7dfe8fcd259ae7d075c22b1c04d5ac79c pending=idle strict_orphan=true
+=== RUN   TestGateGProcessCrash/sensor-partial-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=9149ca4f07cc393ce576ca95b9f60763d925e1aea188bd4747bd32209de82429 pending=idle strict_orphan=true
+=== RUN   TestGateGProcessCrash/sensor-commit-fsync
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=331e14b7e668ff7c249eb3135be1b08fc5d061409a3038f1a9366ea0b80b5176 pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/active-episode
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=62cfa5ee55d65dd4bb6b1ed3f4b637dbefe49309f35e8c75e1e92630dcdf9067 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/first-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=8681c88029b6f01515a6cc27c86ebd5bd00b3a8e4ad219f78d85f4a887480d39 pending=contrast-pending strict_orphan=false
+=== RUN   TestGateGProcessCrash/second-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=20 checksum=bab93c21a1636d9dbcc98b2076ac19aff19dc80a253009a1651b29b8d690b4e6 pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/pending-contrast
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=57e4645058361eb764d781c0e22c6df33a471e2caca5af453393725faebb7cd3 pending=contrast-pending strict_orphan=false
+=== RUN   TestGateGProcessCrash/checkpoint-before-rename
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=2089f0d04a54c4db1f48b6ce0f36924da3dcf19485a290860522bdd558eb823c pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/checkpoint-after-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=0beb523c934e11950179728084df6d2030f9b89eeb4d085f33c4366ffe669431 pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/supervisor-rebuild
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=08bcea50b203865674e9f4e09845bd347fa2c7e64f3308c47fc5b593ddc8f265 pending=idle strict_orphan=false
+--- PASS: TestGateGProcessCrash (0.64s)
+    --- PASS: TestGateGProcessCrash/payload (0.04s)
+    --- PASS: TestGateGProcessCrash/before-append (0.03s)
+    --- PASS: TestGateGProcessCrash/write-before-sync (0.04s)
+    --- PASS: TestGateGProcessCrash/fsync-before-apply (0.04s)
+    --- PASS: TestGateGProcessCrash/apply-before-ack (0.04s)
+    --- PASS: TestGateGProcessCrash/sensor-intent (0.04s)
+    --- PASS: TestGateGProcessCrash/sensor-partial-apply (0.04s)
+    --- PASS: TestGateGProcessCrash/sensor-commit-fsync (0.07s)
+    --- PASS: TestGateGProcessCrash/active-episode (0.04s)
+    --- PASS: TestGateGProcessCrash/first-outcome (0.03s)
+    --- PASS: TestGateGProcessCrash/second-outcome (0.03s)
+    --- PASS: TestGateGProcessCrash/pending-contrast (0.03s)
+    --- PASS: TestGateGProcessCrash/checkpoint-before-rename (0.04s)
+    --- PASS: TestGateGProcessCrash/checkpoint-after-sync (0.04s)
+    --- PASS: TestGateGProcessCrash/supervisor-rebuild (0.07s)
+=== RUN   TestNativeV2GateGProcessCrash
+=== RUN   TestNativeV2GateGProcessCrash/payload
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=a7a95892ef96382c1dc75ba209196204e3fc5203746beb86acc5129357650d27 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/before-append
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=d198773c45851817dfa26818cdf41149b651e3fcf20ccfe3991d30a394520c7f pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/write-before-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=4361711eeb745d2d2d038e9fb3cbf7126d6eeb54c9dbb224c35561d96b3d9490 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/fsync-before-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=1325805666e7c267895ef5ff153ba8750e238ac6f021942b75089637a3cf09c3 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/apply-before-ack
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=5d5ff6a759c39268af8a096f017817f96a91382c2d4e95fd8ee9aeb1bd042436 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/sensor-intent
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=cc82202e6b45662c4118c12325fc3099cd839103232047b90dcccfecbe84582f pending=idle strict_orphan=true
+=== RUN   TestNativeV2GateGProcessCrash/sensor-partial-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=9b397be1ee0623b6a6391b9fc9a29b16c8aba90a57e00adb8921294d8f302287 pending=idle strict_orphan=true
+=== RUN   TestNativeV2GateGProcessCrash/sensor-commit-fsync
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=4c6321ef9b440742221d2b10bf2a77ed86c99341abed077ae68ed8967078afca pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/active-episode
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=07e1c815799ec853d6d4597db39b5d0b70babce0b7ecd2f7cd4c204f7e9330eb pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/first-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=138ba5d6247ae1d19143ccf2c84bcb1562a41c4b1511f52d8d967e16355d2936 pending=contrast-pending strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/second-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=20 checksum=2e848734aa17aeb5b4d9bd819e557185cdad52fa3146bf0088bec9403ff74a6b pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/pending-contrast
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=07db27c5c31738b72d10c683628727b3b707d4a3f88aaeaf6557b75a71113b5b pending=contrast-pending strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/checkpoint-before-rename
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=ff32cfe4093b9a9ae4e043aa54d4af7a939481dc5a82e037913d16f2c9bcf2cc pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/checkpoint-after-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=e7bcdaaca4088f1622fa20f46a3c1551c0b7795264bc361d05b058907bce547d pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/supervisor-rebuild
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=7924bb97378785dd32c4c938fb2ece0c601f1e40bae0c7b7520f1c22f1ecff12 pending=idle strict_orphan=false
+--- PASS: TestNativeV2GateGProcessCrash (0.79s)
+    --- PASS: TestNativeV2GateGProcessCrash/payload (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/before-append (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/write-before-sync (0.06s)
+    --- PASS: TestNativeV2GateGProcessCrash/fsync-before-apply (0.06s)
+    --- PASS: TestNativeV2GateGProcessCrash/apply-before-ack (0.06s)
+    --- PASS: TestNativeV2GateGProcessCrash/sensor-intent (0.06s)
+    --- PASS: TestNativeV2GateGProcessCrash/sensor-partial-apply (0.06s)
+    --- PASS: TestNativeV2GateGProcessCrash/sensor-commit-fsync (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/active-episode (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/first-outcome (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/second-outcome (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/pending-contrast (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/checkpoint-before-rename (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/checkpoint-after-sync (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/supervisor-rebuild (0.06s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	1.445s

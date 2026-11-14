@@ -55,7 +55,7 @@ func ValidateNativeControlState(data []byte, enabled bool) error {
 		return errors.New("invalid native bias")
 	}
 	if s.Config.Encoder != "" {
-		if len(s.Features) != 4 {
+		if len(s.Features) != s.Config.relationalFeatureCount() {
 			return errors.New("invalid relational features")
 		}
 		inputs = map[NodeID]bool{}
@@ -136,7 +136,7 @@ func ValidateNativeControlState(data []byte, enabled bool) error {
 			lookup[id] = &ConceptNode{ID: id, Synapses: map[NodeID]SynapseList{}}
 		}
 		for _, e := range raw.Edges {
-			lookup[e.SourceID].Synapses[e.TargetID] = append(lookup[e.SourceID].Synapses[e.TargetID], &Synapse{TargetID: e.TargetID, Weight: e.Weight, Confidence: e.Confidence})
+			lookup[e.SourceID].Synapses[e.TargetID] = append(lookup[e.SourceID].Synapses[e.TargetID], &Synapse{TargetID: e.TargetID, Weight: e.Weight, Confidence: e.Confidence, Inhibitory: e.Inhibitory})
 		}
 	}
 	episodes := []*NativeEpisode{s.Episode}

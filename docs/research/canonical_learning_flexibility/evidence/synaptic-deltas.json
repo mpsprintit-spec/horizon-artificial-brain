@@ -1,0 +1,65 @@
+[
+  {
+    "stage": "00-foundation",
+    "new_edges": 0,
+    "removed_edges": 0,
+    "signed_weight_changed": 0,
+    "policy_weight_changed": 0,
+    "signed_weight_L1": 0,
+    "max_signed_weight_delta": 0
+  },
+  {
+    "stage": "01-A",
+    "new_edges": 12,
+    "removed_edges": 0,
+    "signed_weight_changed": 12,
+    "policy_weight_changed": 0,
+    "signed_weight_L1": 10.191199225770108,
+    "max_signed_weight_delta": 0.8999999687500013
+  },
+  {
+    "stage": "02-B",
+    "new_edges": 8,
+    "removed_edges": 0,
+    "signed_weight_changed": 20,
+    "policy_weight_changed": 0,
+    "signed_weight_L1": 7.20000050490362,
+    "max_signed_weight_delta": 0.8999999687500013
+  },
+  {
+    "stage": "02-native-ready",
+    "new_edges": 72,
+    "removed_edges": 0,
+    "signed_weight_changed": 72,
+    "policy_weight_changed": 72,
+    "signed_weight_L1": 0.371363118291782,
+    "max_signed_weight_delta": 0.009807459912548779
+  },
+  {
+    "stage": "03-C",
+    "new_edges": 0,
+    "removed_edges": 0,
+    "signed_weight_changed": 40,
+    "policy_weight_changed": 40,
+    "signed_weight_L1": 4.728322024458442,
+    "max_signed_weight_delta": 0.17304040741509016
+  },
+  {
+    "stage": "04-D",
+    "new_edges": 2,
+    "removed_edges": 0,
+    "signed_weight_changed": 22,
+    "policy_weight_changed": 0,
+    "signed_weight_L1": 2.1557805604971305,
+    "max_signed_weight_delta": 0.8999999687500013
+  },
+  {
+    "stage": "05-restart-continuation",
+    "new_edges": 0,
+    "removed_edges": 0,
+    "signed_weight_changed": 22,
+    "policy_weight_changed": 0,
+    "signed_weight_L1": 1.744020112770528e-07,
+    "max_signed_weight_delta": 8.3333329126134e-09
+  }
+]

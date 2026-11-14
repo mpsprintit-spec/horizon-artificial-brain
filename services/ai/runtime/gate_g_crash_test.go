@@ -22,6 +22,14 @@ type gateGCrashPlan struct {
 // The child is killed inside the real transaction boundaries, not by returning
 // an exception to the caller. All paths are isolated fixtures owned by this test.
 func TestGateGProcessCrash(t *testing.T) {
+	gateGProcessCrash(t, k.NativeRelationalEncoderV1)
+}
+
+func TestNativeV2GateGProcessCrash(t *testing.T) {
+	gateGProcessCrash(t, k.NativeRelationalEncoderV2)
+}
+
+func gateGProcessCrash(t *testing.T, encoder string) {
 	if dir := os.Getenv("HORIZON_GATE_G_CRASH_CHILD"); dir != "" {
 		var plan gateGCrashPlan
 		b, e := os.ReadFile(filepath.Join(dir, "plan.json"))
@@ -99,7 +107,7 @@ func TestGateGProcessCrash(t *testing.T) {
 			gateGSensor(t, rt, "production-input")
 			cfg := nativeControlConfig(ids)
 			cfg.Version = k.NativeControlCausalVersion
-			cfg.Encoder = "local-relational-v1"
+			cfg.Encoder = encoder
 			nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
 			gateGNative(t, rt, "prior-learning")
 			gateGSensor(t, rt, "target-context")
@@ -250,6 +258,9 @@ func TestGateGProcessCrash(t *testing.T) {
 				}
 			}
 			if root := os.Getenv("HORIZON_GATE_G_EVIDENCE_DIR"); root != "" {
+				if encoder == k.NativeRelationalEncoderV2 {
+					root = filepath.Join(root, encoder)
+				}
 				dest := filepath.Join(root, "crashes", tc.name)
 				if e = os.MkdirAll(dest, 0755); e != nil {
 					t.Fatal(e)

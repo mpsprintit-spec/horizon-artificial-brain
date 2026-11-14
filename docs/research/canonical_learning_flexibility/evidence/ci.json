@@ -1,0 +1,19 @@
+{
+  "checked_at": "2026-11-14T11:07:00Z",
+  "commit": "daf040ae5330d6f8949b36c9aacb1293d596943c",
+  "workflow": {
+    "workflow_runs": [
+      {
+        "id": 43586914319,
+        "name": "CI/CD",
+        "status": "in_progress",
+        "conclusion": null,
+        "run_number": 1789,
+        "jobs_url": "https://api.github.com/repos/mpsprintit-spec/horizon-artificial-brain/actions/runs/43586914319/jobs",
+        "logs_url": "https://api.github.com/repos/mpsprintit-spec/horizon-artificial-brain/actions/runs/43586914319/logs",
+        "workflow_id": 348433370
+      }
+    ]
+  },
+  "scope": "source-freeze head; documentation/evidence publication has no Go/data changes"
+}
