@@ -1,91 +1,86 @@
-# Gate G continuation record — 14 November 2026
+# Gate G — final continuation record,14 November2026
+
+**Decision: Gate G NOT PASSED. G8 needs repair;81/90 comparisons meet budget,9 fail.**
+G1–G7/G9/G10 pass the registered technical/functional cases. Native stays opt-in;
+PR67 stays draft. No main merge/default promotion or user-state overwrite.
+
+## Branch and exact source
 
 Branch: `research/gate-g-coexistence-20261113`.
-Draft stacked review: https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/67.
-Main remains `3a9e7ce3ffadff86c792050056ebea4eda48da0b`, freshly reverified;
-PR64 remains `0df3f19a33bd7de69ed496293591d734331c5e51`.
-Native remains opt-in; no merge, force push or user-state overwrite.
+PR: https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/67.
+Main: `3a9e7ce3ffadff86c792050056ebea4eda48da0b`.
+Phase III: `0df3f19a33bd7de69ed496293591d734331c5e51`.
+Frozen measured/tested local source: `9cca3e645203ceff84de3f214923b210f478a66e`.
+Published equivalent: `45b13f2e46c515f0ec5f67a49f2063c9217935a2`.
+Exact common tree: `99c1648594661cffe1a5f00ba974fedffd915e66`.
+Runtime code unit: localb5b70fa / publishedaf1217f.
+Final report/evidence-only revision is the commit containing this record; get its
+full HEAD from git rev-parse HEAD or PR67. Do not confuse that docs suffix with
+the measured source. Native/main/PR63 ancestry is preserved without force push.
 
-## Source and publication
+## Completed checks and evidence
 
-- Latest runtime local commit: `b5b70faaf47d54992832d346546d66a1df7f0b00`.
-- Successfully published equivalent: `af1217f2a04656bce72b6df5fa3d93081914d3f8`.
-- Exact common tree: `f2b040b44ec14737904b022e146921d64bbea8b8`.
-- Historical world/policy checkpoint rejection: local `a9e4ed7`, published
-  `d87fb5a3ed246376f68c55d100f3ac55f0c4417e`.
-- Automatic numeric projection repair: local `6de2fe8`, published
-  `3d74282f33d0c69d03413db3668ac46ada0309cc`; CI43484426494 passed.
-- Original measured code: local `ca49943`, published `af3b946`, exact
-  tree04a3ddbe; CI43473683439 passed. It predates both ownership repairs.
-- Authentic pre-integration baseline: local `1e12332`, published `609ee918`.
-- Initial immutable technical archive was published in `d46f100`.
+-27 mixed order/seed cases: full canonical bytes, activation, sequence, checksum,
+  genesis replay, checkpoint suffix and further learning after restore match.
+-15 real subprocess crash boundaries pass; orphan repair preserves a byte-equal
+  backup, paired outcome retry learns once; no recovery physical dispatch.
+- Native models1/2/3, actual production startup, composition, corruption,
+  downgrade/matched-prefix rollback and active legacy isolation pass.
+- Explicit and automatic private-policy address aliases are blocked; correctly
+  checksummed unsafe world/policy checkpoints are rejected before target mutation.
+- Frozen activity law equivalence:384 transitions; typed sort/tie order27 cases.
+- Latest full ordinary Go suite, targeted race, vet/plain build,4 Android arm64
+  cross-builds and83 focused test-pass records have no failure.
+- Race covers all69 packages:62 local remaining packages plus7 exact-source CI
+  packages. CI43550972852 passed validate/monitor, nested adapters, trained
+  dialogue/recovery, Android and live Bridge. Prior local20m full-race timeout
+  remains retained; it is not relabeled as a successful monolithic run.
 
-API publication preserves merge ancestry and exact source trees. CLI push lacked
-credentials; no claim is made that local author/time SHAs were pushed unchanged.
-The full branch HEAD may include a later documentation/tools-only commit; resolve
-it with git rev-parse HEAD or PR67. Runtime source identity is pinned above.
+## Performance verdict and remaining work
 
-## Implemented and verified
+Original measured codeaf3b946 failed9/90 budgets; its baseline sensor-refusal
+assumption also failed because the old sensor route bypassed the blanket guard.
+Corrected Process-bearing negative control rejects as expected.
 
-One canonical Brain/N and one ordered journal, episode admission, shared actual
-activation, observed learning, outcome/pair dedup, private recovery and no physical
-replay are implemented.27 mixed-order/seed cases,15 process-exit crash boundaries,
-native models1/2/3, actual production restart, enabled composition, matched-prefix
-rollback, corruption and active-path legacy isolation pass their registered tests.
+Repaired source45b13f2 completed all25 planned commands with expected exits,
+including corrected negative control. One managed session disappeared during
+B1-persistence; partial output is retained and the whole unfinished command was
+repeated unchanged. Completed results were preserved; remaining commands ran
+one per session in the original ABBA order. No benchmark remains active.
 
-Subsequent adversarial probes found automatic projection could recruit a native
-bias and a correctly checksummed old checkpoint could restore that alias. Both
-negative logs remain. The matcher now excludes native roles, and semantic native
-validation rejects world-population aliases before target mutation, preserving
-the supplied file bytes. Basic/native and targeted race checks pass.
+Repaired result:81/90 within budget,9 failures. All allocation checks pass;
+remaining failures are thought/native learning/native-idle p95 and checkpoint4k
+mean latency. Full cases/limits are in PERFORMANCE.md and the retained summary.
+40k sparse+WAL p95 improves18.115→13.245ms; dense4k allocations41040.5→25028/op,
+but dense4k p95 still fails35.08→41.76ms against40.442ms limit. Do not infer a
+whole-gate pass from selected improvements.
 
-Performance repair preserves the frozen general activity law on384 complete
-canonical transitions and27 exact sort/tie cases. It uses typed sorting and a
-known-zero local activity specialization; every eligibility timestamp/mirror is
-still settled. Validation timing improves dense4k allocation count41041→25026
-and p9537.69→32.39ms. Sparse timing varies; this is NOT confirmation.
+Next implementation: profile the remaining1k, learning4k and checkpoint4k cells
+on pinned sources, isolate CPU/wall/JSON/prefix costs, implement only a verified
+bottleneck repair, preserve complete-state equivalence and all safety checks,
+freeze source, then run a fresh full confirmation with UNCHANGED budgets.
+No fully isolated cause or verified fix for all remaining tail regressions is
+claimed. Do not merge while G8 fails. Android execution and power-loss behavior
+remain unmeasured; C/D/H scientific limits from PR64 remain unchanged.
 
-## Actual pending work
+## Reproduction and publication
 
-Original full ABBA in `evidence/performance-final/` is retained:9/90 budget
-comparisons fail. Its final expected-refusal diagnostic was also wrong: the old
-sensor path bypassed the blanket guard. The corrected Process-bearing diagnostic
-rejects with the authentic error, retained separately. Do not relabel that
-original invocation as protocol-clean or passing.
+REPORT.md and RESULTS.json cover all subgates/deliverables. Raw commands, source
+hashes, failing/passing logs, profiles and synthetic crash artifacts are retained
+in evidence/Gate_G_Evidence_20261114.zip with per-payload manifest; ARCHIVE.json
+records the archive digest. The initial technical-evidence.zip stays immutable.
+The final artifact commit must be successfully published before claiming these
+newer artifacts are saved; final PR metadata records that published commit.
 
-Overlayfs append ABBA passes its predeclared supplementary budget
-(p951.1455→1.1565ms,2084B/op unchanged). Primary Go TempDir fixtures use tmpfs;
-all Sync calls remain; neither filesystem result is a device/power-loss test.
+```sh
+go test ./... -count=1
+go vet ./...
+go build ./...
+python3 scripts/run_gate_g_confirmation.py --baseline BASELINE --candidate CANDIDATE --output NEW_DIRECTORY
+python3 scripts/summarize_gate_g_confirmation.py NEW_DIRECTORY
+```
 
-At this record:
-- Full ordinary latest-source Go suite is running, process session67158.
-- Latest-source Gate G/activation targeted race passed (session99360 finished).
-- Exact runtime-head CI43550686882 is in progress.
-- Remaining package race coverage, final focused raw crash capture, latest-source
-  vet/plain build/four Android cross-builds and NEW full ABBA still need completion.
-- No other benchmark is active. Old session86667 ended with the retained baseline
-  diagnostic assumption mismatch. Profiling session45987 completed successfully.
-- G8 remains OPEN/FAILED on old confirmation; no whole-gate pass or default promotion.
-
-## Evidence and next steps
-
-INTEGRATION_FREEZE_20261114.json pins Go source hashes, runner hashes and both
-runtime source IDs. Updated raw logs/profiles and performance outputs are still
-expanded/untracked; only the initial technical archive is already committed.
-The report and final evidence archive must still be finished and published.
-
-1. Finish ordinary tests; run remaining race packages and final raw Gate G capture.
-2. Verify vet/build and Android from a new isolated checkout of the frozen source.
-3. Run a NEW complete sequential ABBA with unchanged budgets after all other local
-   heavy commands stop; keep its process session ID and per-command active.json.
-4. Evaluate each budget and G1–G10; preserve every failure and amendment.
-5. Finish Indonesian REPORT.md, final manifest/archive, commits and PR67 description.
-6. Verify exact published trees and final code CI. Do not merge failed gates.
-
-Use scripts/run_gate_g_confirmation.py with baseline and candidate checkouts and a
-NEW output directory. Both must contain the identical common benchmark harness.
-Use scripts/summarize_gate_g_confirmation.py for the full budget table. Corrected
-runner diagnostic is baseline-global-guard-refusal; old metadata remains readable.
-The prior local full-race20m timeout is retained; complete race coverage can use
-the exact-source CI package set plus local remaining packages, with that split
-explicitly reported. No Android hardware is available for execution measurements.
+Keep the common benchmark harness identical on baseline and candidate. Baseline
+is1e12332 (published609ee918), with no integration source copied into it. Use
+short managed sessions/continuous polling; step runner can continue the preserved
+command order after a session loss. Never run fault tests on user-state paths.

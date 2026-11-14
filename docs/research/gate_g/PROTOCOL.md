@@ -320,3 +320,16 @@ These validation timings cannot replace the failed original confirmation.
 Only after technical regression and a source freeze may a NEW full ABBA use the
 original sizes, samples, seeds, admission and latency/allocation budgets. The
 corrected baseline global-guard diagnostic and filesystem disclosures remain.
+
+### Managed-session interruption during repaired confirmation
+
+The long managed runner session disappeared with no terminal result during
+B1-persistence. Completed commands remain unchanged; the partial output is
+retained under its interrupted timestamp. The complete unfinished command was
+repeated with the SAME source, harness, inputs, samples, environment and budgets.
+Remaining commands ran one per managed session in the original ABBA order, with
+continuous session polling. runs.json records this interruption explicitly.
+No failed completed measurement was discarded. The final corrected baseline
+diagnostic rejected as expected. The complete repaired matrix still failed9/90
+numeric comparisons: Gate G is NOT passed. Its raw failures are final evidence,
+not replaced by the favorable development timings.
