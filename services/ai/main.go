@@ -6,15 +6,15 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"strings"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/bridge"
 	"github.com/project-horizon/horizon-core/services/ai/config"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
-		"github.com/project-horizon/horizon-core/services/ai/runtime"
+	"github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 func main() {
@@ -30,11 +30,17 @@ func main() {
 	// executable. Cluster remains available as a legacy sensor/decision
 	// compatibility component, but it is not invoked as the brain here.
 	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
-	if brainMemoryPath == "" { brainMemoryPath = "brain_memory.json" }
+	if brainMemoryPath == "" {
+		brainMemoryPath = "brain_memory.json"
+	}
 	eventLogPath := strings.TrimSpace(os.Getenv("HORIZON_EVENT_LOG_PATH"))
-	if eventLogPath == "" { eventLogPath = "horizon_events.jsonl" }
+	if eventLogPath == "" {
+		eventLogPath = "horizon_events.jsonl"
+	}
 	checkpointPath := strings.TrimSpace(os.Getenv("HORIZON_CHECKPOINT_PATH"))
-	if checkpointPath == "" { checkpointPath = brainMemoryPath + ".checkpoint.json" }
+	if checkpointPath == "" {
+		checkpointPath = brainMemoryPath + ".checkpoint.json"
+	}
 
 	eventLog, err := runtime.OpenEventLog(eventLogPath)
 	if err != nil {
@@ -45,42 +51,12 @@ func main() {
 
 	// The production brain is reconstructed and anchored BEFORE any
 	// asynchronous service starts accepting observations or cognitive work.
-	horizon, loadedBrain, err := initializeProductionHorizon(eventLog, eventLogPath, brainMemoryPath, checkpointPath)
+	horizon, needsBootstrap, err := initializeProductionHorizon(eventLog, eventLogPath, brainMemoryPath, checkpointPath)
 	if err != nil {
 		logger.Error("canonical brain startup refused", "error", err)
 		os.Exit(1)
 	}
-	var output runtime.CognitiveOutput
-	stimulusCount := 0
-	if !loadedBrain {
-		signals := bootstrapSignals()
-		for _, signal := range signals {
-			if err := signal.Validate(); err != nil {
-				logger.Error("invalid bootstrap signal", "error", err)
-				os.Exit(1)
-			}
-		}
-		stimulus := signalStimulus(signals)
-		stimulusCount = len(stimulus)
-		err = horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
-			var processErr error
-			output, processErr = active.CognitiveProcess(runtime.Event{
-				ID: "bootstrap", Stimulus: stimulus, Cycles: 8, Timestamp: time.Now().UTC(),
-			})
-			if processErr != nil { return processErr }
-			if processErr = active.SaveBrain(brainMemoryPath); processErr != nil { return processErr }
-			return active.Checkpoint(checkpointPath)
-		})
-	} else {
-		err = horizon.Supervisor().With(func(active *runtime.BrainRuntime) error {
-			output = runtime.CognitiveOutput{
-				BrainIdentity: runtime.BrainIdentity,
-				Sequence: active.LastSequence(),
-				Timestamp: time.Now().UTC(),
-			}
-			return nil
-		})
-	}
+	output, stimulusCount, err := finishProductionStartup(horizon, needsBootstrap, brainMemoryPath, checkpointPath)
 	if err != nil {
 		logger.Error("Horizon brain initialization failed", "error", err)
 		os.Exit(1)
@@ -88,12 +64,21 @@ func main() {
 
 	// Explicit startup administration only. The enabled contract is persisted;
 	// ordinary startup/merging code never silently trains or migrates a Brain.
-	if backupPath:=strings.TrimSpace(os.Getenv("HORIZON_COMPOSITION_INIT_BACKUP"));backupPath!="" {
-		state,stateErr:=horizon.CompositionStatus()
-		if stateErr!=nil {logger.Error("composition status refused","error",stateErr);os.Exit(1)}
-		if state==nil {
-			if err:=horizon.InitializeNeuralComposition(knowledge.DefaultCompositionConfig(),backupPath,time.Now().UTC());err!=nil {logger.Error("explicit composition initialization refused","error",err);os.Exit(1)}
-			if err:=horizon.Supervisor().WithMutation(func(rt *runtime.BrainRuntime)error{return rt.Checkpoint(checkpointPath)});err!=nil {logger.Error("composition checkpoint failed","error",err);os.Exit(1)}
+	if backupPath := strings.TrimSpace(os.Getenv("HORIZON_COMPOSITION_INIT_BACKUP")); backupPath != "" {
+		state, stateErr := horizon.CompositionStatus()
+		if stateErr != nil {
+			logger.Error("composition status refused", "error", stateErr)
+			os.Exit(1)
+		}
+		if state == nil {
+			if err := horizon.InitializeNeuralComposition(knowledge.DefaultCompositionConfig(), backupPath, time.Now().UTC()); err != nil {
+				logger.Error("explicit composition initialization refused", "error", err)
+				os.Exit(1)
+			}
+			if err := horizon.Supervisor().WithMutation(func(rt *runtime.BrainRuntime) error { return rt.Checkpoint(checkpointPath) }); err != nil {
+				logger.Error("composition checkpoint failed", "error", err)
+				os.Exit(1)
+			}
 		}
 	}
 
@@ -112,12 +97,12 @@ func main() {
 		bridgeOrigins = []string{"https://mpsprintit-spec.github.io", "http://localhost:8080"}
 	}
 	monitorBridge, err := bridge.NewManaged(horizon.Supervisor(), bridge.Config{
-		AllowCompositionTraining: strings.EqualFold(strings.TrimSpace(os.Getenv("HORIZON_COMPOSITION_TRAINING")),"true"),
-		AllowedOrigins: bridgeOrigins,
-		Token: strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
-		RuntimeCommit: strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
-		EventLogPath: eventLogPath,
-		BrainMemoryPath: brainMemoryPath,
+		AllowCompositionTraining: strings.EqualFold(strings.TrimSpace(os.Getenv("HORIZON_COMPOSITION_TRAINING")), "true"),
+		AllowedOrigins:           bridgeOrigins,
+		Token:                    strings.TrimSpace(os.Getenv("HORIZON_BRIDGE_TOKEN")),
+		RuntimeCommit:            strings.TrimSpace(os.Getenv("HORIZON_RUNTIME_COMMIT")),
+		EventLogPath:             eventLogPath,
+		BrainMemoryPath:          brainMemoryPath,
 	})
 	if err != nil {
 		logger.Error("failed to initialize monitor bridge", "error", err)
@@ -169,7 +154,9 @@ func main() {
 		// exclusive lease so a checkpoint and memory file always refer to
 		// the current canonical runtime, even after an atomic handover.
 		if saveErr := horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
-			if err := active.SaveBrain(brainMemoryPath); err != nil { return err }
+			if err := active.SaveBrain(brainMemoryPath); err != nil {
+				return err
+			}
 			return active.Checkpoint(checkpointPath)
 		}); saveErr != nil {
 			logger.Error("canonical brain persistence failed", "error", saveErr)
