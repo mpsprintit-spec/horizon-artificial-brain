@@ -54,11 +54,29 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 	}
 	retention = clamp01(retention)
 	rate := (1 - retention) / 24.0 // Hours; e-fold time, not an asserted biological half-life.
+	// All established links pay the same watermark interval. These two
+	// invocation-local arithmetic results are not a cache of neural parameters.
+	var settled bool
+	var weightFactor, confidenceFactor float64
 	factorSince := func(created time.Time, scale float64) float64 {
 		if created.IsZero() {
 			return 1
 		}
 		if previous.After(created) {
+			if !now.After(previous) {
+				return 1
+			}
+			if !settled {
+				weightFactor = expDecay(now.Sub(previous).Hours() * rate * 1)
+				confidenceFactor = expDecay(now.Sub(previous).Hours() * rate * .5)
+				settled = true
+			}
+			if scale == 1 {
+				return weightFactor
+			}
+			if scale == .5 {
+				return confidenceFactor
+			}
 			created = previous
 		}
 		if !now.After(created) {
@@ -74,10 +92,15 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 		}
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil || (native.Enabled() && native.Has(synapse.TargetID)) {
+				if synapse == nil {
 					continue
 				}
 				d := &synapse.Dynamic
+				// Unknown creation already yields factor==1 and no mutation.
+				// Keep that common sparse case out of the factor closure.
+				if d.LastModification.IsZero() || (native.Enabled() && native.Has(synapse.TargetID)) {
+					continue
+				}
 				factor := factorSince(d.LastModification, 1)
 				if factor == 1 {
 					continue

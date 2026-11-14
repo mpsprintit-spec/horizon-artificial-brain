@@ -45,3 +45,21 @@ hardware power-loss as untested if unavailable.
 No controller default change. No production memory/checkpoint overwrite. Merge
 is allowed by this request only after every mandatory integration gate passes;
 otherwise publish the repaired branch and concrete remaining blockers.
+
+## Retained first confirmation and second repair
+
+Source1069c02 completed the entire unchanged matrix:89/90, including all nine
+original failures passing. The new failure was sparse4k/no-WAL thought p95:
+baseline1.0497ms, candidate2.508ms, original limit1.307155ms. Candidate B1 p95
+3.888ms versus B2 1.128ms, median.8142/.8181ms, no cell GC. This is not a pass;
+do not discard B1 or attribute the entire failure to scheduling without proof.
+
+The diagnostic keeps100 observations/cell,3 profiling repeats (development only).
+It identifies whole-graph activity/physical-memory traversal and factor calls;
+fixture loading is separately visible and must not be called thought CPU.
+The bounded second repair inlines the existing no-creation/no-decay branch and
+reuses identical watermark interval arithmetic within one memory settlement.
+Every relevant synapse, timestamp, mirror and protected parameter still follows
+the original law. No persistent graph cache, skipped validation or lazy state.
+Compare the entire canonical state against the frozen physical-time law before
+another full90-comparison ABBA. Keep the first matrix and original limits.
