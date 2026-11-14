@@ -73,7 +73,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	}
 	if r.eventLog != nil {
 		r.transactionFaultLocked("before-append")
-		if err := r.eventLog.Append(command); err != nil {
+		if err := r.eventLog.appendEncoded(command, encoded); err != nil {
 			r.markRecoveryRequiredLocked()
 			return fmt.Errorf("%w: append %s: %v", ErrRuntimeRecoveryRequired, command.Type, err)
 		}

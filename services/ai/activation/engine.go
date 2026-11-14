@@ -167,30 +167,45 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
 	native := e.Memory.NativeOwnershipLocked()
-	state = cloneState(state)
-	confidence = cloneState(confidence)
+	// Positive cycles only read the borrowed input maps, then replace them
+	// with fresh maps. Preserve detached return values for the zero-cycle API.
+	if cycles <= 0 {
+		return cloneState(state), cloneState(confidence)
+	}
 	for i := 0; i < cycles; i++ {
-		next := map[knowledge.NodeID]float64{}
-		nextConfidence := map[knowledge.NodeID]float64{}
+		next := make(map[knowledge.NodeID]float64, len(state))
+		nextConfidence := make(map[knowledge.NodeID]float64, len(state))
 		ids := sortedNodeIDs(state)
-		for _, id := range ids {
+		nodes := make([]*knowledge.ConceptNode, len(ids))
+		for index, id := range ids {
 			n := e.Memory.Registry.GetByID(id)
 			if n == nil || (native.Enabled() && native.Has(id)) {
 				continue
 			}
+			nodes[index] = n
 			adaptive := n.Threshold - (n.Importance * .05) - (float64(n.Frequency) * .001)
 			n.Threshold = clamp(adaptive, .12, .8)
 			next[id] = n.RestingActivation
 		}
-		for _, id := range ids {
+		var outbound [8]*knowledge.Synapse
+		for index, id := range ids {
 			level := state[id]
-			n := e.Memory.Registry.GetByID(id)
-			if n == nil || (native.Enabled() && native.Has(id)) {
+			n := nodes[index]
+			if n == nil {
 				continue
 			}
 			next[id] += level * (1 - e.Decay)
 			nextConfidence[id] = max(nextConfidence[id], confidence[id])
-			synapses := n.OutboundAll()
+			// Scratch addresses only: no neural values survive this iteration.
+			// Retain the historical map/list enumeration and target sort exactly.
+			synapses := outbound[:0]
+			for _, list := range n.Synapses {
+				for _, synapse := range list {
+					if synapse != nil {
+						synapses = append(synapses, synapse)
+					}
+				}
+			}
 			sortSynapsesByTarget(synapses)
 			for _, s := range synapses {
 				if native.Enabled() && native.Has(s.TargetID) {

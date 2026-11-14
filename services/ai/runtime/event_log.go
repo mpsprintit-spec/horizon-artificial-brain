@@ -139,6 +139,13 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	if err != nil {
 		return fmt.Errorf("encode logged event: %w", err)
 	}
+	return l.appendEncoded(event, data)
+}
+
+// appendEncoded accepts only bytes just produced by json.Marshal in Append
+// or runJournalCommandLocked. Validation/size checks still precede this call;
+// the same immutable encoding is written once, with all writer fences and Sync.
+func (l *EventLog) appendEncoded(event LoggedEvent, data []byte) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.file == nil || l.lockFile == nil {
