@@ -1,0 +1,16 @@
+{
+  "source": "a3ce74c0281f853412134e16ccd414c7046a9e7e",
+  "preserved_branch": "research/canonical-integration-continual-20261114",
+  "reason": "standalone Phase I\u2013III acquisition/experiment executable; not imported by canonical serving packages",
+  "excluded_from_main_candidate": [
+    "cmd/horizon-native-foundation/main.go",
+    "internal/nativefoundation/diagnostics.go",
+    "internal/nativefoundation/experiment.go",
+    "internal/nativefoundation/phase2.go",
+    "internal/nativefoundation/phase2_credit.go",
+    "internal/nativefoundation/phase2_test.go",
+    "internal/nativefoundation/phase3_credit.go",
+    "internal/nativefoundation/phase3_credit_test.go",
+    "internal/nativefoundation/recovery.go"
+  ]
+}
