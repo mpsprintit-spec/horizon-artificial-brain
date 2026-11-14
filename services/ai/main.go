@@ -45,42 +45,12 @@ func main() {
 
 	// The production brain is reconstructed and anchored BEFORE any
 	// asynchronous service starts accepting observations or cognitive work.
-	horizon, loadedBrain, err := initializeProductionHorizon(eventLog, eventLogPath, brainMemoryPath, checkpointPath)
+	horizon, needsBootstrap, err := initializeProductionHorizon(eventLog, eventLogPath, brainMemoryPath, checkpointPath)
 	if err != nil {
 		logger.Error("canonical brain startup refused", "error", err)
 		os.Exit(1)
 	}
-	var output runtime.CognitiveOutput
-	stimulusCount := 0
-	if !loadedBrain {
-		signals := bootstrapSignals()
-		for _, signal := range signals {
-			if err := signal.Validate(); err != nil {
-				logger.Error("invalid bootstrap signal", "error", err)
-				os.Exit(1)
-			}
-		}
-		stimulus := signalStimulus(signals)
-		stimulusCount = len(stimulus)
-		err = horizon.Supervisor().WithMutation(func(active *runtime.BrainRuntime) error {
-			var processErr error
-			output, processErr = active.CognitiveProcess(runtime.Event{
-				ID: "bootstrap", Stimulus: stimulus, Cycles: 8, Timestamp: time.Now().UTC(),
-			})
-			if processErr != nil { return processErr }
-			if processErr = active.SaveBrain(brainMemoryPath); processErr != nil { return processErr }
-			return active.Checkpoint(checkpointPath)
-		})
-	} else {
-		err = horizon.Supervisor().With(func(active *runtime.BrainRuntime) error {
-			output = runtime.CognitiveOutput{
-				BrainIdentity: runtime.BrainIdentity,
-				Sequence: active.LastSequence(),
-				Timestamp: time.Now().UTC(),
-			}
-			return nil
-		})
-	}
+	output, stimulusCount, err := finishProductionStartup(horizon, needsBootstrap, brainMemoryPath, checkpointPath)
 	if err != nil {
 		logger.Error("Horizon brain initialization failed", "error", err)
 		os.Exit(1)

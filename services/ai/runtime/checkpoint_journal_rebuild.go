@@ -77,11 +77,9 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 
 	// Each processed event at the checkpoint boundary must be represented
 	// exactly in the authenticated journal prefix (no phantom dedup entries).
-	index := make(map[string]uint64)
-	for _, logged := range prefix {
-		if input := processedJournalEvent(logged); input != nil && input.ID != "" {
-			index[input.ID] = logged.Sequence
-		}
+	index, err := journalProcessedIndex(prefix)
+	if err != nil {
+		return nil, err
 	}
 	if len(index) != len(snapshot.ProcessedEvents) {
 		return nil, errors.New("checkpoint processed-event index disagrees with journal prefix")

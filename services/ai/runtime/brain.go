@@ -85,6 +85,9 @@ type SynapseBinding struct {
 }
 
 type BrainRuntime struct {
+	// Unexported subprocess-test hook; never configured from input/environment.
+	transactionFault      func(string)
+	replaying             bool // Private detached recovery; never a published serving mode.
 	nativeCommandIndex    map[string]string
 	cognitiveCommandIndex map[string]string // derived dedup cache; rebuilt from authenticated processedEvents
 	composition           *CompositionContinuation
@@ -217,7 +220,7 @@ func (r *BrainRuntime) LoadBrain(path string) error {
 	}
 	// Manual brain import resets the local event sequence. It cannot be
 	// reconciled with an existing attached journal; use checkpoint recovery.
-	if r.neuralWrittenGrounding || r.composition != nil {
+	if r.neuralWrittenGrounding || r.composition != nil || r.brain.HasNativeControl() {
 		return errors.New("versioned neural serving requires complete checkpoint recovery, not a Brain-only load")
 	}
 	if r.eventLog != nil {
@@ -287,7 +290,7 @@ func (r *BrainRuntime) DNF() *dnf.Fabric {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.ensureWritableLocked() != nil || r.supervised || r.eventLog != nil {
+	if r.ensureWritableLocked() != nil || r.supervised || r.eventLog != nil || r.brain.HasNativeControl() {
 		return nil
 	}
 	return r.dnf
@@ -299,7 +302,7 @@ func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowle
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeObservation); err != nil {
 		return knowledge.GroundedRepresentation{}, err
 	}
 	if r.eventLog != nil {
@@ -418,7 +421,7 @@ func (r *BrainRuntime) SetEventLog(log *EventLog) {
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if r.recoveryRequired || r.supervised {
+	if r.recoveryRequired || r.supervised || r.replaying {
 		return
 	}
 	r.eventLog = log
@@ -512,7 +515,10 @@ func (r *BrainRuntime) LearnObservedTransition(current []knowledge.NodeID, now t
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeLearn); err != nil {
+		return err
+	}
+	if err := r.admitWorldReferencesLocked(current); err != nil {
 		return err
 	}
 	if r.eventLog != nil {
@@ -614,6 +620,9 @@ func (r *BrainRuntime) thinkAtWithContextPersistenceLocked(cycles int, context m
 	if persist {
 		context = cloneContext(context)
 		event := Event{Cycles: cycles, Timestamp: now, Context: context}
+		if err := r.validateNeuralEventLocked(event); err != nil {
+			return activation.ThoughtResult{}, r.seq, err
+		}
 		var thought activation.ThoughtResult
 		err := r.runJournalCommandLocked(LoggedEvent{Type: EventTypeThink, Timestamp: now, Event: &event}, func() error {
 			var applyErr error
@@ -798,6 +807,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	// activation, and memory dynamics, so the continuous service can coexist
 	// with external observations without racing on BrainState.
 	r.brain.RLock()
+	native := r.brain.NativeOwnershipLocked()
 	predictionError := clamp01(r.brain.BrainState.PredictionState["last_error"])
 	policy := r.brain.BrainState.LearningPolicyState
 
@@ -819,7 +829,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	var best candidate
 	found, nonfinite := false, false
 	r.brain.Registry.VisitNodes(func(node *knowledge.ConceptNode) {
-		if node == nil {
+		if node == nil || (native.Enabled() && native.Has(node.ID)) {
 			return
 		}
 		score := scoreNode(node)
@@ -839,7 +849,7 @@ func (r *BrainRuntime) applyCuriosityDrive(now time.Time) map[knowledge.NodeID]f
 	var candidates []candidate
 	if nonfinite {
 		r.brain.Registry.VisitNodes(func(node *knowledge.ConceptNode) {
-			if node != nil {
+			if node != nil && (!native.Enabled() || !native.Has(node.ID)) {
 				if score := scoreNode(node); !(score <= 0) {
 					candidates = append(candidates, candidate{node.ID, score})
 				}
@@ -897,7 +907,7 @@ func (r *BrainRuntime) PlanInquiry(uncertainty float64, at time.Time) (InquiryAg
 	// interleave between those steps.
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeObservation); err != nil {
 		return InquiryAgenda{}, err
 	}
 	if r.eventLog != nil {
@@ -977,7 +987,7 @@ func (r *BrainRuntime) CompleteInquiry(observedInformationGain, predictionError 
 	// boundary that owns the pending inquiry trajectory.
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeInquiryOutcome); err != nil {
 		return err
 	}
 	if r.eventLog != nil {

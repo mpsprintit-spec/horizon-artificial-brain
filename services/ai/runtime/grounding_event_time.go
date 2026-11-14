@@ -14,7 +14,7 @@ func (r *BrainRuntime) GroundObservationAt(token, source, modality string, at ti
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeObservation); err != nil {
 		return knowledge.GroundedRepresentation{}, err
 	}
 	if r.eventLog != nil {

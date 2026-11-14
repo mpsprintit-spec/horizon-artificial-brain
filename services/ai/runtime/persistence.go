@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/activation"
@@ -93,6 +94,9 @@ func (r *BrainRuntime) Checkpoint(path string) error {
 // checkpointLocked is also used to persist a private pre-migration backup
 // while the same owner lock protects its reference and journal receipt.
 func (r *BrainRuntime) checkpointLocked(path string) error {
+	if r.replaying {
+		return errors.New("checkpoint requires completed private replay")
+	}
 	if r.brain.HasNativeControl() {
 		return r.checkpointVersionLocked(path, nativeCheckpointSchemaVersion)
 	}
@@ -319,11 +323,22 @@ func (r *BrainRuntime) RestoreCheckpoint(path string) error {
 	if r.eventLog != nil {
 		return errors.New("checkpoint restore requires a detached runtime; use supervisor recovery")
 	}
-	brainPath := path + ".restore.tmp"
-	if err := os.WriteFile(brainPath, snapshot.Brain, 0600); err != nil {
+	if r.replaying || r.brain.HasNativeControl() {
+		return errors.New("native checkpoint restore requires a fresh detached runtime")
+	}
+	staged, err := os.CreateTemp(filepath.Dir(path), ".horizon-restore-*.tmp")
+	if err != nil {
+		return err
+	}
+	brainPath := staged.Name()
+	defer os.Remove(brainPath)
+	if _, err := staged.Write(snapshot.Brain); err != nil {
+		staged.Close()
 		return fmt.Errorf("stage brain restore: %w", err)
 	}
-	defer os.Remove(brainPath)
+	if err := staged.Close(); err != nil {
+		return err
+	}
 	if err := r.brain.Load(brainPath); err != nil {
 		return fmt.Errorf("restore brain: %w", err)
 	}

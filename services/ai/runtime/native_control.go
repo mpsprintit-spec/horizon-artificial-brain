@@ -185,6 +185,11 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		if c.Begin.Observation != nil {
 			state = c.Begin.Observation.State
 		}
+		if p := s.PendingContrast; p != nil && p.Mode == "action" {
+			if !c.Begin.Training || !c.Begin.Intervention || c.Begin.MatchKey != p.MatchKey || knowledge.NativeStateDigest(state) != p.InitialDigest {
+				return out, errors.New("native trial start does not match pending factual contrast")
+			}
+		}
 		if len(state) > s.Config.MaxActiveNodes {
 			return out, errors.New("native input exceeds active-state budget")
 		}
@@ -196,17 +201,17 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 		}
 		for _, group := range s.Outputs {
 			for _, id := range group {
-				if _, ok := state[id]; ok {
+				if _, ok := state[id]; ok && c.Begin.Observation != nil {
 					return out, errors.New("native observation cannot inject effector activity")
 				}
 			}
 		}
 		for _, id := range s.Features {
-			if _, ok := state[id]; ok {
+			if _, ok := state[id]; ok && c.Begin.Observation != nil {
 				return out, errors.New("native observation cannot inject feature activity")
 			}
 		}
-		if _, ok := state[s.Bias]; ok {
+		if _, ok := state[s.Bias]; ok && c.Begin.Observation != nil {
 			return out, errors.New("native observation cannot inject bias")
 		}
 	}

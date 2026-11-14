@@ -49,8 +49,12 @@ func (r *BrainRuntime) writeCheckpointLocked(path string, snapshot BrainSnapshot
 		},
 		"brain": func(_ io.Writer, _ bool, _ string) error {
 			checksumLaw := checkpointChecksumV7WithBrain
-			if snapshot.SchemaVersion >= neuralWrittenBrainSnapshotSchemaVersion { checksumLaw = checkpointChecksumV8WithBrain }
-			if snapshot.SchemaVersion >= compositionBrainSnapshotSchemaVersion { checksumLaw = checkpointChecksumV9WithBrain }
+			if snapshot.SchemaVersion >= neuralWrittenBrainSnapshotSchemaVersion {
+				checksumLaw = checkpointChecksumV8WithBrain
+			}
+			if snapshot.SchemaVersion >= compositionBrainSnapshotSchemaVersion {
+				checksumLaw = checkpointChecksumV9WithBrain
+			}
 			checksum, e := checksumLaw(snapshot, func(hash io.Writer, _ bool, _ string) error {
 				return r.brain.WriteCanonical(io.MultiWriter(hash, file), false, "")
 			})
@@ -81,9 +85,13 @@ func (r *BrainRuntime) writeCheckpointLocked(path string, snapshot BrainSnapshot
 	if err := tmp.Close(); err != nil {
 		return err
 	}
-	return commitCheckpointFile(tmp.Name(), path, syncJournalDirectory)
+	r.transactionFaultLocked("checkpoint-before-rename")
+	if err := commitCheckpointFile(tmp.Name(), path, syncJournalDirectory); err != nil {
+		return err
+	}
+	r.transactionFaultLocked("checkpoint-after-rename-sync")
+	return nil
 }
-
 
 // commitCheckpointFile publishes a synced snapshot and persists its directory
 // entry. A directory sync error leaves the published file in place and reports

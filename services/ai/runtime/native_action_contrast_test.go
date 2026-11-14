@@ -103,6 +103,14 @@ func TestNativeActionContrastMatchingAndPendingReplay(t *testing.T) {
 			if err := bad.RestoreCheckpoint(cp); err != nil {
 				t.Fatal(err)
 			}
+			if probe.name == "block" || probe.name == "input" {
+				before := continuationBytes(t, bad)
+				_, err := bad.ApplyNativeControl(NativeControlCommand{ID: "bad", Begin: &NativeBegin{EpisodeID: "bad", Training: true, Intervention: true, MatchKey: probe.block, Observation: &NativeObservation{Source: "controlled-action-world", SampleID: "bad", State: probe.state}}}, time.Date(2026, 11, 6, 0, 1, 0, 0, time.UTC))
+				if err == nil || !bytes.Equal(before, continuationBytes(t, bad)) || bad.RecoveryRequired() {
+					t.Fatal("unmatched trial start was not rejected before mutation")
+				}
+				return
+			}
 			command := actionTrial(t, bad, probe.state, "bad", probe.block, probe.actions, 0)
 			before, _ := bad.brain.CanonicalJSON()
 			seq := bad.LastSequence()

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"math"
+	"slices"
 	"sort"
 	"time"
 )
@@ -35,18 +36,7 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 	defer e.mu.RUnlock()
 	e.Memory.RLock()
 	defer e.Memory.RUnlock()
-	reserved := map[knowledge.NodeID]bool{}
-	if c := e.Memory.BrainState.NativeControl; c != nil {
-		reserved[c.Bias] = true
-		for _, id := range c.Features {
-			reserved[id] = true
-		}
-		for _, group := range c.Outputs {
-			for _, id := range group {
-				reserved[id] = true
-			}
-		}
-	}
+	reserved := e.Memory.NativeOwnershipLocked()
 	state := e.internalState
 	if len(state) > maxNodes {
 		return nil, errors.New("native active-state budget exceeded")
@@ -58,7 +48,7 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 	next := make(map[knowledge.NodeID]float64, len(state))
 	conf := make(map[knowledge.NodeID]float64, len(state))
 	for _, id := range ids {
-		if reserved[id] || state[id] == 0 {
+		if reserved.Has(id) || state[id] == 0 {
 			continue
 		}
 		out.ActiveNodes++
@@ -67,7 +57,7 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 	switch op.Kind {
 	case "propagate":
 		for _, id := range ids {
-			if reserved[id] || state[id] == 0 {
+			if reserved.Has(id) || state[id] == 0 {
 				continue
 			}
 			n := e.Memory.Registry.GetByID(id)
@@ -79,11 +69,11 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 			// historical recurrent law. No cache can become stale after graph growth.
 			targets := make([]knowledge.NodeID, 0, len(n.Synapses))
 			for target := range n.Synapses {
-				if !reserved[target] {
+				if !reserved.Has(target) {
 					targets = append(targets, target)
 				}
 			}
-			sort.Slice(targets, func(i, j int) bool { return targets[i] < targets[j] })
+			slices.Sort(targets)
 			for _, target := range targets {
 				channels := n.Synapses[target]
 				if len(channels) > 1 {
@@ -131,7 +121,7 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 	case "focus":
 		mean := 0.0
 		for _, id := range ids {
-			if !reserved[id] {
+			if !reserved.Has(id) {
 				mean += state[id]
 			}
 		}
@@ -139,13 +129,13 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 			mean /= float64(out.ActiveNodes)
 		}
 		for _, id := range ids {
-			if !reserved[id] {
+			if !reserved.Has(id) {
 				next[id] = math.Max(0, state[id]-op.Gain*mean)
 			}
 		}
 	case "relax":
 		for _, id := range ids {
-			if !reserved[id] {
+			if !reserved.Has(id) {
 				next[id] = state[id] * (1 - op.Gain)
 			}
 		}
@@ -234,6 +224,7 @@ func (e *Engine) ApplySparseObservedPlasticity(pre, post map[knowledge.NodeID]fl
 	}
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
+	native := e.Memory.NativeOwnershipLocked()
 	mutations := 0
 	visit := func(n *knowledge.ConceptNode) {
 		p := clamp01(pre[n.ID])
@@ -246,7 +237,7 @@ func (e *Engine) ApplySparseObservedPlasticity(pre, post map[knowledge.NodeID]fl
 				continue
 			}
 			for _, s := range list {
-				if s == nil {
+				if s == nil || (native.Enabled() && (native.Has(n.ID) || native.Has(target))) {
 					continue
 				}
 				elig := decayEligibility(s.Dynamic.Eligibility, s.Dynamic.LastEligibilityUpdate, at)

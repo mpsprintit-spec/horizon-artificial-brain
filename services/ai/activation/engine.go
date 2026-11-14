@@ -160,27 +160,57 @@ func (e *Engine) applyPatternPrediction(prediction, confidence map[knowledge.Nod
 	return normalize(out),normalize(outConfidence)
 }
 
-func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64,map[knowledge.NodeID]float64) {
-	if e==nil || e.Memory==nil { return cloneState(state),cloneState(confidence) }
-	e.Memory.Lock(); defer e.Memory.Unlock()
-	state=cloneState(state); confidence=cloneState(confidence)
-	for i:=0;i<cycles;i++ {
-		next:=map[knowledge.NodeID]float64{}; nextConfidence:=map[knowledge.NodeID]float64{}
+func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now time.Time, cycles int) (map[knowledge.NodeID]float64, map[knowledge.NodeID]float64) {
+	if e == nil || e.Memory == nil {
+		return cloneState(state), cloneState(confidence)
+	}
+	e.Memory.Lock()
+	defer e.Memory.Unlock()
+	native := e.Memory.NativeOwnershipLocked()
+	state = cloneState(state)
+	confidence = cloneState(confidence)
+	for i := 0; i < cycles; i++ {
+		next := map[knowledge.NodeID]float64{}
+		nextConfidence := map[knowledge.NodeID]float64{}
 		ids := sortedNodeIDs(state)
-		for _,id:=range ids { n:=e.Memory.Registry.GetByID(id); if n==nil{continue}; adaptive:=n.Threshold-(n.Importance*.05)-(float64(n.Frequency)*.001); n.Threshold=clamp(adaptive,.12,.8); next[id]=n.RestingActivation }
-		for _,id:=range ids {
-			level:=state[id]; n:=e.Memory.Registry.GetByID(id); if n==nil{continue}
-			next[id]+=level*(1-e.Decay); nextConfidence[id]=max(nextConfidence[id],confidence[id])
-			synapses:=n.OutboundAll(); sort.Slice(synapses,func(i,j int)bool{return synapses[i].TargetID<synapses[j].TargetID})
-			for _,s:=range synapses {
-				age:=temporalPenalty(now,s.LastActivation); pulse:=level*s.Weight*s.Confidence*e.SpreadRate*age
-				if s.Inhibitory { next[s.TargetID]-=pulse*e.Inhibition } else { next[s.TargetID]+=pulse }
-				nextConfidence[s.TargetID]=max(nextConfidence[s.TargetID],confidence[id]*s.Confidence*age); s.Activation=pulse
+		for _, id := range ids {
+			n := e.Memory.Registry.GetByID(id)
+			if n == nil || (native.Enabled() && native.Has(id)) {
+				continue
+			}
+			adaptive := n.Threshold - (n.Importance * .05) - (float64(n.Frequency) * .001)
+			n.Threshold = clamp(adaptive, .12, .8)
+			next[id] = n.RestingActivation
+		}
+		for _, id := range ids {
+			level := state[id]
+			n := e.Memory.Registry.GetByID(id)
+			if n == nil || (native.Enabled() && native.Has(id)) {
+				continue
+			}
+			next[id] += level * (1 - e.Decay)
+			nextConfidence[id] = max(nextConfidence[id], confidence[id])
+			synapses := n.OutboundAll()
+			sortSynapsesByTarget(synapses)
+			for _, s := range synapses {
+				if native.Enabled() && native.Has(s.TargetID) {
+					continue
+				}
+				age := temporalPenalty(now, s.LastActivation)
+				pulse := level * s.Weight * s.Confidence * e.SpreadRate * age
+				if s.Inhibitory {
+					next[s.TargetID] -= pulse * e.Inhibition
+				} else {
+					next[s.TargetID] += pulse
+				}
+				nextConfidence[s.TargetID] = max(nextConfidence[s.TargetID], confidence[id]*s.Confidence*age)
+				s.Activation = pulse
 			}
 		}
-		state=normalize(next); confidence=normalize(nextConfidence)
+		state = normalize(next)
+		confidence = normalize(nextConfidence)
 	}
-	return state,confidence
+	return state, confidence
 }
 
 func (e *Engine) converge(state,confidence map[knowledge.NodeID]float64,now time.Time) Result {
