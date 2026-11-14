@@ -294,3 +294,29 @@ result. Native validation must reject this role/provenance alias before restore,
 leave the checkpoint unchanged, and preserve valid native1/2/3 fixtures. This is
 validation of the existing single-substrate ownership contract, not a schema
 migration or permission to alter user knowledge.
+
+### Performance repair validation (14 November, before new confirmation)
+
+The retained original confirmation failed9/90 resource comparisons, including
+dense recurrent thought and native learning latency. Its diagnostic profiles
+show repeated map copying/sorting, global activity/retention traversal and JSON
+costs. They do not establish that host scheduling explains every regression.
+
+The bounded repair replaces reflection-based target/ID sorting with typed Go
+sorting under the same comparator, and specializes the local activity case whose
+pre/post maps are both empty. Every world synapse still receives the SAME elapsed
+eligibility calculation, timestamp settlement and legacy mirrors; native role
+ownership remains checked. No lazy state, changed learning equation, skipped WAL
+or reduced validation is introduced. Retain the original +0 arithmetic to keep
+negative-zero canonical behavior.
+
+Before confirmation, compare against the frozen general activity law from
+a9e4ed7: seeds37/83/151, unconfigured and native model1/2/3,32 zero/duplicate/
+forward/rollback time steps each (384 transitions), complete canonical bytes.
+Typed sorting must preserve the old exact pointer/tie order on27 seed/size cases.
+Then run development timing on the identified sparse40k and dense4k cells.
+These validation timings cannot replace the failed original confirmation.
+
+Only after technical regression and a source freeze may a NEW full ABBA use the
+original sizes, samples, seeds, admission and latency/allocation budgets. The
+corrected baseline global-guard diagnostic and filesystem disclosures remain.

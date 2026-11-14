@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"math"
+	"slices"
 	"sort"
 	"time"
 )
@@ -72,7 +73,7 @@ func (e *Engine) PrepareNativeOperation(op knowledge.NativeOperation, at time.Ti
 					targets = append(targets, target)
 				}
 			}
-			sort.Slice(targets, func(i, j int) bool { return targets[i] < targets[j] })
+			slices.Sort(targets)
 			for _, target := range targets {
 				channels := n.Synapses[target]
 				if len(channels) > 1 {

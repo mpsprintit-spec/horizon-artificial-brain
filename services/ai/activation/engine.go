@@ -191,7 +191,7 @@ func (e *Engine) advance(state, confidence map[knowledge.NodeID]float64, now tim
 			next[id] += level * (1 - e.Decay)
 			nextConfidence[id] = max(nextConfidence[id], confidence[id])
 			synapses := n.OutboundAll()
-			sort.Slice(synapses, func(i, j int) bool { return synapses[i].TargetID < synapses[j].TargetID })
+			sortSynapsesByTarget(synapses)
 			for _, s := range synapses {
 				if native.Enabled() && native.Has(s.TargetID) {
 					continue
