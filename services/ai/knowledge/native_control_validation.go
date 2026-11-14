@@ -11,11 +11,12 @@ func ValidateNativeControlState(data []byte, enabled bool) error {
 		return nil
 	}
 	var raw struct {
-		Schema    int                   `json:"schema_version"`
-		State     *NativeControlState   `json:"native_control"`
-		Units     []canonicalNeuralUnit `json:"neural_units"`
-		Edges     []canonicalSynapse    `json:"synapses"`
-		Cognitive json.RawMessage       `json:"cognitive_model"`
+		Schema      int                    `json:"schema_version"`
+		State       *NativeControlState    `json:"native_control"`
+		Units       []canonicalNeuralUnit  `json:"neural_units"`
+		Edges       []canonicalSynapse     `json:"synapses"`
+		Populations []ProjectionPopulation `json:"populations"`
+		Cognitive   json.RawMessage        `json:"cognitive_model"`
 	}
 	if e := json.Unmarshal(data, &raw); e != nil {
 		return e
@@ -89,6 +90,13 @@ func ValidateNativeControlState(data []byte, enabled bool) error {
 			}
 			owned[id] = true
 			targets[id] = true
+		}
+	}
+	for _, population := range raw.Populations {
+		for _, unit := range population.Units {
+			if owned[unit.NodeID] {
+				return errors.New("native policy unit cannot belong to world projection")
+			}
 		}
 	}
 	type edge struct{ from, to NodeID }

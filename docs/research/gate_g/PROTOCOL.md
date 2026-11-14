@@ -286,3 +286,11 @@ Do not claim the recorded performance matrix benchmarks the repaired descendant
 or passes G8. Its failed budgets remain retained; the descendant needs technical
 regression/CI verification and a future fresh resource confirmation after any
 performance repair. No primary criterion or failed fixture is removed.
+
+The follow-up compatibility probe supplied a correct full checkpoint checksum
+around an old world population containing a native bias. The old validator and
+reader accepted it and mutated a fresh recovery target. Retain that negative
+result. Native validation must reject this role/provenance alias before restore,
+leave the checkpoint unchanged, and preserve valid native1/2/3 fixtures. This is
+validation of the existing single-substrate ownership contract, not a schema
+migration or permission to alter user knowledge.

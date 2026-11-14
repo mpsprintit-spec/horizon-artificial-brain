@@ -43,6 +43,12 @@ worktree, uncommitted benchmark, checkpoint, memory or user journal was replaced
    candidate selection; world projection and exact checkpoint recovery remain
    tested. This repair follows the measuredaf3 code, whose failed resource result
    is retained rather than attributed to the repaired descendant.
+8. A correctly checksummed old checkpoint could also retain that private/world
+   population alias. The added negative test proved both validation acceptance
+   and unsafe restore into a fresh target. Native state validation now rejects
+   owned role IDs in world projection metadata before target mutation, retaining
+   the supplied checkpoint bytes. Valid schema/model formats are unchanged; no
+   knowledge is deleted or silently migrated to repair an unsafe historical file.
 
 ## Entry points and transaction effects
 
