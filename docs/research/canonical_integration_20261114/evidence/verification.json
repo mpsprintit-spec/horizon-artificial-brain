@@ -1,0 +1,31 @@
+{
+  "main_head": "3a9e7ce3ffadff86c792050056ebea4eda48da0b",
+  "ready_pr": 63,
+  "ready_head": "cee28ff2431b2a5f5d2ea61c668c4de262c25426",
+  "ready_ci": {
+    "run": 43597512222,
+    "conclusion": "success"
+  },
+  "research_pr": 69,
+  "source_head": "a5d2842f8cc4fa835d32c87bb2008244b0c51768",
+  "source_ci": {
+    "run": 43597835457,
+    "conclusion": "success"
+  },
+  "prior_pr68_ci": {
+    "run": 43588974833,
+    "conclusion": "success"
+  },
+  "local_full_tests": "PASS both trees",
+  "local_full_scoped_race": "PASS both trees",
+  "standard_clean_clone_vet_build_android": "PASS both trees",
+  "new_runtime_learning_or_persistence_changes": false,
+  "G8": {
+    "status": "BLOCKED",
+    "last_complete_budget_passes": 81,
+    "comparisons": 90,
+    "new_confirmation": false
+  },
+  "merge_performed": false,
+  "native_default_enabled": false
+}

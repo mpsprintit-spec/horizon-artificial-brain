@@ -34,7 +34,7 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 	if r == nil || r.brain == nil { return KnowledgeProcessingResult{}, errors.New("brain runtime is not initialized") }
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil { return KnowledgeProcessingResult{}, err }
+	if err := r.admitCommandLocked(EventTypeKnowledgeImport); err != nil { return KnowledgeProcessingResult{}, err }
 	if at.IsZero() { at = r.nowLocked() }
 	at = at.UTC()
 
@@ -62,6 +62,10 @@ func (r *BrainRuntime) ProcessKnowledgeDocument(document knowledge.KnowledgeDocu
 		KnowledgeDocument: &frozen,
 	}
 	r.decorateCompositionJournalLocked(&record)
+	if err := validateJournalPayload(record); err != nil { return KnowledgeProcessingResult{}, err }
+	encoded, err := json.Marshal(record)
+	if err != nil { return KnowledgeProcessingResult{}, err }
+	if len(encoded) >= 16<<20 { return KnowledgeProcessingResult{}, errors.New("knowledge import exceeds journal record limit") }
 	if err := r.eventLog.Append(record); err != nil {
 		// Append might have partially persisted a record. Never assume the
 		// journal is clean or let this in-memory runtime accept more writes.
@@ -84,7 +88,7 @@ func (r *BrainRuntime) replayKnowledgeDocument(document knowledge.KnowledgeDocum
 	if r == nil || r.brain == nil { return errors.New("brain runtime is not initialized") }
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil { return err }
+	if err := r.admitCommandLocked(EventTypeKnowledgeImport); err != nil { return err }
 	if r.eventLog != nil { return errors.New("knowledge import replay requires detached journal") }
 	if at.IsZero() { return errors.New("knowledge import replay requires a timestamp") }
 	compiled, err := knowledge.CompileKnowledgeDocumentWithEncoding(document, at, r.surfaceEncoding)

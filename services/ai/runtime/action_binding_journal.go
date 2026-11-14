@@ -7,7 +7,7 @@ import (
 )
 
 func cloneActionBinding(binding ActionBinding) ActionBinding {
-	binding.NumericPrediction=cloneNumericPrediction(binding.NumericPrediction)
+	binding.NumericPrediction = cloneNumericPrediction(binding.NumericPrediction)
 	binding.TargetNodeIDs = append(binding.TargetNodeIDs[:0:0], binding.TargetNodeIDs...)
 	binding.Synapses = append(binding.Synapses[:0:0], binding.Synapses...)
 	return binding
@@ -22,7 +22,12 @@ func cloneActionBindings(bindings map[string]ActionBinding) map[string]ActionBin
 }
 
 func (r *BrainRuntime) validateActionBindingLocked(binding ActionBinding) (ActionBinding, error) {
-	if err:=binding.NumericPrediction.validate();err!=nil{return ActionBinding{},err}
+	r.brain.RLock()
+	reserved := r.brain.NativeReservedNodesLocked()
+	r.brain.RUnlock()
+	if err := binding.NumericPrediction.validate(); err != nil {
+		return ActionBinding{}, err
+	}
 	if strings.TrimSpace(binding.RequestID) == "" {
 		return ActionBinding{}, errors.New("action binding request ID is required")
 	}
@@ -36,12 +41,12 @@ func (r *BrainRuntime) validateActionBindingLocked(binding ActionBinding) (Actio
 		return ActionBinding{}, errors.New("action binding requires at least one neural target")
 	}
 	for _, id := range binding.TargetNodeIDs {
-		if r.brain.Registry.GetByID(id) == nil {
+		if reserved[id] || r.brain.Registry.GetByID(id) == nil {
 			return ActionBinding{}, errors.New("action binding references an unknown target node")
 		}
 	}
 	for _, syn := range binding.Synapses {
-		if r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil {
+		if reserved[syn.SourceNodeID] || reserved[syn.TargetNodeID] || r.brain.Registry.GetByID(syn.SourceNodeID) == nil || r.brain.Registry.GetByID(syn.TargetNodeID) == nil {
 			return ActionBinding{}, errors.New("action binding references an unknown synapse node")
 		}
 	}
@@ -57,7 +62,7 @@ func (r *BrainRuntime) registerActionBindingLocked(binding ActionBinding) error 
 		return err
 	}
 	if previous, exists := r.actions[binding.RequestID]; exists {
-		if previous.RequestID == binding.RequestID && previous.BrainIdentity == binding.BrainIdentity && previous.Intent == binding.Intent && sameNumericPrediction(previous.NumericPrediction,binding.NumericPrediction) && slices.Equal(previous.TargetNodeIDs, binding.TargetNodeIDs) && slices.Equal(previous.Synapses, binding.Synapses) {
+		if previous.RequestID == binding.RequestID && previous.BrainIdentity == binding.BrainIdentity && previous.Intent == binding.Intent && sameNumericPrediction(previous.NumericPrediction, binding.NumericPrediction) && slices.Equal(previous.TargetNodeIDs, binding.TargetNodeIDs) && slices.Equal(previous.Synapses, binding.Synapses) {
 			return nil
 		}
 		return errors.New("action binding request ID already has different targets")

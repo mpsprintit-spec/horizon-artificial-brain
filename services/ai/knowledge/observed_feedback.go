@@ -19,13 +19,14 @@ func (k *KnowledgeBase) ApplyObservedAssociationFeedback(sources []NodeID, actua
 	}
 	k.mu.Lock()
 	defer k.mu.Unlock()
+	native := k.NativeOwnershipLocked()
 	for _, source := range sources {
 		node := k.Registry.GetByID(source)
 		if node == nil {
 			continue
 		}
 		for _, s := range node.OutboundAll() {
-			if s == nil || s.Inhibitory || observed[s.TargetID] {
+			if s == nil || s.Inhibitory || observed[s.TargetID] || (native.Enabled() && (native.Has(source) || native.Has(s.TargetID))) {
 				continue
 			}
 			delta := ReconsolidationGain * clamp01(confidence) * clamp01(s.Dynamic.Weight) * clamp01(s.Dynamic.Confidence)

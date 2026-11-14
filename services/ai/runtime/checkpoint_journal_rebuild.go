@@ -44,7 +44,7 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return nil, fmt.Errorf("decode recovery checkpoint: %w", err)
 	}
-	if snapshot.SchemaVersion != coordinatedCheckpointSchemaVersion && snapshot.SchemaVersion != phase4CheckpointSchemaVersion && snapshot.SchemaVersion != phase2CheckpointSchemaVersion && snapshot.SchemaVersion != neuralMetaCheckpointSchemaVersion && snapshot.SchemaVersion != cognitiveModelCheckpointSchemaVersion && snapshot.SchemaVersion != compositionBrainSnapshotSchemaVersion && snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion {
+	if snapshot.SchemaVersion != nativeCheckpointSchemaVersion && snapshot.SchemaVersion != coordinatedCheckpointSchemaVersion && snapshot.SchemaVersion != phase4CheckpointSchemaVersion && snapshot.SchemaVersion != phase2CheckpointSchemaVersion && snapshot.SchemaVersion != neuralMetaCheckpointSchemaVersion && snapshot.SchemaVersion != cognitiveModelCheckpointSchemaVersion && snapshot.SchemaVersion != compositionBrainSnapshotSchemaVersion && snapshot.SchemaVersion != BrainSnapshotSchemaVersion && snapshot.SchemaVersion != evidenceProvenanceBrainSnapshotSchemaVersion && snapshot.SchemaVersion != observedFeedbackBrainSnapshotSchemaVersion && snapshot.SchemaVersion != physicalMemoryBrainSnapshotSchemaVersion && snapshot.SchemaVersion != recurrentBrainSnapshotSchemaVersion && snapshot.SchemaVersion != orderedBrainSnapshotSchemaVersion && snapshot.SchemaVersion != outcomeBrainSnapshotSchemaVersion {
 		return nil, fmt.Errorf("checkpoint schema %d cannot support journal offset replay", snapshot.SchemaVersion)
 	}
 	// Earlier v5 checkpoints used a graph-only legacy Brain encoding that
@@ -57,7 +57,7 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 	if err := json.Unmarshal(snapshot.Brain, &brainFormat); err != nil {
 		return nil, fmt.Errorf("decode checkpoint canonical brain header: %w", err)
 	}
-	if brainFormat.SchemaVersion != 2 && brainFormat.SchemaVersion != 3 && brainFormat.SchemaVersion != 4 && brainFormat.SchemaVersion != 5 && brainFormat.SchemaVersion != 6 {
+	if brainFormat.SchemaVersion != 7 && brainFormat.SchemaVersion != 2 && brainFormat.SchemaVersion != 3 && brainFormat.SchemaVersion != 4 && brainFormat.SchemaVersion != 5 && brainFormat.SchemaVersion != 6 {
 		return nil, errors.New("checkpoint brain format is incomplete for journal offset recovery; create a new canonical checkpoint")
 	}
 	if snapshot.JournalPrefixHash == "" {
@@ -77,11 +77,9 @@ func RebuildRuntimeFromCheckpointAndJournal(log *EventLog, checkpointPath string
 
 	// Each processed event at the checkpoint boundary must be represented
 	// exactly in the authenticated journal prefix (no phantom dedup entries).
-	index := make(map[string]uint64)
-	for _, logged := range prefix {
-		if input := processedJournalEvent(logged); input != nil && input.ID != "" {
-			index[input.ID] = logged.Sequence
-		}
+	index, err := journalProcessedIndex(prefix)
+	if err != nil {
+		return nil, err
 	}
 	if len(index) != len(snapshot.ProcessedEvents) {
 		return nil, errors.New("checkpoint processed-event index disagrees with journal prefix")

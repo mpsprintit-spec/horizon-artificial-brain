@@ -54,11 +54,29 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 	}
 	retention = clamp01(retention)
 	rate := (1 - retention) / 24.0 // Hours; e-fold time, not an asserted biological half-life.
+	// All established links pay the same watermark interval. These two
+	// invocation-local arithmetic results are not a cache of neural parameters.
+	var settled bool
+	var weightFactor, confidenceFactor float64
 	factorSince := func(created time.Time, scale float64) float64 {
 		if created.IsZero() {
 			return 1
 		}
 		if previous.After(created) {
+			if !now.After(previous) {
+				return 1
+			}
+			if !settled {
+				weightFactor = expDecay(now.Sub(previous).Hours() * rate * 1)
+				confidenceFactor = expDecay(now.Sub(previous).Hours() * rate * .5)
+				settled = true
+			}
+			if scale == 1 {
+				return weightFactor
+			}
+			if scale == .5 {
+				return confidenceFactor
+			}
 			created = previous
 		}
 		if !now.After(created) {
@@ -67,8 +85,9 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 		return expDecay(now.Sub(created).Hours() * rate * scale)
 	}
 	protectedN := k.protectedNParameter()
+	native := k.NativeOwnershipLocked()
 	k.Registry.VisitNodes(func(source *ConceptNode) {
-		if source == nil {
+		if source == nil || (native.Enabled() && native.Has(source.ID)) {
 			return
 		}
 		for _, list := range source.Synapses {
@@ -77,6 +96,11 @@ func (k *KnowledgeBase) ApplyMemoryDynamicsWithEncoding(now time.Time, dynamics 
 					continue
 				}
 				d := &synapse.Dynamic
+				// Unknown creation already yields factor==1 and no mutation.
+				// Keep that common sparse case out of the factor closure.
+				if d.LastModification.IsZero() || (native.Enabled() && native.Has(synapse.TargetID)) {
+					continue
+				}
 				factor := factorSince(d.LastModification, 1)
 				if factor == 1 {
 					continue
@@ -109,6 +133,7 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 	var raw struct {
 		SchemaVersion  int                  `json:"schema_version"`
 		MemoryDecay    *MemoryDecayState    `json:"memory_decay,omitempty"`
+		NativeControl  *NativeControlState  `json:"native_control,omitempty"`
 		CognitiveModel *CognitiveModelState `json:"cognitive_model,omitempty"`
 		BrainState     struct {
 			MemoryDecay *MemoryDecayState `json:"memory_decay,omitempty"`
@@ -117,11 +142,14 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	if raw.SchemaVersion > 6 {
+	if raw.SchemaVersion > 7 {
 		return errors.New("unsupported canonical brain version")
 	}
-	if raw.SchemaVersion >= 4 && (raw.CognitiveModel == nil || (raw.SchemaVersion == 4 && raw.CognitiveModel.Config.Version != CognitiveModelVersion) || (raw.SchemaVersion >= 5 && raw.CognitiveModel.Config.Version != CognitiveModelV2)) {
+	if raw.SchemaVersion >= 4 && raw.SchemaVersion <= 6 && (raw.CognitiveModel == nil || (raw.SchemaVersion == 4 && raw.CognitiveModel.Config.Version != CognitiveModelVersion) || (raw.SchemaVersion >= 5 && raw.CognitiveModel.Config.Version != CognitiveModelV2)) {
 		return errors.New("canonical v4 requires its cognitive model contract")
+	}
+	if raw.SchemaVersion == 7 && raw.NativeControl == nil {
+		return errors.New("canonical7 requires native control")
 	}
 	if raw.BrainState.MemoryDecay != nil {
 		return errors.New("legacy graph cannot carry physical memory state")
@@ -132,7 +160,7 @@ func ValidateMemoryDecayState(data []byte, allowPhysical bool) error {
 		}
 		return nil
 	}
-	if !allowPhysical || (raw.SchemaVersion != 3 && raw.SchemaVersion != 4 && raw.SchemaVersion != 5 && raw.SchemaVersion != 6) {
+	if !allowPhysical || (raw.SchemaVersion != 3 && raw.SchemaVersion != 4 && raw.SchemaVersion != 5 && raw.SchemaVersion != 6 && raw.SchemaVersion != 7) {
 		return errors.New("legacy checkpoint/brain cannot carry physical memory state")
 	}
 	if raw.MemoryDecay.Encoding != PhysicalMemoryDynamics || raw.MemoryDecay.AppliedAt.IsZero() {

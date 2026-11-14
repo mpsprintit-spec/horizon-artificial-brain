@@ -20,10 +20,11 @@ import (
 const EventLogSchemaVersion = 3
 
 func supportedEventLogSchema(version int) bool {
-	return version == coordinatedJournalSchemaVersion || version == terminalExposureJournalSchemaVersion || version == phase4JournalSchemaVersion || version == phase3JournalSchemaVersion || version == phase2JournalSchemaVersion || version == componentLearningJournalSchemaVersion || version == terminalReadoutJournalSchemaVersion || version == neuralMetaJournalSchemaVersion || version == cognitiveModelJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
+	return version == nativeJournalSchemaVersion || version == coordinatedJournalSchemaVersion || version == terminalExposureJournalSchemaVersion || version == phase4JournalSchemaVersion || version == phase3JournalSchemaVersion || version == phase2JournalSchemaVersion || version == componentLearningJournalSchemaVersion || version == terminalReadoutJournalSchemaVersion || version == neuralMetaJournalSchemaVersion || version == cognitiveModelJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
 }
 
 type LoggedEvent struct {
+	NativeControl             *NativeControlCommand          `json:"native_control,omitempty"`
 	CognitiveModel            *CognitiveModelCommand         `json:"cognitive_model,omitempty"`
 	CompositionPerception     *CompositionPerception         `json:"composition_perception,omitempty"`
 	CompositionEncoding       string                         `json:"composition_encoding,omitempty"`
@@ -77,7 +78,8 @@ type EventLog struct {
 	// Also detect in-place truncation, which preserves the inode.
 	acknowledgedSize int64
 	// Test-only fault injection; guarded by mu like file writes.
-	beforeAppend func(LoggedEvent) error
+	beforeAppend     func(LoggedEvent) error
+	transactionFault func(string, LoggedEvent) // unexported test hook, under mu
 }
 
 func OpenEventLog(path string) (*EventLog, error) {
@@ -137,6 +139,13 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	if err != nil {
 		return fmt.Errorf("encode logged event: %w", err)
 	}
+	return l.appendEncoded(event, data)
+}
+
+// appendEncoded accepts only bytes just produced by json.Marshal in Append
+// or runJournalCommandLocked. Validation/size checks still precede this call;
+// the same immutable encoding is written once, with all writer fences and Sync.
+func (l *EventLog) appendEncoded(event LoggedEvent, data []byte) error {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	if l.file == nil || l.lockFile == nil {
@@ -166,8 +175,14 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	if _, err := l.file.Write(append(data, '\n')); err != nil {
 		return fmt.Errorf("append logged event: %w", err)
 	}
+	if l.transactionFault != nil {
+		l.transactionFault("after-write-before-sync", event)
+	}
 	if err := l.file.Sync(); err != nil {
 		return fmt.Errorf("sync event log: %w", err)
+	}
+	if l.transactionFault != nil {
+		l.transactionFault("after-sync-before-apply", event)
 	}
 	expected := l.acknowledgedSize + int64(len(data)+1)
 	opened, err = l.file.Stat()
@@ -598,9 +613,13 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		}
 	}
 	brainRuntime.mu.Lock()
-	if brainRuntime.supervised {
+	if brainRuntime.supervised || brainRuntime.eventLog != nil || brainRuntime.replaying {
 		brainRuntime.mu.Unlock()
 		return ErrManagedRuntimeAccess
+	}
+	if err := brainRuntime.ensureWritableLocked(); err != nil {
+		brainRuntime.mu.Unlock()
+		return err
 	}
 	// Validate the whole contract timeline before the first mutation. A v2
 	// command cannot bypass its migration, nor can serving silently revert.
@@ -609,7 +628,13 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	if brainRuntime.composition != nil {
 		compositionEncoding = brainRuntime.composition.Config.Version
 	}
+	contractSequence := firstSequence
 	for _, logged := range events {
+		if logged.BrainIdentity != BrainIdentity || !supportedEventLogSchema(logged.SchemaVersion) || logged.Sequence != contractSequence {
+			brainRuntime.mu.Unlock()
+			return errors.New("incompatible identity/schema or discontinuous replay sequence")
+		}
+		contractSequence++
 		if logged.CompositionEncoding != compositionEncoding {
 			brainRuntime.mu.Unlock()
 			return errors.New("composition contract changed without its migration")
@@ -637,9 +662,15 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 	originalEncoding := brainRuntime.surfaceEncoding
 	originalDynamics := brainRuntime.dynamicsEncoding
 	brainRuntime.eventLog = nil
+	brainRuntime.replaying = true
 	brainRuntime.mu.Unlock()
+	complete := false
 	defer func() {
 		brainRuntime.mu.Lock()
+		brainRuntime.replaying = false
+		if !complete {
+			brainRuntime.markRecoveryRequiredLocked()
+		}
 		brainRuntime.eventLog = originalLog
 		brainRuntime.surfaceEncoding = originalEncoding
 		if brainRuntime.neuralWrittenGrounding {
@@ -666,6 +697,10 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		brainRuntime.dynamicsEncoding = logged.DynamicsEncoding
 		brainRuntime.mu.Unlock()
 		switch logged.Type {
+		case EventTypeNativeControl:
+			if _, err := brainRuntime.ApplyNativeControl(*logged.NativeControl, logged.Timestamp); err != nil {
+				return err
+			}
 		case EventTypeCognitiveModel:
 			if _, err := brainRuntime.ApplyCognitiveModel(*logged.CognitiveModel, logged.Timestamp); err != nil {
 				return err
@@ -805,5 +840,6 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 			return fmt.Errorf("replay event sequence mismatch after %q: got %d want %d", logged.Type, got, logged.Sequence)
 		}
 	}
+	complete = true
 	return nil
 }

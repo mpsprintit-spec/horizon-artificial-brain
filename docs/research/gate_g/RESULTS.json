@@ -1,0 +1,197 @@
+{
+  "date": "2026-11-14",
+  "decision": "perlu perbaikan; Gate G NOT PASSED",
+  "runtime_source_local": "b5b70faaf47d54992832d346546d66a1df7f0b00",
+  "source_local": "9cca3e645203ceff84de3f214923b210f478a66e",
+  "source_published": "45b13f2e46c515f0ec5f67a49f2063c9217935a2",
+  "source_tree": "99c1648594661cffe1a5f00ba974fedffd915e66",
+  "main": "3a9e7ce3ffadff86c792050056ebea4eda48da0b",
+  "ci_run": 43550972852,
+  "ci_status": "success",
+  "gates": {
+    "G1": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G2": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G3": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G4": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G5": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G6": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G7": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G9": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G10": {
+      "status": "passed_registered_cases",
+      "scope": "technical/functional integration; explicit opt-in"
+    },
+    "G8": {
+      "status": "failed",
+      "passed_comparisons": 81,
+      "total_comparisons": 90,
+      "failures": [
+        {
+          "kind": "production-thought",
+          "benchmark": "BenchmarkGateGThought/nodes=1000/dense=false/journal=false",
+          "baseline_benchmark": "BenchmarkGateGThought/nodes=1000/dense=false/journal=false",
+          "metric": "thought_p95_ms",
+          "baseline": 0.78345,
+          "candidate": 1.1644999999999999,
+          "factor": 1.15,
+          "additive_allowance": 0.1,
+          "limit": 1.0009675,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "production-thought",
+          "benchmark": "BenchmarkGateGThought/nodes=1000/dense=false/journal=true",
+          "baseline_benchmark": "BenchmarkGateGThought/nodes=1000/dense=false/journal=true",
+          "metric": "thought_p95_ms",
+          "baseline": 0.7431,
+          "candidate": 0.99925,
+          "factor": 1.15,
+          "additive_allowance": 0.1,
+          "limit": 0.9545649999999999,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "production-thought",
+          "benchmark": "BenchmarkGateGThought/nodes=1000/dense=true/journal=false",
+          "baseline_benchmark": "BenchmarkGateGThought/nodes=1000/dense=true/journal=false",
+          "metric": "thought_p95_ms",
+          "baseline": 9.9525,
+          "candidate": 12.620000000000001,
+          "factor": 1.15,
+          "additive_allowance": 0.1,
+          "limit": 11.545375,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "production-thought",
+          "benchmark": "BenchmarkGateGThought/nodes=4000/dense=true/journal=true",
+          "baseline_benchmark": "BenchmarkGateGThought/nodes=4000/dense=true/journal=true",
+          "metric": "thought_p95_ms",
+          "baseline": 35.08,
+          "candidate": 41.760000000000005,
+          "factor": 1.15,
+          "additive_allowance": 0.1,
+          "limit": 40.44199999999999,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "native-stages",
+          "benchmark": "BenchmarkGateGNativeStages/nodes=4000/dense=false",
+          "baseline_benchmark": "BenchmarkGateGNativeStages/nodes=4000/dense=false",
+          "metric": "learning_p95_ms",
+          "baseline": 0.094475,
+          "candidate": 0.2182,
+          "factor": 1.2,
+          "additive_allowance": 0.1,
+          "limit": 0.21337,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "native-stages",
+          "benchmark": "BenchmarkGateGNativeStages/nodes=4000/dense=true",
+          "baseline_benchmark": "BenchmarkGateGNativeStages/nodes=4000/dense=true",
+          "metric": "learning_p95_ms",
+          "baseline": 10.057500000000001,
+          "candidate": 12.313500000000001,
+          "factor": 1.2,
+          "additive_allowance": 0.1,
+          "limit": 12.169,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "persistence-mean-descriptive",
+          "benchmark": "BenchmarkNativeActionPersistence/nodes=4000/mode=checkpoint",
+          "baseline_benchmark": "BenchmarkNativeActionPersistence/nodes=4000/mode=checkpoint",
+          "metric": "ns/op",
+          "baseline": 66299512.5,
+          "candidate": 98324275.5,
+          "factor": 1.2,
+          "additive_allowance": 100000,
+          "limit": 79659415.0,
+          "passed": false,
+          "candidate_runs": 2,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "native-idle-thought",
+          "benchmark": "BenchmarkGateGThoughtNativeIdle/nodes=4000/dense=true/journal=true",
+          "baseline_benchmark": "BenchmarkGateGThought/nodes=4000/dense=true/journal=true",
+          "metric": "thought_p95_ms",
+          "baseline": 35.08,
+          "candidate": 42.26,
+          "factor": 1.15,
+          "additive_allowance": 0.1,
+          "limit": 40.44199999999999,
+          "passed": false,
+          "candidate_runs": 1,
+          "baseline_runs": 2
+        },
+        {
+          "kind": "native-idle-thought",
+          "benchmark": "BenchmarkGateGThoughtNativeIdle/nodes=40000/dense=false/journal=false",
+          "baseline_benchmark": "BenchmarkGateGThought/nodes=40000/dense=false/journal=false",
+          "metric": "thought_p95_ms",
+          "baseline": 16.915,
+          "candidate": 20.78,
+          "factor": 1.15,
+          "additive_allowance": 0.1,
+          "limit": 19.552249999999997,
+          "passed": false,
+          "candidate_runs": 1,
+          "baseline_runs": 2
+        }
+      ]
+    }
+  },
+  "mixed_replay_cases": 27,
+  "crash_process_boundaries": 15,
+  "new_physical_dispatch_on_recovery": 0,
+  "frozen_activity_transitions": 384,
+  "sort_equivalence_cases": 27,
+  "all_package_race_coverage": 69,
+  "native_default": false,
+  "merged": false,
+  "limitations": [
+    "G8 failed; full gate not passed",
+    "Android cross-build only; no on-device performance",
+    "process-crash tests, not power-loss tests",
+    "no automatic V5/native or unsafe-checkpoint migration",
+    "PR64 scientific C/D/H limitations unchanged"
+  ]
+}

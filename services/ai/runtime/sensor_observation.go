@@ -44,7 +44,10 @@ var ErrInvalidSensorObservation = errors.New("invalid sensor observation")
 // Clone returns an ownership-safe copy of the observation and all nested slices.
 func (s SensorObservation) Clone() SensorObservation {
 	out := s
-	if s.CompositionScene != nil { scene,_:=freezeComposition(*s.CompositionScene);out.CompositionScene=&scene }
+	if s.CompositionScene != nil {
+		scene, _ := freezeComposition(*s.CompositionScene)
+		out.CompositionScene = &scene
+	}
 	out.ChannelStates = append([]float64(nil), s.ChannelStates...)
 	out.SpatialCoordinates = append([]float64(nil), s.SpatialCoordinates...)
 	out.TemporalDelta = append([]float64(nil), s.TemporalDelta...)
@@ -62,7 +65,14 @@ func (s SensorObservation) Clone() SensorObservation {
 // Validate rejects ambiguous or non-finite physical input before it reaches
 // the canonical brain. Numeric feature arrays are expected to be normalized.
 func (s SensorObservation) Validate() error {
-	if s.CompositionScene!=nil {if err:=s.CompositionScene.Validate();err!=nil{return err};if s.Modality!="simulator"||!s.CompositionScene.ObservedAt.Equal(s.Timestamp){return errors.New("composition scene requires the contemporaneous numeric simulator boundary")}}
+	if s.CompositionScene != nil {
+		if err := s.CompositionScene.Validate(); err != nil {
+			return err
+		}
+		if s.Modality != "simulator" || !s.CompositionScene.ObservedAt.Equal(s.Timestamp) {
+			return errors.New("composition scene requires the contemporaneous numeric simulator boundary")
+		}
+	}
 	if math.IsNaN(s.NoiseTolerance) || math.IsInf(s.NoiseTolerance, 0) || s.NoiseTolerance < 0 || s.NoiseTolerance > 1 {
 		return fmt.Errorf("%w: noise tolerance must be finite and within [0,1]", ErrInvalidSensorObservation)
 	}
@@ -153,11 +163,15 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 		r := o.Runtime
 		r.mu.Lock()
 		defer r.mu.Unlock()
-		if err := r.ensureWritableLocked(); err != nil {
+		if err := r.admitCommandLocked(EventTypeSensorIntent); err != nil {
 			return processedSensor{}, err
 		}
-		if sensor.CompositionScene!=nil && r.composition==nil {return processedSensor{},errors.New("neural composition is disabled")}
-		if sensor.CompositionScene!=nil && r.composition.Scene!=nil && sensor.Timestamp.Before(r.composition.Scene.ObservedAt) {return processedSensor{},errors.New("composition scene timestamp regressed")}
+		if sensor.CompositionScene != nil && r.composition == nil {
+			return processedSensor{}, errors.New("neural composition is disabled")
+		}
+		if sensor.CompositionScene != nil && r.composition.Scene != nil && sensor.Timestamp.Before(r.composition.Scene.ObservedAt) {
+			return processedSensor{}, errors.New("composition scene timestamp regressed")
+		}
 		if sensor.NoiseTolerance > 0 && !r.dynamicsEncoding.HasStableProjection() {
 			return processedSensor{}, fmt.Errorf("%w: noise tolerance requires stable projection dynamics", ErrInvalidSensorObservation)
 		}
@@ -197,8 +211,18 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 			}
 		}
 
+		complete := false
+		defer func() {
+			if !complete {
+				r.markRecoveryRequiredLocked()
+			}
+		}()
+		r.transactionFaultLocked("sensor-after-intent")
 		r.settleMemoryTimeLocked(sensor.Timestamp)
-		if sensor.CompositionScene!=nil {scene,_:=freezeComposition(*sensor.CompositionScene);r.composition.Scene=&scene}
+		if sensor.CompositionScene != nil {
+			scene, _ := freezeComposition(*sensor.CompositionScene)
+			r.composition.Scene = &scene
+		}
 		var population knowledge.ProjectionPopulation
 		var bindings []knowledge.SensoryFieldBinding
 		var ids []knowledge.NodeID
@@ -240,6 +264,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 			return processedSensor{}, fmt.Errorf("%w: sensor temporal learning: %v", ErrRuntimeRecoveryRequired, err)
 		}
 		if journaled {
+			r.transactionFaultLocked("sensor-after-apply-before-commit")
 			commit := LoggedEvent{
 				SchemaVersion: EventLogSchemaVersion, BrainIdentity: BrainIdentity, DynamicsEncoding: r.dynamicsEncoding, SurfaceEncoding: r.surfaceEncoding,
 				Sequence: output.Sequence, Type: EventTypeSensorCommit,
@@ -251,6 +276,7 @@ func (o *CognitiveOrchestrator) ProcessSensorObservation(sensor SensorObservatio
 				return processedSensor{}, fmt.Errorf("%w: append sensor commit: %v", ErrRuntimeRecoveryRequired, err)
 			}
 		}
+		complete = true
 		// Publish only after the complete sensor transition (and any durable
 		// commit marker), including temporal learning, has finished.
 		if r.telemetry != nil {

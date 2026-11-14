@@ -54,12 +54,20 @@ func (e *Engine) applyActivityPlasticity(preState, postState map[knowledge.NodeI
 	}
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
+	native := e.Memory.NativeOwnershipLocked()
+	if local && len(preState) == 0 && len(postState) == 0 {
+		e.applyEmptyLocalActivityLocked(now, native)
+		return
+	}
 
 	e.Memory.Registry.VisitNodes(func(source *knowledge.ConceptNode) {
+		if native.Enabled() && native.Has(source.ID) {
+			return
+		}
 		pre := clamp01(preState[source.ID])
 		for _, list := range source.Synapses {
 			for _, synapse := range list {
-				if synapse == nil {
+				if synapse == nil || (native.Enabled() && native.Has(synapse.TargetID)) {
 					continue
 				}
 
@@ -104,6 +112,36 @@ func (e *Engine) applyActivityPlasticity(preState, postState map[knowledge.NodeI
 
 				synapse.Weight = synapse.Dynamic.Weight
 				synapse.Confidence = synapse.Dynamic.Confidence
+			}
+		}
+	})
+}
+
+// The empty observed-thought case still settles EVERY eligibility timestamp
+// and legacy mirror in canonical N. Only known-zero coactivity work is removed;
+// this is not lazy learning, skipped validation, or a different decay law.
+func (e *Engine) applyEmptyLocalActivityLocked(now time.Time, native knowledge.NativeOwnership) {
+	e.Memory.Registry.VisitNodes(func(source *knowledge.ConceptNode) {
+		if native.Enabled() && native.Has(source.ID) {
+			return
+		}
+		for _, list := range source.Synapses {
+			for _, synapse := range list {
+				if synapse == nil || (native.Enabled() && native.Has(synapse.TargetID)) {
+					continue
+				}
+				d := &synapse.Dynamic
+				eligibility := decayEligibility(d.Eligibility, d.LastEligibilityUpdate, now)
+				// Retain the old +0 expression, including canonical negative-zero
+				// behavior, rather than just assigning the decayed value.
+				d.Eligibility = clamp01(eligibility + .15*0*(1-eligibility))
+				if d.LastEligibilityUpdate.IsZero() || now.After(d.LastEligibilityUpdate) {
+					d.LastEligibilityUpdate = now
+				}
+				synapse.Weight = d.Weight
+				if !synapse.Inhibitory {
+					synapse.Confidence = d.Confidence
+				}
 			}
 		}
 	})
