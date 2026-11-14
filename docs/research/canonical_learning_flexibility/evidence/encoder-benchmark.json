@@ -1,0 +1,128 @@
+[
+  {
+    "neurons": 1000,
+    "density": 0.001,
+    "v1": {
+      "ns_op": 6245.0,
+      "parameter_reads": 80.0,
+      "structural_reads": 4.0,
+      "bytes_op": 1067.0,
+      "allocs_op": 15.0
+    },
+    "v2": {
+      "ns_op": 7605.0,
+      "parameter_reads": 144.0,
+      "structural_reads": 4.0,
+      "bytes_op": 1459.0,
+      "allocs_op": 18.0
+    },
+    "time_ratio": 1.2177742193755003,
+    "bytes_ratio": 1.3673851921274602,
+    "budget_alert": false
+  },
+  {
+    "neurons": 1000,
+    "density": 1,
+    "v1": {
+      "ns_op": 512550.0,
+      "parameter_reads": 80.0,
+      "structural_reads": 4000.0,
+      "bytes_op": 9307.0,
+      "allocs_op": 17.0
+    },
+    "v2": {
+      "ns_op": 592597.0,
+      "parameter_reads": 144.0,
+      "structural_reads": 4000.0,
+      "bytes_op": 9667.0,
+      "allocs_op": 19.0
+    },
+    "time_ratio": 1.1561740318017755,
+    "bytes_ratio": 1.038680563017084,
+    "budget_alert": false
+  },
+  {
+    "neurons": 4000,
+    "density": 0.001,
+    "v1": {
+      "ns_op": 5348.0,
+      "parameter_reads": 80.0,
+      "structural_reads": 16.0,
+      "bytes_op": 1134.0,
+      "allocs_op": 17.0
+    },
+    "v2": {
+      "ns_op": 8711.0,
+      "parameter_reads": 144.0,
+      "structural_reads": 16.0,
+      "bytes_op": 1497.0,
+      "allocs_op": 19.0
+    },
+    "time_ratio": 1.6288332086761406,
+    "bytes_ratio": 1.32010582010582,
+    "budget_alert": false
+  },
+  {
+    "neurons": 4000,
+    "density": 1,
+    "v1": {
+      "ns_op": 2264673.0,
+      "parameter_reads": 80.0,
+      "structural_reads": 16000.0,
+      "bytes_op": 33851.0,
+      "allocs_op": 16.0
+    },
+    "v2": {
+      "ns_op": 2472742.0,
+      "parameter_reads": 144.0,
+      "structural_reads": 16000.0,
+      "bytes_op": 34239.0,
+      "allocs_op": 19.0
+    },
+    "time_ratio": 1.0918759573677965,
+    "bytes_ratio": 1.0114619952143216,
+    "budget_alert": false
+  },
+  {
+    "neurons": 40000,
+    "density": 0.001,
+    "v1": {
+      "ns_op": 18393.0,
+      "parameter_reads": 80.0,
+      "structural_reads": 160.0,
+      "bytes_op": 1417.0,
+      "allocs_op": 16.0
+    },
+    "v2": {
+      "ns_op": 26155.0,
+      "parameter_reads": 144.0,
+      "structural_reads": 160.0,
+      "bytes_op": 1791.0,
+      "allocs_op": 19.0
+    },
+    "time_ratio": 1.4220083727505028,
+    "bytes_ratio": 1.2639378969654198,
+    "budget_alert": false
+  },
+  {
+    "neurons": 40000,
+    "density": 1,
+    "v1": {
+      "ns_op": 30539876.0,
+      "parameter_reads": 80.0,
+      "structural_reads": 160000.0,
+      "bytes_op": 328768.0,
+      "allocs_op": 16.0
+    },
+    "v2": {
+      "ns_op": 31780503.0,
+      "parameter_reads": 144.0,
+      "structural_reads": 160000.0,
+      "bytes_op": 329149.0,
+      "allocs_op": 19.0
+    },
+    "time_ratio": 1.0406231839317226,
+    "bytes_ratio": 1.001158871909675,
+    "budget_alert": false
+  }
+]

@@ -1,0 +1,5 @@
+=== RUN   TestFlexV2RecoveryNeverDispatchesPhysicalActions
+    flex_v2_recovery_test.go:117: live_dispatches=1 new_recovery_dispatches=0
+--- PASS: TestFlexV2RecoveryNeverDispatchesPhysicalActions (0.20s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/execution	1.221s
