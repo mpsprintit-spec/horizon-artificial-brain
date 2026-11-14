@@ -1,0 +1,12 @@
+{
+  "archive": "Horizon_Canonical_Continuation_E1_20261114.tar.xz",
+  "bytes": 5828488,
+  "sha256": "7452a46b6231b5af409848bf928b1fd486fbe8e563ee44baeffbfefeeaf0c4d3",
+  "payloads": 203,
+  "raw_bytes": 82842916,
+  "parent": "PR68 sequence10817",
+  "next_checkpoint": "e1-main-continuation/07-E1-restarted.json",
+  "journal": "e1-main-continuation/events.jsonl",
+  "next_sequence": 75331,
+  "native_updates": 10752
+}
