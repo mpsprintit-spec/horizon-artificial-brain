@@ -30,7 +30,7 @@ only input experiences and their observed consequences change. Preserve failures
 ## Pengujian
 
 Training lineage: one Brain from an empty valid checkpoint, deterministic
-numeric grounding into distinct distributed populations, seed 37. Populations
+numeric grounding of 16-dimensional Walsh +/-1 vectors (rows 1..9) into distinct distributed populations, seed 37. Populations
 are anonymous numeric adapter addresses, not built-in cognitive concepts.
 Each stage saves its complete checkpoint; evaluation copies never replace the
 main lineage or feed evaluation outcomes back into it.
@@ -39,7 +39,7 @@ main lineage or feed evaluation outcomes back into it.
 | --- | --- | --- |
 | A: order | 8 balanced repetitions of two reversed prefixes ending in distinct populations; mean target-minus-competitor prediction >= .1 for each case and improvement over untrained | Fresh event IDs/times; simultaneous population-member permutation and novel irrelevant prefix |
 | B: context | Continue A; 8 balanced repetitions of identical cue with two different contexts and outcomes; each margin >= .1 and improves over pre-B | Same contexts, new samples/permutations/prefixes; retain A |
-| C: consequence | Continue B; opt-in v3 control with v2 encoder, propagate/stop; 48 balanced rounds, four amplitudes .3/.5/.7/.9; two states: activity before learned outgoing connections, or at outcome population | Fresh amplitudes .4/.6/.8; both alternatives physically execute in the numerical test environment on evaluation copies; mean optimal-action probability increases >= .1, final greedy accuracy >= 5/6, mean absolute fitted factual net-return advantage error decreases >= 30% |
+| C: consequence | Continue B; opt-in v3 control with v2 encoder, propagate/stop; 192 balanced rounds, four amplitudes .3/.5/.7/.9; two states: activity before learned outgoing connections, or at outcome population | Fresh amplitudes .4/.6/.8; both alternatives physically execute in the numerical test environment on evaluation copies; mean optimal-action probability increases >= .1, final greedy accuracy >= 5/6, mean absolute fitted factual net-return advantage error decreases >= 30% |
 | D: reuse | Continue C; measure two previously learned links in the same episode with an actually observed intermediate; then 8 balanced joint exposures, no new mechanism | Fresh prefix/permutation samples; both predictions correct with margin >= .1; report pre-D reuse separately; retain A/B/C |
 
 C reward is measured activity in the specified outcome populations after an
@@ -66,6 +66,15 @@ activity fixtures 1k/4k/40k, sparse .001/dense 1, single thread, 100 iterations,
 3 repeats, allocs and structural reads. Lock exploratory alert at >2x median
 ns/op or B/op for the opt-in eight-channel encoder vs old four-channel encoder;
 investigate an alert; historical/default path must remain unchanged.
+
+A/B attribution controls remove canonical PatternSynapse traces on evaluation
+copies; record residual pair-synapse prediction separately. C attribution control
+zeros canonical policy edges only on an evaluation copy. A/B discrimination must
+not retain every local margin under pattern ablation; C choice improvement must
+fall under policy-edge ablation. Restart continuation includes a fresh numeric
+observation, recurrent thought and native policy selection, with exact live vs
+restored state equality. Assert exactly 1536 paired updates, retained after D
+and restart.
 
 ## Keputusan
 
