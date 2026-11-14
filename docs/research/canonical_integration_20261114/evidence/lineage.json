@@ -1,0 +1,14 @@
+{
+  "parent_sequence": 10817,
+  "final_sequence": 75331,
+  "checkpoint_checksum": "68a1518ebf1eea887041a339851754880d7638866a135361693205bab4bf4b82",
+  "journal_prefix_hash": "9cb342a9419e187a8a333a75018debd8fde39d7a40c150f92fb72e3cf23039a4",
+  "journal_sha256": "ebe2ff1ed74c3adf2c0176b2aa5ab8ead09c8fbdf10c07243e724de9b8354ede",
+  "original_journal_byte_prefix_preserved": true,
+  "old_dedup_receipts_preserved": 12295,
+  "model_configuration_unchanged": true,
+  "policy_role_addresses_unchanged": true,
+  "source_local": "0687321241a392c4c1049bf909fc40ac5153c294",
+  "source_published": "a5d2842f8cc4fa835d32c87bb2008244b0c51768",
+  "source_tree": "b5943abb9effa1d863b225d2cb33231e69e555fb"
+}

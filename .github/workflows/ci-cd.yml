@@ -46,6 +46,11 @@ jobs:
           go test -race ./services/ai/runtime -run '^TestGroundedDialogueConcurrentCanonicalRead$' -count=1
       - name: Live Bridge integration smoke
         run: make bridge-smoke
+      - name: Verify PR68 parent and continual E1 lineage
+        run: |
+          python3 scripts/prepare_continual_parent.py --destination "$RUNNER_TEMP/horizon-continual-parent"
+          HORIZON_CONTINUAL_PARENT="$RUNNER_TEMP/horizon-continual-parent" \
+          go test ./services/ai/runtime -run '^TestContinual(EPrerequisites|E1)$' -count=1 -timeout=20m
 
   monitor:
     runs-on: ubuntu-latest

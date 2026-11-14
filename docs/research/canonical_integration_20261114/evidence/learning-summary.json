@@ -1,0 +1,512 @@
+{
+  "after": {
+    "Accuracy": 0.9722222222222222,
+    "OptimalProbability": 0.9249999999999997,
+    "Regret": 0.01861061155308614,
+    "NuisanceSensitivity": 0.1541671241354935,
+    "MaxNuisanceConsequence": 0
+  },
+  "before": {
+    "Accuracy": 0.5,
+    "OptimalProbability": 0.4999999999999999,
+    "Regret": 0.42833033598518333,
+    "NuisanceSensitivity": 1.4284320555851404,
+    "MaxNuisanceConsequence": 0
+  },
+  "blocks": 3,
+  "complete_genesis_replay": true,
+  "complete_suffix_replay": true,
+  "derived_context_noise_after": [
+    1.142056654203707,
+    1.1420566533964507
+  ],
+  "derived_context_noise_before": [
+    1.142247463254166,
+    1.1422474624481642
+  ],
+  "final_checkpoint": "07-E1-restarted.json",
+  "final_sequence": 75331,
+  "native_updates": 10752,
+  "next_transition_equal": true,
+  "pairs": 9216,
+  "parent_sequence": 10817,
+  "policy_ablation": {
+    "Accuracy": 0.5,
+    "OptimalProbability": 0.5000000000000001,
+    "Regret": 0.32499999999999996,
+    "NuisanceSensitivity": 0,
+    "MaxNuisanceConsequence": 0
+  },
+  "retention_after_restart": {
+    "A": [
+      1.3778597474022227,
+      1.3781815315168608,
+      1.3778597474022227,
+      1.3781815315168608,
+      1.3778597474022227,
+      1.3781815315168608,
+      1.3778597474022227,
+      1.3781815315168608
+    ],
+    "B": [
+      1.3554237376101097,
+      1.3554237372077842,
+      1.3554237376101097,
+      1.3554237372077842,
+      1.3910525099027669,
+      1.391052509595709,
+      1.3910525099027669,
+      1.391052509595709
+    ],
+    "C": {
+      "OptimalProbability": 0.9500000000000001,
+      "Accuracy": 1,
+      "AdvantageError": 0.31085010308044386,
+      "Probes": [
+        {
+          "Amplitude": 0.4,
+          "Condition": 0,
+          "Values": [
+            0.26598405098885813,
+            -0.19728125088952084
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.6696595062230064,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.4,
+          "Condition": 1,
+          "Values": [
+            0.0007390621094314747,
+            0.07487063305385462
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.4
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 0,
+          "Values": [
+            0.3930467683512507,
+            -0.2900005392936101
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 1,
+          "Values": [
+            -0.03439541872342307,
+            0.15309066287621026
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.6
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 0,
+          "Values": [
+            0.5486208581662085,
+            -0.39810781681547275
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 1,
+          "Values": [
+            -0.060734996274068434,
+            0.23916495441729738
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.8
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        }
+      ]
+    },
+    "D": [
+      1.3778597474022227,
+      1.3050658899050025,
+      1.3781815315168608,
+      1.3050658892511249,
+      1.3778597474022227,
+      1.3050658899050025,
+      1.3781815315168608,
+      1.3050658892511249
+    ]
+  },
+  "retention_after_training": {
+    "A": [
+      1.3778597495888267,
+      1.3781815336952081,
+      1.3778597495888267,
+      1.3781815336952081,
+      1.3778597495888267,
+      1.3781815336952081,
+      1.3778597495888267,
+      1.3781815336952081
+    ],
+    "B": [
+      1.355423740560498,
+      1.3554237401581721,
+      1.355423740560498,
+      1.3554237401581721,
+      1.391052512154526,
+      1.3910525118474681,
+      1.391052512154526,
+      1.3910525118474681
+    ],
+    "C": {
+      "OptimalProbability": 0.9500000000000001,
+      "Accuracy": 1,
+      "AdvantageError": 0.3109038546951263,
+      "Probes": [
+        {
+          "Amplitude": 0.4,
+          "Condition": 0,
+          "Values": [
+            0.26598405098885813,
+            -0.19728125088952084
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.669982015911101,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.4,
+          "Condition": 1,
+          "Values": [
+            0.0007390621094314747,
+            0.07487063305385462
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.4
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 0,
+          "Values": [
+            0.3930467683512507,
+            -0.2900005392936101
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 1,
+          "Values": [
+            -0.03439541872342307,
+            0.15309066287621026
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.6
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 0,
+          "Values": [
+            0.5486208581662085,
+            -0.39810781681547275
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 1,
+          "Values": [
+            -0.060734996274068434,
+            0.23916495441729738
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.8
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        }
+      ]
+    },
+    "D": [
+      1.3778597495888267,
+      1.3050658947001033,
+      1.3781815336952081,
+      1.3050658940462259,
+      1.3778597495888267,
+      1.3050658947001033,
+      1.3781815336952081,
+      1.3050658940462259
+    ]
+  },
+  "retention_before": {
+    "A": [
+      1.3779302395373954,
+      1.3782517575107291,
+      1.3779302395373954,
+      1.3782517575107291,
+      1.3779302395373954,
+      1.3782517575107291,
+      1.3779302395373954,
+      1.3782517575107291
+    ],
+    "B": [
+      1.3555188453283469,
+      1.355518844926553,
+      1.3555188453283469,
+      1.355518844926553,
+      1.3911250813634715,
+      1.3911250810569502,
+      1.3911250813634715,
+      1.3911250810569502
+    ],
+    "C": {
+      "OptimalProbability": 0.9500000000000001,
+      "Accuracy": 1,
+      "AdvantageError": 0.36348544837849345,
+      "Probes": [
+        {
+          "Amplitude": 0.4,
+          "Condition": 0,
+          "Values": [
+            0.2069075793682672,
+            -0.1382047792689295
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.669982015911101,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.4,
+          "Condition": 1,
+          "Values": [
+            -0.10438601473873205,
+            0.17999570990201874
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.4
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 0,
+          "Values": [
+            0.1236456918816146,
+            -0.020599462823973166
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 1,
+          "Values": [
+            -0.282551730422885,
+            0.4012469745756736
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.6
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 0,
+          "Values": [
+            0.2230192481477445,
+            -0.07250620679700731
+          ],
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 1,
+          "Values": [
+            -0.23758668978359032,
+            0.4160166479268215
+          ],
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "FactualReturns": [
+            -0.05,
+            0.8
+          ],
+          "Greedy": 1,
+          "Optimal": 1
+        }
+      ]
+    },
+    "D": [
+      1.3779302395373954,
+      1.3052204452358742,
+      1.3782517575107291,
+      1.305220444583013,
+      1.3779302395373954,
+      1.3052204452358742,
+      1.3782517575107291,
+      1.305220444583013
+    ]
+  },
+  "source": "PR68 continuation; no A-D training, no model initialization",
+  "validation": [
+    {
+      "Accuracy": 0.8055555555555556,
+      "OptimalProbability": 0.7749999999999997,
+      "Regret": 0.09944400733117259,
+      "NuisanceSensitivity": 0.1807234411830441,
+      "MaxNuisanceConsequence": 0
+    },
+    {
+      "Accuracy": 0.8888888888888888,
+      "OptimalProbability": 0.8499999999999995,
+      "Regret": 0.04944400733117258,
+      "NuisanceSensitivity": 0.15901276924913252,
+      "MaxNuisanceConsequence": 0
+    },
+    {
+      "Accuracy": 0.9722222222222222,
+      "OptimalProbability": 0.9249999999999997,
+      "Regret": 0.016110673997839258,
+      "NuisanceSensitivity": 0.14572042817471292,
+      "MaxNuisanceConsequence": 0
+    }
+  ],
+  "validation_before": {
+    "Accuracy": 0.5,
+    "OptimalProbability": 0.4999999999999999,
+    "Regret": 0.41165992263332934,
+    "NuisanceSensitivity": 1.5937378999160419,
+    "MaxNuisanceConsequence": 0
+  }
+}

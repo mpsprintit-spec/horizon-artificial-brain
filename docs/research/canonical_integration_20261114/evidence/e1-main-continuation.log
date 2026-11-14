@@ -1,0 +1,8 @@
+=== RUN   TestContinualE1
+    continual_e1_test.go:327: block 1 pairs=3072 validation accuracy=0.8055555555555556 regret=0.09944400733117259 sensitivity=0.1807234411830441
+    continual_e1_test.go:327: block 2 pairs=6144 validation accuracy=0.8888888888888888 regret=0.04944400733117258 sensitivity=0.15901276924913252
+    continual_e1_test.go:327: block 3 pairs=9216 validation accuracy=0.9722222222222222 regret=0.016110673997839258 sensitivity=0.14572042817471292
+    continual_e1_test.go:443: E1 seq=75331 updates=10752 accuracy=0.5 -> 0.9722222222222222 regret=0.42833033598518333 -> 0.01861061155308614 nuisance sensitivity=1.4284320555851404 -> 0.1541671241354935
+--- PASS: TestContinualE1 (71.53s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	71.570s

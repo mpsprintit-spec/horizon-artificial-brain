@@ -1,0 +1,32 @@
+[
+  {
+    "checkpoint": "06-E1.json",
+    "sequence": 75329,
+    "checksum": "d9b60f5bedf2e3f5a64ed44df70ed3bd480e81c705a5d99a576ab1f6c25df03a",
+    "prefix": "6e76b839a1874b48e5b3ea68a97dab4d1f4ded4a39de27420a9f01108a57bb3e",
+    "file_sha256": "b334b28512c7c257ed12a3ca83b3d63e8eaa30400ff5fc3b7f6ccf517d114a18",
+    "native_updates": 10752,
+    "neurons": 57,
+    "synapses": 94,
+    "patterns": 24,
+    "new_synapses": 0,
+    "policy_changes": 72,
+    "world_changes": 0,
+    "signed_weight_L1": 8.462188477183945
+  },
+  {
+    "checkpoint": "07-E1-restarted.json",
+    "sequence": 75331,
+    "checksum": "68a1518ebf1eea887041a339851754880d7638866a135361693205bab4bf4b82",
+    "prefix": "9cb342a9419e187a8a333a75018debd8fde39d7a40c150f92fb72e3cf23039a4",
+    "file_sha256": "e73f8d34e80957dd442b1b5be81811270989e30ee50d03c783fab4dfeb137537",
+    "native_updates": 10752,
+    "neurons": 57,
+    "synapses": 94,
+    "patterns": 24,
+    "new_synapses": 0,
+    "policy_changes": 72,
+    "world_changes": 22,
+    "signed_weight_L1": 8.46781367155948
+  }
+]

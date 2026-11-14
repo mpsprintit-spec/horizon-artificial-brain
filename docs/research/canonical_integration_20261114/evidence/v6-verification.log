@@ -1,0 +1,10 @@
+=== RUN   TestGroundedDialogueFreshEvaluation
+    grounded_dialogue_evaluation_test.go:94: Fresh language evaluation: map[changed-focus:map[exact:48 meaning:48 total:48] changed-focus-past:map[exact:48 meaning:48 total:48] deictic:map[exact:48 meaning:48 total:48] deictic-negation-past:map[exact:48 meaning:48 total:48] must-clarify:map[exact:16 meaning:16 no-substantive-claim:16 total:16] named-context:map[exact:48 meaning:48 total:48] negation:map[exact:48 meaning:48 total:48] outside-scope:map[meaning:16 no-substantive-claim:16 total:16] paraphrase:map[exact:48 meaning:48 total:48] past-named:map[exact:48 meaning:48 total:48] polar-negative-state:map[exact:48 meaning:48 total:48] polar-positive:map[exact:48 meaning:48 total:48]]
+--- PASS: TestGroundedDialogueFreshEvaluation (9.41s)
+=== RUN   TestGroundedDialoguePersistenceContextAndSynapticAblation
+--- PASS: TestGroundedDialoguePersistenceContextAndSynapticAblation (32.95s)
+=== RUN   TestGroundedDialogueMeaningSynapticAblation
+    grounded_dialogue_evaluation_test.go:200: native="Lampu itu sekarang padam." focus=0.25; after reference-synapse ablation="Objek yang mana?" focus=0 valid=false; spelling retained="lampu"
+--- PASS: TestGroundedDialogueMeaningSynapticAblation (0.71s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	43.080s
