@@ -1,0 +1,241 @@
+[
+  {
+    "label": "full-regression",
+    "command": [
+      "go",
+      "test",
+      "./...",
+      "-count=1",
+      "-timeout=20m"
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup",
+    "returncode": 0,
+    "seconds": 166.49897003173828
+  },
+  {
+    "label": "go-build",
+    "command": [
+      "go",
+      "build",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup",
+    "returncode": 0,
+    "seconds": 1.0243403911590576
+  },
+  {
+    "label": "go-vet",
+    "command": [
+      "go",
+      "vet",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup",
+    "returncode": 0,
+    "seconds": 3.068469762802124
+  },
+  {
+    "label": "nested-services-analytics",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/analytics",
+    "returncode": 0,
+    "seconds": 0.134232759475708
+  },
+  {
+    "label": "nested-services-behavior",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/behavior",
+    "returncode": 0,
+    "seconds": 0.3555183410644531
+  },
+  {
+    "label": "nested-services-device",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/device",
+    "returncode": 0,
+    "seconds": 0.11157059669494629
+  },
+  {
+    "label": "nested-services-digital-twin",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/digital-twin",
+    "returncode": 0,
+    "seconds": 0.09660792350769043
+  },
+  {
+    "label": "nested-services-drone",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/drone",
+    "returncode": 0,
+    "seconds": 0.2818033695220947
+  },
+  {
+    "label": "nested-services-glasses",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/glasses",
+    "returncode": 0,
+    "seconds": 0.30881834030151367
+  },
+  {
+    "label": "nested-services-health-monitoring",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/health-monitoring",
+    "returncode": 0,
+    "seconds": 0.0838172435760498
+  },
+  {
+    "label": "nested-services-media",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/media",
+    "returncode": 0,
+    "seconds": 0.10973286628723145
+  },
+  {
+    "label": "nested-services-mission",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/mission",
+    "returncode": 0,
+    "seconds": 0.09173989295959473
+  },
+  {
+    "label": "nested-services-notification",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/notification",
+    "returncode": 0,
+    "seconds": 0.09744834899902344
+  },
+  {
+    "label": "nested-services-ota",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/ota",
+    "returncode": 0,
+    "seconds": 0.08954215049743652
+  },
+  {
+    "label": "nested-services-radio",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/radio",
+    "returncode": 0,
+    "seconds": 0.08962559700012207
+  },
+  {
+    "label": "nested-services-storage",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/storage",
+    "returncode": 0,
+    "seconds": 0.09032750129699707
+  },
+  {
+    "label": "nested-services-user",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/user",
+    "returncode": 0,
+    "seconds": 0.07567882537841797
+  },
+  {
+    "label": "nested-services-watch",
+    "command": [
+      "go",
+      "test",
+      "./..."
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup/services/watch",
+    "returncode": 0,
+    "seconds": 0.0999000072479248
+  },
+  {
+    "label": "bridge-smoke",
+    "command": [
+      "bash",
+      "scripts/bridge_smoke.sh"
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup",
+    "returncode": 0,
+    "seconds": 4.47279691696167
+  },
+  {
+    "label": "android-arm64-build",
+    "command": [
+      "go",
+      "build",
+      "-o",
+      "/workspace/scratch/37cd8f10c5b6/retirement-evidence/horizon-chat-android-arm64",
+      "./cmd/horizon-chat"
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup",
+    "returncode": 0,
+    "seconds": 3.287721872329712
+  },
+  {
+    "label": "fixture-preparation-tests",
+    "command": [
+      "python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "scripts",
+      "-p",
+      "test_prepare_*.py"
+    ],
+    "cwd": "/workspace/scratch/37cd8f10c5b6/horizon-precleanup",
+    "returncode": 0,
+    "seconds": 0.24592137336730957
+  }
+]

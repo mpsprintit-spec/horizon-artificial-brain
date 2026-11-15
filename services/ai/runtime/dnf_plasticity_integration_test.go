@@ -14,14 +14,14 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 	brain.Connect(source, target, 0.05, 0.20, false)
 
 	runtime := NewBrainRuntime(brain)
-	if runtime == nil || runtime.DNF() == nil {
+	if runtime == nil || runtime.dnf == nil {
 		t.Fatal("expected runtime and DNF fabric")
 	}
-	if runtime.DNF().Brain() != brain {
+	if runtime.dnf.Brain() != brain {
 		t.Fatal("runtime DNF must use the canonical Brain")
 	}
 
-	beforeStructure, err := runtime.DNF().Inspect(time.Unix(100, 0).UTC())
+	beforeStructure, err := runtime.dnf.Inspect(time.Unix(100, 0).UTC())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 		}
 	}
 
-	state, err := runtime.DNF().SynapseState(source.ID, target.ID, false)
+	state, err := runtime.dnf.SynapseState(source.ID, target.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func TestDNFPlasticityChangesNextCognitiveActivation(t *testing.T) {
 		t.Fatalf("brain identity changed: got %q want %q", after.BrainIdentity, BrainIdentity)
 	}
 
-	afterStructure, err := runtime.DNF().Inspect(t0.Add(2 * time.Minute))
+	afterStructure, err := runtime.dnf.Inspect(t0.Add(2 * time.Minute))
 	if err != nil {
 		t.Fatal(err)
 	}

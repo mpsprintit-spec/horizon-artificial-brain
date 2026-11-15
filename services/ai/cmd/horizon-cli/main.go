@@ -13,33 +13,32 @@ import (
 	"time"
 
 	"github.com/project-horizon/horizon-core/services/ai/core"
-	"github.com/project-horizon/horizon-core/services/ai/perception"
-	"github.com/project-horizon/horizon-core/services/ai/knowledge"
-	"github.com/project-horizon/horizon-core/services/ai/runtime"
-	"github.com/project-horizon/horizon-core/services/ai/plugin"
-	"github.com/project-horizon/horizon-core/services/ai/thinking"
-	"github.com/project-horizon/horizon-core/services/ai/websearch"
 	"github.com/project-horizon/horizon-core/services/ai/evolution"
+	"github.com/project-horizon/horizon-core/services/ai/knowledge"
+	"github.com/project-horizon/horizon-core/services/ai/perception"
+	"github.com/project-horizon/horizon-core/services/ai/plugin"
+	"github.com/project-horizon/horizon-core/services/ai/runtime"
+	"github.com/project-horizon/horizon-core/services/ai/websearch"
 )
 
 const memoryFile = "services/ai/brain_memory.json"
 
 type cli struct {
-	horizon    *core.HorizonEngine
-	perceiver  perception.UserInputPerception
-	in         *bufio.Scanner
-	out        io.Writer
-	debug      bool
-	history    []string
-	context    []string
-	last       pipelineResult
-	startedAt  time.Time
-	memoryPath string
+	horizon         *core.HorizonEngine
+	perceiver       perception.UserInputPerception
+	in              *bufio.Scanner
+	out             io.Writer
+	debug           bool
+	history         []string
+	context         []string
+	last            pipelineResult
+	startedAt       time.Time
+	memoryPath      string
 	roleCatalog     *evolution.RoleCatalog
 	roleCatalogPath string
-	brainLive bool
-	brainStop chan struct{}
-	brainWG sync.WaitGroup
+	brainLive       bool
+	brainStop       chan struct{}
+	brainWG         sync.WaitGroup
 }
 
 type pipelineResult struct {
@@ -59,12 +58,7 @@ type pipelineResult struct {
 	PatternEvidence     []string
 	Intent              string
 	Path                string
-	FocusToken          string
-	FunctionalSignals   []string
 	InterpretationNotes []string
-	Propositions        []string
-	Constraints         []string
-	EvidencePaths       []string
 	EvalStatus          string
 }
 
@@ -82,14 +76,14 @@ func newCLI(input io.Reader, output io.Writer, memoryPath string) *cli {
 	horizon.Gateway.RegisterPlugin("terbang", &plugin.DronePlugin{})
 	horizon.Gateway.RegisterPlugin("logsystem", &plugin.ChatbotPlugin{})
 	return &cli{
-		horizon:    horizon,
-		in:         bufio.NewScanner(input),
-		out:        &cliOutput{writer: output},
-		startedAt:  time.Now(),
-		memoryPath: memoryPath,
+		horizon:         horizon,
+		in:              bufio.NewScanner(input),
+		out:             &cliOutput{writer: output},
+		startedAt:       time.Now(),
+		memoryPath:      memoryPath,
 		roleCatalog:     &evolution.RoleCatalog{},
 		roleCatalogPath: "roles.json",
-		brainStop: make(chan struct{}),
+		brainStop:       make(chan struct{}),
 	}
 }
 
@@ -187,7 +181,9 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 	// Labels returned by PulseWithLabels name activity for inspection. They
 	// cannot serve as a learned language decoder, even when a forecast exists.
 	answer := "Jawaban bahasa belum tersedia."
-	if result.Composition!=nil { answer=fmt.Sprintf("Komposisi: %s; usulan motor=%v (belum dieksekusi)",result.Composition.Status,result.Composition.Motor) }
+	if result.Composition != nil {
+		answer = fmt.Sprintf("Komposisi: %s; usulan motor=%v (belum dieksekusi)", result.Composition.Status, result.Composition.Motor)
+	}
 	return pipelineResult{
 		Input:               input,
 		Tokens:              strings.Fields(input),
@@ -198,11 +194,7 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 		Forecast:            activeNodeTokens(result.Answer.NodeIDs),
 		AnswerStatus:        result.Answer.Status,
 		Context:             c.context,
-		FunctionalSignals:   nil,
 		InterpretationNotes: []string{"source=" + result.Interpretation.Source},
-		Propositions:        nil,
-		Constraints:         nil,
-		EvidencePaths:       nil,
 		EvalStatus:          "cognitive_interpretation",
 	}
 }
@@ -210,161 +202,181 @@ func (c *cli) process(ctx context.Context, input string) pipelineResult {
 // handleCommand never exposes a live neural pointer to inspection code.
 // Save/load and autonomous monitor controls are separate managed mutations.
 func (c *cli) handleCommand(input string) bool {
-	lower:=strings.ToLower(strings.TrimSpace(input))
-	if strings.HasPrefix(lower,"composition "){return c.handleComposition(input)}
+	lower := strings.ToLower(strings.TrimSpace(input))
+	if strings.HasPrefix(lower, "composition ") {
+		return c.handleComposition(input)
+	}
 	switch lower {
 	case "brain":
 		c.toggleBrainMonitor()
 		return true
 	case "save":
-		if err:=c.horizon.SaveActiveBrain(c.memoryPath);err!=nil {
-			fmt.Fprintf(c.out,"Save failed: %v\n",err)
-		} else {fmt.Fprintln(c.out,"Memory saved.")}
+		if err := c.horizon.SaveActiveBrain(c.memoryPath); err != nil {
+			fmt.Fprintf(c.out, "Save failed: %v\n", err)
+		} else {
+			fmt.Fprintln(c.out, "Memory saved.")
+		}
 		return true
 	case "load":
-		if err:=c.horizon.LoadActiveBrain(c.memoryPath);err!=nil {
-			fmt.Fprintf(c.out,"Load failed: %v\n",err)
-		} else {fmt.Fprintln(c.out,"Memory loaded.")}
+		if err := c.horizon.LoadActiveBrain(c.memoryPath); err != nil {
+			fmt.Fprintf(c.out, "Load failed: %v\n", err)
+		} else {
+			fmt.Fprintln(c.out, "Memory loaded.")
+		}
 		return true
-	case "help","exit","quit","activation","context","history","clear","debug on","debug off":
+	case "help", "exit", "quit", "activation", "context", "history", "clear", "debug on", "debug off":
 		// These commands only inspect local CLI state, so they must not
 		// serialize a potentially massive neural graph.
-		return c.handleCommandWithSnapshot(input,knowledge.BrainReadSnapshot{})
-	case "memory","nodes","synapses","clusters","patterns":
+		return c.handleCommandWithSnapshot(input, knowledge.BrainReadSnapshot{})
+	case "memory", "nodes", "synapses", "clusters", "patterns":
 		// Fall through to the managed brain inspection below.
 	default:
-		if !strings.HasPrefix(lower,"stats ") &&
-			!strings.HasPrefix(lower,"relations ") &&
-			!strings.HasPrefix(lower,"name ") {
+		if !strings.HasPrefix(lower, "stats ") &&
+			!strings.HasPrefix(lower, "relations ") &&
+			!strings.HasPrefix(lower, "name ") {
 			// The ordinary user input path must not construct a neural
 			// snapshot before entering the cognition pipeline.
 			return false
 		}
 	}
-	inspection,err:=c.horizon.InspectActiveBrain()
-	if err!=nil {
-		fmt.Fprintf(c.out,"Brain command unavailable: %v\n",err)
+	inspection, err := c.horizon.InspectActiveBrain()
+	if err != nil {
+		fmt.Fprintf(c.out, "Brain command unavailable: %v\n", err)
 		return true
 	}
-	return c.handleCommandWithSnapshot(input,inspection.Graph)
+	return c.handleCommandWithSnapshot(input, inspection.Graph)
 }
 
-func (c *cli) handleCommandWithSnapshot(input string,brain knowledge.BrainReadSnapshot) bool {
-	units:=brain.NeuralUnits()
-	edges:=brain.Synapses()
+func (c *cli) handleCommandWithSnapshot(input string, brain knowledge.BrainReadSnapshot) bool {
+	units := brain.NeuralUnits()
+	edges := brain.Synapses()
 	switch strings.ToLower(input) {
 	case "help":
-		fmt.Fprintln(c.out,"Commands: help, exit, quit, brain, memory, nodes, synapses, activation, context, history, clear, save, load, debug on, debug off")
-	case "exit","quit":
-		fmt.Fprintln(c.out,"Shutting down Horizon...")
+		fmt.Fprintln(c.out, "Commands: help, exit, quit, brain, memory, nodes, synapses, activation, context, history, clear, save, load, debug on, debug off")
+	case "exit", "quit":
+		fmt.Fprintln(c.out, "Shutting down Horizon...")
 	case "memory":
-		fmt.Fprintf(c.out,"Memory: %d nodes, %d synapses\n",len(units),len(edges))
+		fmt.Fprintf(c.out, "Memory: %d nodes, %d synapses\n", len(units), len(edges))
 	case "":
 	case "nodes":
 		var tokens []string
-		for _,n:=range units {tokens=append(tokens,fmt.Sprintf("node:%d",n.ID))}
-		fmt.Fprintf(c.out,"Nodes (%d): %s\n",len(tokens),strings.Join(tokens,", "))
+		for _, n := range units {
+			tokens = append(tokens, fmt.Sprintf("node:%d", n.ID))
+		}
+		fmt.Fprintf(c.out, "Nodes (%d): %s\n", len(tokens), strings.Join(tokens, ", "))
 	case "synapses":
-		fmt.Fprintf(c.out,"Synapses: %d\n",len(edges))
+		fmt.Fprintf(c.out, "Synapses: %d\n", len(edges))
 	case "activation":
-		fmt.Fprintf(c.out,"Activation: %s\n",strings.Join(c.last.Activation,", "))
+		fmt.Fprintf(c.out, "Activation: %s\n", strings.Join(c.last.Activation, ", "))
 	case "context":
-		fmt.Fprintf(c.out,"Context: %s\n",strings.Join(c.context,", "))
+		fmt.Fprintf(c.out, "Context: %s\n", strings.Join(c.context, ", "))
 	case "history":
-		fmt.Fprintln(c.out,strings.Join(c.history,"\n"))
+		fmt.Fprintln(c.out, strings.Join(c.history, "\n"))
 	case "clear":
-		fmt.Fprint(c.out,"\x1b[H\x1b[2J")
+		fmt.Fprint(c.out, "\x1b[H\x1b[2J")
 	case "debug on":
-		c.debug=true
-		fmt.Fprintln(c.out,"Debug enabled.")
+		c.debug = true
+		fmt.Fprintln(c.out, "Debug enabled.")
 	case "debug off":
-		c.debug=false
-		fmt.Fprintln(c.out,"Debug disabled.")
+		c.debug = false
+		fmt.Fprintln(c.out, "Debug disabled.")
 	case "clusters":
-		for _,cl:=range evolution.ClusterSnapshot(brain) {
+		for _, cl := range evolution.ClusterSnapshot(brain) {
 			var words []string
-			for _,id:=range cl.Members {
-				if brain.HasNode(id) {words=append(words,fmt.Sprintf("node:%d",id))}
-			}
-			status:="belum cukup mapan"
-			if len(cl.Members)>=evolution.StabilityThreshold {
-				if name:=c.roleCatalog.Match(cl.Centroid);name!="" {
-					status="peran: "+name
-				} else {
-					status=fmt.Sprintf("BARU, belum dikenal -- beri nama: name %d <nama>",cl.ID)
+			for _, id := range cl.Members {
+				if brain.HasNode(id) {
+					words = append(words, fmt.Sprintf("node:%d", id))
 				}
 			}
-			fmt.Fprintf(c.out,"Cluster %d (%s): %s\n",cl.ID,status,strings.Join(words,", "))
+			status := "belum cukup mapan"
+			if len(cl.Members) >= evolution.StabilityThreshold {
+				if name := c.roleCatalog.Match(cl.Centroid); name != "" {
+					status = "peran: " + name
+				} else {
+					status = fmt.Sprintf("BARU, belum dikenal -- beri nama: name %d <nama>", cl.ID)
+				}
+			}
+			fmt.Fprintf(c.out, "Cluster %d (%s): %s\n", cl.ID, status, strings.Join(words, ", "))
 		}
 	default:
-		lower:=strings.ToLower(strings.TrimSpace(input))
-		if strings.HasPrefix(lower,"stats ") {
-			word:=strings.TrimSpace(input[len("stats "):])
-			nodeID,ok:=brain.NodeForSurface(word)
+		lower := strings.ToLower(strings.TrimSpace(input))
+		if strings.HasPrefix(lower, "stats ") {
+			word := strings.TrimSpace(input[len("stats "):])
+			nodeID, ok := brain.NodeForSurface(word)
 			if !ok {
-				fmt.Fprintf(c.out,"Node %q belum ada.\n",word)
+				fmt.Fprintf(c.out, "Node %q belum ada.\n", word)
 				return true
 			}
-			s:=evolution.ComputeSnapshotStats(brain,nodeID)
-			fmt.Fprintf(c.out,"Stats %q: IsA-masuk=%d IsA-keluar=%d Deskriptif-masuk=%d JenisRelasi=%d Keluar=%d Masuk=%d RataConfidence=%.2f\n",
-				word,s.IsAIncoming,s.IsAOutgoing,s.DescriptiveIncoming,s.DistinctRelationKinds,s.OutDegree,s.InDegree,s.AverageConfidence)
+			s := evolution.ComputeSnapshotStats(brain, nodeID)
+			fmt.Fprintf(c.out, "Stats %q: IsA-masuk=%d IsA-keluar=%d Deskriptif-masuk=%d JenisRelasi=%d Keluar=%d Masuk=%d RataConfidence=%.2f\n",
+				word, s.IsAIncoming, s.IsAOutgoing, s.DescriptiveIncoming, s.DistinctRelationKinds, s.OutDegree, s.InDegree, s.AverageConfidence)
 			return true
 		}
-		if strings.HasPrefix(lower,"relations ") {
-			word:=strings.TrimSpace(input[len("relations "):])
-			nodeID,ok:=brain.NodeForSurface(word)
+		if strings.HasPrefix(lower, "relations ") {
+			word := strings.TrimSpace(input[len("relations "):])
+			nodeID, ok := brain.NodeForSurface(word)
 			if !ok {
-				fmt.Fprintf(c.out,"Node %q belum ada.\n",word)
+				fmt.Fprintf(c.out, "Node %q belum ada.\n", word)
 				return true
 			}
-			fmt.Fprintf(c.out,"Keluar dari %q:\n",word)
-			for _,edge:=range edges {
-				if edge.SourceID!=nodeID {continue}
-				name:="?"
-				if brain.HasNode(edge.TargetID) {name=fmt.Sprintf("node:%d",edge.TargetID)}
-				fmt.Fprintf(c.out,"  --[%s]--> %s (weight=%.2f confidence=%.2f)\n",edge.Kind,name,edge.Weight,edge.Confidence)
+			fmt.Fprintf(c.out, "Keluar dari %q:\n", word)
+			for _, edge := range edges {
+				if edge.SourceID != nodeID {
+					continue
+				}
+				name := "?"
+				if brain.HasNode(edge.TargetID) {
+					name = fmt.Sprintf("node:%d", edge.TargetID)
+				}
+				fmt.Fprintf(c.out, "  --[%s]--> %s (weight=%.2f confidence=%.2f)\n", edge.Kind, name, edge.Weight, edge.Confidence)
 			}
-			fmt.Fprintf(c.out,"Masuk ke %q:\n",word)
-			for _,edge:=range edges {
-				if edge.TargetID==nodeID && edge.SourceID!=nodeID {
-					fmt.Fprintf(c.out,"  node:%d --[%s]--> (weight=%.2f confidence=%.2f)\n",
-						edge.SourceID,edge.Kind,edge.Weight,edge.Confidence)
+			fmt.Fprintf(c.out, "Masuk ke %q:\n", word)
+			for _, edge := range edges {
+				if edge.TargetID == nodeID && edge.SourceID != nodeID {
+					fmt.Fprintf(c.out, "  node:%d --[%s]--> (weight=%.2f confidence=%.2f)\n",
+						edge.SourceID, edge.Kind, edge.Weight, edge.Confidence)
 				}
 			}
 			return true
 		}
-		if strings.HasPrefix(lower,"name ") {
-			parts:=strings.SplitN(strings.TrimSpace(input[len("name "):])," ",2)
-			if len(parts)!=2 {
-				fmt.Fprintln(c.out,"Pakai: name <id-cluster> <nama>")
+		if strings.HasPrefix(lower, "name ") {
+			parts := strings.SplitN(strings.TrimSpace(input[len("name "):]), " ", 2)
+			if len(parts) != 2 {
+				fmt.Fprintln(c.out, "Pakai: name <id-cluster> <nama>")
 				return true
 			}
 			var id int
-			fmt.Sscanf(parts[0],"%d",&id)
-			label:=parts[1]
-			for _,cl:=range evolution.ClusterSnapshot(brain) {
-				if cl.ID!=id {continue}
-				if len(cl.Members)<evolution.StabilityThreshold {
-					fmt.Fprintln(c.out,"Cluster ini belum cukup mapan untuk diberi nama.")
+			fmt.Sscanf(parts[0], "%d", &id)
+			label := parts[1]
+			for _, cl := range evolution.ClusterSnapshot(brain) {
+				if cl.ID != id {
+					continue
+				}
+				if len(cl.Members) < evolution.StabilityThreshold {
+					fmt.Fprintln(c.out, "Cluster ini belum cukup mapan untuk diberi nama.")
 					return true
 				}
-				c.roleCatalog.Learn(label,cl.Centroid)
-				fmt.Fprintf(c.out,"Dicatat: pola cluster %d sekarang dikenal sebagai %q.\n",id,label)
+				c.roleCatalog.Learn(label, cl.Centroid)
+				fmt.Fprintf(c.out, "Dicatat: pola cluster %d sekarang dikenal sebagai %q.\n", id, label)
 				return true
 			}
-			fmt.Fprintln(c.out,"Cluster tidak ditemukan.")
+			fmt.Fprintln(c.out, "Cluster tidak ditemukan.")
 			return true
 		}
-		if lower=="patterns" {
-			for _,ps:=range brain.Patterns() {
+		if lower == "patterns" {
+			for _, ps := range brain.Patterns() {
 				var words []string
-				for _,id:=range ps.Members {
-					if brain.HasNode(id) {words=append(words,fmt.Sprintf("node:%d",id))}
+				for _, id := range ps.Members {
+					if brain.HasNode(id) {
+						words = append(words, fmt.Sprintf("node:%d", id))
+					}
 				}
-				resultWord:="?"
-				if brain.HasNode(ps.Result) {resultWord=fmt.Sprintf("node:%d",ps.Result)}
-				fmt.Fprintf(c.out,"{%s} -> %s (weight=%.2f confidence=%.2f freq=%d)\n",
-					strings.Join(words,", "),resultWord,ps.Weight,ps.Confidence,ps.Frequency)
+				resultWord := "?"
+				if brain.HasNode(ps.Result) {
+					resultWord = fmt.Sprintf("node:%d", ps.Result)
+				}
+				fmt.Fprintf(c.out, "{%s} -> %s (weight=%.2f confidence=%.2f freq=%d)\n",
+					strings.Join(words, ", "), resultWord, ps.Weight, ps.Confidence, ps.Frequency)
 			}
 			return true
 		}
@@ -372,7 +384,6 @@ func (c *cli) handleCommandWithSnapshot(input string,brain knowledge.BrainReadSn
 	}
 	return true
 }
-
 
 func (c *cli) toggleBrainMonitor() {
 	if c.brainLive {
@@ -477,12 +488,7 @@ func (c *cli) printDebug(r pipelineResult) {
 	fmt.Fprintf(c.out, "[debug] PatternEvidence: %s\n", strings.Join(r.PatternEvidence, " | "))
 	fmt.Fprintf(c.out, "[debug] Intent: %s\n", r.Intent)
 	fmt.Fprintf(c.out, "[debug] Path: %s\n", r.Path)
-	fmt.Fprintf(c.out, "[debug] Focus: %s\n", r.FocusToken)
-	fmt.Fprintf(c.out, "[debug] FunctionalSignals: %s\n", strings.Join(r.FunctionalSignals, " | "))
 	fmt.Fprintf(c.out, "[debug] InterpretationNotes: %s\n", strings.Join(r.InterpretationNotes, " | "))
-	fmt.Fprintf(c.out, "[debug] Proposition: %s\n", strings.Join(r.Propositions, " | "))
-	fmt.Fprintf(c.out, "[debug] Constraints: %s\n", strings.Join(r.Constraints, " | "))
-	fmt.Fprintf(c.out, "[debug] EvidencePaths: %s\n", strings.Join(r.EvidencePaths, " | "))
 	fmt.Fprintf(c.out, "[debug] Decision: %s\n", r.EvalStatus)
 }
 
@@ -490,21 +496,27 @@ func (c *cli) printSessionStats() {
 	fmt.Fprintf(c.out, "Session: %d inputs, %d nodes, %d synapses, %s uptime\n", len(c.history), c.nodeCount(), c.synapseCount(), time.Since(c.startedAt).Round(time.Millisecond))
 }
 func (c *cli) nodeCount() int {
-	inspection,err:=c.horizon.InspectActiveBrain()
-	if err!=nil {return 0}
-	nodes,_,_:=inspection.Graph.Counts()
+	inspection, err := c.horizon.InspectActiveBrain()
+	if err != nil {
+		return 0
+	}
+	nodes, _, _ := inspection.Graph.Counts()
 	return nodes
 }
 func (c *cli) synapseCount() int {
-	inspection,err:=c.horizon.InspectActiveBrain()
-	if err!=nil {return 0}
-	_,synapses,_:=inspection.Graph.Counts()
+	inspection, err := c.horizon.InspectActiveBrain()
+	if err != nil {
+		return 0
+	}
+	_, synapses, _ := inspection.Graph.Counts()
 	return synapses
 }
 
 func activeNodeTokens(ids []knowledge.NodeID) []string {
 	out := make([]string, 0, len(ids))
-	for _, id := range ids { out = append(out, fmt.Sprintf("node:%d", id)) }
+	for _, id := range ids {
+		out = append(out, fmt.Sprintf("node:%d", id))
+	}
 	sort.Strings(out)
 	return out
 }
@@ -515,7 +527,11 @@ var contextNoise = map[string]bool{
 }
 
 func containsString(values []string, target string) bool {
-	for _, value := range values { if value == target { return true } }
+	for _, value := range values {
+		if value == target {
+			return true
+		}
+	}
 	return false
 }
 
@@ -530,13 +546,6 @@ func deriveContext(tokens, concepts []string) []string {
 	}
 	if len(out) > 5 {
 		return out[:5]
-	}
-	return out
-}
-func hypothesisSummary(hyps []thinking.Hypothesis) []string {
-	out := make([]string, 0, len(hyps))
-	for _, h := range hyps {
-		out = append(out, fmt.Sprintf("confidence=%.2f evidence=%d conflicts=%d", h.Confidence, h.Evidence, h.Conflicts))
 	}
 	return out
 }

@@ -20,12 +20,12 @@ import (
 const EventLogSchemaVersion = 3
 
 func supportedEventLogSchema(version int) bool {
-	return version == nativeJournalSchemaVersion || version == coordinatedJournalSchemaVersion || version == terminalExposureJournalSchemaVersion || version == phase4JournalSchemaVersion || version == phase3JournalSchemaVersion || version == phase2JournalSchemaVersion || version == componentLearningJournalSchemaVersion || version == terminalReadoutJournalSchemaVersion || version == neuralMetaJournalSchemaVersion || version == cognitiveModelJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
+	return version == nativeJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
 }
 
 type LoggedEvent struct {
 	NativeControl             *NativeControlCommand          `json:"native_control,omitempty"`
-	CognitiveModel            *CognitiveModelCommand         `json:"cognitive_model,omitempty"`
+	RetiredCognition          json.RawMessage                `json:"cognitive_model,omitempty"`
 	CompositionPerception     *CompositionPerception         `json:"composition_perception,omitempty"`
 	CompositionEncoding       string                         `json:"composition_encoding,omitempty"`
 	CompositionMigration      *CompositionMigration          `json:"composition_migration,omitempty"`
@@ -134,6 +134,9 @@ func (l *EventLog) Append(event LoggedEvent) error {
 	}
 	if event.BrainIdentity == "" {
 		event.BrainIdentity = BrainIdentity
+	}
+	if err := rejectRetiredJournal(event); err != nil {
+		return err
 	}
 	data, err := json.Marshal(event)
 	if err != nil {
@@ -699,10 +702,6 @@ func replayEventLogFromSequence(brainRuntime *BrainRuntime, events []LoggedEvent
 		switch logged.Type {
 		case EventTypeNativeControl:
 			if _, err := brainRuntime.ApplyNativeControl(*logged.NativeControl, logged.Timestamp); err != nil {
-				return err
-			}
-		case EventTypeCognitiveModel:
-			if _, err := brainRuntime.ApplyCognitiveModel(*logged.CognitiveModel, logged.Timestamp); err != nil {
 				return err
 			}
 		case EventTypeCompositionMigration:

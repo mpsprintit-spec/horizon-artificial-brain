@@ -197,7 +197,6 @@ type InquiryState struct {
 
 type BrainState struct {
 	NativeControl            *NativeControlState       `json:"native_control,omitempty"`
-	CognitiveModel           *CognitiveModelState      `json:"cognitive_model,omitempty"`
 	NResolution              *NResolutionState         `json:"n_resolution,omitempty"`
 	MemoryDecay              *MemoryDecayState         `json:"memory_decay,omitempty"`
 	SensoryTraces            []SensoryExperienceTrace  `json:"sensory_traces,omitempty"`
@@ -218,9 +217,6 @@ type BrainState struct {
 }
 
 type KnowledgeBase struct {
-	cognitiveDigestMu      sync.Mutex
-	cognitiveDigestWeights []float64 // exact-array SHA memoization only; never used for inference
-	cognitiveDigestValue   string
 	// Ownership is a monotonic, non-serialized guard against legacy
 	// adapters mutating the canonical brain after a runtime handover.
 	// An atomic flag lives WITH the substrate rather than a global map,
@@ -533,9 +529,6 @@ func (k *KnowledgeBase) load(path string, standalone bool) error {
 	}
 	if standalone {
 		if err := ValidateNativeControlState(b, false); err != nil {
-			return err
-		}
-		if err := ValidateCognitiveModelState(b, false); err != nil {
 			return err
 		}
 		if err := ValidateWrittenNumericState(b, false); err != nil {

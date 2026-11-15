@@ -236,8 +236,8 @@ func (k *KnowledgeBase) ValidateNativeInit(c NativeControlConfig) error {
 	}
 	k.RLock()
 	defer k.RUnlock()
-	if k.BrainState.NativeControl != nil || k.BrainState.CognitiveModel != nil {
-		return errors.New("native control requires an unconfigured native Brain; V5 remains isolated")
+	if k.BrainState.NativeControl != nil {
+		return errors.New("native control requires an unconfigured native Brain")
 	}
 	for _, id := range c.Sources {
 		if k.Registry.GetByID(id) == nil {
@@ -256,7 +256,7 @@ func (k *KnowledgeBase) InitializeNativeControl(c NativeControlConfig, at time.T
 	// Caller owns the runtime; the Brain lock serializes persistence/inspection.
 	k.Lock()
 	defer k.Unlock()
-	if k.BrainState.NativeControl != nil || k.BrainState.CognitiveModel != nil {
+	if k.BrainState.NativeControl != nil {
 		return errors.New("native control already initialized")
 	}
 	c.Sources = append([]NodeID(nil), c.Sources...)

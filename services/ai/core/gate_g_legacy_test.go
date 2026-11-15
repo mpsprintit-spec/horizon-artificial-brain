@@ -10,7 +10,6 @@ import (
 
 func TestGateGFacadeThinkingCannotFallBackToLegacyEngines(t *testing.T) {
 	h := NewHorizonEngine()
-	h.Decision = nil
 	out, e := h.Pulse("pengalaman neural")
 	if e != nil || out.Interpretation.Source != "neural" {
 		t.Fatal("production Pulse relied on legacy decision", e)

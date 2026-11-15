@@ -17,7 +17,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 	brain.ConnectAt(source, target, 0.20, 0.50, false, t0)
 
 	runtime := NewBrainRuntime(brain)
-	if runtime == nil || runtime.DNF() == nil {
+	if runtime == nil || runtime.dnf == nil {
 		t.Fatal("expected runtime and DNF fabric")
 	}
 
@@ -30,7 +30,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	seed, err := runtime.DNF().SynapseState(source.ID, target.ID, false)
+	seed, err := runtime.dnf.SynapseState(source.ID, target.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	oneHalfLife, err := runtime.DNF().SynapseState(source.ID, target.ID, false)
+	oneHalfLife, err := runtime.dnf.SynapseState(source.ID, target.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,7 +73,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	twoHalfLives, err := runtime.DNF().SynapseState(source.ID, target.ID, false)
+	twoHalfLives, err := runtime.dnf.SynapseState(source.ID, target.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestDNFTemporalEligibilityDecaysAcrossIdleCognitiveCycles(t *testing.T) {
 		t.Fatalf("eligibility trace collapsed to zero too early: %v", twoHalfLives.Eligibility)
 	}
 
-	structure, err := runtime.DNF().Inspect(t0.Add(2 * time.Second))
+	structure, err := runtime.dnf.Inspect(t0.Add(2 * time.Second))
 	if err != nil {
 		t.Fatal(err)
 	}

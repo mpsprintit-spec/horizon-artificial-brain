@@ -1,8 +1,21 @@
 # Horizon Core
 
-Horizon Core is the foundation repository for Project Horizon cloud intelligence and control center. The repository now contains the HC-001 foundation layer: shared configuration, logging, middleware, domain primitives, infrastructure interfaces, API gateway health endpoint, deployment assets, CI/CD, and tests.
+Horizon Core contains Project Horizon's native neural Brain and the HC-001 infrastructure foundation: configuration, logging, middleware, domain primitives, API gateway, deployment assets, CI/CD, and tests.
 
-Business logic, AI processing, and HC-002 features are intentionally outside this foundation scope.
+## Current neural architecture
+
+Production cognition runs through one `BrainRuntime` and canonical substrate N.
+Perception, presentation, transport and safety boundaries remain adapters around
+that Brain. Native operation policy, causal credit, recurrent dynamics,
+plasticity, continual learning and authenticated persistence retain their
+existing contracts.
+
+MUSE, BMPS, cognitive V1–V5, the historical thinking/decision pipeline and its
+research executable have been retired. Their implementation remains available
+at [the pre-cleanup revision](https://github.com/mpsprintit-spec/horizon-artificial-brain/tree/6b6db6c9ec0f373fed51f38a415d0a36baf7e812).
+Historical controller checkpoints and journals are explicitly refused; see
+[retirement and recovery guidance](docs/OBSOLETE_COGNITION_RETIREMENT.md).
+This cleanup does not replace the production Brain or promote the A–E1 checkpoint.
 
 ## HC-001 Foundation Components
 

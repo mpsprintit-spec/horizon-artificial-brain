@@ -78,16 +78,28 @@ func TestRetiredRuntimeSupportedMutationAndInspectionMatrix(t *testing.T) {
 		"mutable-view": func() error {
 			return r.WithBrainView(func(*knowledge.Brain) error { t.Error("retired callback invoked"); return nil })
 		},
-		"inspection": func() error { _, err := r.InspectBrain(); return err },
-		"labels":     func() error { _, err := r.ResolveNodeLabels([]knowledge.NodeID{grounded.NodeID}, "text"); return err },
-		"monitor":    func() error { _, err := r.MonitorSnapshot(); return err },
-		"handshake":  func() error { _, err := r.MonitorHandshake("test"); return err },
+		"inspection":       func() error { _, err := r.InspectBrain(); return err },
+		"labels":           func() error { _, err := r.ResolveNodeLabels([]knowledge.NodeID{grounded.NodeID}, "text"); return err },
+		"monitor":          func() error { _, err := r.MonitorSnapshot(); return err },
+		"handshake":        func() error { _, err := r.MonitorHandshake("test"); return err },
 		"written-contract": func() error { _, err := r.WrittenGroundingContract(); return err },
-		"spelling-read": func() error { _, err := r.ReadLearnedSpelling([]knowledge.NodeID{grounded.NodeID}); return err },
-		"continuation-read": func() error { _, err := r.ReadLearnedContinuation(&knowledge.ObservationTrace{Stimulus: [][]knowledge.NodeID{{grounded.NodeID}}}, 4, at); return err },
-		"spelling-learn": func() error { e, err := knowledge.NewSpellingExposure([]knowledge.NodeID{grounded.NodeID}, "probe", .8, .8); if err != nil { return err }; _, err = r.LearnSpelling(e, at); return err },
+		"spelling-read":    func() error { _, err := r.ReadLearnedSpelling([]knowledge.NodeID{grounded.NodeID}); return err },
+		"continuation-read": func() error {
+			_, err := r.ReadLearnedContinuation(&knowledge.ObservationTrace{Stimulus: [][]knowledge.NodeID{{grounded.NodeID}}}, 4, at)
+			return err
+		},
+		"spelling-learn": func() error {
+			e, err := knowledge.NewSpellingExposure([]knowledge.NodeID{grounded.NodeID}, "probe", .8, .8)
+			if err != nil {
+				return err
+			}
+			_, err = r.LearnSpelling(e, at)
+			return err
+		},
 		"written-migration-plan": func() error { _, err := r.PlanNeuralWrittenGrounding(); return err },
-		"written-migration-apply": func() error { return r.ApplyNeuralWrittenGrounding(WrittenGroundingPlan{}, filepath.Join(t.TempDir(), "backup.json"), at) },
+		"written-migration-apply": func() error {
+			return r.ApplyNeuralWrittenGrounding(WrittenGroundingPlan{}, filepath.Join(t.TempDir(), "backup.json"), at)
+		},
 	}
 	for name, operation := range cases {
 		t.Run(name, func(t *testing.T) {
@@ -99,7 +111,8 @@ func TestRetiredRuntimeSupportedMutationAndInspectionMatrix(t *testing.T) {
 			}
 		})
 	}
-	if r.DNF() != nil || r.Telemetry() != nil {
+	assertNoRetiredCognitiveAPI(t, r)
+	if r.Telemetry() != nil {
 		t.Fatal("retired runtime exposed live engine/hub")
 	}
 	if _, err := NewRuntimeSupervisor(r); !errors.Is(err, ErrRuntimeRecoveryRequired) {

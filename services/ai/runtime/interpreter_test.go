@@ -27,36 +27,3 @@ func TestGate4DefaultsToNeuralInterpreter(t *testing.T) {
 		t.Fatal("neural interpretation did not preserve runtime identity/state")
 	}
 }
-
-func TestGate4LegacyIsDisabledUnlessExplicitlyInjected(t *testing.T) {
-	runtime := NewBrainRuntime(knowledge.NewBrain())
-	output := CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: 1}
-
-	if _, err := runtime.Interpret(output, LegacyCompatibilityInterpreter{}); err == nil {
-		t.Fatal("legacy interpreter must be disabled without an explicit delegate")
-	}
-}
-
-func TestGate4LegacyCannotReplaceDefaultNeuralPath(t *testing.T) {
-	runtime := NewBrainRuntime(knowledge.NewBrain())
-	output := CognitiveOutput{BrainIdentity: BrainIdentity, Sequence: 2}
-	legacy := LegacyCompatibilityInterpreter{Delegate: func(CognitiveOutput) (Interpretation, error) {
-		return Interpretation{BrainIdentity: BrainIdentity, Sequence: 2}, nil
-	}}
-
-	legacyResult, err := runtime.Interpret(output, legacy)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if legacyResult.Source != "legacy-compatibility" {
-		t.Fatalf("expected explicit legacy source marker, got %q", legacyResult.Source)
-	}
-
-	neuralResult, err := runtime.Interpret(output, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if neuralResult.Source != "neural" {
-		t.Fatalf("explicit legacy adapter changed default path: %q", neuralResult.Source)
-	}
-}

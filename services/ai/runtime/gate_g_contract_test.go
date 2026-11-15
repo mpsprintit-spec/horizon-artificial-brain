@@ -91,12 +91,7 @@ func TestGateGArchitectureDependencyBoundary(t *testing.T) {
 	rt, ids := nativeFixture(t)
 	cfg := nativeControlConfig(ids)
 	nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
-	if rt.brain.HasCognitiveModel() {
-		t.Fatal("native opt-in initialized frozen V5 controller")
-	}
-	if rt.DNF() != nil {
-		t.Fatal("native runtime exposed standalone mutation escape hatch")
-	}
+	assertNoRetiredCognitiveAPI(t, rt)
 	called := false
 	if e = rt.WithBrainView(func(*k.Brain) error { called = true; return nil }); e == nil || called {
 		t.Fatal("native runtime exported mutable Brain")
@@ -266,7 +261,7 @@ func TestGateGPolicyOwnershipAndHistoricalNativeVersions(t *testing.T) {
 
 func TestGateGAdmissionMatrix(t *testing.T) {
 	allowed := []string{EventTypeProcess, EventTypeCognitiveProcess, EventTypeObservation, EventTypeThink, EventTypeCognitiveThink, EventTypeSensorIntent, EventTypeLearn, EventTypeSpellingExposure, EventTypeCompositionExposure, EventTypeCompositionPerception, EventTypeVectorGround, EventTypeKnowledgeImport, EventTypeInquiryOutcome, EventTypeOutcome, EventTypeConsequence, EventTypeActionBinding}
-	isolated := []string{EventTypeCognitiveModel, EventTypeCompositionMigration, EventTypeWrittenGroundingMigration, EventTypeSurfaceRebinding, "unrecognized-command"}
+	isolated := []string{"cognitive_model_command", EventTypeCompositionMigration, EventTypeWrittenGroundingMigration, EventTypeSurfaceRebinding, "unrecognized-command"}
 	rt, ids := nativeFixture(t)
 	for _, kind := range append(append([]string{}, allowed...), isolated...) {
 		if e := rt.admitCommandLocked(kind); e != nil {
