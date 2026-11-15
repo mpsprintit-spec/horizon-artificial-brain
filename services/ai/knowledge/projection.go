@@ -119,10 +119,14 @@ func (k *KnowledgeBase) matchRepresentationPopulation(vector NeuralVector, thres
 		if population.Scope != nil { for _, unit := range population.Units { scoped[unit.NodeID] = true } }
 	}
 	k.projectionMu.RUnlock()
+	// Native role prototypes are canonical neurons, but are not receptive
+	// fields for world input. Similarity alone cannot confer that ownership.
+	// Caller holds k.mu throughout projection and role-address inspection.
+	native := k.NativeOwnershipLocked()
 	nodes := k.Registry.Nodes()
 	candidates := make([]populationCandidate, 0, len(nodes))
 	for _, node := range nodes {
-		if scoped[node.ID] { continue }
+		if scoped[node.ID] || (native.Enabled() && native.Has(node.ID)) { continue }
 		if len(node.Representation) != len(vector.Values) {
 			continue
 		}

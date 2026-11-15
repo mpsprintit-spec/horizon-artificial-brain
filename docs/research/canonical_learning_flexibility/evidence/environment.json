@@ -1,0 +1,7 @@
+{
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_count": 9,
+  "go_version": "go version go1.23.2 linux/amd64",
+  "filesystem": "overlayfs",
+  "source_head": "daf040ae5330d6f8949b36c9aacb1293d596943c"
+}

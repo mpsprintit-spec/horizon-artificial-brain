@@ -22,7 +22,7 @@ func (r *BrainRuntime) WithBrainView(fn func(*knowledge.Brain) error) error {
 	if err := r.ensureWritableLocked(); err != nil {
 		return err
 	}
-	if r.supervised || r.eventLog != nil {
+	if r.supervised || r.eventLog != nil || r.brain.HasNativeControl() {
 		return ErrManagedRuntimeAccess
 	}
 	return fn(r.brain)

@@ -108,7 +108,7 @@ func writeCanonicalBrain(w io.Writer, k *KnowledgeBase, pretty bool, prefix stri
 	if len(traces) == 0 {
 		traces = nil
 	}
-	payload := canonicalBrainFile{CognitiveModel: state.CognitiveModel, NResolution: state.NResolution, SchemaVersion: 2, BrainIdentity: "horizon", SensoryTraces: state.SensoryTraces, Populations: populations, TemporalPatterns: patterns, Episodes: episodes, BootstrapExperiences: bootstrap, DevelopmentalExperiences: developmental, ExperienceTraces: traces, AttentionState: canonicalMap(state.AttentionState), PredictionState: canonicalMap(state.PredictionState), ErrorState: errorState, MemoryState: canonicalMap(state.MemoryState), MemoryDecay: state.MemoryDecay, CuriosityState: canonicalMap(state.CuriosityState), LearningPolicyState: state.LearningPolicyState, SelfModelState: canonicalMap(state.SelfModelState), SocialModelState: canonicalMap(state.SocialModelState), ValueState: canonicalMap(state.ValueState), PlasticityState: canonicalMap(state.PlasticityState), InquiryState: state.InquiryState}
+	payload := canonicalBrainFile{NativeControl: state.NativeControl, CognitiveModel: state.CognitiveModel, NResolution: state.NResolution, SchemaVersion: 2, BrainIdentity: "horizon", SensoryTraces: state.SensoryTraces, Populations: populations, TemporalPatterns: patterns, Episodes: episodes, BootstrapExperiences: bootstrap, DevelopmentalExperiences: developmental, ExperienceTraces: traces, AttentionState: canonicalMap(state.AttentionState), PredictionState: canonicalMap(state.PredictionState), ErrorState: errorState, MemoryState: canonicalMap(state.MemoryState), MemoryDecay: state.MemoryDecay, CuriosityState: canonicalMap(state.CuriosityState), LearningPolicyState: state.LearningPolicyState, SelfModelState: canonicalMap(state.SelfModelState), SocialModelState: canonicalMap(state.SocialModelState), ValueState: canonicalMap(state.ValueState), PlasticityState: canonicalMap(state.PlasticityState), InquiryState: state.InquiryState}
 	if state.MemoryDecay != nil {
 		payload.SchemaVersion = 3
 	}
@@ -116,8 +116,13 @@ func writeCanonicalBrain(w io.Writer, k *KnowledgeBase, pretty bool, prefix stri
 		payload.SchemaVersion = 4
 		if state.CognitiveModel.Config.Version == CognitiveModelV2 {
 			payload.SchemaVersion = 5
- if state.CognitiveModel.Phase4V5 != nil && state.CognitiveModel.Phase4V5.Contract != "" { payload.SchemaVersion = 6 }
+			if state.CognitiveModel.Phase4V5 != nil && state.CognitiveModel.Phase4V5.Contract != "" {
+				payload.SchemaVersion = 6
+			}
 		}
+	}
+	if state.NativeControl != nil {
+		payload.SchemaVersion = 7
 	}
 	// Provenance was a nonnil empty array even without populations.
 	overrides := map[string]jsonstream.ValueWriter{

@@ -27,7 +27,7 @@ jobs:
             )
           done < <(git ls-files 'services/*/go.mod')
       - name: Race-test runtime and adapter concurrency
-        run: go test -race -timeout=20m ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
+        run: go test -race -timeout=40m ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli
       - name: Verify and prepare the trained dialogue bundle
         run: |
           python3 -m unittest discover -s scripts -p test_prepare_grounded_dialogue.py
@@ -46,6 +46,11 @@ jobs:
           go test -race ./services/ai/runtime -run '^TestGroundedDialogueConcurrentCanonicalRead$' -count=1
       - name: Live Bridge integration smoke
         run: make bridge-smoke
+      - name: Verify saved A–E1 checkpoint, replay and retention
+        run: |
+          python3 scripts/prepare_native_continuation.py --destination "$RUNNER_TEMP/horizon-native-saved"
+          HORIZON_NATIVE_CONTINUATION_DIR="$RUNNER_TEMP/horizon-native-saved" \
+          go test ./services/ai/runtime -run '^TestNativeIntegrationSavedContinuation$' -count=1 -timeout=20m
 
   monitor:
     runs-on: ubuntu-latest

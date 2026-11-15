@@ -36,7 +36,7 @@ func (r *BrainRuntime) GroundVectorAt(vector knowledge.NeuralVector, at time.Tim
 	frozen := knowledge.NewNeuralVector(vector.Values)
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil { return knowledge.GroundedVector{}, err }
+	if err := r.admitCommandLocked(EventTypeVectorGround); err != nil { return knowledge.GroundedVector{}, err }
 	if at.IsZero() { at = r.nowLocked() } else { at = at.UTC() }
 	if r.eventLog != nil {
 		record := LoggedEvent{
@@ -45,6 +45,7 @@ func (r *BrainRuntime) GroundVectorAt(vector knowledge.NeuralVector, at time.Tim
 			Timestamp: at, Vector: &frozen,
 		}
 		r.decorateCompositionJournalLocked(&record)
+		if err := validateJournalPayload(record); err != nil { return knowledge.GroundedVector{}, err }
 		if err := r.eventLog.Append(record); err != nil {
 			r.markRecoveryRequiredLocked()
 			return knowledge.GroundedVector{}, fmt.Errorf("%w: append numeric grounding: %v", ErrRuntimeRecoveryRequired, err)

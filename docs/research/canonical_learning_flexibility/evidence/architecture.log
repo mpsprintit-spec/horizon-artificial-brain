@@ -1,0 +1,39 @@
+=== RUN   TestGateGFacadeThinkingCannotFallBackToLegacyEngines
+--- PASS: TestGateGFacadeThinkingCannotFallBackToLegacyEngines (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/core	0.016s
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/none
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v1
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v2
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v3
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/none
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v1
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v2
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v3
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/none
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v1
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v2
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v3
+--- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw (0.80s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/none (0.05s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v1 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v2 (0.09s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v3 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/none (0.05s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v1 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v2 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v3 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/none (0.04s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v1 (0.06s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v2 (0.07s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v3 (0.07s)
+=== RUN   TestGateGTypedSynapseSortPreservesFrozenOrder
+--- PASS: TestGateGTypedSynapseSortPreservesFrozenOrder (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/activation	0.813s
+=== RUN   TestGateGActualProductionStartupContinuesNativeEpisode
+    gate_g_production_test.go:121: recovered active checkpoint checksum=62e2e12edd6140935c6c4c54254cf5a0dbaed7e45caca17525497aba55893886 sequence=5; continued observed learning; bootstrap events added=0
+--- PASS: TestGateGActualProductionStartupContinuesNativeEpisode (0.17s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai	0.177s

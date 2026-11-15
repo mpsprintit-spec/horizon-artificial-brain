@@ -1,0 +1,56 @@
+{
+  "verified_at": "2026-11-14",
+  "main": "3a9e7ce3ffadff86c792050056ebea4eda48da0b",
+  "pull_requests": {
+    "61": {
+      "url": "https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/61",
+      "head": "research/native-neural-foundation-20261106",
+      "head_sha": "0ef994a1d8842b36dbc6b994ecafcb0bf9951174",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "base": "main",
+      "base_sha": "d7cb140b5996f1bddffeebbda693ebadfd714841"
+    },
+    "62": {
+      "url": "https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/62",
+      "head": "research/native-phase2-20261107",
+      "head_sha": "ea69b2101004dbf10c07068e42436170c2adcf8d",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "base": "research/native-neural-foundation-20261106",
+      "base_sha": "0ef994a1d8842b36dbc6b994ecafcb0bf9951174"
+    },
+    "63": {
+      "url": "https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/63",
+      "head": "fix/bootstrap-idempotent-startup-android",
+      "head_sha": "1837968ce0ba5707e3f15a36b14a7c87b1cc357f",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "base": "main",
+      "base_sha": "32df59b9285d829ae73429c7f277621e63de7ce3"
+    },
+    "64": {
+      "url": "https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/64",
+      "head": "research/native-phase3-20261108",
+      "head_sha": "0df3f19a33bd7de69ed496293591d734331c5e51",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "base": "research/native-phase2-20261107",
+      "base_sha": "ea69b2101004dbf10c07068e42436170c2adcf8d"
+    },
+    "67": {
+      "url": "https://github.com/mpsprintit-spec/horizon-artificial-brain/pull/67",
+      "head": "research/gate-g-coexistence-20261113",
+      "head_sha": "e9ae2331c9c020f3d905a79cc0a303599ac83889",
+      "state": "open",
+      "draft": true,
+      "merged": false,
+      "base": "research/native-phase3-20261108",
+      "base_sha": "0df3f19a33bd7de69ed496293591d734331c5e51"
+    }
+  }
+}

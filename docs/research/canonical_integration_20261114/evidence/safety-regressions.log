@@ -1,0 +1,249 @@
+=== RUN   TestGateGResolvedContrastCheckpointAndRollback
+--- PASS: TestGateGResolvedContrastCheckpointAndRollback (0.04s)
+=== RUN   TestGateGArchitectureDependencyBoundary
+--- PASS: TestGateGArchitectureDependencyBoundary (0.17s)
+=== RUN   TestGateGReplayFailureCannotBecomeServingRuntime
+--- PASS: TestGateGReplayFailureCannotBecomeServingRuntime (0.00s)
+=== RUN   TestGateGRejectsCorruptMixedJournal
+    gate_g_contract_test.go:156: last durable native record {"native_control":{"id":"init","initialize":{"max_active_nodes":4096,"max_synapse_reads":100000,"version":"native-operation-control-v1","sources":[1,2,3,4,5,6,7],"operations":[{"kind":"propagate","gain":1,"cost":0.08},{"kind":"relax","gain":0.1,"cost":0.08},{"kind":"focus","gain":0.5,"cost":0.08},{"kind":"stop","gain":0,"cost":0}],"seed":37,"learning_rate":0.2,"gamma":1,"lambda":1,"temperature":0.15,"max_steps":8}},"dynamics_encoding":"evidence-provenance-v1","surface_encoding":"written-text-v1","schema_version":14,"brain_identity":"horizon-primary-brain","sequence":2,"type":"native_control_command","timestamp":"2026-11-06T00:00:00.002Z"}
+--- PASS: TestGateGRejectsCorruptMixedJournal (0.00s)
+=== RUN   TestGateGPolicyOwnershipAndHistoricalNativeVersions
+=== RUN   TestGateGPolicyOwnershipAndHistoricalNativeVersions/native-operation-control-v1
+=== RUN   TestGateGPolicyOwnershipAndHistoricalNativeVersions/native-operation-control-v2
+=== RUN   TestGateGPolicyOwnershipAndHistoricalNativeVersions/native-operation-control-v3
+--- PASS: TestGateGPolicyOwnershipAndHistoricalNativeVersions (0.21s)
+    --- PASS: TestGateGPolicyOwnershipAndHistoricalNativeVersions/native-operation-control-v1 (0.12s)
+    --- PASS: TestGateGPolicyOwnershipAndHistoricalNativeVersions/native-operation-control-v2 (0.04s)
+    --- PASS: TestGateGPolicyOwnershipAndHistoricalNativeVersions/native-operation-control-v3 (0.05s)
+=== RUN   TestGateGAdmissionMatrix
+--- PASS: TestGateGAdmissionMatrix (0.00s)
+=== RUN   TestGateGAlreadyEnabledCompositionSharesNativeJournal
+--- PASS: TestGateGAlreadyEnabledCompositionSharesNativeJournal (0.55s)
+=== RUN   TestGateGDirectLearningCannotAliasNativePolicyUnits
+=== RUN   TestGateGDirectLearningCannotAliasNativePolicyUnits/experience
+=== RUN   TestGateGDirectLearningCannotAliasNativePolicyUnits/consequence
+=== RUN   TestGateGDirectLearningCannotAliasNativePolicyUnits/spelling
+--- PASS: TestGateGDirectLearningCannotAliasNativePolicyUnits (0.01s)
+    --- PASS: TestGateGDirectLearningCannotAliasNativePolicyUnits/experience (0.00s)
+    --- PASS: TestGateGDirectLearningCannotAliasNativePolicyUnits/consequence (0.00s)
+    --- PASS: TestGateGDirectLearningCannotAliasNativePolicyUnits/spelling (0.00s)
+=== RUN   TestGateGProcessCrash
+=== RUN   TestGateGProcessCrash/payload
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=ee0082b8f847f1bb6d60371b9f9b2df56ae21bcc0275b4f5eec45c5b561189e4 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/before-append
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=b201ccb67ceb1da6afb9670c953dd4998ffcba1819b479dff71740301d9400b8 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/write-before-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=5a55b98255eff074fa528a27d043cf03a3469e87f9fcfc774ff5122da4833fc6 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/fsync-before-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=afa4debe558d95c4d5e9feb2672b9ca3c019e0dc2b608ac249bc1953cf3fbc1c pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/apply-before-ack
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=c87ff04001ef1115b2fec465093173bf892f175402dd088f2f0c61cb4fce4142 pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/sensor-intent
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=13decc32e2cdb7558872d7d3e8e4eb96513444c27447e13ac4e4902a77850ad9 pending=idle strict_orphan=true
+=== RUN   TestGateGProcessCrash/sensor-partial-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=6a2a46e59e5e3eb906979e2ab8c4c6e9002142706699679a462233f92dd190b7 pending=idle strict_orphan=true
+=== RUN   TestGateGProcessCrash/sensor-commit-fsync
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=94c3149c199dcb5f2ce2e3cdc8e4026c65cd75558f7f371d3de02f6bb748c60a pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/active-episode
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=d7cc312d40e4801e1010d73433af50ee1e17dcd9eebb9a82b4bd82fbcbfcadfb pending=episode-active strict_orphan=false
+=== RUN   TestGateGProcessCrash/first-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=f06074f961fe91fa825c9cae5b656087e74e7ae56334c6d2b5867837d8fbfbad pending=contrast-pending strict_orphan=false
+=== RUN   TestGateGProcessCrash/second-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=20 checksum=b56cc0a026caa4d2a439fbd1f5f57412a0a957d2e588445581314567e10487a7 pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/pending-contrast
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=dcda73489150743fa722830748bc8e81abe9d0a2248e9162d14910324e15a7d7 pending=contrast-pending strict_orphan=false
+=== RUN   TestGateGProcessCrash/checkpoint-before-rename
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=bde262abe2ed5d6619e2b724e287a1619d0845e4ceb1bf09b4fcb027fbc00548 pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/checkpoint-after-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=a85d318c5317f67d0db471165ef646a55f9478e39fa844de2797d0e972ac15d4 pending=idle strict_orphan=false
+=== RUN   TestGateGProcessCrash/supervisor-rebuild
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=66d5a7d874d96f70bfa05eb5d3c42924a2127e8eabd981d38f57e894321f0da1 pending=idle strict_orphan=false
+--- PASS: TestGateGProcessCrash (0.55s)
+    --- PASS: TestGateGProcessCrash/payload (0.03s)
+    --- PASS: TestGateGProcessCrash/before-append (0.04s)
+    --- PASS: TestGateGProcessCrash/write-before-sync (0.04s)
+    --- PASS: TestGateGProcessCrash/fsync-before-apply (0.03s)
+    --- PASS: TestGateGProcessCrash/apply-before-ack (0.03s)
+    --- PASS: TestGateGProcessCrash/sensor-intent (0.03s)
+    --- PASS: TestGateGProcessCrash/sensor-partial-apply (0.04s)
+    --- PASS: TestGateGProcessCrash/sensor-commit-fsync (0.03s)
+    --- PASS: TestGateGProcessCrash/active-episode (0.03s)
+    --- PASS: TestGateGProcessCrash/first-outcome (0.04s)
+    --- PASS: TestGateGProcessCrash/second-outcome (0.03s)
+    --- PASS: TestGateGProcessCrash/pending-contrast (0.03s)
+    --- PASS: TestGateGProcessCrash/checkpoint-before-rename (0.04s)
+    --- PASS: TestGateGProcessCrash/checkpoint-after-sync (0.05s)
+    --- PASS: TestGateGProcessCrash/supervisor-rebuild (0.05s)
+=== RUN   TestNativeV2GateGProcessCrash
+=== RUN   TestNativeV2GateGProcessCrash/payload
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=1c784df73b35ef623fa0be6eaa539c0dbc2204bdeb35ae8da4e24d6d9b1c2760 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/before-append
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=dbfa95f767ee0f90c598ad44bd300887ea18a700faacb76a8e8f971308e15933 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/write-before-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=e31a1b216616b0bada56d3d3e39037854748b86e3aced23eb271d6c480ef386b pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/fsync-before-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=95c2a6b9e63e3c1d3bc8e832d911102abc68faa7744df9a3c5fab991d6b96b67 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/apply-before-ack
+    gate_g_crash_test.go:281: exit=86 expected_seq=15 checksum=1f953ef24387a52c8dd246f371d5e71b3a03359306b5a2a3adf102807bdad226 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/sensor-intent
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=af961584da8c4ef33c81d8791fe410f83229d0f1996bba66688e21879729a10e pending=idle strict_orphan=true
+=== RUN   TestNativeV2GateGProcessCrash/sensor-partial-apply
+    gate_g_crash_test.go:281: exit=86 expected_seq=13 checksum=3252e6e7e9af04b2fa62f824e65596f0b0fc2ff2936236009746273cff08da35 pending=idle strict_orphan=true
+=== RUN   TestNativeV2GateGProcessCrash/sensor-commit-fsync
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=de42af257006d387e7f6a9e732762899e0e0fc219d7befc3d2b0260c85a6bcbc pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/active-episode
+    gate_g_crash_test.go:281: exit=86 expected_seq=14 checksum=254d136c4c53699ea91a7cbc7d7dfa23fc3b8ea4089b5b92d0a220e8d69a1fb2 pending=episode-active strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/first-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=0ee501846f2230d05b063e2ef232d3762d498220bb3f8b0e7d44e32f09094294 pending=contrast-pending strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/second-outcome
+    gate_g_crash_test.go:281: exit=86 expected_seq=20 checksum=05916726d8387e7882fc75e85ebba0584edffc83e94417ee40391d4bdb2d8591 pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/pending-contrast
+    gate_g_crash_test.go:281: exit=86 expected_seq=17 checksum=ac12fbe78b7c8323858cb2f389dbb2d5ccdb53b1a1f40baad21eab1d12f4fe14 pending=contrast-pending strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/checkpoint-before-rename
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=5647acc5f6e22e0c4a7545ac2d5d0eb4bf83ba8aeaee145e33e22dd85e93039f pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/checkpoint-after-sync
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=71d5419174dfc4bb17081161c4a8950d8e7adae37712f5f14fd89d91030c2c34 pending=idle strict_orphan=false
+=== RUN   TestNativeV2GateGProcessCrash/supervisor-rebuild
+    gate_g_crash_test.go:281: exit=86 expected_seq=24 checksum=d4e2bac3aec1678d0bf23a28361d1804e288a9b7432305c2bccf15bdf10cc8e6 pending=idle strict_orphan=false
+--- PASS: TestNativeV2GateGProcessCrash (0.69s)
+    --- PASS: TestNativeV2GateGProcessCrash/payload (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/before-append (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/write-before-sync (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/fsync-before-apply (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/apply-before-ack (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/sensor-intent (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/sensor-partial-apply (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/sensor-commit-fsync (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/active-episode (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/first-outcome (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/second-outcome (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/pending-contrast (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/checkpoint-before-rename (0.04s)
+    --- PASS: TestNativeV2GateGProcessCrash/checkpoint-after-sync (0.05s)
+    --- PASS: TestNativeV2GateGProcessCrash/supervisor-rebuild (0.06s)
+=== RUN   TestGateGMixedReplay
+=== RUN   TestGateGMixedReplay/seed37/sensor-native
+=== RUN   TestGateGMixedReplay/seed37/native-sensor
+=== RUN   TestGateGMixedReplay/seed37/sensor-inquiry-native
+=== RUN   TestGateGMixedReplay/seed37/inquiry-native-outcome
+=== RUN   TestGateGMixedReplay/seed37/written-native
+=== RUN   TestGateGMixedReplay/seed37/thought-native
+=== RUN   TestGateGMixedReplay/seed37/learning-checkpoint-sensor
+=== RUN   TestGateGMixedReplay/seed37/checkpoint-active-continuation
+=== RUN   TestGateGMixedReplay/seed37/native-thought-native
+=== RUN   TestGateGMixedReplay/seed83/sensor-native
+=== RUN   TestGateGMixedReplay/seed83/native-sensor
+=== RUN   TestGateGMixedReplay/seed83/sensor-inquiry-native
+=== RUN   TestGateGMixedReplay/seed83/inquiry-native-outcome
+=== RUN   TestGateGMixedReplay/seed83/written-native
+=== RUN   TestGateGMixedReplay/seed83/thought-native
+=== RUN   TestGateGMixedReplay/seed83/learning-checkpoint-sensor
+=== RUN   TestGateGMixedReplay/seed83/checkpoint-active-continuation
+=== RUN   TestGateGMixedReplay/seed83/native-thought-native
+=== RUN   TestGateGMixedReplay/seed151/sensor-native
+=== RUN   TestGateGMixedReplay/seed151/native-sensor
+=== RUN   TestGateGMixedReplay/seed151/sensor-inquiry-native
+=== RUN   TestGateGMixedReplay/seed151/inquiry-native-outcome
+=== RUN   TestGateGMixedReplay/seed151/written-native
+=== RUN   TestGateGMixedReplay/seed151/thought-native
+=== RUN   TestGateGMixedReplay/seed151/learning-checkpoint-sensor
+=== RUN   TestGateGMixedReplay/seed151/checkpoint-active-continuation
+=== RUN   TestGateGMixedReplay/seed151/native-thought-native
+--- PASS: TestGateGMixedReplay (0.93s)
+    --- PASS: TestGateGMixedReplay/seed37/sensor-native (0.03s)
+    --- PASS: TestGateGMixedReplay/seed37/native-sensor (0.03s)
+    --- PASS: TestGateGMixedReplay/seed37/sensor-inquiry-native (0.03s)
+    --- PASS: TestGateGMixedReplay/seed37/inquiry-native-outcome (0.18s)
+    --- PASS: TestGateGMixedReplay/seed37/written-native (0.07s)
+    --- PASS: TestGateGMixedReplay/seed37/thought-native (0.02s)
+    --- PASS: TestGateGMixedReplay/seed37/learning-checkpoint-sensor (0.03s)
+    --- PASS: TestGateGMixedReplay/seed37/checkpoint-active-continuation (0.03s)
+    --- PASS: TestGateGMixedReplay/seed37/native-thought-native (0.02s)
+    --- PASS: TestGateGMixedReplay/seed83/sensor-native (0.02s)
+    --- PASS: TestGateGMixedReplay/seed83/native-sensor (0.02s)
+    --- PASS: TestGateGMixedReplay/seed83/sensor-inquiry-native (0.03s)
+    --- PASS: TestGateGMixedReplay/seed83/inquiry-native-outcome (0.03s)
+    --- PASS: TestGateGMixedReplay/seed83/written-native (0.03s)
+    --- PASS: TestGateGMixedReplay/seed83/thought-native (0.02s)
+    --- PASS: TestGateGMixedReplay/seed83/learning-checkpoint-sensor (0.03s)
+    --- PASS: TestGateGMixedReplay/seed83/checkpoint-active-continuation (0.03s)
+    --- PASS: TestGateGMixedReplay/seed83/native-thought-native (0.02s)
+    --- PASS: TestGateGMixedReplay/seed151/sensor-native (0.02s)
+    --- PASS: TestGateGMixedReplay/seed151/native-sensor (0.02s)
+    --- PASS: TestGateGMixedReplay/seed151/sensor-inquiry-native (0.03s)
+    --- PASS: TestGateGMixedReplay/seed151/inquiry-native-outcome (0.03s)
+    --- PASS: TestGateGMixedReplay/seed151/written-native (0.04s)
+    --- PASS: TestGateGMixedReplay/seed151/thought-native (0.03s)
+    --- PASS: TestGateGMixedReplay/seed151/learning-checkpoint-sensor (0.03s)
+    --- PASS: TestGateGMixedReplay/seed151/checkpoint-active-continuation (0.03s)
+    --- PASS: TestGateGMixedReplay/seed151/native-thought-native (0.02s)
+=== RUN   TestGateGAdmissionRejectsBeforeMutation
+=== RUN   TestGateGAdmissionRejectsBeforeMutation/active
+=== RUN   TestGateGAdmissionRejectsBeforeMutation/awaiting-outcome
+=== RUN   TestGateGAdmissionRejectsBeforeMutation/pending-contrast
+--- PASS: TestGateGAdmissionRejectsBeforeMutation (0.06s)
+    --- PASS: TestGateGAdmissionRejectsBeforeMutation/active (0.02s)
+    --- PASS: TestGateGAdmissionRejectsBeforeMutation/awaiting-outcome (0.02s)
+    --- PASS: TestGateGAdmissionRejectsBeforeMutation/pending-contrast (0.02s)
+=== RUN   TestGateGAutomaticProjectionCannotRecruitNativePolicy
+=== RUN   TestGateGAutomaticProjectionCannotRecruitNativePolicy/legacy
+=== RUN   TestGateGAutomaticProjectionCannotRecruitNativePolicy/evidence-provenance-v1
+--- PASS: TestGateGAutomaticProjectionCannotRecruitNativePolicy (0.02s)
+    --- PASS: TestGateGAutomaticProjectionCannotRecruitNativePolicy/legacy (0.01s)
+    --- PASS: TestGateGAutomaticProjectionCannotRecruitNativePolicy/evidence-provenance-v1 (0.01s)
+=== RUN   TestGateGRecoveryRejectsPolicyWorldProjectionAlias
+--- PASS: TestGateGRecoveryRejectsPolicyWorldProjectionAlias (0.01s)
+=== RUN   TestNativeV2SignReadoutAndCanonicalCompatibility
+--- PASS: TestNativeV2SignReadoutAndCanonicalCompatibility (0.03s)
+=== RUN   TestNativeV2MixedPendingReplayAndPolicyProtection
+=== RUN   TestNativeV2MixedPendingReplayAndPolicyProtection/0
+=== RUN   TestNativeV2MixedPendingReplayAndPolicyProtection/1
+--- PASS: TestNativeV2MixedPendingReplayAndPolicyProtection (0.04s)
+    --- PASS: TestNativeV2MixedPendingReplayAndPolicyProtection/0 (0.01s)
+    --- PASS: TestNativeV2MixedPendingReplayAndPolicyProtection/1 (0.02s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	3.316s
+=== RUN   TestGateGFacadeThinkingCannotFallBackToLegacyEngines
+--- PASS: TestGateGFacadeThinkingCannotFallBackToLegacyEngines (0.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/core	0.016s
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/none
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v1
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v2
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v3
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/none
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v1
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v2
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v3
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/none
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v1
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v2
+=== RUN   TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v3
+--- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw (1.01s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/none (0.13s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v1 (0.17s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v2 (0.09s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/37/native-operation-control-v3 (0.07s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/none (0.06s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v1 (0.07s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v2 (0.07s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/83/native-operation-control-v3 (0.07s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/none (0.06s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v1 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v2 (0.08s)
+    --- PASS: TestGateGEmptyLocalActivityMatchesFrozenLaw/151/native-operation-control-v3 (0.07s)
+=== RUN   TestGateGTypedSynapseSortPreservesFrozenOrder
+--- PASS: TestGateGTypedSynapseSortPreservesFrozenOrder (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/activation	1.029s
+=== RUN   TestGateGRecoveryNeverDispatchesPhysicalActions
+    gate_g_recovery_test.go:117: live_dispatches=1 new_recovery_dispatches=0
+--- PASS: TestGateGRecoveryNeverDispatchesPhysicalActions (0.03s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/execution	0.035s
+=== RUN   TestGateGActualProductionStartupContinuesNativeEpisode
+    gate_g_production_test.go:121: recovered active checkpoint checksum=38cb8ab7a07d777d6c13e05be6fd182de212952d479ac54fba4fd5dcb47977f3 sequence=5; continued observed learning; bootstrap events added=0
+--- PASS: TestGateGActualProductionStartupContinuesNativeEpisode (0.35s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai	0.366s

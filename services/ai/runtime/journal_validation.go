@@ -10,6 +10,9 @@ import (
 // Reject foreign payloads rather than replaying only the recognized fraction
 // of a mixed record. Legacy process/think retain their lower-level meaning.
 func validateJournalPayload(event LoggedEvent) error {
+	if (event.Type == EventTypeNativeControl) != (event.SchemaVersion == nativeJournalSchemaVersion) {
+		return errors.New("native command requires WAL14")
+	}
 	if event.SchemaVersion == coordinatedJournalSchemaVersion && (event.Type != EventTypeCognitiveModel || event.CognitiveModel == nil || event.CognitiveModel.Coordinated == nil) {
 		return errors.New("schema13 reserved for coordinated V5")
 	}
@@ -99,6 +102,8 @@ func validateJournalPayload(event LoggedEvent) error {
 	}
 	var required []string
 	switch event.Type {
+	case EventTypeNativeControl:
+		required = []string{"native_control"}
 	case EventTypeCognitiveModel:
 		required = []string{"cognitive_model"}
 	case EventTypeCompositionMigration:
@@ -136,7 +141,7 @@ func validateJournalPayload(event LoggedEvent) error {
 	default:
 		return fmt.Errorf("unknown event type %q", event.Type)
 	}
-	present := map[string]bool{"cognitive_model": event.CognitiveModel != nil, "event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
+	present := map[string]bool{"native_control": event.NativeControl != nil, "cognitive_model": event.CognitiveModel != nil, "event": event.Event != nil, "experience": event.Experience != nil, "outcome": event.Outcome != nil, "consequence": event.Consequence != nil, "document": event.KnowledgeDocument != nil, "vector": event.Vector != nil, "intent_hash": event.IntentHash != "", "observation": event.ObservationCommand != nil, "action_binding": event.ActionBinding != nil, "inquiry_outcome": event.InquiryOutcome != nil, "surface_rebinding": event.SurfaceRebinding != nil}
 	present["written_grounding_migration"] = event.WrittenGroundingMigration != nil
 	present["spelling_exposure"] = event.SpellingExposure != nil
 	present["composition_migration"] = event.CompositionMigration != nil
@@ -154,6 +159,11 @@ func validateJournalPayload(event LoggedEvent) error {
 		}
 	}
 	switch event.Type {
+	case EventTypeNativeControl:
+		if event.Timestamp.IsZero() {
+			return errors.New("native time required")
+		}
+		return event.NativeControl.Validate()
 	case EventTypeCognitiveModel:
 		if (event.SchemaVersion != coordinatedJournalSchemaVersion && event.SchemaVersion != terminalExposureJournalSchemaVersion && event.SchemaVersion != phase4JournalSchemaVersion && event.SchemaVersion != phase3JournalSchemaVersion && event.SchemaVersion != phase2JournalSchemaVersion && event.SchemaVersion != cognitiveModelJournalSchemaVersion && event.SchemaVersion != neuralMetaJournalSchemaVersion && event.SchemaVersion != terminalReadoutJournalSchemaVersion && event.SchemaVersion != componentLearningJournalSchemaVersion) || event.Timestamp.IsZero() {
 			return errors.New("invalid cognitive journal contract")

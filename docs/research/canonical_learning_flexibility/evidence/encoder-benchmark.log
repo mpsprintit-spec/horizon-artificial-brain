@@ -1,0 +1,42 @@
+goos: linux
+goarch: amd64
+pkg: github.com/project-horizon/horizon-core/services/ai/runtime
+cpu: AMD EPYC 9V74 80-Core Processor                
+BenchmarkNativeEncoderVersions/local-relational-v1/n=1000/density=0.001         	     100	      4374 ns/op	        80.00 parameter_reads	         4.000 structural_reads	    1065 B/op	      15 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=1000/density=0.001         	     100	      6245 ns/op	        80.00 parameter_reads	         4.000 structural_reads	    1076 B/op	      15 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=1000/density=0.001         	     100	      6435 ns/op	        80.00 parameter_reads	         4.000 structural_reads	    1067 B/op	      15 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=1000/density=1             	     100	    570750 ns/op	        80.00 parameter_reads	      4000 structural_reads	    9307 B/op	      17 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=1000/density=1             	     100	    507923 ns/op	        80.00 parameter_reads	      4000 structural_reads	    9290 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=1000/density=1             	     100	    512550 ns/op	        80.00 parameter_reads	      4000 structural_reads	    9308 B/op	      17 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=4000/density=0.001         	     100	      5348 ns/op	        80.00 parameter_reads	        16.00 structural_reads	    1126 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=4000/density=0.001         	     100	      5322 ns/op	        80.00 parameter_reads	        16.00 structural_reads	    1134 B/op	      17 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=4000/density=0.001         	     100	      5361 ns/op	        80.00 parameter_reads	        16.00 structural_reads	    1141 B/op	      17 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=4000/density=1             	     100	   2164376 ns/op	        80.00 parameter_reads	     16000 structural_reads	   33851 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=4000/density=1             	     100	   2504890 ns/op	        80.00 parameter_reads	     16000 structural_reads	   33874 B/op	      17 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=4000/density=1             	     100	   2264673 ns/op	        80.00 parameter_reads	     16000 structural_reads	   33851 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=40000/density=0.001        	     100	     18233 ns/op	        80.00 parameter_reads	       160.0 structural_reads	    1412 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=40000/density=0.001        	     100	     27875 ns/op	        80.00 parameter_reads	       160.0 structural_reads	    1419 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=40000/density=0.001        	     100	     18393 ns/op	        80.00 parameter_reads	       160.0 structural_reads	    1417 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=40000/density=1            	     100	  30539876 ns/op	        80.00 parameter_reads	    160000 structural_reads	  328765 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=40000/density=1            	     100	  30145525 ns/op	        80.00 parameter_reads	    160000 structural_reads	  328768 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v1/n=40000/density=1            	     100	  33157483 ns/op	        80.00 parameter_reads	    160000 structural_reads	  328770 B/op	      16 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=1000/density=0.001         	     100	     20441 ns/op	       144.0 parameter_reads	         4.000 structural_reads	    1462 B/op	      18 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=1000/density=0.001         	     100	      6892 ns/op	       144.0 parameter_reads	         4.000 structural_reads	    1459 B/op	      18 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=1000/density=0.001         	     100	      7605 ns/op	       144.0 parameter_reads	         4.000 structural_reads	    1444 B/op	      18 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=1000/density=1             	     100	    609370 ns/op	       144.0 parameter_reads	      4000 structural_reads	    9674 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=1000/density=1             	     100	    592597 ns/op	       144.0 parameter_reads	      4000 structural_reads	    9652 B/op	      18 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=1000/density=1             	     100	    588066 ns/op	       144.0 parameter_reads	      4000 structural_reads	    9667 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=4000/density=0.001         	     100	      9147 ns/op	       144.0 parameter_reads	        16.00 structural_reads	    1506 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=4000/density=0.001         	     100	      8107 ns/op	       144.0 parameter_reads	        16.00 structural_reads	    1483 B/op	      18 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=4000/density=0.001         	     100	      8711 ns/op	       144.0 parameter_reads	        16.00 structural_reads	    1497 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=4000/density=1             	     100	   2561608 ns/op	       144.0 parameter_reads	     16000 structural_reads	   34242 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=4000/density=1             	     100	   2472742 ns/op	       144.0 parameter_reads	     16000 structural_reads	   34239 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=4000/density=1             	     100	   2293159 ns/op	       144.0 parameter_reads	     16000 structural_reads	   34228 B/op	      18 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=40000/density=0.001        	     100	     27804 ns/op	       144.0 parameter_reads	       160.0 structural_reads	    1784 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=40000/density=0.001        	     100	     26155 ns/op	       144.0 parameter_reads	       160.0 structural_reads	    1791 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=40000/density=0.001        	     100	     24736 ns/op	       144.0 parameter_reads	       160.0 structural_reads	    1792 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=40000/density=1            	     100	  31820258 ns/op	       144.0 parameter_reads	    160000 structural_reads	  329146 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=40000/density=1            	     100	  31780503 ns/op	       144.0 parameter_reads	    160000 structural_reads	  329149 B/op	      19 allocs/op
+BenchmarkNativeEncoderVersions/local-relational-v2/n=40000/density=1            	     100	  31390248 ns/op	       144.0 parameter_reads	    160000 structural_reads	  329157 B/op	      19 allocs/op
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	85.058s

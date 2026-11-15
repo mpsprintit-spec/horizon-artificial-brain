@@ -117,7 +117,7 @@ func (r *BrainRuntime) ApplyNeuralWrittenGrounding(plan WrittenGroundingPlan, ba
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeWrittenGroundingMigration); err != nil {
 		return err
 	}
 	if err := r.validateWrittenGroundingPlanLocked(frozen); err != nil {

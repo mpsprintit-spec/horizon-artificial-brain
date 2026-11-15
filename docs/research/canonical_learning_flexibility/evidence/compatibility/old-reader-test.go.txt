@@ -1,0 +1,30 @@
+package runtime
+
+import (
+	"bytes"
+	"os"
+	"path/filepath"
+	"strings"
+	"testing"
+	k "github.com/project-horizon/horizon-core/services/ai/knowledge"
+)
+
+// Isolated compatibility probe compiled against the actual PR67 source.
+func TestFlexOldBinaryCompatibility(t *testing.T) {
+	root:=os.Getenv("HORIZON_FLEX_COMPAT_DIR")
+	r:=NewBrainRuntime(k.NewBrain())
+	before,_:=r.brain.CanonicalJSON()
+	err:=r.RestoreCheckpoint(filepath.Join(root,"02-native-ready.json"))
+	after,_:=r.brain.CanonicalJSON()
+	if err==nil || !strings.Contains(err.Error(),"unsupported native encoder") || !bytes.Equal(before,after) {t.Fatal("old binary did not reject V2 without mutation",err)}
+	t.Log("new encoder rejected by actual old binary without neural mutation:",err)
+	wal,err:=OpenEventLog(filepath.Join(root,"rollback-B-prefix.jsonl"));if err!=nil {t.Fatal(err)};defer wal.Close()
+	rollback,err:=RebuildRuntimeFromCheckpointAndJournal(wal,filepath.Join(root,"02-B.json"));if err!=nil {t.Fatal(err)}
+	if rollback.LastSequence()!=42 || rollback.brain.HasNativeControl() {t.Fatal("rollback did not preserve pre-encoder state")}
+	reference:=NewBrainRuntime(k.NewBrain());if err=reference.RestoreCheckpoint(filepath.Join(root,"02-B.json"));err!=nil {t.Fatal(err)}
+	if !bytes.Equal(continuationBytes(t,reference),continuationBytes(t,rollback)) {t.Fatal("rollback changed complete pre-encoder neural continuation")}
+	t.Logf("rollback exact prefix recovered: sequence=%d",rollback.LastSequence())
+	full,err:=OpenEventLog(filepath.Join(root,"events.jsonl"));if err!=nil {t.Fatal(err)};defer full.Close()
+	if _,err=RebuildRuntimeFromCheckpointAndJournal(full,filepath.Join(root,"02-B.json"));err==nil {t.Fatal("old binary accepted incompatible suffix")}
+	t.Log("incompatible full journal suffix rejected:",err)
+}

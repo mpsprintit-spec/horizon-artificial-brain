@@ -101,13 +101,14 @@ func (e *Engine) applyObservedFeedback(previous *ObservationPrediction, predicte
 	eligibility := math.Exp2(-now.Sub(previous.At).Seconds())
 	e.Memory.Lock()
 	defer e.Memory.Unlock()
+	native := e.Memory.NativeOwnershipLocked()
 	for _, sourceID := range sortedNodeIDs(previous.Source) {
 		source := e.Memory.Registry.GetByID(sourceID)
 		if source == nil {
 			continue
 		}
 		for _, s := range source.OutboundAll() {
-			if s == nil || s.Inhibitory {
+			if s == nil || s.Inhibitory || (native.Enabled() && (native.Has(sourceID) || native.Has(s.TargetID))) {
 				continue
 			}
 			direction := clamp01(actual[s.TargetID]) - clamp01(predicted[s.TargetID])

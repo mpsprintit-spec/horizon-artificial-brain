@@ -117,6 +117,9 @@ func (r *NeuralRegistry) VisitNodes(visit func(*ConceptNode)) {
 	}
 }
 
+// Len reports registry cardinality without a graph scan.
+func (r *NeuralRegistry) Len() int { r.mu.RLock(); defer r.mu.RUnlock(); return len(r.byID) }
+
 // GetOrCreateRepresentation recovers only an exact learned observation.
 // Similarity is deliberately not an identity test: two nearby experiences may
 // share structure without becoming the same neural unit. Distributed overlap
@@ -193,6 +196,7 @@ type InquiryState struct {
 }
 
 type BrainState struct {
+	NativeControl            *NativeControlState       `json:"native_control,omitempty"`
 	CognitiveModel           *CognitiveModelState      `json:"cognitive_model,omitempty"`
 	NResolution              *NResolutionState         `json:"n_resolution,omitempty"`
 	MemoryDecay              *MemoryDecayState         `json:"memory_decay,omitempty"`
@@ -528,6 +532,9 @@ func (k *KnowledgeBase) load(path string, standalone bool) error {
 		return err
 	}
 	if standalone {
+		if err := ValidateNativeControlState(b, false); err != nil {
+			return err
+		}
 		if err := ValidateCognitiveModelState(b, false); err != nil {
 			return err
 		}

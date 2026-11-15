@@ -154,7 +154,7 @@ func (r *BrainRuntime) ApplyNeuralComposition(plan CompositionPlan, backupPath s
 	}
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	if err := r.ensureWritableLocked(); err != nil {
+	if err := r.admitCommandLocked(EventTypeCompositionMigration); err != nil {
 		return err
 	}
 	if err := r.validateCompositionPlanLocked(frozen); err != nil {

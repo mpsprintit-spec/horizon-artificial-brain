@@ -1,0 +1,69 @@
+?   	github.com/project-horizon/horizon-core/cmd/api-gateway	[no test files]
+?   	github.com/project-horizon/horizon-core/cmd/horizon-chat	[no test files]
+?   	github.com/project-horizon/horizon-core/cmd/horizon-dialogue	[no test files]
+?   	github.com/project-horizon/horizon-core/cmd/horizon-hnl	[no test files]
+?   	github.com/project-horizon/horizon-core/cmd/horizon-native-foundation	[no test files]
+ok  	github.com/project-horizon/horizon-core/cmd/horizon-metareasoning-v5	0.054s
+ok  	github.com/project-horizon/horizon-core/internal/cache	0.005s
+ok  	github.com/project-horizon/horizon-core/internal/config	0.004s
+?   	github.com/project-horizon/horizon-core/internal/db	[no test files]
+?   	github.com/project-horizon/horizon-core/internal/logger	[no test files]
+?   	github.com/project-horizon/horizon-core/internal/model	[no test files]
+ok  	github.com/project-horizon/horizon-core/internal/middleware	0.014s
+ok  	github.com/project-horizon/horizon-core/internal/mq	0.007s
+ok  	github.com/project-horizon/horizon-core/internal/nativefoundation	0.376s
+ok  	github.com/project-horizon/horizon-core/internal/utils	0.002s
+ok  	github.com/project-horizon/horizon-core/models/grounded-dialogue-v1	0.240s
+?   	github.com/project-horizon/horizon-core/services/ai/context	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision/api/grpc	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision/api/http	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision/internal/event	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision/internal/handler	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision/internal/repository	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/decision/internal/service	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/internal/jsonstream	[no test files]
+ok  	github.com/project-horizon/horizon-core/services/ai	1.114s
+?   	github.com/project-horizon/horizon-core/services/ai/language	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/perception	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/plugin	[no test files]
+ok  	github.com/project-horizon/horizon-core/services/ai/activation	1.854s
+ok  	github.com/project-horizon/horizon-core/services/ai/bridge	1.364s
+ok  	github.com/project-horizon/horizon-core/services/ai/cmd/horizon-cli	1.316s
+ok  	github.com/project-horizon/horizon-core/services/ai/config	0.003s
+ok  	github.com/project-horizon/horizon-core/services/ai/core	2.044s
+ok  	github.com/project-horizon/horizon-core/services/ai/decision/internal/model	0.012s
+ok  	github.com/project-horizon/horizon-core/services/ai/dnf	0.011s
+ok  	github.com/project-horizon/horizon-core/services/ai/domain	0.004s
+ok  	github.com/project-horizon/horizon-core/services/ai/evolution	0.006s
+ok  	github.com/project-horizon/horizon-core/services/ai/execution	0.037s
+ok  	github.com/project-horizon/horizon-core/services/ai/hfcc	0.004s
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/api/grpc	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/api/http	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/contracts	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/estimator	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/filter	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/engine	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/fusion	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/handler	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/model	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/repository	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/temporary/websearch	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/understanding	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/api/grpc	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/api/http	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/internal/event	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/internal/handler	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/internal/model	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/internal/repository	[no test files]
+?   	github.com/project-horizon/horizon-core/services/ai/vision/internal/service	[no test files]
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	9.736s
+ok  	github.com/project-horizon/horizon-core/services/ai/learning	0.104s
+ok  	github.com/project-horizon/horizon-core/services/ai/memory	0.009s
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	130.866s
+ok  	github.com/project-horizon/horizon-core/services/ai/sensor-fusion/service	0.006s
+ok  	github.com/project-horizon/horizon-core/services/ai/teaching	0.751s
+ok  	github.com/project-horizon/horizon-core/services/ai/terminal	12.491s
+ok  	github.com/project-horizon/horizon-core/services/ai/thinking	0.086s
+ok  	github.com/project-horizon/horizon-core/services/ai/websearch	0.012s

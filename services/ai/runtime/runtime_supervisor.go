@@ -40,6 +40,7 @@ func NewRuntimeSupervisor(initial *BrainRuntime) (*RuntimeSupervisor, error) {
 	if initial.supervised {
 		return nil, ErrRuntimeAlreadyOwned
 	}
+	if initial.replaying { return nil, ErrManagedRuntimeAccess }
 	initial.supervised = true
 	markSupervisorOwnedBrain(initial.brain)
 	return &RuntimeSupervisor{current: initial, epoch: make(chan struct{})}, nil
@@ -115,6 +116,7 @@ func (s *RuntimeSupervisor) RecoverFromCheckpoint(log *EventLog, checkpointPath 
 		return errors.New("recovery did not return a clean, detached runtime")
 	}
 
+	old.transactionFaultLocked("supervisor-after-rebuild")
 	old.markRecoveryRequiredLocked()
 	old.eventLog = nil
 

@@ -1,0 +1,3210 @@
+{
+  "pilot-128-action": [
+    {
+      "seed": 5003,
+      "arm": "action",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.10173716521831382,
+        "reward": 0.1245496652183138,
+        "accuracy": 0.8984375,
+        "operations": 0.5703125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.002483250189423941,
+      "advantage_rmse": 0.05460293511662114,
+      "nuisance_effect": 0.020408222963671802,
+      "signal_effect_error": 0.04946884782715704,
+      "effect_precision": 0.6542553191489362,
+      "effect_recall": 0.9609375,
+      "parameter_changes": 208,
+      "seconds": 0.254860391
+    },
+    {
+      "seed": 5011,
+      "arm": "action",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.10524074758531769,
+        "reward": 0.1333657475853177,
+        "accuracy": 0.953125,
+        "operations": 0.703125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.00039765305472234946,
+      "advantage_rmse": 0.034048018107715454,
+      "nuisance_effect": 0.010218865354967164,
+      "signal_effect_error": 0.03501234750545745,
+      "effect_precision": 0.9769230769230769,
+      "effect_recall": 0.9921875,
+      "parameter_changes": 208,
+      "seconds": 0.139168865
+    }
+  ],
+  "pilot-128-feature": [
+    {
+      "seed": 5003,
+      "arm": "feature",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.3266783509092452,
+        "reward": 0.04332164909075436,
+        "accuracy": 0.234375,
+        "operations": 9.25,
+        "stops": 0.234375,
+        "truncations": 0.765625,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.43089876631698293,
+      "advantage_rmse": 0.12129939988659984,
+      "nuisance_effect": 0.0020273473052859147,
+      "signal_effect_error": 0.02177085488812552,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.308919088
+    },
+    {
+      "seed": 5011,
+      "arm": "feature",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.09455265964997857,
+        "reward": 0.11330265964997856,
+        "accuracy": 0.71875,
+        "operations": 0.46875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.011085740990061474,
+      "advantage_rmse": 0.08101238214331886,
+      "nuisance_effect": 0.0005182141841351052,
+      "signal_effect_error": 0.012991753361225083,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.132568867
+    }
+  ],
+  "pilot-128-unmatched": [
+    {
+      "seed": 5003,
+      "arm": "unmatched",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.01088412484278823,
+        "reward": 0.039946624842788214,
+        "accuracy": 0.2734375,
+        "operations": 0.7265625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.09333629056494952,
+      "advantage_rmse": 0.1728060497207137,
+      "nuisance_effect": 0.05000076672405298,
+      "signal_effect_error": 0.04885584896311232,
+      "effect_precision": 0.5565217391304348,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.264774138
+    },
+    {
+      "seed": 5011,
+      "arm": "unmatched",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.47996578054122657,
+        "reward": 3.4219458772470404e-05,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.5856041811812667,
+      "advantage_rmse": 0.20869857254123592,
+      "nuisance_effect": 0.03580378915918529,
+      "signal_effect_error": 0.07167658568008012,
+      "effect_precision": 0.5818181818181818,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.226768051
+    }
+  ],
+  "pilot-128-unpaired": [
+    {
+      "seed": 5003,
+      "arm": "unpaired",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.06618365880203361,
+        "reward": 0.01850384119796642,
+        "accuracy": 0.109375,
+        "operations": 2.1171875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.17040407420977138,
+      "advantage_rmse": 0.11450261147801516,
+      "nuisance_effect": 0.03772392198039215,
+      "signal_effect_error": 0.06975309453165528,
+      "effect_precision": 0.5523809523809524,
+      "effect_recall": 0.90625,
+      "parameter_changes": 208,
+      "seconds": 0.26380703
+    },
+    {
+      "seed": 5011,
+      "arm": "unpaired",
+      "blocks": 128,
+      "executed_training_episodes": 512,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.004440772334074194,
+        "reward": 0.033684227665925805,
+        "accuracy": 0.2890625,
+        "operations": 0.953125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.11007917297411424,
+      "advantage_rmse": 0.14467011339942984,
+      "nuisance_effect": 0.015357502493332294,
+      "signal_effect_error": 0.07814504365142466,
+      "effect_precision": 0.7398843930635838,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.152390343
+    }
+  ],
+  "pilot-32-action": [
+    {
+      "seed": 5003,
+      "arm": "action",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.3466279004535672,
+        "reward": 0.13337209954643275,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.4508483158613049,
+      "advantage_rmse": 0.0730200649167535,
+      "nuisance_effect": 0.00588999712969292,
+      "signal_effect_error": 0.11204004591300938,
+      "effect_precision": 1,
+      "effect_recall": 0.2109375,
+      "parameter_changes": 208,
+      "seconds": 0.289257958
+    },
+    {
+      "seed": 5011,
+      "arm": "action",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.343353117102073,
+        "reward": 0.13664688289792684,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.44899151774211304,
+      "advantage_rmse": 0.060240036242943704,
+      "nuisance_effect": 0.003576626035118649,
+      "signal_effect_error": 0.09335402165200163,
+      "effect_precision": 1,
+      "effect_recall": 0.7421875,
+      "parameter_changes": 208,
+      "seconds": 0.178962123
+    }
+  ],
+  "pilot-32-feature": [
+    {
+      "seed": 5003,
+      "arm": "feature",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.03046740064392095,
+        "reward": 0.03046740064392095,
+        "accuracy": 0.328125,
+        "operations": 0,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.07375301476381681,
+      "advantage_rmse": 0.26473126215776094,
+      "nuisance_effect": 0.014613676480848947,
+      "signal_effect_error": 0.07236155680492862,
+      "effect_precision": 0.7354838709677419,
+      "effect_recall": 0.890625,
+      "parameter_changes": 192,
+      "seconds": 0.174316895
+    },
+    {
+      "seed": 5011,
+      "arm": "feature",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.4799532182463323,
+        "reward": 4.6781753666875956e-05,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.5855916188863723,
+      "advantage_rmse": 0.05823464696675022,
+      "nuisance_effect": 0.003808533545376951,
+      "signal_effect_error": 0.08591757062639704,
+      "effect_precision": 1,
+      "effect_recall": 0.8125,
+      "parameter_changes": 192,
+      "seconds": 0.172058621
+    }
+  ],
+  "pilot-32-unmatched": [
+    {
+      "seed": 5003,
+      "arm": "unmatched",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.07468850342395475,
+        "reward": 0.03812399657604524,
+        "accuracy": 0.203125,
+        "operations": 2.8203125,
+        "stops": 0.828125,
+        "truncations": 0.171875,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.17890891883169252,
+      "advantage_rmse": 0.12873827541977206,
+      "nuisance_effect": 0.05175560905063492,
+      "signal_effect_error": 0.08550427741196091,
+      "effect_precision": 0.5048076923076923,
+      "effect_recall": 0.8203125,
+      "parameter_changes": 208,
+      "seconds": 0.22540587
+    },
+    {
+      "seed": 5011,
+      "arm": "unmatched",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.343353117102073,
+        "reward": 0.13664688289792684,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.44899151774211304,
+      "advantage_rmse": 0.17821215148485844,
+      "nuisance_effect": 0.005342313246928817,
+      "signal_effect_error": 0.04619713477223306,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.214563977
+    }
+  ],
+  "pilot-32-unpaired": [
+    {
+      "seed": 5003,
+      "arm": "unpaired",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.03046740064392095,
+        "reward": 0.03046740064392095,
+        "accuracy": 0.328125,
+        "operations": 0,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.07375301476381681,
+      "advantage_rmse": 0.20226996496313393,
+      "nuisance_effect": 0.028592256702313395,
+      "signal_effect_error": 0.11122972088511254,
+      "effect_precision": 0.2905982905982906,
+      "effect_recall": 0.265625,
+      "parameter_changes": 208,
+      "seconds": 0.202695663
+    },
+    {
+      "seed": 5011,
+      "arm": "unpaired",
+      "blocks": 32,
+      "executed_training_episodes": 128,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.4799597793600418,
+        "reward": 4.022063995733814e-05,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.5855981800000818,
+      "advantage_rmse": 0.3684993051609377,
+      "nuisance_effect": 0.2881532487273829,
+      "signal_effect_error": 0.036723237163533054,
+      "effect_precision": 0.5060240963855421,
+      "effect_recall": 0.984375,
+      "parameter_changes": 208,
+      "seconds": 0.172009912
+    }
+  ],
+  "pilot-512-action": [
+    {
+      "seed": 5003,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.1042171035945666,
+        "reward": 0.13077960359456658,
+        "accuracy": 0.9921875,
+        "operations": 0.6640625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 3.3118131711612486e-06,
+      "advantage_rmse": 0.002100413901083144,
+      "nuisance_effect": 0.0017073955749407918,
+      "signal_effect_error": 0.0013475707554645106,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.496770352
+    },
+    {
+      "seed": 5011,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": 0.10563840064004004,
+        "reward": 0.13563840064004004,
+        "accuracy": 1,
+        "operations": 0.75,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0,
+      "advantage_rmse": 0.0012658777926726056,
+      "nuisance_effect": 0.0010152572816190242,
+      "signal_effect_error": 0.0006755433041774224,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.351297796
+    }
+  ],
+  "pilot-512-feature": [
+    {
+      "seed": 5003,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.40850593224461085,
+        "reward": 0.07149406775538858,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.5127263476523486,
+      "advantage_rmse": 0.08394847658508373,
+      "nuisance_effect": 1.8560720192674525e-08,
+      "signal_effect_error": 2.3355453326783144e-05,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.564421428
+    },
+    {
+      "seed": 5011,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.343353117102073,
+        "reward": 0.13664688289792684,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.44899151774211304,
+      "advantage_rmse": 0.26475650878919227,
+      "nuisance_effect": 2.440313439299943e-08,
+      "signal_effect_error": 1.8134433864904235e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.471340612
+    }
+  ],
+  "pilot-512-unmatched": [
+    {
+      "seed": 5003,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.010955398383842848,
+        "reward": 0.04623210161615717,
+        "accuracy": 0.375,
+        "operations": 1.4296875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.11517581379158061,
+      "advantage_rmse": 0.12792376845144326,
+      "nuisance_effect": 0.09853249958826983,
+      "signal_effect_error": 0.08815978144750763,
+      "effect_precision": 0.5267489711934157,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.469309743
+    },
+    {
+      "seed": 5011,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.26702026623243896,
+        "reward": 0.06329223376756105,
+        "accuracy": 0.328125,
+        "operations": 8.2578125,
+        "stops": 0.328125,
+        "truncations": 0.671875,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.372658666872479,
+      "advantage_rmse": 0.03477006097744792,
+      "nuisance_effect": 0.016040771406902812,
+      "signal_effect_error": 0.04086415962113452,
+      "effect_precision": 0.7272727272727273,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.399103779
+    }
+  ],
+  "pilot-512-unpaired": [
+    {
+      "seed": 5003,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36359398181524977,
+        "reward": 0.11640601818475024,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.4683731256380262,
+        "reward": 0.011626874361973844,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10422041540773776,
+      "regret": 0.572593541045764,
+      "advantage_rmse": 0.20279847549366176,
+      "nuisance_effect": 0.09440253520912723,
+      "signal_effect_error": 0.07007331047817439,
+      "effect_precision": 0.5043478260869565,
+      "effect_recall": 0.90625,
+      "parameter_changes": 208,
+      "seconds": 0.656324166
+    },
+    {
+      "seed": 5011,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.08657886516173924,
+        "reward": 0.000921134838260763,
+        "accuracy": 0.0703125,
+        "operations": 2.1875,
+        "stops": 0.8203125,
+        "truncations": 0.1796875,
+        "cases": 128
+      },
+      "After": {
+        "net_return": -0.343353117102073,
+        "reward": 0.13664688289792684,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 128
+      },
+      "oracle_return": 0.10563840064004004,
+      "regret": 0.44899151774211304,
+      "advantage_rmse": 0.58140391534322,
+      "nuisance_effect": 0.12590149776727616,
+      "signal_effect_error": 0.13451408607244736,
+      "effect_precision": 0.5224489795918368,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.513486464
+    }
+  ],
+  "development-512-action-clean": [
+    {
+      "seed": 5003,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10333618606204534,
+        "reward": 0.12911743606204532,
+        "accuracy": 0.99609375,
+        "operations": 0.64453125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.007252569931090961,
+        "reward": 0.036627569931090787,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 1.6559065855736854e-06,
+      "advantage_rmse": 0.0021031660810550217,
+      "nuisance_effect": 0.0017141176047634115,
+      "signal_effect_error": 0.0013433857531183293,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.881478922
+    },
+    {
+      "seed": 5011,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10434467005828955,
+        "reward": 0.1323134200582896,
+        "accuracy": 1,
+        "operations": 0.69921875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.004566837331659536,
+        "reward": 0.034879337331659495,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0,
+      "advantage_rmse": 0.0012678090425999847,
+      "nuisance_effect": 0.0010192543575309409,
+      "signal_effect_error": 0.0006734453436054084,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.281293505
+    }
+  ],
+  "development-512-action-noisy": [
+    {
+      "seed": 5003,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10333618606204534,
+        "reward": 0.12911743606204532,
+        "accuracy": 0.99609375,
+        "operations": 0.64453125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.011190280125787187,
+        "reward": 0.04056528012578718,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 1.6559065855736854e-06,
+      "advantage_rmse": 0.002103166081055029,
+      "nuisance_effect": 0.0017141176047633933,
+      "signal_effect_error": 0.0013433857531183484,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.757412732
+    },
+    {
+      "seed": 5011,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10434467005828955,
+        "reward": 0.1323134200582896,
+        "accuracy": 1,
+        "operations": 0.69921875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": -0.005172631318125254,
+        "reward": 0.025139868681874688,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0,
+      "advantage_rmse": 0.0012678090426000166,
+      "nuisance_effect": 0.0010192543575309105,
+      "signal_effect_error": 0.0006734453436054448,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.56982588
+    }
+  ],
+  "development-512-feature-clean": [
+    {
+      "seed": 5003,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10333784196863091,
+        "reward": 0.1292753419686309,
+        "accuracy": 1,
+        "operations": 0.6484375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.007252569931090962,
+        "reward": 0.036627569931090787,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 0,
+      "advantage_rmse": 0.00024787913722927997,
+      "nuisance_effect": 1.863379389999728e-08,
+      "signal_effect_error": 2.3282920863030277e-05,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.5827745659999999
+    },
+    {
+      "seed": 5011,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10434467005828955,
+        "reward": 0.1323134200582896,
+        "accuracy": 1,
+        "operations": 0.69921875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.004566837331659536,
+        "reward": 0.0348793373316595,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0,
+      "advantage_rmse": 0.00046995606253147224,
+      "nuisance_effect": 2.4499209722006997e-08,
+      "signal_effect_error": 1.8078115748031885e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.987066429
+    }
+  ],
+  "development-512-feature-noisy": [
+    {
+      "seed": 5003,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.4105430778517816,
+        "reward": 0.06945692214821837,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.011190280125787183,
+        "reward": 0.040565280125787195,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 0.5138809198204125,
+      "advantage_rmse": 0.08394854919064886,
+      "nuisance_effect": 1.8633793891025506e-08,
+      "signal_effect_error": 2.3282920863037135e-05,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.980120711
+    },
+    {
+      "seed": 5011,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.3461459045651204,
+        "reward": 0.13385409543487944,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": -0.005172631318125254,
+        "reward": 0.025139868681874688,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0.45049057462340997,
+      "advantage_rmse": 0.2647565145170793,
+      "nuisance_effect": 2.4499209726018545e-08,
+      "signal_effect_error": 1.807811574732336e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.76646486
+    }
+  ],
+  "development-512-unmatched-clean": [
+    {
+      "seed": 5003,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10333618606204534,
+        "reward": 0.12911743606204532,
+        "accuracy": 0.99609375,
+        "operations": 0.64453125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.007252569931090961,
+        "reward": 0.036627569931090787,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 1.6559065855736854e-06,
+      "advantage_rmse": 0.0021031660810550217,
+      "nuisance_effect": 0.0017141176047634115,
+      "signal_effect_error": 0.0013433857531183293,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.150317738
+    },
+    {
+      "seed": 5011,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10434467005828955,
+        "reward": 0.1323134200582896,
+        "accuracy": 1,
+        "operations": 0.69921875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.004566837331659536,
+        "reward": 0.034879337331659495,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0,
+      "advantage_rmse": 0.0012678090425999847,
+      "nuisance_effect": 0.0010192543575309409,
+      "signal_effect_error": 0.0006734453436054084,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.817801151
+    }
+  ],
+  "development-512-unmatched-noisy": [
+    {
+      "seed": 5003,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.01010249080478572,
+        "reward": 0.04677250919521429,
+        "accuracy": 0.41015625,
+        "operations": 1.421875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.007754976109578636,
+        "reward": 0.03712997610957866,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 0.11344033277341663,
+      "advantage_rmse": 0.12844451504501295,
+      "nuisance_effect": 0.09892042281499532,
+      "signal_effect_error": 0.08788599330636629,
+      "effect_precision": 0.5267489711934157,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.720487246
+    },
+    {
+      "seed": 5011,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.24548077383856423,
+        "reward": 0.06873797616143493,
+        "accuracy": 0.36328125,
+        "operations": 7.85546875,
+        "stops": 0.36328125,
+        "truncations": 0.63671875,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.0019807242039245523,
+        "reward": 0.03229322420392462,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0.34982544389685377,
+      "advantage_rmse": 0.034831836434242,
+      "nuisance_effect": 0.01610392405023707,
+      "signal_effect_error": 0.040737252293118593,
+      "effect_precision": 0.7252124645892352,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.644727343
+    }
+  ],
+  "development-512-unpaired-clean": [
+    {
+      "seed": 5003,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10333618606204534,
+        "reward": 0.12911743606204532,
+        "accuracy": 0.99609375,
+        "operations": 0.64453125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.007252569931090961,
+        "reward": 0.036627569931090787,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 1.6559065855736854e-06,
+      "advantage_rmse": 0.0010529751894981798,
+      "nuisance_effect": 0.0005631488878869286,
+      "signal_effect_error": 0.0013151617838896824,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.134732544
+    },
+    {
+      "seed": 5011,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10434467005828955,
+        "reward": 0.1323134200582896,
+        "accuracy": 1,
+        "operations": 0.69921875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.004566837331659536,
+        "reward": 0.034879337331659495,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0,
+      "advantage_rmse": 0.001159940997535929,
+      "nuisance_effect": 0.00047723134714412676,
+      "signal_effect_error": 0.0012288381088687537,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.962800506
+    }
+  ],
+  "development-512-unpaired-noisy": [
+    {
+      "seed": 5003,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.36453833252791945,
+        "reward": 0.11546166747208052,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.46835897306689245,
+        "reward": 0.011641026933107519,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06190700774411453,
+          "reward": 0.039186742255885434,
+          "accuracy": 0.1796875,
+          "operations": 2.52734375,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.030024596932807797,
+          "reward": 0.030024596932807797,
+          "accuracy": 0.3515625,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09148879921157457,
+          "reward": 0.13148879921157455,
+          "accuracy": 0.6484375,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.011190280125787187,
+        "reward": 0.04056528012578718,
+        "accuracy": 0,
+        "operations": 0.734375,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10333784196863091,
+      "regret": 0.5716968150355234,
+      "advantage_rmse": 0.2033406081552775,
+      "nuisance_effect": 0.09477419873357258,
+      "signal_effect_error": 0.0698556915015341,
+      "effect_precision": 0.5021739130434782,
+      "effect_recall": 0.90234375,
+      "parameter_changes": 208,
+      "seconds": 0.978915608
+    },
+    {
+      "seed": 5011,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.10603038698151901,
+        "reward": 0.0014696130184810405,
+        "accuracy": 0.08203125,
+        "operations": 2.6875,
+        "stops": 0.77734375,
+        "truncations": 0.22265625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.3461459045651204,
+        "reward": 0.13385409543487944,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.06430611046936913,
+          "reward": 0.03975638953063084,
+          "accuracy": 0.1640625,
+          "operations": 2.6015625,
+          "stops": 0.96484375,
+          "truncations": 0.03515625,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027354789051884057,
+          "reward": 0.027354789051884057,
+          "accuracy": 0.30078125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.0938540954348794,
+          "reward": 0.13385409543487944,
+          "accuracy": 0.69921875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": -0.005172631318125254,
+        "reward": 0.025139868681874688,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10434467005828955,
+      "regret": 0.45049057462340997,
+      "advantage_rmse": 0.5814985268093363,
+      "nuisance_effect": 0.1263971729553363,
+      "signal_effect_error": 0.13409634046352675,
+      "effect_precision": 0.5213849287169042,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.810526726
+    }
+  ],
+  "validation-512-action-clean": [
+    {
+      "seed": 6007,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10633675700194235,
+        "reward": 0.13133675700194242,
+        "accuracy": 0.99609375,
+        "operations": 0.625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.003942289792263681,
+        "reward": 0.03304385229226369,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 3.5531652776837896e-06,
+      "advantage_rmse": 0.00154257688954003,
+      "nuisance_effect": 0.0006881875612311274,
+      "signal_effect_error": 0.0014131571369341814,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.861166353
+    },
+    {
+      "seed": 6011,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.09084450990201781,
+        "reward": 0.11646950990201782,
+        "accuracy": 0.99609375,
+        "operations": 0.640625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.005578810325394053,
+        "reward": 0.03589131032539393,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 3.7050073881383927e-06,
+      "advantage_rmse": 0.0011450444833252874,
+      "nuisance_effect": 0.000732498008941045,
+      "signal_effect_error": 0.0006427980778177663,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.795859111
+    }
+  ],
+  "validation-512-action-noisy": [
+    {
+      "seed": 6007,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10633675700194235,
+        "reward": 0.13133675700194242,
+        "accuracy": 0.99609375,
+        "operations": 0.625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.0007012294969601445,
+        "reward": 0.029802791996960225,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 3.5531652776837896e-06,
+      "advantage_rmse": 0.0015425768895400737,
+      "nuisance_effect": 0.0006881875612311774,
+      "signal_effect_error": 0.0014131571369342072,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.892754819
+    },
+    {
+      "seed": 6011,
+      "arm": "action",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.09084450990201781,
+        "reward": 0.11646950990201782,
+        "accuracy": 0.99609375,
+        "operations": 0.640625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.013097583170608638,
+        "reward": 0.04341008317060867,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 3.7050073881383927e-06,
+      "advantage_rmse": 0.0011450444833252527,
+      "nuisance_effect": 0.0007324980089410213,
+      "signal_effect_error": 0.0006427980778177477,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.752727514
+    }
+  ],
+  "validation-512-feature-clean": [
+    {
+      "seed": 6007,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10634031016722004,
+        "reward": 0.1314965601672201,
+        "accuracy": 1,
+        "operations": 0.62890625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.003942289792263681,
+        "reward": 0.03304385229226369,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 0,
+      "advantage_rmse": 0.0014893306442656895,
+      "nuisance_effect": 1.120252567374583e-08,
+      "signal_effect_error": 7.711763840795744e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.91731316
+    },
+    {
+      "seed": 6011,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.09084821490940595,
+        "reward": 0.11631696490940595,
+        "accuracy": 1,
+        "operations": 0.63671875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.005578810325394054,
+        "reward": 0.03589131032539393,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 0,
+      "advantage_rmse": 0.0001405871261842983,
+      "nuisance_effect": 6.436266894425821e-09,
+      "signal_effect_error": 3.922565158397627e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.859210871
+    }
+  ],
+  "validation-512-feature-noisy": [
+    {
+      "seed": 6007,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.005664286614372835,
+        "reward": 0.1258982133856272,
+        "accuracy": 0.7734375,
+        "operations": 3.2890625,
+        "stops": 0.7734375,
+        "truncations": 0.2265625,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.000701229496960145,
+        "reward": 0.029802791996960204,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 0.11200459678159287,
+      "advantage_rmse": 0.02320323330032546,
+      "nuisance_effect": 1.1202525651994024e-08,
+      "signal_effect_error": 7.711763840794795e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.862782748
+    },
+    {
+      "seed": 6011,
+      "arm": "feature",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.3612750520482051,
+        "reward": 0.11872494795179475,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.013097583170608634,
+        "reward": 0.04341008317060867,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 0.45212326695761107,
+      "advantage_rmse": 0.14523172747134047,
+      "nuisance_effect": 6.4362669151578e-09,
+      "signal_effect_error": 3.922565158392003e-06,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.069810561
+    }
+  ],
+  "validation-512-unmatched-clean": [
+    {
+      "seed": 6007,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10633675700194235,
+        "reward": 0.13133675700194242,
+        "accuracy": 0.99609375,
+        "operations": 0.625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.003942289792263681,
+        "reward": 0.03304385229226369,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 3.5531652776837896e-06,
+      "advantage_rmse": 0.00154257688954003,
+      "nuisance_effect": 0.0006881875612311274,
+      "signal_effect_error": 0.0014131571369341814,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.708076893
+    },
+    {
+      "seed": 6011,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.09084450990201781,
+        "reward": 0.11646950990201782,
+        "accuracy": 0.99609375,
+        "operations": 0.640625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.005578810325394053,
+        "reward": 0.03589131032539393,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 3.7050073881383927e-06,
+      "advantage_rmse": 0.0011450444833252874,
+      "nuisance_effect": 0.000732498008941045,
+      "signal_effect_error": 0.0006427980778177663,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.638254836
+    }
+  ],
+  "validation-512-unmatched-noisy": [
+    {
+      "seed": 6007,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.38528597834633277,
+        "reward": 0.09471402165366685,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.002200525209759017,
+        "reward": 0.031302087709758994,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 0.49162628851355283,
+      "advantage_rmse": 0.14909328511987566,
+      "nuisance_effect": 0.12050952267674793,
+      "signal_effect_error": 0.06750829993193141,
+      "effect_precision": 0.4989293361884368,
+      "effect_recall": 0.91015625,
+      "parameter_changes": 208,
+      "seconds": 1.223289849
+    },
+    {
+      "seed": 6011,
+      "arm": "unmatched",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.3698844671640777,
+        "reward": 0.11011553283592233,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.00895625961654992,
+        "reward": 0.03926875961655,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 0.4607326820734836,
+      "advantage_rmse": 0.12297357190894051,
+      "nuisance_effect": 0.0021168841413566606,
+      "signal_effect_error": 0.021323990505046245,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.146285116
+    }
+  ],
+  "validation-512-unpaired-clean": [
+    {
+      "seed": 6007,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.10634031016722004,
+        "reward": 0.1314965601672201,
+        "accuracy": 1,
+        "operations": 0.62890625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.003942289792263681,
+        "reward": 0.03304385229226369,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 0,
+      "advantage_rmse": 0.0018287854264149857,
+      "nuisance_effect": 0.000763760247503629,
+      "signal_effect_error": 0.002278187698201449,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.783655669
+    },
+    {
+      "seed": 6011,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": false,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": 0.09084821490940595,
+        "reward": 0.11631696490940595,
+        "accuracy": 1,
+        "operations": 0.63671875,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.005578810325394053,
+        "reward": 0.03589131032539393,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 0,
+      "advantage_rmse": 0.0002259846470307725,
+      "nuisance_effect": 0.00012559859151853637,
+      "signal_effect_error": 0.00045381106906444794,
+      "effect_precision": 1,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 0.678145413
+    }
+  ],
+  "validation-512-unpaired-noisy": [
+    {
+      "seed": 6007,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.3046089361354868,
+        "reward": 0.000391063864512673,
+        "accuracy": 0.01171875,
+        "operations": 7.625,
+        "stops": 0.43359375,
+        "truncations": 0.56640625,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.46870176085514803,
+        "reward": 4.8239144852658544e-05,
+        "accuracy": 0,
+        "operations": 11.71875,
+        "stops": 0.0234375,
+        "truncations": 0.9765625,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11348349633392124,
+          "reward": 0.0283915036660786,
+          "accuracy": 0.07421875,
+          "operations": 3.546875,
+          "stops": 0.94921875,
+          "truncations": 0.05078125,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.03690451080771827,
+          "reward": 0.03690451080771827,
+          "accuracy": 0.37109375,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.09311304892665302,
+          "reward": 0.13311304892665307,
+          "accuracy": 0.62890625,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.0007012294969601445,
+        "reward": 0.029802791996960225,
+        "accuracy": 0,
+        "operations": 0.7275390625,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.10634031016722004,
+      "regret": 0.575042071022368,
+      "advantage_rmse": 0.13114329279480022,
+      "nuisance_effect": 0.11641449317924983,
+      "signal_effect_error": 0.028362084588590956,
+      "effect_precision": 0.5224489795918368,
+      "effect_recall": 1,
+      "parameter_changes": 208,
+      "seconds": 1.080661291
+    },
+    {
+      "seed": 6011,
+      "arm": "unpaired",
+      "blocks": 512,
+      "executed_training_episodes": 2048,
+      "shared_reward_offset": true,
+      "Before": {
+        "net_return": -0.25021558554310513,
+        "reward": 0.01119066445689543,
+        "accuracy": 0,
+        "operations": 6.53515625,
+        "stops": 0.92578125,
+        "truncations": 0.07421875,
+        "cases": 256
+      },
+      "After": {
+        "net_return": -0.3612750520482051,
+        "reward": 0.11872494795179475,
+        "accuracy": 0,
+        "operations": 12,
+        "stops": 0,
+        "truncations": 1,
+        "cases": 256
+      },
+      "baselines": {
+        "random": {
+          "net_return": -0.11526141408895331,
+          "reward": 0.024113585911046446,
+          "accuracy": 0.09375,
+          "operations": 3.484375,
+          "stops": 0.953125,
+          "truncations": 0.046875,
+          "cases": 256
+        },
+        "static0": {
+          "net_return": 0.027194972630181963,
+          "reward": 0.027194972630181963,
+          "accuracy": 0.36328125,
+          "operations": 0,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        },
+        "static1": {
+          "net_return": 0.07872494795179477,
+          "reward": 0.11872494795179475,
+          "accuracy": 0.63671875,
+          "operations": 1,
+          "stops": 1,
+          "truncations": 0,
+          "cases": 256
+        }
+      },
+      "randomized_intervention_training": {
+        "net_return": 0.013097583170608638,
+        "reward": 0.04341008317060867,
+        "accuracy": 0,
+        "operations": 0.7578125,
+        "stops": 1,
+        "truncations": 0,
+        "cases": 2048
+      },
+      "encoder": "identity",
+      "oracle_return": 0.09084821490940595,
+      "regret": 0.45212326695761107,
+      "advantage_rmse": 0.23931135131198844,
+      "nuisance_effect": 0.01747006269707712,
+      "signal_effect_error": 0.03564647881263013,
+      "effect_precision": 0.696969696969697,
+      "effect_recall": 0.98828125,
+      "parameter_changes": 208,
+      "seconds": 1.125374148
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "file": "Gate_G_Evidence_20261114.zip",
+  "bytes": 1188334,
+  "sha256": "05d59c36eb9b4280512f87d8ccaf73dd3add3f3bc61485ed8244a5f024f3e66b",
+  "payload_count": 413,
+  "manifest": "MANIFEST.json",
+  "source_local": "9cca3e645203ceff84de3f214923b210f478a66e",
+  "source_published": "45b13f2e46c515f0ec5f67a49f2063c9217935a2",
+  "verdict": "Gate G not passed; G8 failed9/90",
+  "verified_payload_hashes": true
+}

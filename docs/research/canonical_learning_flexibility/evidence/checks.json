@@ -1,0 +1,47 @@
+{
+  "source_head": "daf040ae5330d6f8949b36c9aacb1293d596943c",
+  "compiler": "go1.23.2 linux/amd64",
+  "checks": [
+    {
+      "command": "go test ./...",
+      "exit_code": 0
+    },
+    {
+      "command": "go vet ./...",
+      "exit_code": 0
+    },
+    {
+      "command": "go build ./...",
+      "exit_code": 0
+    },
+    {
+      "command": "GOMAXPROCS=2 go test -race -p=2 -timeout=30m ./services/ai/knowledge ./services/ai/learning ./services/ai/runtime ./services/ai/teaching ./services/ai/bridge ./services/ai/core ./services/ai/cmd/horizon-cli",
+      "exit_code": 0
+    },
+    {
+      "command": "go test ./services/ai/runtime -run ^TestContinualLearningFlexibility$ -count=1 -v",
+      "exit_code": 0
+    },
+    {
+      "command": "go test ./services/ai/runtime -run ^Test(GateGProcessCrash|NativeV2GateGProcessCrash)$ -count=1 -v",
+      "exit_code": 0
+    },
+    {
+      "command": "GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -o horizon-cli-flex-android-arm64 ./services/ai/cmd/horizon-cli",
+      "exit_code": 0
+    }
+  ],
+  "android_sha256": "ff2025525fb1ac08659390d042e2c8a105807ca21cb3573d48bc5b0076783f97",
+  "new_encoder_crash_boundaries_passed": 15,
+  "old_encoder_crash_boundaries_passed": 15,
+  "complete_genesis_matches": 7,
+  "complete_suffix_matches": 7,
+  "canonical_N_count": 1,
+  "native_updates_final": 1536,
+  "G8": {
+    "status": "failed-existing",
+    "passed": 81,
+    "total": 90,
+    "not_rebenchmarked": true
+  }
+}

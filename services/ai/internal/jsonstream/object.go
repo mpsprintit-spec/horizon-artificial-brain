@@ -59,6 +59,12 @@ func Array(w io.Writer, count int, nilSlice bool, pretty bool, prefix string, it
 	if err := put(w, "["); err != nil {
 		return err
 	}
+	// Compact checkpoints encode thousands of entries. Encoder retains its
+	// transient buffer, avoiding Marshal's returned byte-copy for every entry.
+	// Trim only Encoder's framing newline: escaping, number validation and JSON
+	// bytes remain encoding/json's ordinary compact representation.
+	var compact bytes.Buffer
+	encoder := json.NewEncoder(&compact)
 	for i := 0; i < count; i++ {
 		if i > 0 {
 			if err := put(w, ","); err != nil {
@@ -70,8 +76,23 @@ func Array(w io.Writer, count int, nilSlice bool, pretty bool, prefix string, it
 				return err
 			}
 		}
-		if err := Value(w, item(i), pretty, prefix+"  "); err != nil {
-			return err
+		if pretty {
+			if err := Value(w, item(i), true, prefix+"  "); err != nil {
+				return err
+			}
+		} else {
+			compact.Reset()
+			if err := encoder.Encode(item(i)); err != nil {
+				return err
+			}
+			data := compact.Bytes()
+			n, err := w.Write(data[:len(data)-1])
+			if err != nil {
+				return err
+			}
+			if n != len(data)-1 {
+				return io.ErrShortWrite
+			}
 		}
 	}
 	if pretty && count > 0 {
