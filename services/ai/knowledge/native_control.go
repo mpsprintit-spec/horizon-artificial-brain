@@ -10,6 +10,7 @@ import (
 	"errors"
 	"math"
 	"math/rand"
+	"slices"
 	"sort"
 	"time"
 )
@@ -23,7 +24,16 @@ func (c NativeControlConfig) SupportsExperiments() bool {
 }
 
 func NativeDigest(v any) string {
-	b, e := json.Marshal(v)
+	var b []byte
+	var e error
+	switch value := v.(type) {
+	case *NativeEpisode:
+		b, e = marshalNativeEpisodeDigest(value)
+	case map[NodeID]float64:
+		b, e = nativeDigestState(value).MarshalJSON()
+	default:
+		b, e = json.Marshal(v)
+	}
 	if e != nil {
 		return ""
 	}
@@ -288,7 +298,7 @@ func nativeIDs(state map[NodeID]float64) []NodeID {
 	for id := range state {
 		ids = append(ids, id)
 	}
-	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
+	slices.Sort(ids)
 	return ids
 }
 func nativeWeight(s *Synapse) float64 {
