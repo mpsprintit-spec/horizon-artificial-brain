@@ -146,9 +146,13 @@ func (r *BrainRuntime) ApplyNeuralWrittenGrounding(plan WrittenGroundingPlan, ba
 			return err
 		}
 	}
-	// The pre-migration copy is deliberately v12 so the H18 binary can also
-	// restore it for rollback. Numeric serving itself requires v13.
-	if err := r.checkpointVersionLocked(backupPath, evidenceProvenanceBrainSnapshotSchemaVersion); err != nil {
+	// Legacy rollback uses v12; native rollback must retain the complete v20
+	// policy and lineage. Numeric registration never downgrades a native Brain.
+	backupVersion := evidenceProvenanceBrainSnapshotSchemaVersion
+	if r.brain.HasNativeControl() {
+		backupVersion = nativeCheckpointSchemaVersion
+	}
+	if err := r.checkpointVersionLocked(backupPath, backupVersion); err != nil {
 		_ = os.Remove(backupPath)
 		if r.eventLog != nil {
 			_ = os.Remove(backupPath + ".events.jsonl")

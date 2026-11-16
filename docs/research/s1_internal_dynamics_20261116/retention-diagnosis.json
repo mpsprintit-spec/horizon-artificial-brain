@@ -1,0 +1,890 @@
+{
+  "cause": "historical-oracle-flexAt-couples-observation-time-to-sequence",
+  "control_s1_learning_updates": 0,
+  "frozen_primary_gate_retained": false,
+  "frozen_result_retained": "PARTIAL",
+  "matched_control_sequence": 75849,
+  "oracle_time_difference_seconds": 0.518,
+  "post_s1_retention": {
+    "A": [
+      1.3778591810691332,
+      1.378180967322255,
+      1.3778591810691332,
+      1.378180967322255,
+      1.3778591810691332,
+      1.378180967322255,
+      1.3778591810691332,
+      1.378180967322255
+    ],
+    "B": [
+      1.355422973455494,
+      1.355422973053164,
+      1.355422973455494,
+      1.355422973053164,
+      1.3910519266930268,
+      1.3910519263859644,
+      1.3910519266930268,
+      1.3910519263859644
+    ],
+    "C": {
+      "Accuracy": 1,
+      "AdvantageError": 0.31085010224750464,
+      "OptimalProbability": 0.9500000000000001,
+      "Probes": [
+        {
+          "Amplitude": 0.4,
+          "Condition": 0,
+          "FactualReturns": [
+            0.669659501225371,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0,
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "Values": [
+            0.26598405098885813,
+            -0.19728125088952084
+          ]
+        },
+        {
+          "Amplitude": 0.4,
+          "Condition": 1,
+          "FactualReturns": [
+            -0.05,
+            0.4
+          ],
+          "Greedy": 1,
+          "Optimal": 1,
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "Values": [
+            0.0007390621094314747,
+            0.07487063305385462
+          ]
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 0,
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0,
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "Values": [
+            0.3930467683512507,
+            -0.2900005392936101
+          ]
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 1,
+          "FactualReturns": [
+            -0.05,
+            0.6
+          ],
+          "Greedy": 1,
+          "Optimal": 1,
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "Values": [
+            -0.03439541872342307,
+            0.15309066287621026
+          ]
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 0,
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0,
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "Values": [
+            0.5486208581662085,
+            -0.39810781681547275
+          ]
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 1,
+          "FactualReturns": [
+            -0.05,
+            0.8
+          ],
+          "Greedy": 1,
+          "Optimal": 1,
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "Values": [
+            -0.060734996274068434,
+            0.23916495441729738
+          ]
+        }
+      ]
+    },
+    "D": [
+      1.3778591810691332,
+      1.3050646479660717,
+      1.378180967322255,
+      1.3050646473121863,
+      1.3778591810691332,
+      1.3050646479660717,
+      1.378180967322255,
+      1.3050646473121863
+    ]
+  },
+  "source_sequence": 75331,
+  "time_matched_E1": {
+    "Accuracy": 0.9722222222222222,
+    "MaxNuisanceConsequence": 0,
+    "NuisanceSensitivity": 0.15416712413549355,
+    "OptimalProbability": 0.9249999999999997,
+    "Probes": [
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.1,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.669659501225371,
+          0
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.27675807918926626,
+          -0.20339234978867146
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.5,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.669659501225371,
+          0
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.313900683831499,
+          -0.18746588900857086
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.9,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.669659501225371,
+          0
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.3415176754186917,
+          -0.10694605802574489
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.1,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.669659501225371,
+          0
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.2385225443799454,
+          -0.16700728041191593
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.5,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.669659501225371,
+          0
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.15066377614981785,
+          -0.026275744204667634
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 0,
+        "Noise": 0.9,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.669659501225371,
+          0
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.09798462104852722,
+          0.14587283887750663
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.1,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.4
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.011513090309839621,
+          0.06875953415470404
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.5,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.4
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.0486556949520724,
+          0.08468599493480473
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.9,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.4
+        ],
+        "Signal": 0.4,
+        "Values": [
+          0.07627268653926517,
+          0.16520582591763067
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.1,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.4
+        ],
+        "Signal": 0.4,
+        "Values": [
+          -0.02672244449948121,
+          0.10514460353145955
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.5,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.4
+        ],
+        "Signal": 0.4,
+        "Values": [
+          -0.11458121272960875,
+          0.24587613973870792
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.9,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.4
+        ],
+        "Signal": 0.4,
+        "Values": [
+          -0.16726036783089943,
+          0.4180247228208821
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.1,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.4038207965516588,
+          -0.2961116381927607
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.5,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.4409634011938916,
+          -0.28018517741266
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.9,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.46858039278108454,
+          -0.19966534642983422
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.1,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.365585261742338,
+          -0.25972656881600514
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.5,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.27772649351221046,
+          -0.11899503260875684
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.9,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.22504733841091976,
+          0.053153550473417396
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.1,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.6
+        ],
+        "Signal": 0.6,
+        "Values": [
+          -0.023621390523014974,
+          0.14697956397705966
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.5,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.6
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.013521214119217733,
+          0.16290602475716043
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.9,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.6
+        ],
+        "Signal": 0.6,
+        "Values": [
+          0.04113820570641064,
+          0.24342585573998607
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.1,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.6
+        ],
+        "Signal": 0.6,
+        "Values": [
+          -0.06185692533233578,
+          0.1833646333538152
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.5,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.6
+        ],
+        "Signal": 0.6,
+        "Values": [
+          -0.14971569356246342,
+          0.3240961695610635
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.9,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.6
+        ],
+        "Signal": 0.6,
+        "Values": [
+          -0.20239484866375412,
+          0.49624475264323775
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.1,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.5593948863666166,
+          -0.4042189157146233
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.5,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.5965374910088496,
+          -0.3882924549345226
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.9,
+        "Nuisance": 0,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.6241544825960421,
+          -0.3077726239516967
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.1,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.5211593515572959,
+          -0.3678338463378678
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.5,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.43330058332716825,
+          -0.22710231013061954
+        ]
+      },
+      {
+        "Action": 0,
+        "Condition": 0,
+        "Noise": 0.9,
+        "Nuisance": 8,
+        "Optimal": 0,
+        "Returns": [
+          0.95,
+          0
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.38062142822587763,
+          -0.054953727048445145
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.1,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.8
+        ],
+        "Signal": 0.8,
+        "Values": [
+          -0.049960968073660225,
+          0.23305385551814684
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.5,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.8
+        ],
+        "Signal": 0.8,
+        "Values": [
+          -0.012818363431427476,
+          0.24898031629824746
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.9,
+        "Nuisance": 0,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.8
+        ],
+        "Signal": 0.8,
+        "Values": [
+          0.014798628155765443,
+          0.32950014728107324
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.1,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.8
+        ],
+        "Signal": 0.8,
+        "Values": [
+          -0.08819650288298117,
+          0.26943892489490234
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.5,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.8
+        ],
+        "Signal": 0.8,
+        "Values": [
+          -0.17605527111310867,
+          0.41017046110215066
+        ]
+      },
+      {
+        "Action": 1,
+        "Condition": 1,
+        "Noise": 0.9,
+        "Nuisance": 8,
+        "Optimal": 1,
+        "Returns": [
+          -0.05,
+          0.8
+        ],
+        "Signal": 0.8,
+        "Values": [
+          -0.22873442621439943,
+          0.582319044184325
+        ]
+      }
+    ],
+    "Regret": 0.01860165281181586
+  },
+  "time_matched_oracles_exact": true,
+  "time_matched_retention": {
+    "A": [
+      1.3778591810691332,
+      1.378180967322255,
+      1.3778591810691332,
+      1.378180967322255,
+      1.3778591810691332,
+      1.378180967322255,
+      1.3778591810691332,
+      1.378180967322255
+    ],
+    "B": [
+      1.355422973455494,
+      1.355422973053164,
+      1.355422973455494,
+      1.355422973053164,
+      1.3910519266930268,
+      1.3910519263859644,
+      1.3910519266930268,
+      1.3910519263859644
+    ],
+    "C": {
+      "Accuracy": 1,
+      "AdvantageError": 0.31085010224750464,
+      "OptimalProbability": 0.9500000000000001,
+      "Probes": [
+        {
+          "Amplitude": 0.4,
+          "Condition": 0,
+          "FactualReturns": [
+            0.669659501225371,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0,
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "Values": [
+            0.26598405098885813,
+            -0.19728125088952084
+          ]
+        },
+        {
+          "Amplitude": 0.4,
+          "Condition": 1,
+          "FactualReturns": [
+            -0.05,
+            0.4
+          ],
+          "Greedy": 1,
+          "Optimal": 1,
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "Values": [
+            0.0007390621094314747,
+            0.07487063305385462
+          ]
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 0,
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0,
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "Values": [
+            0.3930467683512507,
+            -0.2900005392936101
+          ]
+        },
+        {
+          "Amplitude": 0.6,
+          "Condition": 1,
+          "FactualReturns": [
+            -0.05,
+            0.6
+          ],
+          "Greedy": 1,
+          "Optimal": 1,
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "Values": [
+            -0.03439541872342307,
+            0.15309066287621026
+          ]
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 0,
+          "FactualReturns": [
+            0.95,
+            0
+          ],
+          "Greedy": 0,
+          "Optimal": 0,
+          "Probabilities": [
+            0.9500000000000001,
+            0.05
+          ],
+          "Values": [
+            0.5486208581662085,
+            -0.39810781681547275
+          ]
+        },
+        {
+          "Amplitude": 0.8,
+          "Condition": 1,
+          "FactualReturns": [
+            -0.05,
+            0.8
+          ],
+          "Greedy": 1,
+          "Optimal": 1,
+          "Probabilities": [
+            0.05,
+            0.9500000000000001
+          ],
+          "Values": [
+            -0.060734996274068434,
+            0.23916495441729738
+          ]
+        }
+      ]
+    },
+    "D": [
+      1.3778591810691332,
+      1.3050646479660717,
+      1.378180967322255,
+      1.3050646473121863,
+      1.3778591810691332,
+      1.3050646479660717,
+      1.378180967322255,
+      1.3050646473121863
+    ]
+  },
+  "trained_sequence": 75849
+}

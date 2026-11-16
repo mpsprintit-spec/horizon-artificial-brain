@@ -261,7 +261,9 @@ func TestGateGPolicyOwnershipAndHistoricalNativeVersions(t *testing.T) {
 
 func TestGateGAdmissionMatrix(t *testing.T) {
 	allowed := []string{EventTypeProcess, EventTypeCognitiveProcess, EventTypeObservation, EventTypeThink, EventTypeCognitiveThink, EventTypeSensorIntent, EventTypeLearn, EventTypeSpellingExposure, EventTypeCompositionExposure, EventTypeCompositionPerception, EventTypeVectorGround, EventTypeKnowledgeImport, EventTypeInquiryOutcome, EventTypeOutcome, EventTypeConsequence, EventTypeActionBinding}
-	isolated := []string{"cognitive_model_command", EventTypeCompositionMigration, EventTypeWrittenGroundingMigration, EventTypeSurfaceRebinding, "unrecognized-command"}
+	// Numeric registrations have a narrow, independently tested native
+	// coexistence contract; controller replacement remains isolated.
+	isolated := []string{"cognitive_model_command", EventTypeSurfaceRebinding, "unrecognized-command"}
 	rt, ids := nativeFixture(t)
 	for _, kind := range append(append([]string{}, allowed...), isolated...) {
 		if e := rt.admitCommandLocked(kind); e != nil {

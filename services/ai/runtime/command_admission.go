@@ -82,6 +82,19 @@ func (r *BrainRuntime) admitCommandLocked(kind string) error {
 		return fmt.Errorf("%w: %s rejected during %s; settle the native outcome or pending contrast first", ErrCommandAdmission, kind, state)
 	}
 	switch kind {
+	case EventTypeWrittenGroundingMigration:
+		// An annotation-free native Brain needs only an empty numeric adapter
+		// registration. No existing population or policy parameter is migrated.
+		// Nonempty lexical migrations still require a separate coexistence proof.
+		plan, err := r.brain.PlanWrittenNumericProjection()
+		if err == nil && len(plan) == 0 {
+			return nil
+		}
+		return fmt.Errorf("%w: native numeric registration requires an empty projection migration", ErrCommandAdmission)
+	case EventTypeCompositionMigration:
+		// The plan validator restricts native coexistence to the existing
+		// continuous numeric contract. It cannot replace the native policy.
+		return nil
 	case EventTypeProcess, EventTypeCognitiveProcess, EventTypeObservation,
 		EventTypeThink, EventTypeCognitiveThink, EventTypeSensorIntent,
 		EventTypeLearn, EventTypeSpellingExposure, EventTypeCompositionExposure,

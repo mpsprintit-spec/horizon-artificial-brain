@@ -1,0 +1,12 @@
+{
+  "bias_retained": true,
+  "changed_synapses": 272,
+  "feature_geometry_retained": true,
+  "metric": {
+    "Samples": 192,
+    "Coordinates": 576,
+    "RMSE": 0.17411282653035973,
+    "MAE": 0.1376006428439545,
+    "Accuracy": 0.3020833333333333
+  }
+}
