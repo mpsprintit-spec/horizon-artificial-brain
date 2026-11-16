@@ -1,0 +1,235 @@
+{
+  "status": "REJECTED AS PURE TIME CONTROL",
+  "reason": "ThinkAt is a real recurrent operation and updates node frequency, activation clocks and homeostatic thresholds; it cannot be treated as passive time settlement. No original or S1 input state was modified.",
+  "control_checkpoint_sha256": "cb23040d6bb914b6dd961890bf5d13a68536c018defcd62d88643906effc2db3",
+  "node_field_changes": [
+    {
+      "node": 1,
+      "changes": {
+        "frequency": {
+          "before": 37,
+          "after": 38
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 2,
+      "changes": {
+        "frequency": {
+          "before": 37,
+          "after": 38
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 3,
+      "changes": {
+        "frequency": {
+          "before": 37,
+          "after": 38
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 4,
+      "changes": {
+        "frequency": {
+          "before": 37,
+          "after": 38
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 5,
+      "changes": {
+        "frequency": {
+          "before": 37,
+          "after": 38
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 9,
+      "changes": {
+        "frequency": {
+          "before": 37,
+          "after": 38
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 13,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 14,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 15,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 16,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 17,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 18,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 19,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 20,
+      "changes": {
+        "threshold": {
+          "before": 0.15000000000000002,
+          "after": 0.12
+        },
+        "frequency": {
+          "before": 25,
+          "after": 26
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:01:15.331Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    },
+    {
+      "node": 21,
+      "changes": {
+        "threshold": {
+          "before": 0.25,
+          "after": 0.192
+        },
+        "last_activation": {
+          "before": "2026-11-14T00:00:10.811Z",
+          "after": "2026-11-14T00:01:15.332Z"
+        }
+      }
+    }
+  ],
+  "original_results_retained": true
+}

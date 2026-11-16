@@ -1,0 +1,4 @@
+=== RUN   TestS1FinalRetentionAudit
+    s1_final_audit_test.go:240: original neuron learning parameters changed 1
+--- FAIL: TestS1FinalRetentionAudit (56.77s)
+FAIL
