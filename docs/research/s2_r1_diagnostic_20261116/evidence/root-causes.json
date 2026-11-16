@@ -1,0 +1,112 @@
+{
+  "status": "DIAGNOSED",
+  "scope": "operational recruitment/admission failures on original 16 commands",
+  "independent_predictive_information": "INCONCLUSIVE",
+  "new_learning_commands": 0,
+  "s2r2_started": false,
+  "causes": [
+    {
+      "classification": "A",
+      "name": "Input Encoding Failure",
+      "decision": "not_found",
+      "confidence": "high for tested S2 paths",
+      "support": [
+        "input-coordinate-map.json",
+        "learning-input-summary.json"
+      ],
+      "contrary_evidence": "Additional coordinates enter X, vary, and change native residual-axis proposals; no mapping error found.",
+      "causal_experiments": [
+        "five input conditions",
+        "equivalent transformations of fit/check/witness inputs"
+      ],
+      "minimal_change": "none to codec"
+    },
+    {
+      "classification": "B",
+      "name": "Neural Recruitment Failure",
+      "decision": "diagnosed_operationally",
+      "confidence": "high",
+      "support": [
+        "source-validation.json",
+        "admission-traces.json.xz",
+        "direction-step-contributions.json"
+      ],
+      "contrary_evidence": "No hard source-reachability ban: positive controls are selected by native arithmetic.",
+      "causal_experiments": [
+        "source/path invariance in original continuation",
+        "rejected direction with partial parameter intervention",
+        "positive controls at coordinates 56 and 59"
+      ],
+      "minimal_change": "test bounded incumbent-relative readout proposals; preserve gate"
+    },
+    {
+      "classification": "C",
+      "name": "Learning Admission Failure",
+      "decision": "gate_bug_not_demonstrated",
+      "confidence": "high for 16 original commands",
+      "support": [
+        "candidate-trials.csv",
+        "admission-summary.csv"
+      ],
+      "contrary_evidence": "All full proposals on commands 5-16 fail actual check gain; beneficial smaller proposals were never evaluated by original search.",
+      "causal_experiments": [
+        "exact 1260-trial replay",
+        "partial-step interventions",
+        "witness controls"
+      ],
+      "minimal_change": "do not lower thresholds or remove retention"
+    },
+    {
+      "classification": "D",
+      "name": "Representation Capacity Limitation",
+      "decision": "feature_ceiling_not_causal; broader_representation_limits_unresolved",
+      "confidence": "high for ceiling exclusion; limited for full hypothesis",
+      "support": [
+        "source-validation.json",
+        "positive-control-summary.json",
+        "ranked-tail-summary.json"
+      ],
+      "contrary_evidence": "30<32; growth branch executes; native controls and partial proposals use 31 features.",
+      "causal_experiments": [
+        "native trace of growth branch",
+        "synthetic same-lineage controls",
+        "fixed ranking 9-64 and basis probes"
+      ],
+      "minimal_change": "do not add neurons or raise ceiling before a demonstrated need"
+    },
+    {
+      "classification": "E",
+      "name": "Insufficient Predictive Information",
+      "decision": "INCONCLUSIVE for independent forecast/absolute-error value",
+      "confidence": "insufficient independent evidence",
+      "support": [
+        "direction-step-contributions.json",
+        "extra-signal-correlation.json"
+      ],
+      "contrary_evidence": "Prior-operation channel is useful in a counterfactual; absolute-error influence is small but measurable; no independent final holdout used.",
+      "causal_experiments": [
+        "separate forecast/error-magnitude/history-presence/history-action masks",
+        "seeded permutation"
+      ],
+      "minimal_change": "new paired diagnostic/check episodes in a future preregistered stage; no new training now"
+    },
+    {
+      "classification": "F",
+      "name": "Other Verified Cause",
+      "decision": "DIAGNOSED: coupled full refit proposal and deterministic retry",
+      "confidence": "high within original replay and development data",
+      "support": [
+        "partial-step-summary.json",
+        "admission-traces.json.xz",
+        "witness-control-summary.json"
+      ],
+      "contrary_evidence": "Local gains are small and are not independent repair validation; search tail beyond rank64 remains untested.",
+      "causal_experiments": [
+        "same-graph parameter interpolation with unchanged gate/retention",
+        "original versus witness-controlled searches",
+        "candidate hash identity across commands5-8 and9-16"
+      ],
+      "minimal_change": "bounded target-readout proposal plus data-role separation; retain old experience and gate"
+    }
+  ]
+}

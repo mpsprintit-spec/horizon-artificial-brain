@@ -1,0 +1,10 @@
+{
+  "s1_sequence": 75866,
+  "s2_sequence": 76617,
+  "source_common_synapses": 5820,
+  "changed_source_synapses": 0,
+  "added_synapses": 424,
+  "removed_source_synapses": 0,
+  "native_control_exact": true,
+  "interpretation": "historical S1->S2 preservation, not a new retention generalization test"
+}

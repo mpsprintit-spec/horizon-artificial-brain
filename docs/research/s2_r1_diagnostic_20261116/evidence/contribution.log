@@ -1,0 +1,4 @@
+=== RUN   TestS2R1RecruitmentCounterfactual
+    s2r1_followup_test.go:203: split old-readout/new-feature changes and extra-coordinate interventions without installing a candidate
+--- PASS: TestS2R1RecruitmentCounterfactual (7.86s)
+PASS

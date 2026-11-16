@@ -1,0 +1,134 @@
+[
+  {
+    "after_check_mse": 3.3646136308434286e-12,
+    "before_check_mse": 0.008650077759767734,
+    "cause": "missing-direction",
+    "coordinate": 56,
+    "eligible_direction_n": 1,
+    "extra_axis_l2": 0.9999832261075937,
+    "other_coordinates_vary": false,
+    "seed": 3101,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 0.006600565752794246,
+    "before_check_mse": 0.006600565752794246,
+    "cause": "insufficient-predictive-evidence",
+    "coordinate": 56,
+    "eligible_direction_n": 0,
+    "extra_axis_l2": 0.7483924923293215,
+    "other_coordinates_vary": true,
+    "seed": 3101,
+    "selected_by_unchanged_native_rules": false
+  },
+  {
+    "after_check_mse": 1.573081669671203e-11,
+    "before_check_mse": 0.008650077759767734,
+    "cause": "missing-direction",
+    "coordinate": 59,
+    "eligible_direction_n": 2,
+    "extra_axis_l2": 0.9999832283435882,
+    "other_coordinates_vary": false,
+    "seed": 3101,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 0.006600565752794246,
+    "before_check_mse": 0.006600565752794246,
+    "cause": "insufficient-predictive-evidence",
+    "coordinate": 59,
+    "eligible_direction_n": 0,
+    "extra_axis_l2": 0.7532914926331457,
+    "other_coordinates_vary": true,
+    "seed": 3101,
+    "selected_by_unchanged_native_rules": false
+  },
+  {
+    "after_check_mse": 5.085306561814388e-12,
+    "before_check_mse": 0.007091107306982347,
+    "cause": "missing-direction",
+    "coordinate": 56,
+    "eligible_direction_n": 1,
+    "extra_axis_l2": 0.9994510453999044,
+    "other_coordinates_vary": false,
+    "seed": 3109,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 0.007477471169128662,
+    "before_check_mse": 0.007477471169128662,
+    "cause": "insufficient-predictive-evidence",
+    "coordinate": 56,
+    "eligible_direction_n": 0,
+    "extra_axis_l2": 0.7071407788342294,
+    "other_coordinates_vary": true,
+    "seed": 3109,
+    "selected_by_unchanged_native_rules": false
+  },
+  {
+    "after_check_mse": 1.5840909394459055e-11,
+    "before_check_mse": 0.007091107306982347,
+    "cause": "missing-direction",
+    "coordinate": 59,
+    "eligible_direction_n": 2,
+    "extra_axis_l2": 0.9994491422483249,
+    "other_coordinates_vary": false,
+    "seed": 3109,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 0.007477471169128662,
+    "before_check_mse": 0.007477471169128662,
+    "cause": "insufficient-predictive-evidence",
+    "coordinate": 59,
+    "eligible_direction_n": 0,
+    "extra_axis_l2": 0.7153599270450232,
+    "other_coordinates_vary": true,
+    "seed": 3109,
+    "selected_by_unchanged_native_rules": false
+  },
+  {
+    "after_check_mse": 6.508995970305762e-12,
+    "before_check_mse": 0.007055824046810945,
+    "cause": "missing-direction",
+    "coordinate": 56,
+    "eligible_direction_n": 1,
+    "extra_axis_l2": 0.999240976152252,
+    "other_coordinates_vary": false,
+    "seed": 3121,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 0.0013717306095677622,
+    "before_check_mse": 0.006323951607497833,
+    "cause": "missing-direction",
+    "coordinate": 56,
+    "eligible_direction_n": 1,
+    "extra_axis_l2": 0.7323593930328066,
+    "other_coordinates_vary": true,
+    "seed": 3121,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 1.9162191093666414e-11,
+    "before_check_mse": 0.007055824046810945,
+    "cause": "missing-direction",
+    "coordinate": 59,
+    "eligible_direction_n": 2,
+    "extra_axis_l2": 0.9992378666183314,
+    "other_coordinates_vary": false,
+    "seed": 3121,
+    "selected_by_unchanged_native_rules": true
+  },
+  {
+    "after_check_mse": 0.0013717306095677622,
+    "before_check_mse": 0.006323951607497833,
+    "cause": "missing-direction",
+    "coordinate": 59,
+    "eligible_direction_n": 1,
+    "extra_axis_l2": 0.7372334828962045,
+    "other_coordinates_vary": true,
+    "seed": 3121,
+    "selected_by_unchanged_native_rules": true
+  }
+]

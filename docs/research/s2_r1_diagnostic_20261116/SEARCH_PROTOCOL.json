@@ -1,0 +1,13 @@
+{
+  "reason": "Historical traces show 907 ranked product proposals but only eight are fitted on stalled lessons. Test whether the ranking budget excludes admissible relations.",
+  "preregistered_before_execution": true,
+  "historical_commands": [5, 9],
+  "first_rank": 9,
+  "last_rank": 64,
+  "candidate_modes": ["activation", "metric"],
+  "law": "same product feature, quantizer, bounded fit, redundancy, precision and retention arithmetic; evaluate against incumbent; never install",
+  "ceiling": "unchanged 32; proposals contain 31 features",
+  "data": "original development, fit and witness sets only",
+  "final_holdout_used": false,
+  "interpretation": "causal audit of search truncation, not evidence of independent generalization or a validated production repair"
+}

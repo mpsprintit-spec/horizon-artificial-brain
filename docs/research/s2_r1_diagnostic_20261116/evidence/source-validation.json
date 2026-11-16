@@ -1,0 +1,13 @@
+{
+  "development_readout_checks": 64,
+  "features": 30,
+  "final_holdout_used": false,
+  "native_checksum": "b87285e38a321d45e4da920f219b388d1a2d061554042d2dd0f109883b38ab9d",
+  "neurons": 264,
+  "patterns": 24,
+  "payloads_verified": 75,
+  "policy_updates": 10752,
+  "sequence": 76617,
+  "state_unchanged": true,
+  "synapses": 6244
+}

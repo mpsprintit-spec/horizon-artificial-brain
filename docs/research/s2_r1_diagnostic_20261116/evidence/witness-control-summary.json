@@ -1,0 +1,350 @@
+[
+  {
+    "after_mse": 3.102875878926054e-05,
+    "check_overlap_fit_n": 0,
+    "control": "remove-S2-witnesses",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 5.925928635528654e-05,
+    "selected": false,
+    "selected_vs_original_retention": {
+      "maximum_error": 0.01427358903476598,
+      "regressions_against_original_witnesses": 0,
+      "retention_by_query": [
+        {
+          "allowed_mse": 6.646071265821824e-05,
+          "before_mse": 5.501575656383724e-05,
+          "candidate_mse": 5.501575656383724e-05,
+          "n": 32,
+          "query": [
+            170,
+            171,
+            172,
+            173
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0002475820627928566,
+          "before_mse": 0.00020716423621599598,
+          "candidate_mse": 0.00020716423621599598,
+          "n": 32,
+          "query": [
+            224,
+            225,
+            226,
+            227
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0001802579043385183,
+          "before_mse": 0.00016803380057184387,
+          "candidate_mse": 0.00016803380057184387,
+          "n": 32,
+          "query": [
+            229,
+            230,
+            231,
+            232
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 3.448481742892585e-05,
+          "before_mse": 2.7223196535178133e-05,
+          "candidate_mse": 2.7223196535178133e-05,
+          "n": 32,
+          "query": [
+            257,
+            258,
+            259,
+            260
+          ],
+          "regression": false,
+          "sign_flips": 0
+        }
+      ],
+      "selected_model": {
+        "by_operation": {
+          "propagate": {
+            "mse": 2.7737918369423476e-05,
+            "n": 32
+          },
+          "stop": {
+            "mse": 3.431959920909764e-05,
+            "n": 32
+          }
+        },
+        "mae": 0.004706546928725453,
+        "max_abs_error": 0.01427358903476598,
+        "mse": 3.102875878926054e-05,
+        "n": 64,
+        "rmse": 0.005570346379648265
+      }
+    }
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "check_overlap_fit_n": 32,
+    "control": "retain-only-S2-witnesses",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 3.461721609989298e-05,
+    "selected": false,
+    "selected_vs_original_retention": {
+      "maximum_error": 0.01427358903476598,
+      "regressions_against_original_witnesses": 0,
+      "retention_by_query": [
+        {
+          "allowed_mse": 6.646071265821824e-05,
+          "before_mse": 5.501575656383724e-05,
+          "candidate_mse": 5.501575656383724e-05,
+          "n": 32,
+          "query": [
+            170,
+            171,
+            172,
+            173
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0002475820627928566,
+          "before_mse": 0.00020716423621599598,
+          "candidate_mse": 0.00020716423621599598,
+          "n": 32,
+          "query": [
+            224,
+            225,
+            226,
+            227
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0001802579043385183,
+          "before_mse": 0.00016803380057184387,
+          "candidate_mse": 0.00016803380057184387,
+          "n": 32,
+          "query": [
+            229,
+            230,
+            231,
+            232
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 3.448481742892585e-05,
+          "before_mse": 2.7223196535178133e-05,
+          "candidate_mse": 2.7223196535178133e-05,
+          "n": 32,
+          "query": [
+            257,
+            258,
+            259,
+            260
+          ],
+          "regression": false,
+          "sign_flips": 0
+        }
+      ],
+      "selected_model": {
+        "by_operation": {
+          "propagate": {
+            "mse": 2.7737918369423476e-05,
+            "n": 32
+          },
+          "stop": {
+            "mse": 3.431959920909764e-05,
+            "n": 32
+          }
+        },
+        "mae": 0.004706546928725453,
+        "max_abs_error": 0.01427358903476598,
+        "mse": 3.102875878926054e-05,
+        "n": 64,
+        "rmse": 0.005570346379648265
+      }
+    }
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "check_overlap_fit_n": 0,
+    "control": "remove-S2-witnesses",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 7.333169899163911e-05,
+    "selected": false,
+    "selected_vs_original_retention": {
+      "maximum_error": 0.01427358903476598,
+      "regressions_against_original_witnesses": 0,
+      "retention_by_query": [
+        {
+          "allowed_mse": 6.646071265821824e-05,
+          "before_mse": 5.501575656383724e-05,
+          "candidate_mse": 5.501575656383724e-05,
+          "n": 32,
+          "query": [
+            170,
+            171,
+            172,
+            173
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0002475820627928566,
+          "before_mse": 0.00020716423621599598,
+          "candidate_mse": 0.00020716423621599598,
+          "n": 32,
+          "query": [
+            224,
+            225,
+            226,
+            227
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0001802579043385183,
+          "before_mse": 0.00016803380057184387,
+          "candidate_mse": 0.00016803380057184387,
+          "n": 32,
+          "query": [
+            229,
+            230,
+            231,
+            232
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 3.448481742892585e-05,
+          "before_mse": 2.7223196535178133e-05,
+          "candidate_mse": 2.7223196535178133e-05,
+          "n": 32,
+          "query": [
+            257,
+            258,
+            259,
+            260
+          ],
+          "regression": false,
+          "sign_flips": 0
+        }
+      ],
+      "selected_model": {
+        "by_operation": {
+          "propagate": {
+            "mse": 2.7737918369423476e-05,
+            "n": 32
+          },
+          "stop": {
+            "mse": 3.431959920909764e-05,
+            "n": 32
+          }
+        },
+        "mae": 0.004706546928725453,
+        "max_abs_error": 0.01427358903476598,
+        "mse": 3.102875878926054e-05,
+        "n": 64,
+        "rmse": 0.005570346379648265
+      }
+    }
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "check_overlap_fit_n": 32,
+    "control": "retain-only-S2-witnesses",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 3.5598946552146146e-05,
+    "selected": false,
+    "selected_vs_original_retention": {
+      "maximum_error": 0.01427358903476598,
+      "regressions_against_original_witnesses": 0,
+      "retention_by_query": [
+        {
+          "allowed_mse": 6.646071265821824e-05,
+          "before_mse": 5.501575656383724e-05,
+          "candidate_mse": 5.501575656383724e-05,
+          "n": 32,
+          "query": [
+            170,
+            171,
+            172,
+            173
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0002475820627928566,
+          "before_mse": 0.00020716423621599598,
+          "candidate_mse": 0.00020716423621599598,
+          "n": 32,
+          "query": [
+            224,
+            225,
+            226,
+            227
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 0.0001802579043385183,
+          "before_mse": 0.00016803380057184387,
+          "candidate_mse": 0.00016803380057184387,
+          "n": 32,
+          "query": [
+            229,
+            230,
+            231,
+            232
+          ],
+          "regression": false,
+          "sign_flips": 0
+        },
+        {
+          "allowed_mse": 3.448481742892585e-05,
+          "before_mse": 2.7223196535178133e-05,
+          "candidate_mse": 2.7223196535178133e-05,
+          "n": 32,
+          "query": [
+            257,
+            258,
+            259,
+            260
+          ],
+          "regression": false,
+          "sign_flips": 0
+        }
+      ],
+      "selected_model": {
+        "by_operation": {
+          "propagate": {
+            "mse": 2.7737918369423476e-05,
+            "n": 32
+          },
+          "stop": {
+            "mse": 3.431959920909764e-05,
+            "n": 32
+          }
+        },
+        "mae": 0.004706546928725453,
+        "max_abs_error": 0.01427358903476598,
+        "mse": 3.102875878926054e-05,
+        "n": 64,
+        "rmse": 0.005570346379648265
+      }
+    }
+  }
+]

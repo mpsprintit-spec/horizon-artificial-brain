@@ -1,0 +1,72 @@
+[
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "A-original",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 3.461721609989298e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "B-no-forecast",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 3.461721609989298e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "C-no-history",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 3.461721609989298e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "D-permuted-extra",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 3.461721609989298e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "E-history-scale4",
+    "lesson": 5,
+    "minimum_full_candidate_mse": 3.461721609989298e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "A-original",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 3.5598946552146146e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "B-no-forecast",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 3.5598946552146146e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "C-no-history",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 3.464413582958476e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "D-permuted-extra",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 3.6388093382278585e-05,
+    "selected": false
+  },
+  {
+    "after_mse": 3.102875878926054e-05,
+    "condition": "E-history-scale4",
+    "lesson": 9,
+    "minimum_full_candidate_mse": 3.5598946552146146e-05,
+    "selected": false
+  }
+]

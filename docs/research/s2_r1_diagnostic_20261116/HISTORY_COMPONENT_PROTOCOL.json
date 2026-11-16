@@ -1,0 +1,11 @@
+{
+  "reason": "The rejected direction can affect the history group under a partial parameter step. Isolate actual prior-error magnitudes from history-presence and prior-operation channels before attributing that effect.",
+  "preregistered_before_execution": true,
+  "parent": "CONTRIBUTION_PROTOCOL.json",
+  "additional_interventions": ["zero error magnitudes 59-61", "zero history presence 63", "zero history action 64", "permute only error magnitudes 59-61"],
+  "seed": 3301,
+  "fractions": [0, 0.01, 0.05, 0.1, 0.25, 0.5, 1],
+  "data": "same historical check set of 64 development rows",
+  "final_holdout_used": false,
+  "installation": false
+}

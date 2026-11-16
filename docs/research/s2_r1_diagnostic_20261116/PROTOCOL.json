@@ -1,0 +1,42 @@
+{
+  "stage": "S2-R1",
+  "scope": "diagnosis only; no acquisition, installed counterfactual, runtime-law modification, threshold change, or production promotion",
+  "baseline_main": "11c6e0a78547d68a0be8f78b3c801e912722608d",
+  "research_head": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+  "source_archive_sha256": "661d007850d3026ed22636fdc4d96e9113115fb2b9e2d66856ad88e4ba60a49f",
+  "continuation_sequence": 76617,
+  "continuation_native_checksum": "b87285e38a321d45e4da920f219b388d1a2d061554042d2dd0f109883b38ab9d",
+  "native_learner_sha256": "5cbd936e59145868a152c8e6f0ff7b08cf1a6fd30bb1ede579b2bb4136061db6",
+  "data": {
+    "old_development": "64 saved S2 development trials for input path and causal interventions",
+    "historical_admission": "16 immutable journal commands with original fit/check sets and witness state",
+    "final_holdout": "never semantically loaded or evaluated; bytes only authenticated as archive payloads",
+    "synthetic_diagnostic": "known linear target .1 + .2 * one forecast/history coordinate; not evidence of actual prediction-error information or independent generalization"
+  },
+  "seeds": [3101, 3109, 3121],
+  "input_conditions": ["A-original", "B-no-forecast", "C-no-history", "D-controlled-both", "E-legal-variation"],
+  "causal_interventions": {
+    "readout_weight_factors": [0, 0.5, -1, 1.5],
+    "linear_feature": "zero incoming direction; keep existing center, resolution and downstream graph",
+    "product_feature": "coarsen to resolution 7.99 and center zero; explicitly not a perfect zero clamp",
+    "coordinate": "zero each coordinate 0 through 69 without refitting"
+  },
+  "counterfactual_basis": {
+    "lessons": [1, 5, 9],
+    "coordinates": [56, 57, 58, 59, 60, 61, 63, 64],
+    "quantizer_delta_factors": [0.0625, 1, 16],
+    "readout_modes": ["activation", "metric"],
+    "capacity": "at most one added feature; retain native ceiling 32; never install",
+    "interpretation": "candidate proposals outside the native single residual direction; score with native fit and retention functions"
+  },
+  "synthetic_controls": {
+    "parent_state": "exact historical state before lesson 9",
+    "target_coordinates": [56, 59],
+    "other_coordinates": ["zero", "independently varying"],
+    "witnesses": "unchanged historical native witnesses",
+    "installation": false
+  },
+  "completion": "DIAGNOSED, PARTIAL, INCONCLUSIVE or BLOCKED based on causal evidence; successful test exit is only engineering validation",
+  "negative_results": "retain every candidate and failure",
+  "source_integrity": "verify full payload manifest before and after; assert exact runtime bytes before and after each detached diagnostic; exact replay must reproduce continuation"
+}

@@ -1,0 +1,24 @@
+=== RUN   TestS2R1Source
+    s2r1_diagnostic_test.go:104: verified immutable S2 continuation and 64 development reads; no holdout evaluation
+--- PASS: TestS2R1Source (4.25s)
+=== RUN   TestS2R1InputAndCausal
+    s2r1_diagnostic_test.go:192: encoded coordinates checked; five input conditions and readout/source parameter interventions evaluated without state mutation
+--- PASS: TestS2R1InputAndCausal (6.24s)
+=== RUN   TestS2R1HistoricalAdmission
+    s2r1_diagnostic_test.go:262: exact historical receipt match for 16 lessons; recovered original continuation at 76617; all counterfactuals uninstalled
+--- PASS: TestS2R1HistoricalAdmission (189.04s)
+=== RUN   TestS2R1PositiveControlLabels
+--- PASS: TestS2R1PositiveControlLabels (0.00s)
+=== RUN   TestS2R1Followup
+    s2r1_followup_test.go:144: completed equivalent input, witness and parameter controls for historical lesson 5
+    s2r1_followup_test.go:144: completed equivalent input, witness and parameter controls for historical lesson 9
+    s2r1_followup_test.go:152: no installation, no new learning command; original stage08 runtime bytes restored exactly
+--- PASS: TestS2R1Followup (65.88s)
+=== RUN   TestS2R1RankedTail
+    s2r1_followup_test.go:176: completed fixed ranks 9-64 without installation for lesson 5
+    s2r1_followup_test.go:176: completed fixed ranks 9-64 without installation for lesson 9
+--- PASS: TestS2R1RankedTail (31.56s)
+=== RUN   TestS2R1RecruitmentCounterfactual
+    s2r1_followup_test.go:203: split old-readout/new-feature changes and extra-coordinate interventions without installing a candidate
+--- PASS: TestS2R1RecruitmentCounterfactual (8.62s)
+PASS

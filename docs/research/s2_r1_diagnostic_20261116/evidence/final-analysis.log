@@ -1,0 +1,28 @@
+{
+  "lessons": 16,
+  "trials": 1260,
+  "positive_controls": 12,
+  "basis_probes": [
+    {
+      "lesson": 1,
+      "trials": 48,
+      "fit_valid_n": 39,
+      "best_valid_check_mse": 9.556337660483521e-05,
+      "gain_without_retention_regression_n": 39
+    },
+    {
+      "lesson": 5,
+      "trials": 48,
+      "fit_valid_n": 39,
+      "best_valid_check_mse": 3.3698170312186515e-05,
+      "gain_without_retention_regression_n": 0
+    },
+    {
+      "lesson": 9,
+      "trials": 48,
+      "fit_valid_n": 39,
+      "best_valid_check_mse": 3.517320682905043e-05,
+      "gain_without_retention_regression_n": 0
+    }
+  ]
+}

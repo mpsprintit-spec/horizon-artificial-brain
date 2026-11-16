@@ -1,0 +1,11 @@
+=== RUN   TestS2R1Source
+    s2r1_diagnostic_test.go:104: verified immutable S2 continuation and 64 development reads; no holdout evaluation
+--- PASS: TestS2R1Source (32.15s)
+=== RUN   TestS2R1InputAndCausal
+    s2r1_diagnostic_test.go:192: encoded coordinates checked; five input conditions and readout/source parameter interventions evaluated without state mutation
+--- PASS: TestS2R1InputAndCausal (59.38s)
+=== RUN   TestS2R1RecruitmentCounterfactual
+    s2r1_followup_test.go:203: split old-readout/new-feature changes and extra-coordinate interventions without installing a candidate
+--- PASS: TestS2R1RecruitmentCounterfactual (94.51s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	187.107s
