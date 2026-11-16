@@ -1,0 +1,50 @@
+=== RUN   TestMetricReadoutLearnsNewVariableWithTinyConstantOldFeature
+--- PASS: TestMetricReadoutLearnsNewVariableWithTinyConstantOldFeature (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	1.044s
+=== RUN   TestNativeControlReplayAndCredit
+--- PASS: TestNativeControlReplayAndCredit (0.24s)
+=== RUN   TestNativeNumericRegistrationCoexistence
+--- PASS: TestNativeNumericRegistrationCoexistence (4.46s)
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/nonempty-written
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/active-written
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/unsupported-numeric
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/active-numeric
+--- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence (0.28s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/nonempty-written (0.05s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/active-written (0.06s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/unsupported-numeric (0.09s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/active-numeric (0.09s)
+=== RUN   TestMetricBodyCurriculumComparison
+    neural_metric_body_test.go:80: explicit numerical body benchmark required
+--- SKIP: TestMetricBodyCurriculumComparison (0.00s)
+=== RUN   TestMetricLearnsReferenceFallbackWithoutForgettingNamedBinding
+    neural_metric_conditional_test.go:19: dialogue head=17 attempt=0 missing-direction committed=true check=16/16 err=5.750955267558311e-14 N=1
+    neural_metric_conditional_test.go:19: dialogue head=18 attempt=0 missing-direction committed=true check=16/16 err=5.750955267558311e-14 N=2
+    neural_metric_conditional_test.go:19: dialogue head=19 attempt=0 missing-direction committed=true check=16/16 err=5.750955267558311e-14 N=3
+    neural_metric_conditional_test.go:30: dialogue head=7 attempt=0 readout committed=true check=12/12 err=1.4671597270421444e-13 N=3
+    neural_metric_conditional_test.go:31: dialogue head=7 attempt=0 missing-relation committed=true check=24/24 err=1.454392162258955e-13 N=4
+--- PASS: TestMetricLearnsReferenceFallbackWithoutForgettingNamedBinding (2.62s)
+=== RUN   TestMetricProductPreservesMagnitude
+--- PASS: TestMetricProductPreservesMagnitude (5.74s)
+=== RUN   TestMetricInvalidEvidenceFailsBeforeMutation
+--- PASS: TestMetricInvalidEvidenceFailsBeforeMutation (6.00s)
+=== RUN   TestMetricCanonicalRestoreRejectsWrongContractAndOrphans
+--- PASS: TestMetricCanonicalRestoreRejectsWrongContractAndOrphans (1.60s)
+=== RUN   TestMetricObservedOutcomeUncertaintyIsRetained
+--- PASS: TestMetricObservedOutcomeUncertaintyIsRetained (0.14s)
+=== RUN   TestMetricWorldRejectsMalformedRequests
+--- PASS: TestMetricWorldRejectsMalformedRequests (0.85s)
+=== RUN   TestMetricInformationReuseAndPrecision
+--- PASS: TestMetricInformationReuseAndPrecision (1.44s)
+=== RUN   TestMetricFineContrastAndConflictDiagnosis
+--- PASS: TestMetricFineContrastAndConflictDiagnosis (0.18s)
+=== RUN   TestMetricContextualRetention
+--- PASS: TestMetricContextualRetention (0.33s)
+=== RUN   TestMetricImaginedFramesCannotBecomeObservedLabels
+--- PASS: TestMetricImaginedFramesCannotBecomeObservedLabels (0.00s)
+=== RUN   TestMetricNativeTransitionRolloutRecovery
+--- PASS: TestMetricNativeTransitionRolloutRecovery (64.48s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	89.403s

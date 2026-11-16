@@ -1,0 +1,85 @@
+{
+  "checks": [
+    {
+      "log": "diagnostic-receipts.log",
+      "pass_cases": [
+        "TestS2R1InputAndCausal",
+        "TestS2R1HistoricalAdmission"
+      ],
+      "skip_cases": [],
+      "fail_cases": [],
+      "race_reported": false
+    },
+    {
+      "log": "followup.log",
+      "pass_cases": [
+        "TestS2R1Followup"
+      ],
+      "skip_cases": [],
+      "fail_cases": [],
+      "race_reported": false
+    },
+    {
+      "log": "ranked-tail.log",
+      "pass_cases": [
+        "TestS2R1RankedTail"
+      ],
+      "skip_cases": [],
+      "fail_cases": [],
+      "race_reported": false
+    },
+    {
+      "log": "history-components.log",
+      "pass_cases": [
+        "TestS2R1RecruitmentCounterfactual"
+      ],
+      "skip_cases": [],
+      "fail_cases": [],
+      "race_reported": false
+    },
+    {
+      "log": "native-metric-regressions.log",
+      "pass_cases": [
+        "TestMetricReadoutLearnsNewVariableWithTinyConstantOldFeature",
+        "TestNativeControlReplayAndCredit",
+        "TestNativeNumericRegistrationCoexistence",
+        "TestNativeNumericRegistrationRejectsInvalidCoexistence",
+        "TestMetricLearnsReferenceFallbackWithoutForgettingNamedBinding",
+        "TestMetricProductPreservesMagnitude",
+        "TestMetricInvalidEvidenceFailsBeforeMutation",
+        "TestMetricCanonicalRestoreRejectsWrongContractAndOrphans",
+        "TestMetricObservedOutcomeUncertaintyIsRetained",
+        "TestMetricWorldRejectsMalformedRequests",
+        "TestMetricInformationReuseAndPrecision",
+        "TestMetricFineContrastAndConflictDiagnosis",
+        "TestMetricContextualRetention",
+        "TestMetricImaginedFramesCannotBecomeObservedLabels",
+        "TestMetricNativeTransitionRolloutRecovery"
+      ],
+      "skip_cases": [
+        "TestMetricBodyCurriculumComparison"
+      ],
+      "fail_cases": [],
+      "race_reported": false
+    },
+    {
+      "log": "diagnostic-race-with-source.log",
+      "pass_cases": [
+        "TestS2R1Source",
+        "TestS2R1InputAndCausal",
+        "TestS2R1RecruitmentCounterfactual"
+      ],
+      "skip_cases": [],
+      "fail_cases": [],
+      "race_reported": false
+    }
+  ],
+  "vet_production_exit": 0,
+  "vet_diagnostic_exit": 0,
+  "compiler": "go1.22.12 linux/amd64",
+  "python_syntax": "passed",
+  "production_learner_sha256": "5cbd936e59145868a152c8e6f0ff7b08cf1a6fd30bb1ede579b2bb4136061db6",
+  "clean_reproduction": "passed",
+  "byte_identical_reproduction_payloads": 11,
+  "final_descriptor_isolation_passed": true
+}

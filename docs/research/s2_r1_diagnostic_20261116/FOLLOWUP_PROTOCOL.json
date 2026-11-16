@@ -1,0 +1,20 @@
+{
+  "reason": "First diagnostic established 16 exact historical receipts, nonzero extra-coordinate candidate axes, and native reachability. Disambiguate witness coupling and full-refit step effects before classifying root cause.",
+  "preregistered_before_execution": true,
+  "parent_checkpoint": "s2/02-stage-08.json; validate identical numerical traces to historical commands 5 and 9",
+  "commands": [5, 9],
+  "seed": 3203,
+  "input_conditions": ["A-original", "B-no-forecast", "C-no-history", "D-seeded-permutation-of-extra-context", "E-history-scale4"],
+  "transform_witnesses_equivalently": true,
+  "witness_controls": ["original", "remove-S2-witnesses", "retain-only-S2-witnesses"],
+  "witness_interpretation": "Counterfactual data intervention only; native admission unchanged. Evaluate selected candidates again against original witnesses, never install or save as learned state.",
+  "readout_parameter_interventions": {
+    "fractions": [0, 0.01, 0.05, 0.1, 0.25, 0.5, 1],
+    "restriction": "same readout mode and unchanged old feature parameters; fraction 0 must exactly reproduce incumbent",
+    "interpretation": "causal parameter test of rejected full steps, not an implemented update rule or validation of a repair"
+  },
+  "final_holdout_used": false,
+  "new_learning_commands": 0,
+  "source_mutation": false,
+  "all_negative_results_retained": true
+}

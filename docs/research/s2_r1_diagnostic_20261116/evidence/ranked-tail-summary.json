@@ -1,0 +1,16 @@
+[
+  {
+    "best_valid_check_mse": 3.3562438350004097e-05,
+    "eligible_n": 0,
+    "lesson": 5,
+    "ranked_n": 907,
+    "tested_n": 112
+  },
+  {
+    "best_valid_check_mse": 3.402962242539993e-05,
+    "eligible_n": 0,
+    "lesson": 9,
+    "ranked_n": 907,
+    "tested_n": 112
+  }
+]

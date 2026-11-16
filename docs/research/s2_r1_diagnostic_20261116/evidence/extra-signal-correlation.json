@@ -1,0 +1,56 @@
+[
+  {
+    "coordinate": 56,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": 0.11350761566155745,
+    "pearson_target": 0.14396514496018833
+  },
+  {
+    "coordinate": 57,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": 0.003013083292648766,
+    "pearson_target": 0.1524420760486978
+  },
+  {
+    "coordinate": 58,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": -0.044039649729428205,
+    "pearson_target": 0.1534340327764103
+  },
+  {
+    "coordinate": 59,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": 0.1719709938089243,
+    "pearson_target": 0.007766286899397525
+  },
+  {
+    "coordinate": 60,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": 0.04985080242004497,
+    "pearson_target": -0.033847026588742356
+  },
+  {
+    "coordinate": 61,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": 0.05828651213830497,
+    "pearson_target": -0.019924597391478553
+  },
+  {
+    "coordinate": 62,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": null,
+    "pearson_target": null
+  },
+  {
+    "coordinate": 63,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": -0.10182236677223687,
+    "pearson_target": -0.1204670416554953
+  },
+  {
+    "coordinate": 64,
+    "interpretation": "descriptive development correlation, not causal or independent predictive evidence",
+    "pearson_residual": 0.09354793245329411,
+    "pearson_target": -0.32175383373848715
+  }
+]

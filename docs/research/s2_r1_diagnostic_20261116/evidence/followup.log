@@ -1,0 +1,6 @@
+=== RUN   TestS2R1Followup
+    s2r1_followup_test.go:144: completed equivalent input, witness and parameter controls for historical lesson 5
+    s2r1_followup_test.go:144: completed equivalent input, witness and parameter controls for historical lesson 9
+    s2r1_followup_test.go:152: no installation, no new learning command; original stage08 runtime bytes restored exactly
+--- PASS: TestS2R1Followup (66.40s)
+PASS

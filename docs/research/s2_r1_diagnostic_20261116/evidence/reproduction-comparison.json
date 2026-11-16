@@ -1,0 +1,65 @@
+{
+  "clean_reproduction": "passed",
+  "payload_matches": [
+    {
+      "file": "source-validation.json",
+      "sha256": "e862f205bcb6056fbe9c07530d53a4e1ce948367e9a7f26c5ecacfc13e1eed1f",
+      "byte_identical": true
+    },
+    {
+      "file": "input-path.json",
+      "sha256": "ff76d4e74dfad67d2e6f2d478df9db7773f99b94fe46874245f2d4da77556311",
+      "byte_identical": true
+    },
+    {
+      "file": "admission-traces.json",
+      "sha256": "21d18d62dcacd74bcd099c813df43b3da8ae41599eebb77c18712cc8e67315ef",
+      "byte_identical": true
+    },
+    {
+      "file": "basis-probes.json",
+      "sha256": "6725cf04924c0bb2b08c7e18c016c5972b63854dd8210b2ee04c38ab4d004f0d",
+      "byte_identical": true
+    },
+    {
+      "file": "positive-controls.json",
+      "sha256": "504c83bd9ef2fc6d1916b1c44f24c630670a94167a1d03e71b32b4a99f6ae701",
+      "byte_identical": true
+    },
+    {
+      "file": "causal-interventions.json",
+      "sha256": "286f79f8e21c704d39a6adfe61e90f142db0d770b13552c1bdcf01eb7b4cc8f7",
+      "byte_identical": true
+    },
+    {
+      "file": "learning-input-interventions.json",
+      "sha256": "31aea557d89d2a9f90eeb68c18c83942d2405b4d56da99d354b50868fe51cf00",
+      "byte_identical": true
+    },
+    {
+      "file": "witness-controls.json",
+      "sha256": "88530ea06c48ce1d4ffdf9ffd9ae1740c7e17c525dba04247adb9afde29fa743",
+      "byte_identical": true
+    },
+    {
+      "file": "partial-step-interventions.json",
+      "sha256": "33b0db01c4bdaf75cf45a49b3751c2d8fa68e177738e9fe5982c8c67c1632d05",
+      "byte_identical": true
+    },
+    {
+      "file": "ranked-tail-probes.json",
+      "sha256": "089bf051b7efeacb749859c2e878e61f35beeac50f45c81c16f28f68289960e3",
+      "byte_identical": true
+    },
+    {
+      "file": "direction-step-contributions.json",
+      "sha256": "495b5fc75dec749af0929ee24406357eff77d1a74006128f344cf0ef1e570dd4",
+      "byte_identical": true
+    }
+  ],
+  "native_receipt_trials": 1260,
+  "original_learning_commands_replayed": 16,
+  "new_learning_commands": 0,
+  "source_unchanged": true,
+  "final_holdout_evaluations": 0
+}

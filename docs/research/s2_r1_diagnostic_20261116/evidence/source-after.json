@@ -1,0 +1,11 @@
+{
+  "experiment_id": "s2r1-20261116-native-learning-diagnostic",
+  "verified_payloads": 75,
+  "source_unchanged": true,
+  "checkpoint_sequence": 76617,
+  "new_learning_commands": 0,
+  "final_holdout_evaluations": 0,
+  "main_changed": false,
+  "pr74_changed": false,
+  "s2r2_started": false
+}

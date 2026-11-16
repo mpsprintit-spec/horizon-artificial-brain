@@ -1,0 +1,7 @@
+=== RUN   TestS2R1InputAndCausal
+    s2r1_diagnostic_test.go:192: encoded coordinates checked; five input conditions and readout/source parameter interventions evaluated without state mutation
+--- PASS: TestS2R1InputAndCausal (6.05s)
+=== RUN   TestS2R1HistoricalAdmission
+    s2r1_diagnostic_test.go:262: exact historical receipt match for 16 lessons; recovered original continuation at 76617; all counterfactuals uninstalled
+--- PASS: TestS2R1HistoricalAdmission (188.38s)
+PASS

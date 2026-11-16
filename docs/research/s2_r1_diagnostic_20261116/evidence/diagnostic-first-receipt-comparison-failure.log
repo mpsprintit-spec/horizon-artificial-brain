@@ -1,0 +1,10 @@
+=== RUN   TestS2R1Source
+    s2r1_diagnostic_test.go:104: verified immutable S2 continuation and 64 development reads; no holdout evaluation
+--- PASS: TestS2R1Source (5.20s)
+=== RUN   TestS2R1InputAndCausal
+    s2r1_diagnostic_test.go:183: encoded coordinates checked; five input conditions and readout/source parameter interventions evaluated without state mutation
+--- PASS: TestS2R1InputAndCausal (6.77s)
+=== RUN   TestS2R1HistoricalAdmission
+    s2r1_diagnostic_test.go:215: native candidate trace differs from historical receipt at lesson 1
+--- FAIL: TestS2R1HistoricalAdmission (7.87s)
+FAIL

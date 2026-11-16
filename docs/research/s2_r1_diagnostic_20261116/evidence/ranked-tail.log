@@ -1,0 +1,5 @@
+=== RUN   TestS2R1RankedTail
+    s2r1_followup_test.go:176: completed fixed ranks 9-64 without installation for lesson 5
+    s2r1_followup_test.go:176: completed fixed ranks 9-64 without installation for lesson 9
+--- PASS: TestS2R1RankedTail (30.54s)
+PASS

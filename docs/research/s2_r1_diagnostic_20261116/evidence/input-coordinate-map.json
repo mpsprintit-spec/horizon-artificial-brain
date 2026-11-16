@@ -1,0 +1,4464 @@
+[
+  {
+    "coordinate": 0,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.31200520418537014,
+    "min": 0,
+    "sd": 0.09688646566659728,
+    "source_neuron": 175,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01098576517424293,
+        "signed_parameter": -0.08788612139394344,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.005098454612917312,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.040787636903338496,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.003673529713930994,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.029388237711447954,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006819206150770642,
+        "signed_parameter": -0.054553649206165136,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.009332024748426464,
+        "signed_parameter": -0.07465619798741172,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.019127579676574125,
+        "signed_parameter": -0.153020637412593,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0060332563802071755,
+        "signed_parameter": -0.048266051041657404,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004352388212535089,
+    "zero_coordinate_mse_delta": -1.4721335910674978e-06
+  },
+  {
+    "coordinate": 1,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.31784587270080444,
+    "min": 0,
+    "sd": 0.10525733170466292,
+    "source_neuron": 176,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008371383116175496,
+        "signed_parameter": -0.06697106492940397,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.005622784228544985,
+        "signed_parameter": -0.04498227382835988,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.004458404795671733,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.03566723836537387,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0029125429720044498,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.023300343776035598,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0030191730178270584,
+        "signed_parameter": -0.024153384142616467,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0042569643293850126,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0340557146350801,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.015901749237692834,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12721399390154267,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.005265647735821378,
+    "zero_coordinate_mse_delta": -1.978228020117572e-07
+  },
+  {
+    "coordinate": 2,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.31299067189229635,
+    "min": 0,
+    "sd": 0.10643080827573574,
+    "source_neuron": 177,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008918412549287009,
+        "signed_parameter": -0.07134730039429607,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.005851064983330865,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04680851986664692,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.006676765858349876,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.05341412686679901,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.023559465397581518,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.18847572318065214,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.009934101079145162,
+        "signed_parameter": -0.0794728086331613,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.018080072423182502,
+        "signed_parameter": -0.14464057938546002,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.02933464885312084,
+        "signed_parameter": -0.2346771908249667,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.01415838175363417,
+    "zero_coordinate_mse_delta": 7.384030578347819e-06
+  },
+  {
+    "coordinate": 3,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 1,
+    "min": -1,
+    "sd": 1.0,
+    "source_neuron": 178,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.08675098251576825,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.694007860126146,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.02104682554481487,
+        "signed_parameter": -0.16837460435851895,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.062318778517714744,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.49855022814171795,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.026426375215771042,
+        "signed_parameter": -0.21141100172616833,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.050445673677349714,
+        "signed_parameter": -0.4035653894187977,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.012286190222287928,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09828952177830343,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.048813935274956206,
+        "signed_parameter": -0.39051148219964965,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.027915297019914333,
+    "zero_coordinate_mse_delta": 0.00015747983133482702
+  },
+  {
+    "coordinate": 4,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0,
+    "min": -1,
+    "sd": 0.5,
+    "source_neuron": 179,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.05225698092317265,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.4180558473853812,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.003996505529779518,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.031972044238236144,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.04412929056593338,
+        "signed_parameter": -0.353034324527467,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008263796204136925,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0661103696330954,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.03188761328458873,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.25510090627670984,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0035099593262257955,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.028079674609806364,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0349730245007811,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.2797841960062488,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.021045209061831167,
+    "zero_coordinate_mse_delta": 1.605388004791232e-05
+  },
+  {
+    "coordinate": 5,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 1,
+    "min": 0,
+    "sd": 0.5,
+    "source_neuron": 180,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.05225698092317265,
+        "signed_parameter": -0.4180558473853812,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.003996505529779518,
+        "signed_parameter": -0.031972044238236144,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.04412929056593338,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.353034324527467,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008263796204136925,
+        "signed_parameter": -0.0661103696330954,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.03188761328458873,
+        "signed_parameter": -0.25510090627670984,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0035099593262257955,
+        "signed_parameter": -0.028079674609806364,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0349730245007811,
+        "signed_parameter": -0.2797841960062488,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.021045209061831167,
+    "zero_coordinate_mse_delta": 1.605388004791232e-05
+  },
+  {
+    "coordinate": 6,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 7,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3082872607291537,
+    "min": 0,
+    "sd": 0.0985131439270358,
+    "source_neuron": 181,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006707180237887498,
+        "signed_parameter": -0.053657441903099984,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0011001997486261431,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.008801597989009145,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.012772428321424584,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10217942657139667,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0021341371708586154,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.017073097366868923,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0008128353851446758,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.006502683081157407,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.004353573031722564,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.03482858425378051,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01818344930005574,
+        "signed_parameter": -0.14546759440044593,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.012811591094586575,
+    "zero_coordinate_mse_delta": -9.555664543077697e-08
+  },
+  {
+    "coordinate": 8,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32394491090942334,
+    "min": 0,
+    "sd": 0.11621564258607463,
+    "source_neuron": 182,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010562657451855658,
+        "signed_parameter": -0.08450125961484527,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.009515922304577271,
+        "signed_parameter": -0.07612737843661817,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0061361494396108916,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04908919551688713,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01653498411834819,
+        "signed_parameter": -0.13227987294678553,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.004224357344529811,
+        "signed_parameter": -0.033794858756238486,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0042054328289873695,
+        "signed_parameter": -0.033643462631898956,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.02778935504102935,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.2223148403282348,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.005055032351685317,
+    "zero_coordinate_mse_delta": -1.6135713899051237e-06
+  },
+  {
+    "coordinate": 9,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32112939219067266,
+    "min": 0,
+    "sd": 0.09809256297840538,
+    "source_neuron": 183,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.005214704863128045,
+        "signed_parameter": -0.04171763890502436,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.005580896742287566,
+        "signed_parameter": -0.044647173938300526,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.019348397251857,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.154787178014856,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.001031144090625082,
+        "signed_parameter": -0.008249152725000656,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.014374107765192065,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.11499286212153652,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.02119578659517282,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.16956629276138255,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.012847408847724994,
+        "signed_parameter": -0.10277927078179995,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.012913673200358262,
+    "zero_coordinate_mse_delta": 5.134216597943312e-06
+  },
+  {
+    "coordinate": 10,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3169975004989289,
+    "min": 0,
+    "sd": 0.10413866209072867,
+    "source_neuron": 184,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007766265214753095,
+        "signed_parameter": -0.06213012171802476,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.02097142009390927,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.16777136075127416,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.01782003655086005,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.1425602924068804,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.023952621044688434,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.19162096835750747,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0016542241827323253,
+        "signed_parameter": -0.013233793461858602,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.008939335693679608,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07151468554943687,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.017433777567556884,
+        "signed_parameter": -0.13947022054045508,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.014975204372387932,
+    "zero_coordinate_mse_delta": 8.409759384780298e-06
+  },
+  {
+    "coordinate": 11,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.320918323893774,
+    "min": 0,
+    "sd": 0.11499308992260769,
+    "source_neuron": 185,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006517259888418254,
+        "signed_parameter": -0.05213807910734603,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.015931545111470907,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12745236089176726,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.019675236105367054,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.15740188884293643,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008002669404333505,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06402135523466804,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.005305383470581872,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04244306776465498,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.018181651673484518,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.14545321338787615,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.012161611719440014,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09729289375552011,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.015255508152927776,
+    "zero_coordinate_mse_delta": 2.8892954179965218e-06
+  },
+  {
+    "coordinate": 12,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.322436187009971,
+    "min": 0,
+    "sd": 0.11765325779037017,
+    "source_neuron": 186,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008353729573688358,
+        "signed_parameter": -0.06682983658950686,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.01172037210964433,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09376297687715464,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.009868189308657082,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07894551446925666,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.009610733824276215,
+        "signed_parameter": -0.07688587059420972,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00638880785074835,
+        "signed_parameter": -0.0511104628059868,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.004399622884674735,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.03519698307739788,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01740356591483671,
+        "signed_parameter": -0.13922852731869367,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.013799727832947233,
+    "zero_coordinate_mse_delta": 2.294259359797909e-06
+  },
+  {
+    "coordinate": 13,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 14,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32013452077445076,
+    "min": 0.02287515248462469,
+    "sd": 0.08721992959689166,
+    "source_neuron": 187,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0006457674217487792,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.005166139373990234,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.04319071079846883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.34552568638775066,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013190849729784092,
+        "signed_parameter": -0.10552679783827273,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.03784754896732806,
+        "signed_parameter": -0.3027803917386245,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008245804866974602,
+        "signed_parameter": -0.06596643893579682,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.007310603590348152,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.058484828722785216,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0017794308347663034,
+        "signed_parameter": -0.014235446678130427,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.013550358724508965,
+    "zero_coordinate_mse_delta": 9.139498554694065e-06
+  },
+  {
+    "coordinate": 15,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32013452077445076,
+    "min": 0.02287515248462469,
+    "sd": 0.08721992959689166,
+    "source_neuron": 188,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0006457674217487792,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.005166139373990234,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.04319071079846883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.34552568638775066,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013190849729784092,
+        "signed_parameter": -0.10552679783827273,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.03784754896732806,
+        "signed_parameter": -0.3027803917386245,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008245804866974602,
+        "signed_parameter": -0.06596643893579682,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.007310603590348152,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.058484828722785216,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0017794308347663034,
+        "signed_parameter": -0.014235446678130427,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.013550358724508965,
+    "zero_coordinate_mse_delta": 9.139498554694065e-06
+  },
+  {
+    "coordinate": 16,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3189927657746813,
+    "min": 0,
+    "sd": 0.10157076462071361,
+    "source_neuron": 189,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.007894660958901739,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06315728767121391,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006333313961744706,
+        "signed_parameter": -0.050666511693957646,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010194518975749857,
+        "signed_parameter": -0.08155615180599886,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.002716358460778348,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.021730867686226785,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.003075964258239903,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.024607714065919224,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0059062996316771475,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04725039705341718,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.002389605925201525,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0191168474016122,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004759454450362945,
+    "zero_coordinate_mse_delta": -6.293203551672122e-07
+  },
+  {
+    "coordinate": 17,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3189927657746813,
+    "min": 0,
+    "sd": 0.10157076462071361,
+    "source_neuron": 190,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.007894660958901739,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06315728767121391,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006333313961744706,
+        "signed_parameter": -0.050666511693957646,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010194518975749857,
+        "signed_parameter": -0.08155615180599886,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.002716358460778348,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.021730867686226785,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.003075964258239903,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.024607714065919224,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0059062996316771475,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04725039705341718,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.002389605925201525,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0191168474016122,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004759454450362945,
+    "zero_coordinate_mse_delta": -6.293203551672122e-07
+  },
+  {
+    "coordinate": 18,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3189927657746813,
+    "min": 0,
+    "sd": 0.10157076462071361,
+    "source_neuron": 191,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.007894660958901739,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06315728767121391,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006333313961744706,
+        "signed_parameter": -0.050666511693957646,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010194518975749857,
+        "signed_parameter": -0.08155615180599886,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.002716358460778348,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.021730867686226785,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.003075964258239903,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.024607714065919224,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0059062996316771475,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04725039705341718,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.002389605925201525,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0191168474016122,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004759454450362945,
+    "zero_coordinate_mse_delta": -6.293203551672122e-07
+  },
+  {
+    "coordinate": 19,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3189927657746813,
+    "min": 0,
+    "sd": 0.10157076462071361,
+    "source_neuron": 192,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.007894660958901739,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06315728767121391,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006333313961744706,
+        "signed_parameter": -0.050666511693957646,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010194518975749857,
+        "signed_parameter": -0.08155615180599886,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.002716358460778348,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.021730867686226785,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.003075964258239903,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.024607714065919224,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0059062996316771475,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04725039705341718,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.002389605925201525,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0191168474016122,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004759454450362945,
+    "zero_coordinate_mse_delta": -6.293203551672122e-07
+  },
+  {
+    "coordinate": 20,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 21,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3142081015538183,
+    "min": 0.022875152527948847,
+    "sd": 0.08671121862284069,
+    "source_neuron": 193,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 6.367702162883155e-05,
+        "signed_parameter": -0.0005094161730306524,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.011554609605971275,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0924368768477702,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0079819630221456,
+        "signed_parameter": -0.0638557041771648,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.025043330526966508,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.20034664421573206,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.018873949515940062,
+        "signed_parameter": -0.1509915961275205,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.04236140700880853,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.3388912560704682,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.005939553311228165,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04751642648982532,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.019006822035073603,
+    "zero_coordinate_mse_delta": 1.986743039929886e-05
+  },
+  {
+    "coordinate": 22,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3142081015538183,
+    "min": 0.022875152527948847,
+    "sd": 0.08671121862284069,
+    "source_neuron": 194,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 6.367702162883155e-05,
+        "signed_parameter": -0.0005094161730306524,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.011554609605971275,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0924368768477702,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0079819630221456,
+        "signed_parameter": -0.0638557041771648,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.025043330526966508,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.20034664421573206,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.018873949515940062,
+        "signed_parameter": -0.1509915961275205,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.04236140700880853,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.3388912560704682,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.005939553311228165,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04751642648982532,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.019006822035073603,
+    "zero_coordinate_mse_delta": 1.986743039929886e-05
+  },
+  {
+    "coordinate": 23,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3142081015538183,
+    "min": 0.022875152527948847,
+    "sd": 0.08671121862284069,
+    "source_neuron": 195,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 6.367702162883155e-05,
+        "signed_parameter": -0.0005094161730306524,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.011554609605971275,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0924368768477702,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0079819630221456,
+        "signed_parameter": -0.0638557041771648,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.025043330526966508,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.20034664421573206,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.018873949515940062,
+        "signed_parameter": -0.1509915961275205,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.04236140700880853,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.3388912560704682,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.005939553311228165,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04751642648982532,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.019006822035073603,
+    "zero_coordinate_mse_delta": 1.986743039929886e-05
+  },
+  {
+    "coordinate": 24,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3142081015538183,
+    "min": 0.022875152527948847,
+    "sd": 0.08671121862284069,
+    "source_neuron": 196,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 6.367702162883155e-05,
+        "signed_parameter": -0.0005094161730306524,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.011554609605971275,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0924368768477702,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0079819630221456,
+        "signed_parameter": -0.0638557041771648,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.025043330526966508,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.20034664421573206,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.018873949515940062,
+        "signed_parameter": -0.1509915961275205,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.04236140700880853,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.3388912560704682,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.005939553311228165,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04751642648982532,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.019006822035073603,
+    "zero_coordinate_mse_delta": 1.986743039929886e-05
+  },
+  {
+    "coordinate": 25,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32013452077445076,
+    "min": 0.02287515248462469,
+    "sd": 0.08721992959689166,
+    "source_neuron": 197,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0006457674217487792,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.005166139373990234,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.04319071079846883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.34552568638775066,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013190849729784092,
+        "signed_parameter": -0.10552679783827273,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.03784754896732806,
+        "signed_parameter": -0.3027803917386245,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008245804866974602,
+        "signed_parameter": -0.06596643893579682,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.007310603590348152,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.058484828722785216,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0017794308347663034,
+        "signed_parameter": -0.014235446678130427,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.013550358724508965,
+    "zero_coordinate_mse_delta": 9.139498554694065e-06
+  },
+  {
+    "coordinate": 26,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32013452077445076,
+    "min": 0.02287515248462469,
+    "sd": 0.08721992959689166,
+    "source_neuron": 198,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0006457674217487792,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.005166139373990234,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.04319071079846883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.34552568638775066,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013190849729784092,
+        "signed_parameter": -0.10552679783827273,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.03784754896732806,
+        "signed_parameter": -0.3027803917386245,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008245804866974602,
+        "signed_parameter": -0.06596643893579682,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.007310603590348152,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.058484828722785216,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0017794308347663034,
+        "signed_parameter": -0.014235446678130427,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.013550358724508965,
+    "zero_coordinate_mse_delta": 9.139498554694065e-06
+  },
+  {
+    "coordinate": 27,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 28,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3199149392864774,
+    "min": 0.025188718442045538,
+    "sd": 0.08339778861716492,
+    "source_neuron": 199,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0013717987961309598,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.010974390369047678,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0014867135683940395,
+        "signed_parameter": -0.011893708547152316,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.007736085946334837,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.061888687570678697,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008759887164149547,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07007909731319638,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.023368440281981956,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.18694752225585565,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.010095917554285851,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08076734043428681,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.023503620242265176,
+        "signed_parameter": -0.1880289619381214,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.015672001672108894,
+    "zero_coordinate_mse_delta": 1.8512646084089733e-05
+  },
+  {
+    "coordinate": 29,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3199149392864774,
+    "min": 0.025188718442045538,
+    "sd": 0.08339778861716492,
+    "source_neuron": 200,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0013717987961309598,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.010974390369047678,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0014867135683940395,
+        "signed_parameter": -0.011893708547152316,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.007736085946334837,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.061888687570678697,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008759887164149547,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07007909731319638,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.023368440281981956,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.18694752225585565,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.010095917554285851,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08076734043428681,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.023503620242265176,
+        "signed_parameter": -0.1880289619381214,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.015672001672108894,
+    "zero_coordinate_mse_delta": 1.8512646084089733e-05
+  },
+  {
+    "coordinate": 30,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.5643590114259667,
+    "min": 0.03960691801098572,
+    "sd": 0.13017583686016837,
+    "source_neuron": 201,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0037467389945972326,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.02997391195677786,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.05984325481754878,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.4787460385403902,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.047495412394233355,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.37996329915386684,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.04123122464594947,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.32984979716759577,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.01619971883056162,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12959775064449297,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.005457974401519985,
+        "signed_parameter": -0.04366379521215988,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.015214334156092406,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12171467324873925,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.02033388624622764,
+    "zero_coordinate_mse_delta": 5.218364088257742e-05
+  },
+  {
+    "coordinate": 31,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.31409613384619955,
+    "min": 0,
+    "sd": 0.11390219810434199,
+    "source_neuron": 202,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.01659640903782261,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.13277127230258087,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.026713134806675722,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.21370507845340578,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.013746984886433047,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10997587909146438,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.012841171991872619,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10272937593498095,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.012906347657988392,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10325078126390713,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.029750724317609417,
+        "signed_parameter": -0.23800579454087534,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.019923366876012268,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.15938693500809814,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.016681372133671594,
+    "zero_coordinate_mse_delta": 1.0782666238969809e-05
+  },
+  {
+    "coordinate": 32,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.31409613384619955,
+    "min": 0,
+    "sd": 0.11390219810434199,
+    "source_neuron": 203,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.01659640903782261,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.13277127230258087,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.026713134806675722,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.21370507845340578,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.013746984886433047,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10997587909146438,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.012841171991872619,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10272937593498095,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.012906347657988392,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10325078126390713,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.029750724317609417,
+        "signed_parameter": -0.23800579454087534,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.019923366876012268,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.15938693500809814,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.016681372133671594,
+    "zero_coordinate_mse_delta": 1.0782666238969809e-05
+  },
+  {
+    "coordinate": 33,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.31409613384619955,
+    "min": 0,
+    "sd": 0.11390219810434199,
+    "source_neuron": 204,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.01659640903782261,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.13277127230258087,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.026713134806675722,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.21370507845340578,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.013746984886433047,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10997587909146438,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.012841171991872619,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10272937593498095,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.012906347657988392,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10325078126390713,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.029750724317609417,
+        "signed_parameter": -0.23800579454087534,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.019923366876012268,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.15938693500809814,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.016681372133671594,
+    "zero_coordinate_mse_delta": 1.0782666238969809e-05
+  },
+  {
+    "coordinate": 34,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 35,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32322154631658434,
+    "min": 0.03246881486276988,
+    "sd": 0.08051206654817773,
+    "source_neuron": 205,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0025413211272666,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0203305690181328,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.002816462471702128,
+        "signed_parameter": -0.022531699773617023,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.015036449601673942,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12029159681339154,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.017528676678058984,
+        "signed_parameter": -0.14022941342447187,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.03617111635509985,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.2893689308407988,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.021854736299431004,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.17483789039544803,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.010214923998614008,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08171939198891207,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.024377983260484203,
+    "zero_coordinate_mse_delta": 2.930454125284728e-05
+  },
+  {
+    "coordinate": 36,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32322154631658434,
+    "min": 0.03246881486276988,
+    "sd": 0.08051144903231984,
+    "source_neuron": 206,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.002541555394758059,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.020332443158064473,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00281621175325991,
+        "signed_parameter": -0.02252969402607928,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.01503558038652047,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12028464309216376,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01752863035452854,
+        "signed_parameter": -0.1402290428362283,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.03617047060692111,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.28936376485536885,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.021853784091418194,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.17483027273134555,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.010215501160758656,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08172400928606925,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.024377987109021223,
+    "zero_coordinate_mse_delta": 2.93046167342238e-05
+  },
+  {
+    "coordinate": 37,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32322154631658434,
+    "min": 0.03246881486276988,
+    "sd": 0.08051144903231984,
+    "source_neuron": 207,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.002541555394758059,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.020332443158064473,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00281621175325991,
+        "signed_parameter": -0.02252969402607928,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.01503558038652047,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12028464309216376,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01752863035452854,
+        "signed_parameter": -0.1402290428362283,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.03617047060692111,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.28936376485536885,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.021853784091418194,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.17483027273134555,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.010215501160758656,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08172400928606925,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.024377987109021223,
+    "zero_coordinate_mse_delta": 2.93046167342238e-05
+  },
+  {
+    "coordinate": 38,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32322154631658434,
+    "min": 0.03246881486276988,
+    "sd": 0.08051144903231984,
+    "source_neuron": 208,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.002541555394758059,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.020332443158064473,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00281621175325991,
+        "signed_parameter": -0.02252969402607928,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.01503558038652047,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.12028464309216376,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01752863035452854,
+        "signed_parameter": -0.1402290428362283,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.03617047060692111,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.28936376485536885,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.021853784091418194,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.17483027273134555,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.010215501160758656,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08172400928606925,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.024377987109021223,
+    "zero_coordinate_mse_delta": 2.93046167342238e-05
+  },
+  {
+    "coordinate": 39,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3199149392864774,
+    "min": 0.025188718442045538,
+    "sd": 0.08339853511315141,
+    "source_neuron": 209,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0013715645286399437,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.01097251622911955,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0014869642868357872,
+        "signed_parameter": -0.011895714294686298,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.007736955161486672,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06189564129189338,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008759840840619192,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07007872672495354,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.02336908603015949,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.18695268824127592,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.010096869762296878,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08077495809837502,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.023504197404408737,
+        "signed_parameter": -0.1880335792352699,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.01567202426829054,
+    "zero_coordinate_mse_delta": 1.8512733066543024e-05
+  },
+  {
+    "coordinate": 40,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3199149392864774,
+    "min": 0.025188718442045538,
+    "sd": 0.08339778861716492,
+    "source_neuron": 210,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0013717987961309598,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.010974390369047678,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0014867135683940395,
+        "signed_parameter": -0.011893708547152316,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.007736085946334837,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.061888687570678697,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008759887164149547,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07007909731319638,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.023368440281981956,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.18694752225585565,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.010095917554285851,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08076734043428681,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.023503620242265176,
+        "signed_parameter": -0.1880289619381214,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.015672001672108894,
+    "zero_coordinate_mse_delta": 1.8512646084089733e-05
+  },
+  {
+    "coordinate": 41,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 42,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3171261497314677,
+    "min": 0,
+    "sd": 0.11093072656012588,
+    "source_neuron": 211,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.01284355168835624,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10274841350684992,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0007007184115836119,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0056057472926688955,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007576050180627719,
+        "signed_parameter": -0.060608401445021755,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008867856172591067,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07094284938072853,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0023528790636874043,
+        "signed_parameter": -0.018823032509499234,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00928025917071242,
+        "signed_parameter": -0.07424207336569937,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007250123422125811,
+        "signed_parameter": -0.058000987377006485,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004833338458643897,
+    "zero_coordinate_mse_delta": 2.660862039661189e-07
+  },
+  {
+    "coordinate": 43,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3171261497314677,
+    "min": 0,
+    "sd": 0.11093072656012588,
+    "source_neuron": 212,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.01284355168835624,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10274841350684992,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0007007184115836119,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0056057472926688955,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007576050180627719,
+        "signed_parameter": -0.060608401445021755,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008867856172591067,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07094284938072853,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0023528790636874043,
+        "signed_parameter": -0.018823032509499234,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00928025917071242,
+        "signed_parameter": -0.07424207336569937,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007250123422125811,
+        "signed_parameter": -0.058000987377006485,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004833338458643897,
+    "zero_coordinate_mse_delta": 2.660862039661189e-07
+  },
+  {
+    "coordinate": 44,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32396037897801533,
+    "min": 0.025337465185125953,
+    "sd": 0.07857909633786296,
+    "source_neuron": 213,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0014755634660808562,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.01180450772864685,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.002037722842442836,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.01630178273954269,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0038176427310992675,
+        "signed_parameter": -0.03054114184879414,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0053737929173494695,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.042990343338795756,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.011919125728897886,
+        "signed_parameter": -0.09535300583118309,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.005905859262929873,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04724687410343898,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.016038868824631656,
+        "signed_parameter": -0.12831095059705325,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.012833330346536546,
+    "zero_coordinate_mse_delta": 2.4484489042491417e-06
+  },
+  {
+    "coordinate": 45,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32396037897801533,
+    "min": 0,
+    "sd": 0.11482378534637683,
+    "source_neuron": 214,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.008603758953191883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06883007162553506,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.005564101839919357,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04451281471935486,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.011556677260415362,
+        "signed_parameter": -0.0924534180833229,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.011411112049829041,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09128889639863233,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010485190559705173,
+        "signed_parameter": -0.08388152447764138,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0058965922490691325,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04717273799255306,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.020268377969318088,
+        "signed_parameter": -0.1621470237545447,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.005659419552460153,
+    "zero_coordinate_mse_delta": -5.473380282684418e-07
+  },
+  {
+    "coordinate": 46,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32396037897801533,
+    "min": 0,
+    "sd": 0.11482378534637683,
+    "source_neuron": 215,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.008603758953191883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06883007162553506,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.005564101839919357,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04451281471935486,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.011556677260415362,
+        "signed_parameter": -0.0924534180833229,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.011411112049829041,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09128889639863233,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010485190559705173,
+        "signed_parameter": -0.08388152447764138,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0058965922490691325,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04717273799255306,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.020268377969318088,
+        "signed_parameter": -0.1621470237545447,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.005659419552460153,
+    "zero_coordinate_mse_delta": -5.473380282684418e-07
+  },
+  {
+    "coordinate": 47,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.32396037897801533,
+    "min": 0,
+    "sd": 0.11482378534637683,
+    "source_neuron": 216,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.008603758953191883,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.06883007162553506,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.005564101839919357,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04451281471935486,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.011556677260415362,
+        "signed_parameter": -0.0924534180833229,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.011411112049829041,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09128889639863233,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.010485190559705173,
+        "signed_parameter": -0.08388152447764138,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0058965922490691325,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04717273799255306,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.020268377969318088,
+        "signed_parameter": -0.1621470237545447,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.005659419552460153,
+    "zero_coordinate_mse_delta": -5.473380282684418e-07
+  },
+  {
+    "coordinate": 48,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 49,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3232324316622161,
+    "min": 0.032277884335124844,
+    "sd": 0.07727166277640363,
+    "source_neuron": 217,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0034818458718956415,
+        "signed_parameter": -0.027854766975165132,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0037163022218807493,
+        "signed_parameter": -0.029730417775045995,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.006262215839336163,
+        "signed_parameter": -0.0500977267146893,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0034985591001491585,
+        "signed_parameter": -0.02798847280119327,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.008732956285679586,
+        "signed_parameter": -0.06986365028543669,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.017425235727961754,
+        "signed_parameter": -0.13940188582369403,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.005294291066910571,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04235432853528457,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.013011612650949422,
+    "zero_coordinate_mse_delta": 5.651192156288444e-06
+  },
+  {
+    "coordinate": 50,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3232324316622161,
+    "min": 0,
+    "sd": 0.11245690838253529,
+    "source_neuron": 218,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0060200497589641775,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04816039807171342,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.004843977327237766,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.038751818617902126,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01178213843611588,
+        "signed_parameter": -0.09425710748892704,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.011375888364098311,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09100710691278649,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.004932832805567425,
+        "signed_parameter": -0.0394626624445394,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013642136256473213,
+        "signed_parameter": -0.1091370900517857,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.019704299718818263,
+        "signed_parameter": -0.1576343977505461,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.009343162968944663,
+    "zero_coordinate_mse_delta": 1.6906209042313221e-06
+  },
+  {
+    "coordinate": 51,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3232324316622161,
+    "min": 0,
+    "sd": 0.11245690838253529,
+    "source_neuron": 219,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0060200497589641775,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04816039807171342,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.004843977327237766,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.038751818617902126,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01178213843611588,
+        "signed_parameter": -0.09425710748892704,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.011375888364098311,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09100710691278649,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.004932832805567425,
+        "signed_parameter": -0.0394626624445394,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013642136256473213,
+        "signed_parameter": -0.1091370900517857,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.019704299718818263,
+        "signed_parameter": -0.1576343977505461,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.009343162968944663,
+    "zero_coordinate_mse_delta": 1.6906209042313221e-06
+  },
+  {
+    "coordinate": 52,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3232324316622161,
+    "min": 0,
+    "sd": 0.11245690838253529,
+    "source_neuron": 220,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.0060200497589641775,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.04816039807171342,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.004843977327237766,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.038751818617902126,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.01178213843611588,
+        "signed_parameter": -0.09425710748892704,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.011375888364098311,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.09100710691278649,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.004932832805567425,
+        "signed_parameter": -0.0394626624445394,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.013642136256473213,
+        "signed_parameter": -0.1091370900517857,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.019704299718818263,
+        "signed_parameter": -0.1576343977505461,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.009343162968944663,
+    "zero_coordinate_mse_delta": 1.6906209042313221e-06
+  },
+  {
+    "coordinate": 53,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3171261497314677,
+    "min": 0.02587647376856762,
+    "sd": 0.0828773557160524,
+    "source_neuron": 221,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.006809944425320484,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.05447955540256387,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0016904298787964805,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.013523439030371844,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.003913698648758601,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.03130958919006881,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.010787671218214884,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.08630136974571907,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0016216732052615564,
+        "signed_parameter": -0.01297338564209245,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.005363896566353487,
+        "signed_parameter": -0.04291117253082789,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.023607487899096186,
+        "signed_parameter": -0.1888599031927695,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.008178146308914218,
+    "zero_coordinate_mse_delta": -7.493520556833246e-07
+  },
+  {
+    "coordinate": 54,
+    "downstream_features": [
+      174,
+      228,
+      233,
+      234,
+      235,
+      236,
+      237,
+      238,
+      239,
+      240,
+      241,
+      242,
+      243,
+      244,
+      245,
+      246,
+      247,
+      248,
+      249,
+      250,
+      251,
+      252,
+      253,
+      254,
+      255,
+      256,
+      261,
+      262,
+      263,
+      264
+    ],
+    "max": 0.3171261497314677,
+    "min": 0,
+    "sd": 0.11093072656012588,
+    "source_neuron": 222,
+    "source_to_feature_signed_synapses": [
+      {
+        "exc_dynamic_weight": 0.01284355168835624,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.10274841350684992,
+        "target_feature": 174
+      },
+      {
+        "exc_dynamic_weight": 0.0007007184115836119,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.0056057472926688955,
+        "target_feature": 233
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007576050180627719,
+        "signed_parameter": -0.060608401445021755,
+        "target_feature": 237
+      },
+      {
+        "exc_dynamic_weight": 0.008867856172591067,
+        "inh_dynamic_weight": 0.0,
+        "signed_parameter": 0.07094284938072853,
+        "target_feature": 238
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.0023528790636874043,
+        "signed_parameter": -0.018823032509499234,
+        "target_feature": 240
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.00928025917071242,
+        "signed_parameter": -0.07424207336569937,
+        "target_feature": 244
+      },
+      {
+        "exc_dynamic_weight": 0.0,
+        "inh_dynamic_weight": 0.007250123422125811,
+        "signed_parameter": -0.058000987377006485,
+        "target_feature": 250
+      }
+    ],
+    "status": "active-and-contributing",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0.004833338458643897,
+    "zero_coordinate_mse_delta": 2.660862039661189e-07
+  },
+  {
+    "coordinate": 55,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 56,
+    "downstream_features": [],
+    "max": 0.30540489483316,
+    "min": 0.01846909544458588,
+    "sd": 0.06451762880835661,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 57,
+    "downstream_features": [],
+    "max": 0.4976215615361525,
+    "min": 0.002982996597658716,
+    "sd": 0.09935862997364574,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 58,
+    "downstream_features": [],
+    "max": 0.5300411247115735,
+    "min": 0.017566993049798228,
+    "sd": 0.10700189954697963,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 59,
+    "downstream_features": [],
+    "max": 0.05173070135754246,
+    "min": 0,
+    "sd": 0.009998865667581073,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 60,
+    "downstream_features": [],
+    "max": 0.06949998887401693,
+    "min": 0,
+    "sd": 0.015207478048655375,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 61,
+    "downstream_features": [],
+    "max": 0.04365701751097539,
+    "min": 0,
+    "sd": 0.008715135793265109,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 62,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 63,
+    "downstream_features": [],
+    "max": 1,
+    "min": 0,
+    "sd": 0.12401959270615269,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 64,
+    "downstream_features": [],
+    "max": 1,
+    "min": -1,
+    "sd": 0.9920336987093735,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 65,
+    "downstream_features": [],
+    "max": 0,
+    "min": 0,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 66,
+    "downstream_features": [],
+    "max": 0,
+    "min": 0,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 67,
+    "downstream_features": [],
+    "max": 0,
+    "min": 0,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 68,
+    "downstream_features": [],
+    "max": 0,
+    "min": 0,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  },
+  {
+    "coordinate": 69,
+    "downstream_features": [],
+    "max": 1,
+    "min": 1,
+    "sd": 0.0,
+    "source_neuron": null,
+    "source_to_feature_signed_synapses": [],
+    "status": "available-but-not-recruited",
+    "status_scope": "numerical forward pass, not persistent recurrent activation",
+    "zero_coordinate_max_prediction_delta": 0,
+    "zero_coordinate_mse_delta": 0.0
+  }
+]

@@ -1,0 +1,798 @@
+[
+  {
+    "path": "services/ai/runtime/neural_composition.go",
+    "sha256": "f1c1ef181c2e0aa51e3f8102e5550c3152c0ce28ca23c1e1e097804c6c73306c",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 54,
+        "declaration": "func freezeComposition[T any](in T) (T, error) {"
+      },
+      {
+        "line": 63,
+        "declaration": "func cloneCompositionState(in *CompositionContinuation) *CompositionContinuation {"
+      },
+      {
+        "line": 71,
+        "declaration": "func (s *CompositionContinuation) validate() error {"
+      },
+      {
+        "line": 93,
+        "declaration": "func (m CompositionMigration) validateShape() error {"
+      },
+      {
+        "line": 100,
+        "declaration": "func (r *BrainRuntime) PlanNeuralComposition(c knowledge.CompositionConfig) (CompositionPlan, error) {"
+      },
+      {
+        "line": 122,
+        "declaration": "func (r *BrainRuntime) validateCompositionPlanLocked(p CompositionPlan) error {"
+      },
+      {
+        "line": 147,
+        "declaration": "func (r *BrainRuntime) ApplyNeuralComposition(plan CompositionPlan, backupPath string, at time.Time) error {"
+      },
+      {
+        "line": 227,
+        "declaration": "func (r *BrainRuntime) applyCompositionMigrationLocked(m CompositionMigration, at time.Time) error {"
+      },
+      {
+        "line": 248,
+        "declaration": "func (r *BrainRuntime) LearnComposition(e knowledge.CompositionExposure, at time.Time) (uint64, error) {"
+      },
+      {
+        "line": 260,
+        "declaration": "func (r *BrainRuntime) LearnCompositionWithDiagnosis(e knowledge.CompositionExposure, at time.Time) (uint64, *CompositionLearningReceipt, error) {"
+      },
+      {
+        "line": 329,
+        "declaration": "func (r *BrainRuntime) ReadComposition(input knowledge.CompositionInput, at time.Time) (knowledge.CompositionReadout, error) {"
+      },
+      {
+        "line": 357,
+        "declaration": "func (r *BrainRuntime) CompositionStatus() (*CompositionContinuation, error) {"
+      },
+      {
+        "line": 369,
+        "declaration": "func (r *BrainRuntime) compositionReadoutLocked(at time.Time) (*knowledge.CompositionReadout, error) {"
+      },
+      {
+        "line": 385,
+        "declaration": "func (r *BrainRuntime) compositionContextLocked(event *Event) (*knowledge.CompositionReadout, error) {"
+      },
+      {
+        "line": 403,
+        "declaration": "func (r *BrainRuntime) decorateCompositionJournalLocked(e *LoggedEvent) {"
+      },
+      {
+        "line": 413,
+        "declaration": "func (r *BrainRuntime) ObserveCompositionScene(id, source string, scene knowledge.CompositionScene) (CognitiveInterpretation, error) {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/runtime/journal_command.go",
+    "sha256": "b259066b20f3ddbab34690ae14d011ad1a49d84e6364f0244be70c77262bec7f",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 13,
+        "declaration": "func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func() error) error {"
+      },
+      {
+        "line": 76,
+        "declaration": "func processedJournalEvent(logged LoggedEvent) *Event {"
+      },
+      {
+        "line": 95,
+        "declaration": "func journalProcessedIndex(events []LoggedEvent) (map[string]uint64, error) {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/runtime/s2_self_evaluation_test.go",
+    "sha256": "11687ac1948f7b0795c1ebf8b779c84a7a55a8e163aff32fb4b65555706d5f5e",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 61,
+        "declaration": "func s2Paths(t *testing.T) (string, string) {"
+      },
+      {
+        "line": 69,
+        "declaration": "func s2Source(t *testing.T, root string) {"
+      },
+      {
+        "line": 94,
+        "declaration": "func s2Input(p s2Pre, pop [][]k.NodeID) k.CompositionInput {"
+      },
+      {
+        "line": 115,
+        "declaration": "func s2Predict(t *testing.T, r *BrainRuntime, p s2Pre, pop [][]k.NodeID) float64 {"
+      },
+      {
+        "line": 125,
+        "declaration": "func s2Collect(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, seed int64, n int, shift bool, history []float64, historyAction int) []s2Trial {"
+      },
+      {
+        "line": 201,
+        "declaration": "func s2Predictions(t *testing.T, r *BrainRuntime, rows []s2Trial, pop [][]k.NodeID) []float64 {"
+      },
+      {
+        "line": 209,
+        "declaration": "func s2Constant(rows []s2Trial, v float64) []float64 {"
+      },
+      {
+        "line": 216,
+        "declaration": "func s2MetricOf(rows []s2Trial, pred []float64, p s2Protocol) s2Metric {"
+      },
+      {
+        "line": 267,
+        "declaration": "func s2ProtocolRead(t *testing.T, work string) s2Protocol {"
+      },
+      {
+        "line": 281,
+        "declaration": "func TestS2Prepare(t *testing.T) {"
+      },
+      {
+        "line": 347,
+        "declaration": "func s2Lesson(pass int, fit, dev []s2Trial, pop [][]k.NodeID, at time.Time) k.CompositionExposure {"
+      },
+      {
+        "line": 362,
+        "declaration": "func TestS2Train(t *testing.T) {"
+      },
+      {
+        "line": 418,
+        "declaration": "func s2Ablate(t *testing.T, r *BrainRuntime, source *BrainRuntime) int {"
+      },
+      {
+        "line": 450,
+        "declaration": "func s2S1Rows(rows []s2Trial) []s1Sample {"
+      },
+      {
+        "line": 457,
+        "declaration": "func s2ContextGaps(rows []s2Trial, pred []float64, p s2Protocol) map[string]float64 {"
+      },
+      {
+        "line": 480,
+        "declaration": "func TestS2Evaluate(t *testing.T) {"
+      },
+      {
+        "line": 580,
+        "declaration": "func s2Advance(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, target uint64) {"
+      },
+      {
+        "line": 601,
+        "declaration": "func TestS2Retention(t *testing.T) {"
+      },
+      {
+        "line": 656,
+        "declaration": "func s2SynapseChanges(t *testing.T, a, b string) map[string]int {"
+      },
+      {
+        "line": 690,
+        "declaration": "func TestS2Persistence(t *testing.T) {"
+      },
+      {
+        "line": 811,
+        "declaration": "func TestS2Verify(t *testing.T) {"
+      },
+      {
+        "line": 835,
+        "declaration": "func TestS2RestartRetention(t *testing.T) {"
+      },
+      {
+        "line": 900,
+        "declaration": "func TestS2SavedS1Attribution(t *testing.T) {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/runtime/s1_internal_dynamics_test.go",
+    "sha256": "cf33094ecd6a226e911da6c0071761eca36f7407b7f719a26605f0929c45896f",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 53,
+        "declaration": "func s1Check(t *testing.T, err error) {"
+      },
+      {
+        "line": 59,
+        "declaration": "func s1Paths(t *testing.T) (string, string) {"
+      },
+      {
+        "line": 67,
+        "declaration": "func s1Read(t *testing.T, path string, v any) {"
+      },
+      {
+        "line": 73,
+        "declaration": "func s1Write(t *testing.T, path string, v any) { t.Helper(); flexJSON(t, path, v) }"
+      },
+      {
+        "line": 74,
+        "declaration": "func s1Digest(b []byte) string                 { h := sha256.Sum256(b); return hex.EncodeToString(h[:]) }"
+      },
+      {
+        "line": 75,
+        "declaration": "func s1Pop(t *testing.T, source string) [][]k.NodeID {"
+      },
+      {
+        "line": 84,
+        "declaration": "func s1Source(t *testing.T, source string) {"
+      },
+      {
+        "line": 94,
+        "declaration": "func s1Open(t *testing.T, cp, journal string) (*BrainRuntime, *EventLog) {"
+      },
+      {
+        "line": 111,
+        "declaration": "func s1Time(r *BrainRuntime) time.Time {"
+      },
+      {
+        "line": 114,
+        "declaration": "func s1Command(t *testing.T, r *BrainRuntime, c NativeControlCommand) NativeControlResult {"
+      },
+      {
+        "line": 120,
+        "declaration": "func s1Scene(at time.Time) k.CompositionScene {"
+      },
+      {
+        "line": 124,
+        "declaration": "func s1Input(q int, s s1Sample, pop [][]k.NodeID) k.CompositionInput {"
+      },
+      {
+        "line": 163,
+        "declaration": "func s1Predict(t *testing.T, r *BrainRuntime, s s1Sample, pop [][]k.NodeID) []float64 {"
+      },
+      {
+        "line": 176,
+        "declaration": "func s1Target(state map[k.NodeID]float64, pop [][]k.NodeID) []float64 {"
+      },
+      {
+        "line": 179,
+        "declaration": "func s1Previous(state map[k.NodeID]float64, pop [][]k.NodeID) []float64 {"
+      },
+      {
+        "line": 186,
+        "declaration": "func s1Collect(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, seed int64, n int, holdout bool) []s1Sample {"
+      },
+      {
+        "line": 249,
+        "declaration": "func s1MetricOf(rows []s1Sample, predictions [][]float64) s1Metric {"
+      },
+      {
+        "line": 270,
+        "declaration": "func s1Predictions(t *testing.T, r *BrainRuntime, rows []s1Sample, pop [][]k.NodeID) [][]float64 {"
+      },
+      {
+        "line": 278,
+        "declaration": "func s1Lesson(pass, q int, fit, check []s1Sample, pop [][]k.NodeID, at time.Time) k.CompositionExposure {"
+      },
+      {
+        "line": 294,
+        "declaration": "func s1Snapshot(t *testing.T, path string) BrainSnapshot {"
+      },
+      {
+        "line": 303,
+        "declaration": "func s1Near(a, b any, tolerance float64) bool {"
+      },
+      {
+        "line": 336,
+        "declaration": "func s1Original(t *testing.T, r *BrainRuntime, source string) int {"
+      },
+      {
+        "line": 397,
+        "declaration": "func TestS1Prepare(t *testing.T) {"
+      },
+      {
+        "line": 461,
+        "declaration": "func TestS1Train(t *testing.T) {"
+      },
+      {
+        "line": 509,
+        "declaration": "func s1Ablate(r *BrainRuntime) int {"
+      },
+      {
+        "line": 532,
+        "declaration": "func s1AblateReadout(r *BrainRuntime) int {"
+      },
+      {
+        "line": 564,
+        "declaration": "func s1Context(rows []s1Sample, truth, pred [][]float64) (float64, float64) {"
+      },
+      {
+        "line": 610,
+        "declaration": "func TestS1Evaluate(t *testing.T) {"
+      },
+      {
+        "line": 713,
+        "declaration": "func TestS1Restore(t *testing.T) {"
+      },
+      {
+        "line": 778,
+        "declaration": "func TestS1RetentionDiagnosis(t *testing.T) {"
+      },
+      {
+        "line": 827,
+        "declaration": "func TestS1VerifyArtifact(t *testing.T) {"
+      },
+      {
+        "line": 856,
+        "declaration": "func TestS1FinalizeEvidence(t *testing.T) {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/neural_composition.go",
+    "sha256": "5c1dd65d1e31c1330ef735284dcf59adf605b3036668214a84c2e94b488a2078",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 39,
+        "declaration": "func DefaultCompositionConfig() CompositionConfig {"
+      },
+      {
+        "line": 43,
+        "declaration": "func (c CompositionConfig) Validate() error {"
+      },
+      {
+        "line": 86,
+        "declaration": "func compositionNumbers(v []float64, n int) bool {"
+      },
+      {
+        "line": 98,
+        "declaration": "func (s CompositionScene) Validate() error {"
+      },
+      {
+        "line": 115,
+        "declaration": "func (i CompositionInput) Validate() error {"
+      },
+      {
+        "line": 128,
+        "declaration": "func ValidateCompositionWords(words [][]float64) error {"
+      },
+      {
+        "line": 142,
+        "declaration": "func (e CompositionExposure) target() (int, float64, float64, error) {"
+      },
+      {
+        "line": 181,
+        "declaration": "func (e CompositionExposure) Validate() error {"
+      },
+      {
+        "line": 226,
+        "declaration": "func compositionRandom(seed uint64, a, b int) float64 {"
+      },
+      {
+        "line": 237,
+        "declaration": "func (k *KnowledgeBase) compositionBankLocked() ([compositionBanks][]NodeID, error) {"
+      },
+      {
+        "line": 264,
+        "declaration": "func (k *KnowledgeBase) HasNeuralComposition() bool {"
+      },
+      {
+        "line": 278,
+        "declaration": "func (k *KnowledgeBase) compositionParameter(from, to []NodeID) (float64, bool) {"
+      },
+      {
+        "line": 307,
+        "declaration": "func (k *KnowledgeBase) adjustCompositionParameter(from, to []NodeID, value, reliability float64, at time.Time, initial bool) {"
+      },
+      {
+        "line": 349,
+        "declaration": "func (k *KnowledgeBase) InitializeCompositionAt(c CompositionConfig, at time.Time) error {"
+      },
+      {
+        "line": 408,
+        "declaration": "func (k *KnowledgeBase) compositionWordsLocked(words [][]float64) ([][]NodeID, int) {"
+      },
+      {
+        "line": 428,
+        "declaration": "func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e CompositionExposure) error {"
+      },
+      {
+        "line": 516,
+        "declaration": "func (k *KnowledgeBase) loadComposition(bank [compositionBanks][]NodeID, ids [][]NodeID) compositionWeights {"
+      },
+      {
+        "line": 536,
+        "declaration": "func compositionPoint(s CompositionScene, p CompositionPatch) float64 {"
+      },
+      {
+        "line": 544,
+        "declaration": "func compositionForward(input CompositionInput, w compositionWeights) ([compositionOutputs]float64, []float64) {"
+      },
+      {
+        "line": 575,
+        "declaration": "func compositionSigmoid(x float64) float64 {"
+      },
+      {
+        "line": 582,
+        "declaration": "func compositionStep(v, g, reliability float64) float64 {"
+      },
+      {
+        "line": 586,
+        "declaration": "func (k *KnowledgeBase) LearnCompositionAt(c CompositionConfig, e CompositionExposure, at time.Time) error {"
+      },
+      {
+        "line": 748,
+        "declaration": "func GroundingProjectionThreshold() float64 { return .90 }"
+      },
+      {
+        "line": 752,
+        "declaration": "func (k *KnowledgeBase) ReadComposition(c CompositionConfig, input CompositionInput, at time.Time) (CompositionReadout, error) {"
+      },
+      {
+        "line": 859,
+        "declaration": "func (k *KnowledgeBase) CompositionActivation(out CompositionReadout) (map[NodeID]float64, error) {"
+      },
+      {
+        "line": 892,
+        "declaration": "func (k *KnowledgeBase) ValidateCompositionBank(enabled bool) error {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/neural_resolution.go",
+    "sha256": "0bbd4ec5f203457ae75be9ade98d66a0e0b9a2831eb7f214c90511db6d5d0787",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 24,
+        "declaration": "func (k *KnowledgeBase) protectedNParameter() func(NodeID, NodeID) bool {"
+      },
+      {
+        "line": 140,
+        "declaration": "func validateNLesson(e CompositionExposure) error {"
+      },
+      {
+        "line": 181,
+        "declaration": "func nInput(in CompositionInput) []float64 {"
+      },
+      {
+        "line": 212,
+        "declaration": "func nDot(a, b []float64) float64 {"
+      },
+      {
+        "line": 219,
+        "declaration": "func nCodes(m nModel, x []float64) ([]float64, []float64) {"
+      },
+      {
+        "line": 243,
+        "declaration": "func nHeadIndex(m nModel, q []NodeID) int {"
+      },
+      {
+        "line": 251,
+        "declaration": "func nPredict(m nModel, x []float64, q []NodeID) float64 {"
+      },
+      {
+        "line": 262,
+        "declaration": "func (k *KnowledgeBase) loadNModel(bank [compositionBanks][]NodeID, queries [][]NodeID) nModel {"
+      },
+      {
+        "line": 301,
+        "declaration": "func nClone(m nModel) nModel {"
+      },
+      {
+        "line": 315,
+        "declaration": "func nError(m nModel, rows []NWitness) float64 {"
+      },
+      {
+        "line": 330,
+        "declaration": "func nRegression(before, after nModel, rows []NWitness) int {"
+      },
+      {
+        "line": 369,
+        "declaration": "func nFit(m *nModel, q []NodeID, rows []NWitness) bool {"
+      },
+      {
+        "line": 434,
+        "declaration": "func nDelta(axis []float64, rows []NWitness) float64 {"
+      },
+      {
+        "line": 455,
+        "declaration": "func nCenter(axis []float64, rows []NWitness) float64 {"
+      },
+      {
+        "line": 475,
+        "declaration": "func nRedundant(m nModel, rows []NWitness) bool {"
+      },
+      {
+        "line": 494,
+        "declaration": "func nScalarResolution(values []float64, rows []NWitness) (float64, float64) {"
+      },
+      {
+        "line": 526,
+        "declaration": "func nBalancedWitnesses(rows []NWitness, heads []NHeadTopology, budget int) []NWitness {"
+      },
+      {
+        "line": 554,
+        "declaration": "func nConflict(rows []NWitness) bool {"
+      },
+      {
+        "line": 564,
+        "declaration": "func (k *KnowledgeBase) newNNode(kind, index int, at time.Time) NodeID {"
+      },
+      {
+        "line": 578,
+        "declaration": "func (k *KnowledgeBase) writeNParameter(from, to []NodeID, value, reliability float64, at time.Time) {"
+      },
+      {
+        "line": 612,
+        "declaration": "func (k *KnowledgeBase) newNQuery(v []float64, at time.Time) []NodeID {"
+      },
+      {
+        "line": 622,
+        "declaration": "func (k *KnowledgeBase) learnNResolution(bank [compositionBanks][]NodeID, query []NodeID, e CompositionExposure, at time.Time) error {"
+      },
+      {
+        "line": 848,
+        "declaration": "func (k *KnowledgeBase) recordNDiagnosis(d NDiagnosis, at time.Time) {"
+      },
+      {
+        "line": 871,
+        "declaration": "func (k *KnowledgeBase) readNResolution(bank [compositionBanks][]NodeID, query []NodeID, in CompositionInput) CompositionReadout {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/neural_metric.go",
+    "sha256": "2a25050f9782fb5f99ee7f667b32bc9552c36586a820d98061bc938bbe38ec1c",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 11,
+        "declaration": "func IsNumericalCompositionVersion(v string) bool {"
+      },
+      {
+        "line": 21,
+        "declaration": "func (d NDiagnosis) Clone() NDiagnosis {"
+      },
+      {
+        "line": 46,
+        "declaration": "func validateMetricInput(in CompositionInput) error {"
+      },
+      {
+        "line": 67,
+        "declaration": "func nMetricInputError(in CompositionInput) []float64 {"
+      },
+      {
+        "line": 85,
+        "declaration": "func nFinite(x float64) bool { return !math.IsNaN(x) && !math.IsInf(x, 0) }"
+      },
+      {
+        "line": 86,
+        "declaration": "func nRoundoff(x float64) float64 {"
+      },
+      {
+        "line": 93,
+        "declaration": "func nImproves(a, b float64) bool {"
+      },
+      {
+        "line": 96,
+        "declaration": "func nMetricEvaluate(m nModel, x, inputError []float64) nMetricEvaluation {"
+      },
+      {
+        "line": 141,
+        "declaration": "func nMetricValues(m nModel, x []float64, metric bool) []float64 {"
+      },
+      {
+        "line": 148,
+        "declaration": "func nMetricDelta(values []float64, rows []NWitness) float64 {"
+      },
+      {
+        "line": 173,
+        "declaration": "func nMetricAxisDelta(axis []float64, rows []NWitness) float64 {"
+      },
+      {
+        "line": 180,
+        "declaration": "func nMetricQuality(m nModel, q []NodeID, rows []NWitness) float64 {"
+      },
+      {
+        "line": 204,
+        "declaration": "func nMetricPointError(m nModel, q []NodeID, rows []NWitness) float64 {"
+      },
+      {
+        "line": 211,
+        "declaration": "func nMetricMaximumError(m nModel, q []NodeID, rows []NWitness) float64 {"
+      },
+      {
+        "line": 222,
+        "declaration": "func nFitMetric(m *nModel, hi int, rows []NWitness) bool {"
+      },
+      {
+        "line": 337,
+        "declaration": "func nMetricRegression(before, after nModel, rows []NWitness) int {"
+      },
+      {
+        "line": 385,
+        "declaration": "func nBinarySolved(m nModel, q []NodeID, rows []NWitness) bool {"
+      },
+      {
+        "line": 399,
+        "declaration": "func nMetricConflict(rows []NWitness) bool {"
+      },
+      {
+        "line": 409,
+        "declaration": "func nMetricRedundant(m nModel, rows []NWitness, metric bool) bool {"
+      },
+      {
+        "line": 428,
+        "declaration": "func nMetricAliasPairs(m nModel, q []NodeID, rows []NWitness) int {"
+      },
+      {
+        "line": 446,
+        "declaration": "func (k *KnowledgeBase) readNMetric(m nModel, q []NodeID, in CompositionInput) CompositionReadout {"
+      },
+      {
+        "line": 500,
+        "declaration": "func (k *KnowledgeBase) LastNDiagnosis() *NDiagnosis {"
+      },
+      {
+        "line": 511,
+        "declaration": "func (k *KnowledgeBase) validateNContract(c CompositionConfig) error {"
+      },
+      {
+        "line": 525,
+        "declaration": "func validateMetricDiagnosis(d NDiagnosis, metric bool) error {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/neural_metric_learning.go",
+    "sha256": "5cbd936e59145868a152c8e6f0ff7b08cf1a6fd30bb1ede579b2bb4136061db6",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 11,
+        "declaration": "func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []NodeID, e CompositionExposure, at time.Time) error {"
+      },
+      {
+        "line": 392,
+        "declaration": "func nMetricAxisFloor(axis []float64, rows []NWitness) float64 {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/neural_metric_support.go",
+    "sha256": "f562212c3c778c6e24845abe81961570fdff1d6c1ae968d55df3a5cfece7aefe",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 10,
+        "declaration": "func nMetricFeatureRaw(m nModel, index int, rows []NWitness) ([]float64, float64) {"
+      },
+      {
+        "line": 41,
+        "declaration": "func nMetricWitnesses(rows []NWitness, heads []NHeadTopology, budget int, m nModel) []NWitness {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/native_control.go",
+    "sha256": "8a3ab939972f29aaf193f9b33a7d1f1d7b82007bf96d71339c9c237ed55b51e5",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 22,
+        "declaration": "func (c NativeControlConfig) SupportsExperiments() bool {"
+      },
+      {
+        "line": 26,
+        "declaration": "func NativeDigest(v any) string {"
+      },
+      {
+        "line": 45,
+        "declaration": "func NativeStateDigest(state map[NodeID]float64) string {"
+      },
+      {
+        "line": 60,
+        "declaration": "func (o NativeOperation) Validate() error {"
+      },
+      {
+        "line": 90,
+        "declaration": "func nativeFinite(x float64) bool { return !math.IsNaN(x) && !math.IsInf(x, 0) }"
+      },
+      {
+        "line": 91,
+        "declaration": "func (c NativeControlConfig) Validate() error {"
+      },
+      {
+        "line": 184,
+        "declaration": "func (k *KnowledgeBase) HasNativeControl() bool {"
+      },
+      {
+        "line": 189,
+        "declaration": "func (k *KnowledgeBase) NativeControlSnapshot() *NativeControlState {"
+      },
+      {
+        "line": 212,
+        "declaration": "func cloneNativeEpisode(ep *NativeEpisode) *NativeEpisode {"
+      },
+      {
+        "line": 233,
+        "declaration": "func (k *KnowledgeBase) ValidateNativeInit(c NativeControlConfig) error {"
+      },
+      {
+        "line": 249,
+        "declaration": "func (k *KnowledgeBase) InitializeNativeControl(c NativeControlConfig, at time.Time) error {"
+      },
+      {
+        "line": 296,
+        "declaration": "func nativeIDs(state map[NodeID]float64) []NodeID {"
+      },
+      {
+        "line": 304,
+        "declaration": "func nativeWeight(s *Synapse) float64 {"
+      },
+      {
+        "line": 311,
+        "declaration": "func (k *KnowledgeBase) nativeFeatures(s *NativeControlState, state map[NodeID]float64, reads ...*int) (map[NodeID]float64, error) {"
+      },
+      {
+        "line": 324,
+        "declaration": "func (k *KnowledgeBase) nativeReadout(s *NativeControlState, state map[NodeID]float64, greedy bool, u float64) (NativeReadout, error) {"
+      },
+      {
+        "line": 375,
+        "declaration": "func (k *KnowledgeBase) NativePolicy(state map[NodeID]float64, greedy bool, u float64) (NativeReadout, error) {"
+      },
+      {
+        "line": 384,
+        "declaration": "func (k *KnowledgeBase) BeginNativeEpisode(id string, training bool, at time.Time, intervention ...bool) error {"
+      },
+      {
+        "line": 388,
+        "declaration": "func (k *KnowledgeBase) BeginNativeTrial(id string, training bool, at time.Time, intervened bool, matchKey string) error {"
+      },
+      {
+        "line": 407,
+        "declaration": "func (k *KnowledgeBase) AppendNativeDecision(d NativeDecision) error {"
+      },
+      {
+        "line": 429,
+        "declaration": "func (k *KnowledgeBase) LearnNativeOutcome(reward float64, learn bool, at time.Time) (NativeLearning, error) {"
+      },
+      {
+        "line": 511,
+        "declaration": "func nativeProbabilities(values []float64, temperature, epsilon float64) []float64 {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/native_contrast.go",
+    "sha256": "fc2e7989fd595d75a2bdfc71257d55e486221f992a76f33a36b9032d3d01dfa9",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 23,
+        "declaration": "func validateNativeContrast(s *NativeControlState, id, source, outcome string, learn bool, mode string) error {"
+      },
+      {
+        "line": 56,
+        "declaration": "func (k *KnowledgeBase) ValidateNativeContrast(id, source, outcome string, learn bool, modes ...string) error {"
+      },
+      {
+        "line": 74,
+        "declaration": "func (k *KnowledgeBase) LearnNativeObservedOutcome(reward float64, learn bool, id, source, outcome string, at time.Time, modes ...string) (NativeLearning, error) {"
+      },
+      {
+        "line": 194,
+        "declaration": "func (k *KnowledgeBase) DiscardNativeContrast(id string) error {"
+      }
+    ]
+  },
+  {
+    "path": "services/ai/knowledge/neural_resolution_validation.go",
+    "sha256": "304ed74443095128720adfe02eca39a4ba43520233414573449d6c8c33e9fbec",
+    "revision": "70dbf8a36a13abdd8c763b73566d64b7b3025b96",
+    "functions": [
+      {
+        "line": 11,
+        "declaration": "func validateNResolutionState(data []byte, enabled bool, version string) error {"
+      }
+    ]
+  }
+]

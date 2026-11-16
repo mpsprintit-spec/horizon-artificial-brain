@@ -1,0 +1,14 @@
+{
+  "reason": "A partial step along historical lesson 9's rejected direction improves development error. Separate the changed old readout from recruitment of forecast/history in this counterfactual.",
+  "preregistered_before_execution": true,
+  "historical_command": 9,
+  "candidate": "native missing-direction with same readout mode as incumbent",
+  "fractions": [0, 0.01, 0.05, 0.1, 0.25, 0.5, 1],
+  "input_interventions": ["full", "no-forecast", "no-history", "no-extra", "permute-extra"],
+  "permutation_seed": 3301,
+  "parameter_interventions": ["old-readout-change-only", "new-feature-change-only"],
+  "final_holdout_used": false,
+  "new_learning_commands": 0,
+  "installation": false,
+  "interpretation": "development-only computational causal attribution; no claim of independent generalization or validated repair"
+}
