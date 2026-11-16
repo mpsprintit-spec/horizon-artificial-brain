@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/project-horizon/horizon-core/services/ai/decision"
 	"github.com/project-horizon/horizon-core/services/ai/execution"
 	"github.com/project-horizon/horizon-core/services/ai/knowledge"
 	"github.com/project-horizon/horizon-core/services/ai/perception"
@@ -18,7 +17,6 @@ type HorizonEngine struct {
 	// The managed facade publishes only the owner handle and detached values.
 	// It never caches a raw Brain, runtime, or legacy cognitive engine.
 	supervisor *runtime.RuntimeSupervisor
-	Decision *decision.Engine
 
 	// Gateway is the only execution surface exposed by HorizonEngine. The
 	// underlying ExecutionCore is intentionally private to this facade.
@@ -90,7 +88,7 @@ func (h *HorizonEngine) pulseSignalsWith(orchestrator *runtime.CognitiveOrchestr
 
 		event := runtime.Event{
 			ID:        fmt.Sprintf("pulse-%s-%d", observedAt.Format("20060102T150405.000000000Z0700"), index),
-	EpisodeID: signal.SessionID, ResetContext: signal.ResetContext,
+			EpisodeID: signal.SessionID, ResetContext: signal.ResetContext,
 			Stimulus:  append([]string(nil), signal.Tokens...),
 			Source:    signal.Source,
 			Modality:  modality,
@@ -116,12 +114,14 @@ func NewHorizonEngine() *HorizonEngine {
 	brain := knowledge.NewBootstrapBrain()
 	rt := runtime.NewBrainRuntime(brain)
 	supervisor, err := runtime.NewRuntimeSupervisor(rt)
-	if err != nil { return nil }
+	if err != nil {
+		return nil
+	}
 	core := execution.NewExecutionCore()
 	return &HorizonEngine{
-		supervisor: supervisor, Decision: decision.NewEngine(),
-		Gateway: execution.NewExecutionGateway(core),
-		WebSearch: websearch.NewEngine(nil), WebSearchEnabled: false,
+		supervisor: supervisor,
+		Gateway:    execution.NewExecutionGateway(core),
+		WebSearch:  websearch.NewEngine(nil), WebSearchEnabled: false,
 		Perception: perception.UserInputPerception{}, Safety: runtime.SafetyBoundary{},
 	}
 }

@@ -15,7 +15,7 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 	brain.ConnectAt(source, target, 0.20, 0.50, false, t0)
 
 	runtime := NewBrainRuntime(brain)
-	if runtime == nil || runtime.DNF() == nil {
+	if runtime == nil || runtime.dnf == nil {
 		t.Fatal("expected runtime and DNF fabric")
 	}
 
@@ -44,7 +44,7 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 		t.Fatal("expected recurrent prediction state")
 	}
 
-	before, err := runtime.DNF().SynapseState(source.ID, target.ID, false)
+	before, err := runtime.dnf.SynapseState(source.ID, target.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +68,7 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 		t.Fatalf("brain identity changed: got %q want %q", second.BrainIdentity, BrainIdentity)
 	}
 
-	after, err := runtime.DNF().SynapseState(source.ID, target.ID, false)
+	after, err := runtime.dnf.SynapseState(source.ID, target.ID, false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -82,7 +82,7 @@ func TestDNFPredictionErrorFeedsTemporalPlasticityLoop(t *testing.T) {
 		t.Fatalf("prediction-error plasticity exceeded weight bound: %v", after.Weight)
 	}
 
-	structure, err := runtime.DNF().Inspect(t0.Add(500 * time.Millisecond))
+	structure, err := runtime.dnf.Inspect(t0.Add(500 * time.Millisecond))
 	if err != nil {
 		t.Fatal(err)
 	}

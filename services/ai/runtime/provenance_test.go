@@ -10,8 +10,6 @@ import (
 
 func TestVerifyKnowledgeClaimRequiresAcceptedEvidence(t *testing.T) {
 	runtime := NewBrainRuntime(nil)
-	node := runtime.DNF()
-	_ = node
 
 	at := time.Date(2026, 9, 20, 4, 30, 0, 0, time.UTC)
 	grounded, err := runtime.GroundObservation("cahaya", "sensor-a", "text")
@@ -21,10 +19,10 @@ func TestVerifyKnowledgeClaimRequiresAcceptedEvidence(t *testing.T) {
 	claim := KnowledgeClaim{
 		NodeID: grounded.NodeID,
 		Origin: KnowledgeOrigin{
-			Source: "sensor-a",
-			Modality: "text",
-			ObservedAt: at,
-			ExperienceID: "experience-1",
+			Source:            "sensor-a",
+			Modality:          "text",
+			ObservedAt:        at,
+			ExperienceID:      "experience-1",
 			IndependenceGroup: "source-a",
 		},
 		Status: grounded.Status,

@@ -19,34 +19,13 @@ const (
 	SignalUser      SignalType = "user_context"
 )
 
-// Signal is an immutable input sample consumed by the AI cluster.
+// Signal is an immutable input sample presented to the canonical neural runtime.
 type Signal struct {
 	Type       SignalType
 	Source     string
 	Confidence float64
 	Timestamp  time.Time
 	Payload    map[string]float64
-}
-
-// ContextInformation carries mission and user context for decision making.
-type ContextInformation struct {
-	MissionID        string
-	UserID           string
-	EnvironmentRisk  float64
-	BatteryLevel     float64
-	Connectivity     float64
-	RequiresLowPower bool
-}
-
-// Decision is the final AI cluster output for downstream devices and services.
-type Decision struct {
-	Command       string
-	Priority      int
-	Confidence    float64
-	Explanation   string
-	ModuleScores  map[string]float64
-	GeneratedAt   time.Time
-	RecommendedTo []string
 }
 
 // Validate ensures the signal is safe and meaningful before processing.
@@ -66,15 +45,4 @@ func (s Signal) Validate() error {
 		return errors.New("signal timestamp is required")
 	}
 	return nil
-}
-
-func clamp01(v float64) float64 {
-	switch {
-	case math.IsNaN(v) || v < 0:
-		return 0
-	case v > 1:
-		return 1
-	default:
-		return v
-	}
 }

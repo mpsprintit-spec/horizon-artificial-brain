@@ -58,32 +58,16 @@ func (r *BrainRuntime) InterpretCognitive(output CognitiveOutput, observation Ob
 		return CognitiveInterpretation{}, err
 	}
 	result := ToCognitiveInterpretation(observation, interpretation)
-	if output.Composition != nil { copied,_:=freezeComposition(*output.Composition);result.Composition=&copied }
+	if output.Composition != nil {
+		copied, _ := freezeComposition(*output.Composition)
+		result.Composition = &copied
+	}
 	result.State.Timestamp = output.Timestamp
 	return result, nil
 }
 
-// LegacyCompatibilityInterpreter is intentionally opt-in. It is a boundary
-// adapter only; it has no access to BrainRuntime mutation and cannot become
-// the default source of cognition.
-type LegacyCompatibilityInterpreter struct {
-	Delegate func(CognitiveOutput) (Interpretation, error)
-}
-
-func (l LegacyCompatibilityInterpreter) Interpret(output CognitiveOutput) (Interpretation, error) {
-	if l.Delegate == nil {
-		return Interpretation{}, errors.New("legacy compatibility interpreter is disabled")
-	}
-	result, err := l.Delegate(output)
-	if err != nil {
-		return Interpretation{}, err
-	}
-	result.Source = "legacy-compatibility"
-	return result, nil
-}
-
 // Interpret is the explicit Gate-4 entry point. Neural interpretation is
-// always the default; legacy interpretation must be supplied by the caller.
+// always the default; a caller may supply a presentation adapter.
 func (r *BrainRuntime) Interpret(output CognitiveOutput, interpreter CognitiveInterpreter) (Interpretation, error) {
 	if interpreter == nil {
 		interpreter = NeuralInterpreter{}

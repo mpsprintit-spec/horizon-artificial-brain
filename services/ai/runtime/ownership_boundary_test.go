@@ -87,9 +87,7 @@ func TestManagedRuntimeDoesNotExportMutableBrainOrDetachItsJournal(t *testing.T)
 	if err := r.WithBrainView(func(brain *knowledge.Brain) error { called = true; brain.Store("unlogged-mutation"); return nil }); err == nil || called {
 		t.Error("managed callback exposed a mutable Brain")
 	}
-	if fabric := r.DNF(); fabric != nil {
-		t.Error("managed DNF exposed its mutable Brain")
-	}
+	assertNoRetiredCognitiveAPI(t, r)
 	r.SetEventLog(nil)
 	if r.eventLog != journal {
 		t.Error("cached runtime detached owner journal")

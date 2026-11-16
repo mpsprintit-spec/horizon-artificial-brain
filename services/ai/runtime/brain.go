@@ -86,22 +86,21 @@ type SynapseBinding struct {
 
 type BrainRuntime struct {
 	// Unexported subprocess-test hook; never configured from input/environment.
-	transactionFault      func(string)
-	replaying             bool // Private detached recovery; never a published serving mode.
-	nativeCommandIndex    map[string]string
-	cognitiveCommandIndex map[string]string // derived dedup cache; rebuilt from authenticated processedEvents
-	composition           *CompositionContinuation
-	brain                 *knowledge.Brain
-	dnf                   *dnf.Fabric
-	activation            *activation.Engine
-	learning              *learning.LearningUnit
-	promotion             *learning.PromotionEngine
-	evidence              *learning.EvidenceLedger
-	actions               map[string]ActionBinding
-	eventLog              *EventLog
-	clock                 Clock
-	mu                    sync.Mutex
-	sensorMu              sync.Mutex
+	transactionFault   func(string)
+	replaying          bool // Private detached recovery; never a published serving mode.
+	nativeCommandIndex map[string]string
+	composition        *CompositionContinuation
+	brain              *knowledge.Brain
+	dnf                *dnf.Fabric
+	activation         *activation.Engine
+	learning           *learning.LearningUnit
+	promotion          *learning.PromotionEngine
+	evidence           *learning.EvidenceLedger
+	actions            map[string]ActionBinding
+	eventLog           *EventLog
+	clock              Clock
+	mu                 sync.Mutex
+	sensorMu           sync.Mutex
 	// Set when a sensor journal operation may have left an incomplete write.
 	recoveryRequired bool
 	// Monotonic ownership claim. Managed runtime lifetime and journal binding
@@ -127,7 +126,7 @@ func NewBrainRuntime(brain *knowledge.Brain) *BrainRuntime {
 	if brain == nil {
 		brain = knowledge.NewBootstrapBrain()
 	}
-	if brain.HasNativeControl() || brain.HasCognitiveModel() || brain.HasNeuralWrittenProjection() || brain.HasNeuralComposition() {
+	if brain.HasNativeControl() || brain.HasNeuralWrittenProjection() || brain.HasNeuralComposition() {
 		return nil
 	} // Recover versioned serving through its complete checkpoint.
 	if !brain.BindRuntime() {
@@ -180,7 +179,7 @@ func (r *BrainRuntime) SaveBrain(path string) error {
 	if err := r.ensureWritableLocked(); err != nil {
 		return err
 	}
-	if r.composition != nil || r.brain.HasNativeControl() || r.brain.HasCognitiveModel() {
+	if r.composition != nil || r.brain.HasNativeControl() {
 		return r.checkpointLocked(path)
 	}
 	return r.brain.Save(path)
@@ -280,20 +279,6 @@ func (r *BrainRuntime) RestoreEventIndex(events []LoggedEvent) error {
 	r.processedEvents = index
 	r.seq = uint64(len(events))
 	return nil
-}
-
-// DNF is a legacy standalone escape hatch. Managed and journaled runtimes
-// expose detached inspection instead of a Fabric with a mutable Brain pointer.
-func (r *BrainRuntime) DNF() *dnf.Fabric {
-	if r == nil {
-		return nil
-	}
-	r.mu.Lock()
-	defer r.mu.Unlock()
-	if r.ensureWritableLocked() != nil || r.supervised || r.eventLog != nil || r.brain.HasNativeControl() {
-		return nil
-	}
-	return r.dnf
 }
 
 func (r *BrainRuntime) GroundObservation(token, source, modality string) (knowledge.GroundedRepresentation, error) {

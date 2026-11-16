@@ -1,0 +1,643 @@
+{
+  "cmd/horizon-metareasoning-v5/main.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/cluster.go": {
+    "types": [
+      "Module",
+      "Cluster"
+    ],
+    "functions": [
+      "NewCluster",
+      "(c *Cluster) Decide",
+      "(m weightedModule) Name",
+      "(m weightedModule) Evaluate"
+    ]
+  },
+  "services/ai/context/context.go": {
+    "types": [
+      "Engine",
+      "Result"
+    ],
+    "functions": [
+      "NewEngine",
+      "(e *Engine) Focus"
+    ]
+  },
+  "services/ai/core/classify.go": {
+    "types": [
+      "Intent"
+    ],
+    "functions": []
+  },
+  "services/ai/core/legacy_mode.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/core/task.go": {
+    "types": [
+      "TaskPulse",
+      "PulseResult"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/api/grpc/contracts.go": {
+    "types": [
+      "CreateDecisionHandler",
+      "AssessSituationHandler",
+      "SelectBehaviorHandler",
+      "GetDecisionHandler"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/api/grpc/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/api/http/contracts.go": {
+    "types": [
+      "CreateDecisionHandler",
+      "AssessSituationHandler",
+      "SelectBehaviorHandler",
+      "GetDecisionHandler"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/api/http/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/decision.go": {
+    "types": [
+      "Engine"
+    ],
+    "functions": [
+      "NewEngine",
+      "(e *Engine) Decide",
+      "(e *Engine) DecideInterpretation",
+      "(e *Engine) Resolve"
+    ]
+  },
+  "services/ai/decision/internal/event/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/internal/event/events.go": {
+    "types": [
+      "Name",
+      "Event"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/internal/handler/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/internal/handler/handler.go": {
+    "types": [
+      "CommandHandler",
+      "ContextUpdateHandler",
+      "QueryHandler"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/internal/model/contracts.go": {
+    "types": [
+      "SituationAssessor",
+      "RiskAnalyzer",
+      "GoalPlanner",
+      "BehaviorSelector",
+      "DecisionOptimizer",
+      "ContextAwareDecisionEngine",
+      "DecisionService",
+      "DecisionCreator"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/internal/model/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/internal/model/models.go": {
+    "types": [
+      "SituationAssessment",
+      "RiskAssessment",
+      "GoalPlan",
+      "BehaviorSelection",
+      "Decision",
+      "MissionContext",
+      "UserContext",
+      "NavigationState",
+      "Detection"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/internal/repository/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/internal/repository/repository.go": {
+    "types": [
+      "DecisionRepository",
+      "RiskAssessmentRepository",
+      "GoalPlanRepository"
+    ],
+    "functions": []
+  },
+  "services/ai/decision/internal/service/doc.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/decision/internal/service/service.go": {
+    "types": [
+      "DecisionService"
+    ],
+    "functions": []
+  },
+  "services/ai/hfcc/ablation.go": {
+    "types": [],
+    "functions": [
+      "Ablate"
+    ]
+  },
+  "services/ai/hfcc/compare.go": {
+    "types": [],
+    "functions": [
+      "CompareStructures"
+    ]
+  },
+  "services/ai/hfcc/provenance.go": {
+    "types": [],
+    "functions": [
+      "HasExternalKnowledge",
+      "HasCircularDependency",
+      "ValidateProvenanceForClaim"
+    ]
+  },
+  "services/ai/hfcc/reconstruct.go": {
+    "types": [],
+    "functions": [
+      "Reconstruct"
+    ]
+  },
+  "services/ai/hfcc/serialize.go": {
+    "types": [],
+    "functions": [
+      "MarshalCandidate",
+      "UnmarshalCandidate",
+      "MarshalCandidateSet",
+      "UnmarshalCandidateSet",
+      "MarshalExperiment"
+    ]
+  },
+  "services/ai/hfcc/structure.go": {
+    "types": [],
+    "functions": [
+      "CloneStructure",
+      "CloneCandidate",
+      "StrPtr",
+      "Node",
+      "Nest",
+      "WithFunction",
+      "WithDirection",
+      "StructuralFingerprint",
+      "HasParticipation",
+      "CollectParticipationPairs"
+    ]
+  },
+  "services/ai/hfcc/types.go": {
+    "types": [
+      "InferenceClass",
+      "ValidationStatus",
+      "ReconstructionResult",
+      "StructuralCompare",
+      "ResearchCondition",
+      "Observation",
+      "Participant",
+      "StructureNode",
+      "ProvenanceRecord",
+      "Provenance",
+      "GoldAudit",
+      "Candidate",
+      "CandidateSet",
+      "ComparisonResult",
+      "AblationSpec",
+      "AblationReport",
+      "ExperimentRecord"
+    ],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_bmps.go": {
+    "types": [
+      "MetaComputation",
+      "MetaBelief",
+      "BMPSFeatures",
+      "BMPSDecision",
+      "BMPSEvaluation"
+    ],
+    "functions": [
+      "(b MetaBelief) Validate",
+      "(b MetaBelief) After",
+      "BMPSInformation",
+      "ValidateBMPSWeights",
+      "SelectBMPS",
+      "BMPSWeights",
+      "(e BMPSEvaluation) Validate",
+      "ProposeBMPS",
+      "(k *KnowledgeBase) CognitiveBMPSWeights",
+      "(k *KnowledgeBase) FitCognitiveBMPS"
+    ]
+  },
+  "services/ai/knowledge/cognitive_components_v4.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_compositional_probe_v5.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_coordinated_v5.go": {
+    "types": [
+      "CoordinatedPredictionV5",
+      "CoordinatedEpisodeV5",
+      "CoordinatedBatchV5",
+      "CoordinatedLearningV5"
+    ],
+    "functions": [
+      "(k *KnowledgeBase) PreviewCoordinatedV5",
+      "(k *KnowledgeBase) ValidateCoordinatedBatchV5",
+      "(k *KnowledgeBase) LearnCoordinatedV5",
+      "(k *KnowledgeBase) HasCoordinatedV5"
+    ]
+  },
+  "services/ai/knowledge/cognitive_credit_v5.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_fidelity_v5.go": {
+    "types": [
+      "FidelityLearningV5"
+    ],
+    "functions": [
+      "FidelityAssessmentPolicyV5",
+      "CoordinatedEvidenceDigestV5"
+    ]
+  },
+  "services/ai/knowledge/cognitive_learning.go": {
+    "types": [
+      "CognitiveTrainingFrame",
+      "CognitiveTrainingEpisode",
+      "CognitiveTrainingBatch",
+      "CognitiveLearningResult"
+    ],
+    "functions": [
+      "(b CognitiveTrainingBatch) Validate",
+      "(k *KnowledgeBase) ValidateCognitiveBatch",
+      "(k *KnowledgeBase) LearnCognitiveBatch"
+    ]
+  },
+  "services/ai/knowledge/cognitive_meta_learning_v2.go": {
+    "types": [
+      "VerifiedMentalResult"
+    ],
+    "functions": [
+      "(k *KnowledgeBase) CalibrateNeuralMeta"
+    ]
+  },
+  "services/ai/knowledge/cognitive_meta_v2.go": {
+    "types": [
+      "NeuralMetaConfig",
+      "NeuralMetaState",
+      "NeuralMetaInput"
+    ],
+    "functions": [
+      "(n NeuralMetaConfig) States",
+      "(n NeuralMetaConfig) Validate",
+      "(x NeuralMetaInput) Validate",
+      "(k *KnowledgeBase) InitializeNeuralMetaExtension"
+    ]
+  },
+  "services/ai/knowledge/cognitive_model.go": {
+    "types": [
+      "CognitiveModelConfig",
+      "CognitiveEdge",
+      "CognitiveTensor",
+      "CognitiveLayout",
+      "CognitiveModelState",
+      "CognitiveEvidence",
+      "CognitiveInput",
+      "CognitiveReadout"
+    ],
+    "functions": [
+      "(c CognitiveModelConfig) Validate",
+      "(e CognitiveEvidence) Validate",
+      "CognitiveDigest",
+      "(k *KnowledgeBase) HasCognitiveModel",
+      "(k *KnowledgeBase) InitializeCognitiveModel",
+      "(k *KnowledgeBase) CognitiveParameters",
+      "(k *KnowledgeBase) CognitiveConfig",
+      "(x CognitiveInput) Validate",
+      "(k *KnowledgeBase) CognitivePreview",
+      "(k *KnowledgeBase) AdvanceCognitiveModel"
+    ]
+  },
+  "services/ai/knowledge/cognitive_phase2_inference_v5.go": {
+    "types": [
+      "Phase2ProbeV5",
+      "Phase2PredictionV5"
+    ],
+    "functions": [
+      "(k *KnowledgeBase) PreviewPhase2V5",
+      "(k *KnowledgeBase) PreviewPhase3DiagnosticV5"
+    ]
+  },
+  "services/ai/knowledge/cognitive_phase2_world_v5.go": {
+    "types": [
+      "Phase2UpdateTimesV5",
+      "Phase2SpecV5",
+      "Phase2StateV5",
+      "Phase2BatchV5"
+    ],
+    "functions": [
+      "(c Phase2SpecV5) Validate",
+      "(k *KnowledgeBase) ValidatePhase2InitV5",
+      "(k *KnowledgeBase) InitializePhase2V5",
+      "(k *KnowledgeBase) ValidatePhase2BatchV5",
+      "(k *KnowledgeBase) LearnPhase2V5",
+      "(k *KnowledgeBase) HasPhase2V5"
+    ]
+  },
+  "services/ai/knowledge/cognitive_phase3_intervention_v5.go": {
+    "types": [
+      "Phase3InterventionV5"
+    ],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_phase4_v5.go": {
+    "types": [
+      "Phase4SpecV5",
+      "Phase4StateV5",
+      "Phase4DropV5",
+      "Phase4FrameV5",
+      "Phase4EpisodeV5",
+      "Phase4BatchV5",
+      "Phase4PredictionV5",
+      "Phase4LearningV5"
+    ],
+    "functions": [
+      "(s Phase4SpecV5) Validate",
+      "(k *KnowledgeBase) HasPhase4V5",
+      "(k *KnowledgeBase) ValidatePhase4InitV5",
+      "(k *KnowledgeBase) InitializePhase4V5",
+      "(k *KnowledgeBase) PreviewPhase4V5",
+      "(k *KnowledgeBase) PreviewPhase4DiagnosticV5",
+      "(k *KnowledgeBase) ValidatePhase4BatchV5",
+      "(k *KnowledgeBase) LearnPhase4V5"
+    ]
+  },
+  "services/ai/knowledge/cognitive_terminal_exposure_v5.go": {
+    "types": [
+      "Phase4TerminalAcquisitionV5"
+    ],
+    "functions": [
+      "(k *KnowledgeBase) PreviewPhase4TerminalFeaturesV5"
+    ]
+  },
+  "services/ai/knowledge/cognitive_terminal_readout_v3.go": {
+    "types": [],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_terminal_utility_v5.go": {
+    "types": [
+      "TerminalAnswerCountsV5",
+      "TerminalUtilityCaseV5",
+      "TerminalUtilityBatchV5"
+    ],
+    "functions": []
+  },
+  "services/ai/knowledge/cognitive_validation.go": {
+    "types": [],
+    "functions": [
+      "ValidateCognitiveModelState"
+    ]
+  },
+  "services/ai/language/language.go": {
+    "types": [
+      "Engine"
+    ],
+    "functions": [
+      "NewEngine",
+      "(e *Engine) Generate",
+      "(e *Engine) Confirm",
+      "(e *Engine) Realize",
+      "(e *Engine) RealizeEvaluation"
+    ]
+  },
+  "services/ai/runtime/cognitive_coordinated_v5.go": {
+    "types": [],
+    "functions": [
+      "(r *BrainRuntime) PreviewCoordinatedV5"
+    ]
+  },
+  "services/ai/runtime/cognitive_model.go": {
+    "types": [
+      "CognitiveModelCommand",
+      "CognitiveModelResult"
+    ],
+    "functions": [
+      "(c CognitiveModelCommand) Validate",
+      "(r *BrainRuntime) ApplyCognitiveModel",
+      "(r *BrainRuntime) PreviewCognitiveModel",
+      "(r *BrainRuntime) CognitiveModelParameters",
+      "(r *BrainRuntime) CognitiveBMPSWeights"
+    ]
+  },
+  "services/ai/runtime/cognitive_phase2_v5.go": {
+    "types": [],
+    "functions": [
+      "(r *BrainRuntime) PreviewPhase2V5"
+    ]
+  },
+  "services/ai/runtime/cognitive_phase3_v5.go": {
+    "types": [],
+    "functions": [
+      "(r *BrainRuntime) PreviewPhase3DiagnosticV5"
+    ]
+  },
+  "services/ai/runtime/cognitive_phase4_v5.go": {
+    "types": [],
+    "functions": [
+      "(r *BrainRuntime) PreviewPhase4V5",
+      "(r *BrainRuntime) PreviewPhase4DiagnosticV5"
+    ]
+  },
+  "services/ai/runtime/cognitive_terminal_exposure_v5.go": {
+    "types": [],
+    "functions": [
+      "(r *BrainRuntime) PreviewPhase4TerminalFeaturesV5"
+    ]
+  },
+  "services/ai/thinking/cognitive.go": {
+    "types": [
+      "CognitiveState",
+      "ActiveRelation",
+      "FunctionalSignal",
+      "Interpretation",
+      "WorkingMemory",
+      "Hypothesis",
+      "PathTrace",
+      "TraceStep"
+    ],
+    "functions": [
+      "(p *PathTrace) Add",
+      "(w *WorkingMemory) Clear"
+    ]
+  },
+  "services/ai/thinking/fsu.go": {
+    "types": [
+      "Proposition",
+      "EvidenceJudgement",
+      "EvidenceEvaluation",
+      "Constraint",
+      "EvidencePath",
+      "EvalStatus",
+      "FunctionalState"
+    ],
+    "functions": [
+      "BuildFunctionalState",
+      "ApplyFunctionalStateToInterpretation",
+      "EvaluateEvidenceForProposition",
+      "DecideEvaluation",
+      "FormatEvidencePath",
+      "FormatFunctionalStateSummary"
+    ]
+  },
+  "services/ai/thinking/hfcc_adapter.go": {
+    "types": [
+      "ProjectionTarget",
+      "ProjectionMapping",
+      "ProjectionRecord",
+      "HFCCProjectionResult",
+      "ProjectionVerifyResult"
+    ],
+    "functions": [
+      "(m ProjectionMapping) AsRecord",
+      "AssertProjectionConsistency",
+      "BuildHFCCFromPreserved",
+      "BuildHFCCFromPreservedWithMappings",
+      "AuditHFCCConsumerWithMappings",
+      "VerifyProjection",
+      "AuditHFCCConsumer",
+      "ProjectInventoryFromHFCCStructure"
+    ]
+  },
+  "services/ai/thinking/hfcc_bridge.go": {
+    "types": [],
+    "functions": [
+      "InterpretationCandidateID",
+      "BuildHFCCCandidateSet"
+    ]
+  },
+  "services/ai/thinking/inference.go": {
+    "types": [
+      "InferredFact"
+    ],
+    "functions": [
+      "InferFromIsAChain"
+    ]
+  },
+  "services/ai/thinking/interpretation.go": {
+    "types": [],
+    "functions": [
+      "BuildInterpretations",
+      "SelectBestInterpretation",
+      "ScoreInterpretationForTest"
+    ]
+  },
+  "services/ai/thinking/meta.go": {
+    "types": [
+      "MetaCognitiveLayer",
+      "MetaAssessment"
+    ],
+    "functions": [
+      "NewMetaCognitiveLayer",
+      "(m *MetaCognitiveLayer) Evaluate"
+    ]
+  },
+  "services/ai/thinking/preservation.go": {
+    "types": [
+      "ObservationRef",
+      "InfoKind",
+      "InformationClass",
+      "InfoOrigin",
+      "InfoDependency",
+      "Availability",
+      "Location",
+      "InformationPayload",
+      "InformationIID",
+      "InformationItem",
+      "RelocationRecord",
+      "DerivationRecord",
+      "EvidenceItem",
+      "CandidateSnapshot",
+      "CandidateFormationState",
+      "PreservedCandidateState",
+      "PreservationDimensions",
+      "ItemAudit",
+      "PreservationReport"
+    ],
+    "functions": [
+      "MakeIID",
+      "BuildCandidateFormationState",
+      "PreserveCandidateState",
+      "AuditPreservationIID",
+      "AuditTanpaKakiCase",
+      "AuditPreservation"
+    ]
+  },
+  "services/ai/thinking/reasoning.go": {
+    "types": [],
+    "functions": [
+      "(t *ThinkingEngine) Think",
+      "(t *ThinkingEngine) ThinkAbout",
+      "(t *ThinkingEngine) Reason",
+      "BuildHypotheses"
+    ]
+  },
+  "services/ai/thinking/thinking.go": {
+    "types": [
+      "ThinkingEngine",
+      "Thought"
+    ],
+    "functions": [
+      "NewThinkingEngine"
+    ]
+  },
+  "services/ai/understanding/understanding.go": {
+    "types": [
+      "CognitiveRepresentation",
+      "Trace",
+      "Engine",
+      "EdgeProvenance",
+      "ActiveEdge",
+      "SemanticNeighborhood"
+    ],
+    "functions": [
+      "NewEngine",
+      "(u *Engine) Understand",
+      "(u *Engine) CollectActiveRelations",
+      "(u *Engine) BuildSemanticNeighborhood",
+      "ContainsID"
+    ]
+  },
+  "removed_from_retained_files": [
+    "BrainState.CognitiveModel",
+    "BrainRuntime.DNF",
+    "HorizonEngine.Decision",
+    "LegacyCompatibilityInterpreter",
+    "CLI hypothesisSummary and unused FSU result/debug fields",
+    "ContextInformation and Decision from unused weighted Cluster",
+    "cognitive state/digest/dedup fields, version selectors and replay execution cases"
+  ]
+}

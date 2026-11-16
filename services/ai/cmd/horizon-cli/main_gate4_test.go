@@ -4,8 +4,6 @@ import (
 	"context"
 	"io"
 	"testing"
-
-	"github.com/project-horizon/horizon-core/services/ai/core"
 )
 
 // Gate 4 integration boundary: the CLI must reach the same neural runtime
@@ -13,26 +11,18 @@ import (
 // records both the process and the learning transition, so one interaction
 // advances the runtime sequence twice.
 func TestCLIProcessUsesNeuralRuntimeByDefault(t *testing.T) {
-	old := core.LegacyCognitionEnabled
-	core.LegacyCognitionEnabled = false
-	defer func() { core.LegacyCognitionEnabled = old }()
-
 	app := newCLI(nil, io.Discard, "")
 	result := app.process(context.Background(), "uji jalur neural dari cli")
 
 	if result.Path != "neural_runtime" {
 		t.Fatalf("CLI process path = %q, want neural_runtime", result.Path)
 	}
-	if runtimeForCLITest(t,app.horizon).LastSequence() != 1 {
-		t.Fatalf("CLI process expected one canonical process transition: sequence=%d", runtimeForCLITest(t,app.horizon).LastSequence())
+	if runtimeForCLITest(t, app.horizon).LastSequence() != 1 {
+		t.Fatalf("CLI process expected one canonical process transition: sequence=%d", runtimeForCLITest(t, app.horizon).LastSequence())
 	}
 }
 
 func TestCLIProcessCannotFallBackToLegacyControlWhenDisabled(t *testing.T) {
-	old := core.LegacyCognitionEnabled
-	core.LegacyCognitionEnabled = false
-	defer func() { core.LegacyCognitionEnabled = old }()
-
 	app := newCLI(nil, io.Discard, "")
 	result := app.process(context.Background(), "iya")
 

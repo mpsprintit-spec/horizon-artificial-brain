@@ -21,38 +21,9 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	command.SurfaceEncoding = r.surfaceEncoding
 	command.DynamicsEncoding = r.dynamicsEncoding
 	r.decorateCompositionJournalLocked(&command)
-	if command.Type == EventTypeCognitiveModel || r.brain.HasCognitiveModel() {
-		command.SchemaVersion = cognitiveModelJournalSchemaVersion
-	}
-	if command.CognitiveModel != nil && command.CognitiveModel.Initialize != nil && command.CognitiveModel.Initialize.Version == knowledge.CognitiveModelV2 {
-		command.SchemaVersion = neuralMetaJournalSchemaVersion
-	} else if cfg, e := r.brain.CognitiveConfig(); e == nil && cfg.Version == knowledge.CognitiveModelV2 {
-		command.SchemaVersion = neuralMetaJournalSchemaVersion
-	}
 	if command.Timestamp.IsZero() {
 		// The timestamp remains independently validated below.
 		command.Timestamp = r.nowLocked()
-	}
-	if c := command.CognitiveModel; c != nil && (c.Training != nil && c.Training.TerminalReadoutOnly || c.Calibration != nil && c.Calibration.TerminalReadoutOnly) {
-		command.SchemaVersion = terminalReadoutJournalSchemaVersion
-	}
-	if c := command.CognitiveModel; c != nil && (c.Training != nil && c.Training.ComponentV4 != "" || c.Calibration != nil && c.Calibration.ComponentV4 != "") {
-		command.SchemaVersion = componentLearningJournalSchemaVersion
-	}
-	if c := command.CognitiveModel; c != nil && (c.Phase2Init != nil || c.Phase2Training != nil) {
-		command.SchemaVersion = phase2JournalSchemaVersion
-	}
-	if c := command.CognitiveModel; c != nil && c.Phase3Training != nil {
-		command.SchemaVersion = phase3JournalSchemaVersion
-	}
-	if c := command.CognitiveModel; c != nil && (c.Phase4Init != nil || c.Phase4Training != nil) {
-		command.SchemaVersion = phase4JournalSchemaVersion
-	}
-	if c := command.CognitiveModel; c != nil && c.Phase4Training != nil && c.Phase4Training.Protocol == knowledge.Phase4TerminalProtocolV5 {
-		command.SchemaVersion = terminalExposureJournalSchemaVersion
-	}
-	if command.CognitiveModel != nil && command.CognitiveModel.Coordinated != nil {
-		command.SchemaVersion = coordinatedJournalSchemaVersion
 	}
 	if command.Type == EventTypeNativeControl {
 		command.SchemaVersion = nativeJournalSchemaVersion
@@ -85,7 +56,7 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 		}
 	}()
 	switch command.Type {
-	case EventTypeNativeControl, EventTypeCognitiveModel, EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeOutcome:
+	case EventTypeNativeControl, EventTypeActionBinding, EventTypeSurfaceRebinding, EventTypeWrittenGroundingMigration, EventTypeOutcome:
 		// Metadata-only changes do not advance neural time. Candidate outcomes
 		// settle retention only if their evidence actually promotes a synapse.
 	default:
@@ -105,9 +76,6 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 func processedJournalEvent(logged LoggedEvent) *Event {
 	if logged.NativeControl != nil {
 		return &Event{ID: nativeCommandPrefix(*logged.NativeControl) + knowledge.NativeDigest(*logged.NativeControl)}
-	}
-	if logged.CognitiveModel != nil {
-		return &Event{ID: "cognitive/" + logged.CognitiveModel.ID + "/" + knowledge.CognitiveDigest(*logged.CognitiveModel)}
 	}
 	if logged.Type == EventTypeCompositionPerception && logged.CompositionPerception != nil {
 		return &Event{ID: logged.CompositionPerception.ID}

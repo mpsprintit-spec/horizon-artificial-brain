@@ -27,8 +27,7 @@ func main() {
 	}
 
 	// BrainRuntime is the single cognitive authority for the production
-	// executable. Cluster remains available as a legacy sensor/decision
-	// compatibility component, but it is not invoked as the brain here.
+	// executable. Sensor adapters feed the same canonical neural runtime.
 	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
 	if brainMemoryPath == "" {
 		brainMemoryPath = "brain_memory.json"

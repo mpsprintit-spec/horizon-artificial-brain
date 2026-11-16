@@ -2,8 +2,6 @@ package core
 
 import (
 	"testing"
-
-	runtime "github.com/project-horizon/horizon-core/services/ai/runtime"
 )
 
 func TestPulseDefaultUsesCanonicalNeuralRuntime(t *testing.T) {
@@ -28,13 +26,5 @@ func TestPulseDoesNotFabricateActionRecommendation(t *testing.T) {
 	}
 	if result.Recommendation != nil {
 		t.Fatal("Pulse must not fabricate an action recommendation")
-	}
-}
-
-func TestLegacyCompatibilityInterpreterRemainsExplicit(t *testing.T) {
-	interpreter := runtime.LegacyCompatibilityInterpreter{}
-	_, err := interpreter.Interpret(runtime.CognitiveOutput{BrainIdentity: runtime.BrainIdentity})
-	if err == nil {
-		t.Fatal("legacy interpreter without delegate must remain disabled")
 	}
 }
