@@ -1,0 +1,5 @@
+=== RUN   TestNativeIntegrationSavedContinuation
+    native_saved_continuation_test.go:130: saved A–E1 seq75331/updates10752: exact genesis, suffix, checksum, retention and next-thought state; no acquisition
+--- PASS: TestNativeIntegrationSavedContinuation (20.45s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	20.489s

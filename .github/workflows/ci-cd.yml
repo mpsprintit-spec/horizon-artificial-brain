@@ -34,8 +34,10 @@ jobs:
           python3 scripts/prepare_grounded_dialogue.py --state "$RUNNER_TEMP/horizon-dialogue-state"
       - name: Race-test native terminal chat
         run: go test -race ./services/ai/terminal -run '^Test(Terminal|Communication)'
-      - name: Build terminal chat for Android arm64
-        run: GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -o "$RUNNER_TEMP/horizon-chat-android-arm64" ./cmd/horizon-chat
+      - name: Build production and terminal chat for Android arm64
+        run: |
+          GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -o "$RUNNER_TEMP/horizon-chat-android-arm64" ./cmd/horizon-chat
+          GOOS=android GOARCH=arm64 CGO_ENABLED=0 go build -o "$RUNNER_TEMP/horizon-ai-android-arm64" ./services/ai
       - name: Validate trained language, journal replay and production recovery
         env:
           HORIZON_DIALOGUE_MODEL: ${{ runner.temp }}/horizon-dialogue-state
@@ -46,11 +48,17 @@ jobs:
           go test -race ./services/ai/runtime -run '^TestGroundedDialogueConcurrentCanonicalRead$' -count=1
       - name: Live Bridge integration smoke
         run: make bridge-smoke
+      - name: Verify canonical production packaging, startup and restart
+        run: |
+          python3 scripts/prepare_native_continuation.py --check-production-bundle services/ai/canonical-ae1.tar.gz
+          go test -race ./services/ai -run '^TestCanonicalProduction' -count=1 -v -timeout=10m
+          go build -o "$RUNNER_TEMP/horizon-ai" ./services/ai
+          python3 scripts/canonical_production_smoke.py --binary "$RUNNER_TEMP/horizon-ai"
       - name: Verify saved A–E1 checkpoint, replay and retention
         run: |
           python3 scripts/prepare_native_continuation.py --destination "$RUNNER_TEMP/horizon-native-saved"
           HORIZON_NATIVE_CONTINUATION_DIR="$RUNNER_TEMP/horizon-native-saved" \
-          go test ./services/ai/runtime -run '^TestNativeIntegrationSavedContinuation$' -count=1 -timeout=20m
+          go test ./services/ai/runtime -run '^TestNativeIntegrationSavedContinuation$' -count=1 -v -timeout=20m
 
   monitor:
     runs-on: ubuntu-latest

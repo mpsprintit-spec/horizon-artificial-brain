@@ -37,7 +37,8 @@ assert.equal(h.intervals.size,0);assert.equal(h.listeners.get("devicemotion").si
 const headers={Authorization:"Bearer "+token};
 const snapshot=await (await fetch(base+"/v1/brain/snapshot",{headers})).json();
 const events=await (await fetch(base+"/v1/brain/events?after=0",{headers})).json();
-const memory=JSON.parse(readFileSync(memoryPath,"utf8"));
+const memoryFile=JSON.parse(readFileSync(memoryPath,"utf8"));
+const memory=memoryFile.brain??memoryFile;
 for(const request of h.requests){
   const sensor=request.body;
   if(sensor.tokens){assert.deepEqual(sensor.tokens,["naku","melo"]);const event=events.events.find(e=>e.event?.observation?.event_id===sensor.event_id);assert.ok(event,"written observation missing from journal view");assert.deepEqual(event.event.observation.tokens,sensor.tokens);assert.deepEqual(event.event.stimulus,sensor.tokens);continue;}

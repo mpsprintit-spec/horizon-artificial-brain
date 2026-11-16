@@ -1,0 +1,12 @@
+curl: (7) Failed to connect to 127.0.0.1 port 46483 after 0 ms: Could not connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 46483 after 0 ms: Could not connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 46483 after 0 ms: Could not connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 46483 after 0 ms: Could not connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 46483 after 0 ms: Could not connect to server
+curl: (7) Failed to connect to 127.0.0.1 port 46483 after 0 ms: Could not connect to server
+Visual sensor smoke: analytical pixels -> production adapter -> live Bridge -> scoped reuse, uncertainty, canonical memory and journal passed
+Inspection smoke: authenticated bounded pages, Go/JS wire digest and production bounded monitor connection passed
+Browser sensor smoke: production text/camera/audio/IMU/simulator handlers -> live Bridge -> physical reuse, lineage and persistence passed
+Bridge smoke: health, handshake, snapshot, legacy/numeric observations, persistence and event replay passed
+revision: 75332 -> 75335
+hash: sha256:a265bc014be56d208d68e256e25e8fba67b11bebc665610ec17d81a983c09529 -> sha256:6f32dbcad05cbad05e508998b536342a91393b0b265ecc0ec5166bea99cef262

@@ -42,7 +42,8 @@ for (const [index, rgba] of [visualFrame(),visualFrame({dx:1,regionDX:4}),unifor
   previous = measured.state; previousAt = capturedAt; parent = sensor.sample_id; sent.push(sensor);
 }
 const snapshot = await get("/v1/brain/snapshot");
-const saved = JSON.parse(readFileSync(memoryPath,"utf8"));
+const savedFile = JSON.parse(readFileSync(memoryPath,"utf8"));
+const saved = savedFile.brain ?? savedFile;
 const journalView = await get("/v1/brain/events?after=0");
 for (const sensor of sent) {
   const event = journalView.events.find(event=>event.event?.sensor_observation?.sample_id===sensor.sample_id);

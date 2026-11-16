@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log/slog"
 	"net/http"
@@ -19,6 +20,16 @@ import (
 
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
+	prepare := flag.String("prepare-ae1", "", "verify and stage canonical A–E1 in a NEW directory, then exit; never replaces existing state")
+	flag.Parse()
+	if *prepare != "" {
+		if err := prepareCanonicalAE1(*prepare); err != nil {
+			logger.Error("A–E1 preparation refused", "error", err)
+			os.Exit(1)
+		}
+		logger.Info("canonical A–E1 prepared", "directory", *prepare, "sequence", 75331)
+		return
+	}
 
 	cfg, err := config.Load()
 	if err != nil {
@@ -28,25 +39,24 @@ func main() {
 
 	// BrainRuntime is the single cognitive authority for the production
 	// executable. Sensor adapters feed the same canonical neural runtime.
-	brainMemoryPath := strings.TrimSpace(os.Getenv("HORIZON_BRAIN_MEMORY_PATH"))
-	if brainMemoryPath == "" {
-		brainMemoryPath = "brain_memory.json"
-	}
-	eventLogPath := strings.TrimSpace(os.Getenv("HORIZON_EVENT_LOG_PATH"))
-	if eventLogPath == "" {
-		eventLogPath = "horizon_events.jsonl"
-	}
-	checkpointPath := strings.TrimSpace(os.Getenv("HORIZON_CHECKPOINT_PATH"))
-	if checkpointPath == "" {
-		checkpointPath = brainMemoryPath + ".checkpoint.json"
-	}
-
-	eventLog, err := runtime.OpenEventLog(eventLogPath)
+	cwd, err := os.Getwd()
 	if err != nil {
-		logger.Error("failed to lock canonical brain event journal", "path", eventLogPath, "error", err)
+		logger.Error("cannot resolve production directory", "error", err)
 		os.Exit(1)
 	}
-	defer eventLog.Close()
+	paths, err := resolveProductionPaths(os.Getenv, cwd)
+	if err != nil {
+		logger.Error("invalid production state configuration", "error", err)
+		os.Exit(1)
+	}
+	state, err := openProductionState(paths)
+	if err != nil {
+		logger.Error("failed to open canonical production state", "error", err)
+		os.Exit(1)
+	}
+	defer state.Close()
+	brainMemoryPath, eventLogPath, checkpointPath := paths.Memory, paths.Journal, paths.Checkpoint
+	eventLog := state.Log
 
 	// The production brain is reconstructed and anchored BEFORE any
 	// asynchronous service starts accepting observations or cognitive work.
@@ -55,6 +65,7 @@ func main() {
 		logger.Error("canonical brain startup refused", "error", err)
 		os.Exit(1)
 	}
+	defer horizon.Supervisor().Close()
 	output, stimulusCount, err := finishProductionStartup(horizon, needsBootstrap, brainMemoryPath, checkpointPath)
 	if err != nil {
 		logger.Error("Horizon brain initialization failed", "error", err)
@@ -137,6 +148,9 @@ func main() {
 		"environment", cfg.Environment,
 		"port", cfg.Port,
 		"brain_identity", output.BrainIdentity,
+		"brain_memory_path", brainMemoryPath,
+		"checkpoint_path", checkpointPath,
+		"journal_path", eventLogPath,
 		"sequence", output.Sequence,
 		"resonance", output.Resonance,
 		"prediction_error", output.PredictionError,

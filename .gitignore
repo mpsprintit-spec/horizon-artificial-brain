@@ -12,6 +12,11 @@ dist/
 *.test
 coverage.out
 
+# Local canonical deployment state (never commit user experiences)
+horizon-state/
+.horizon-state.startup.lock
+.ae1-staging-*/
+
 # Python validation helpers
 __pycache__/
 

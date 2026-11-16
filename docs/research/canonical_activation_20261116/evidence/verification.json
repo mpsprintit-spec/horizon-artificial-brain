@@ -1,0 +1,396 @@
+{
+  "baseline": "57fa1a6b8abf8d100ee58ecbd62da095d14a95aa",
+  "decision": "PASS_LOCAL; source CI required before merge",
+  "toolchain": "go version go1.22.12 linux/amd64",
+  "platform": "Linux x86_64",
+  "source_manifest": "source-manifest.json",
+  "protected_files_matching": 115,
+  "checks_passed": 27,
+  "checks": [
+    {
+      "name": "bundle",
+      "command": [
+        "python3",
+        "scripts/prepare_native_continuation.py",
+        "--check-production-bundle",
+        "services/ai/canonical-ae1.tar.gz"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 3.592
+    },
+    {
+      "name": "full-tests",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "./...",
+        "-count=1",
+        "-timeout=20m"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 92.146
+    },
+    {
+      "name": "vet",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "vet",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 2.455
+    },
+    {
+      "name": "build",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "build",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.835
+    },
+    {
+      "name": "production-build",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "build",
+        "-o",
+        "/workspace/scratch/44dfb96749bd/ae1-completion-checks/horizon-ai",
+        "./services/ai"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.459
+    },
+    {
+      "name": "android-production",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "build",
+        "-o",
+        "/workspace/scratch/44dfb96749bd/ae1-completion-checks/horizon-ai-android-arm64",
+        "./services/ai"
+      ],
+      "environment_overrides": {
+        "GOOS": "android",
+        "GOARCH": "arm64",
+        "CGO_ENABLED": "0"
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 7.095
+    },
+    {
+      "name": "android-chat",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "build",
+        "-o",
+        "/workspace/scratch/44dfb96749bd/ae1-completion-checks/horizon-chat-android-arm64",
+        "./cmd/horizon-chat"
+      ],
+      "environment_overrides": {
+        "GOOS": "android",
+        "GOARCH": "arm64",
+        "CGO_ENABLED": "0"
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 0.457
+    },
+    {
+      "name": "bridge-smoke",
+      "command": [
+        "bash",
+        "scripts/bridge_smoke.sh"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 113.558
+    },
+    {
+      "name": "live-smoke",
+      "command": [
+        "python3",
+        "scripts/canonical_production_smoke.py",
+        "--binary",
+        "/workspace/scratch/44dfb96749bd/ae1-completion-checks/horizon-ai"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 18.694
+    },
+    {
+      "name": "prepare-oracle",
+      "command": [
+        "python3",
+        "scripts/prepare_native_continuation.py",
+        "--destination",
+        "/workspace/scratch/44dfb96749bd/ae1-completion-checks/oracle-final"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 1.688
+    },
+    {
+      "name": "retention-tests",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "./services/ai/runtime",
+        "-run",
+        "^TestNativeIntegrationSavedContinuation$",
+        "-count=1",
+        "-v",
+        "-timeout=20m"
+      ],
+      "environment_overrides": {
+        "HORIZON_NATIVE_CONTINUATION_DIR": "/workspace/scratch/44dfb96749bd/ae1-completion-checks/oracle-final"
+      },
+      "exit_code": 0,
+      "elapsed_seconds": 23.877
+    },
+    {
+      "name": "adapter-analytics",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/analytics",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.062
+    },
+    {
+      "name": "adapter-behavior",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/behavior",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.171
+    },
+    {
+      "name": "adapter-device",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/device",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.047
+    },
+    {
+      "name": "adapter-digital-twin",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/digital-twin",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.066
+    },
+    {
+      "name": "adapter-drone",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/drone",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.168
+    },
+    {
+      "name": "adapter-glasses",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/glasses",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.164
+    },
+    {
+      "name": "adapter-health-monitoring",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/health-monitoring",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.061
+    },
+    {
+      "name": "adapter-media",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/media",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.049
+    },
+    {
+      "name": "adapter-mission",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/mission",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.045
+    },
+    {
+      "name": "adapter-notification",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/notification",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.057
+    },
+    {
+      "name": "adapter-ota",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/ota",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.049
+    },
+    {
+      "name": "adapter-radio",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/radio",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.049
+    },
+    {
+      "name": "adapter-storage",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/storage",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.058
+    },
+    {
+      "name": "adapter-user",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/user",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.052
+    },
+    {
+      "name": "adapter-watch",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-C",
+        "services/watch",
+        "./..."
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 0.052
+    },
+    {
+      "name": "production-race",
+      "command": [
+        "/workspace/scratch/1f8cd5a50389/go/bin/go",
+        "test",
+        "-race",
+        "./services/ai",
+        "-run",
+        "^TestCanonicalProduction",
+        "-count=1",
+        "-v",
+        "-timeout=10m"
+      ],
+      "environment_overrides": {},
+      "exit_code": 0,
+      "elapsed_seconds": 258.673
+    }
+  ],
+  "retention": {
+    "C": "6/6",
+    "E1": "35/36",
+    "A_B_D": "unchanged PR69 oracle",
+    "native_acquisition_repeated": false
+  },
+  "initial_state": {
+    "sequence": 75331,
+    "native_updates": 10752,
+    "neurons": 57,
+    "synapses": 94,
+    "patterns": 24
+  },
+  "disposable_native_continuation": {
+    "sequence": 75335,
+    "native_updates": 10753
+  },
+  "live_smoke": {
+    "startup_sequence": 75331,
+    "observation_sequence": 75333,
+    "restart_sequence": 75333,
+    "continued_sequence": 75334,
+    "native_updates_preserved": 10752,
+    "bootstrap_events": 0,
+    "original_journal_prefix_preserved": true
+  },
+  "production_memory_sha256": "c7749827a5ce1a8799e677f1cff2ad05d2d532ac3715164a35eece5499453cc4"
+}
