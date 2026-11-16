@@ -22,8 +22,7 @@ PY
 )"
 base="http://127.0.0.1:${port}"
 
-HORIZON_BRAIN_MEMORY_PATH="${tmp_dir}/brain_memory.json" \
-HORIZON_EVENT_LOG_PATH="${tmp_dir}/events.jsonl" \
+HORIZON_STATE_DIR="${tmp_dir}/state" \
 HORIZON_BRIDGE_ADDRESS="127.0.0.1:${port}" \
 HORIZON_BRIDGE_TOKEN="${token}" \
 HORIZON_MONITOR_ORIGINS="http://127.0.0.1:${port}" \
@@ -57,9 +56,9 @@ after_hash="$(jq -r '.canonical_state_hash' <<<"${after}")"
 test "${after_revision}" -gt "${before_revision}"
 test "${after_hash}" != "${before_hash}"
 jq -e --arg id "${event_id}" '.events | any(.[]; .event.id == $id)' < <(curl -fsS "${base}/v1/brain/events?after=0" -H "Authorization: Bearer ${token}") >/dev/null
-test -s "${tmp_dir}/brain_memory.json"
-grep -q '"neural_units"' "${tmp_dir}/brain_memory.json"
-grep -q '"synapses"' "${tmp_dir}/brain_memory.json"
+test -s "${tmp_dir}/state/brain_memory.json"
+grep -q '"neural_units"' "${tmp_dir}/state/brain_memory.json"
+grep -q '"synapses"' "${tmp_dir}/state/brain_memory.json"
 
 sensor_id="${event_id}-fields"
 sensor_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -71,12 +70,12 @@ curl -fsS -X POST "${base}/v1/sensor-observations" \
 JSON
 jq -e '.sensor_bindings | length==2 and (.[0].population==.[1].population) and (.[0].group_id!=.[1].group_id)' "${tmp_dir}/sensor-response.json" >/dev/null
 curl -fsS "${base}/v1/brain/snapshot" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id and (.fields | length==2))' >/dev/null
-jq -e --arg id "${sensor_id}" '.sensory_traces | any(.[]; .sample_id==$id)' "${tmp_dir}/brain_memory.json" >/dev/null
+jq -e --arg id "${sensor_id}" '.sensory_traces // .brain.sensory_traces | any(.[]; .sample_id==$id)' "${tmp_dir}/state/brain_memory.json" >/dev/null
 curl -fsS "${base}/v1/brain/events?after=0" -H "Authorization: Bearer ${token}" | jq -e --arg id "${sensor_id}" '.events | any(.[]; .event.sensor_observation.sample_id==$id and (.event.sensor_observation.fields | length==2))' >/dev/null
 
-node scripts/visual_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/brain_memory.json"
+node scripts/visual_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/state/brain_memory.json"
 node scripts/inspection_smoke.mjs "${base}" "${token}"
-node scripts/browser_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/brain_memory.json"
+node scripts/browser_sensor_smoke.mjs "${base}" "${token}" "${event_id}" "${tmp_dir}/state/brain_memory.json"
 
 echo "Bridge smoke: health, handshake, snapshot, legacy/numeric observations, persistence and event replay passed"
 echo "revision: ${before_revision} -> ${after_revision}"

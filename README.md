@@ -15,7 +15,13 @@ research executable have been retired. Their implementation remains available
 at [the pre-cleanup revision](https://github.com/mpsprintit-spec/horizon-artificial-brain/tree/6b6db6c9ec0f373fed51f38a415d0a36baf7e812).
 Historical controller checkpoints and journals are explicitly refused; see
 [retirement and recovery guidance](docs/OBSOLETE_COGNITION_RETIREMENT.md).
-This cleanup does not replace the production Brain or promote the A–E1 checkpoint.
+
+Clean production installations now start from the authenticated **A–E1 Brain**
+(sequence 75,331; 10,752 native learning updates), embedded in the executable.
+Run `go build -o bin/horizon-ai ./services/ai`, then `./bin/horizon-ai`.
+The default isolated state directory is `./horizon-state`; select a persistent
+volume with `HORIZON_STATE_DIR=/absolute/path`. Existing Brain deployments are
+preserved by default. See [activation, backup and rollback](docs/CANONICAL_AE1_ACTIVATION.md).
 
 ## HC-001 Foundation Components
 

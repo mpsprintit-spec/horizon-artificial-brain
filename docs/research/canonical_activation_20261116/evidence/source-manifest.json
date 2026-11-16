@@ -1,0 +1,17 @@
+{
+  "baseline": "57fa1a6b8abf8d100ee58ecbd62da095d14a95aa",
+  "files": {
+    ".github/workflows/ci-cd.yml": "f36d77e1c55403004949d8e2f487ba15fb6f0f6c6edb59f1c34777e57d51f2e7",
+    ".gitignore": "a8196b5ffcb6819e7e86b8b7a340e010de32366f4ab1a509d7c3a61c3b84c812",
+    "scripts/bridge_smoke.sh": "f75673bc79b177b84ef6d558c16d0366db247c5a2b3e963f87906dbd706af79b",
+    "scripts/browser_sensor_smoke.mjs": "f35dd9b913818987f9415c0917ffd404c5bfb96aa05057b69f243b0cd6560289",
+    "scripts/visual_sensor_smoke.mjs": "f19754d9a00d6f95cd323612e4f228750c89b25af0636409f7e7aa86b2257c1c",
+    "scripts/prepare_native_continuation.py": "b4a3210b1f6a683f6dd225d499af86e5fb53e2ebedcdf7555186b8287c06b208",
+    "scripts/canonical_production_smoke.py": "984e9efc122df55d5f718c15c8bc5f24d859006c68d70ff3c85b9e85ff552238",
+    "services/ai/main.go": "439ebb09f28b27b865f126fc384a8583b4745aab8d9f1a30df8ce5e1f83b5e63",
+    "services/ai/startup.go": "48d7e7fa49a9fefe3d503662f95c3bb7da65f10fc718ab9bca55c11a3c8d77ae",
+    "services/ai/production_state.go": "28fa997cee539c35076fb9b8e8d2c41d2fea85870f31dc56e327b65225346520",
+    "services/ai/production_state_test.go": "32cacea3b39c4f3974d8dc17fd1cbe6360edb91c1b64a43d26dd10e68ad2bb04",
+    "services/ai/canonical-ae1.tar.gz": "2169fd99714d626c775fecbb2d10afa423f615d90566df4b64f764d34fa537e3"
+  }
+}

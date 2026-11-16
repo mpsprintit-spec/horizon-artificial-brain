@@ -1,0 +1,9 @@
+?   	github.com/project-horizon/horizon-core/services/glasses	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/api/grpc	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/api/http	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/config	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/internal/event	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/internal/handler	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/internal/repository	[no test files]
+?   	github.com/project-horizon/horizon-core/services/glasses/internal/service	[no test files]
+ok  	github.com/project-horizon/horizon-core/services/glasses/internal/model	0.002s

@@ -1,0 +1,9 @@
+?   	github.com/project-horizon/horizon-core/services/behavior	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/api/grpc	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/api/http	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/config	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/internal/event	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/internal/handler	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/internal/repository	[no test files]
+?   	github.com/project-horizon/horizon-core/services/behavior/internal/service	[no test files]
+ok  	github.com/project-horizon/horizon-core/services/behavior/internal/model	0.001s

@@ -1,0 +1,13 @@
+=== RUN   TestCanonicalProductionStartupContinuesAndRestarts
+    production_state_test.go:153: A–E1 production: sequence 75331 -> 75335, native updates 10752 -> 10753; idle, WAL and checkpoint restarts passed
+--- PASS: TestCanonicalProductionStartupContinuesAndRestarts (17.85s)
+=== RUN   TestCanonicalProductionPreservesLegacyAndSupportsRollback
+--- PASS: TestCanonicalProductionPreservesLegacyAndSupportsRollback (6.31s)
+=== RUN   TestCanonicalProductionRefusesInvalidActivationWithoutPublication
+--- PASS: TestCanonicalProductionRefusesInvalidActivationWithoutPublication (0.00s)
+=== RUN   TestCanonicalProductionRejectsMismatchedPairWithoutMutation
+--- PASS: TestCanonicalProductionRejectsMismatchedPairWithoutMutation (3.00s)
+=== RUN   TestCanonicalProductionConfigurationFailsClosed
+--- PASS: TestCanonicalProductionConfigurationFailsClosed (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai	27.182s

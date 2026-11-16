@@ -1,0 +1,8 @@
+{
+  "exit_code": 1,
+  "old_memory_unchanged": true,
+  "journal_created_on_rejection": false,
+  "files": [
+    "brain_memory.json"
+  ]
+}
