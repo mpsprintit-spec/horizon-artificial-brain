@@ -1,0 +1,4 @@
+=== RUN   TestS2Persistence
+    s2_self_evaluation_test.go:808: S2 PARTIAL continued sequence 76617 synaptic changes map[added:424 changed:0 removed:0]
+--- PASS: TestS2Persistence (100.34s)
+PASS

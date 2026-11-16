@@ -1,0 +1,29 @@
+{
+  "brain_identity": "horizon-primary-brain",
+  "lineage": [
+    "A-E1",
+    "S1",
+    "S2"
+  ],
+  "sequence": 76617,
+  "native_checksum": "b87285e38a321d45e4da920f219b388d1a2d061554042d2dd0f109883b38ab9d",
+  "native_policy_updates": 10752,
+  "S2_numeric_commands": 16,
+  "S2_numeric_commits": 4,
+  "status": "PARTIAL",
+  "source_S1_sequence": 75866,
+  "continuation_pair": {
+    "s2-continuation.json": {
+      "bytes": 12713427,
+      "sha256": "b85a818a84efb8185cdbf7003e14a8acd3d070c798f3ae7e053729ec9fc76ba0"
+    },
+    "events.jsonl": {
+      "bytes": 44021001,
+      "sha256": "e7157d7c1e3b03c38abd3825e3a6bd8aef0bcbdf748b291e48d99de356d7d527"
+    }
+  },
+  "checkpoint_verified": true,
+  "ready_for_S3_training": false,
+  "production_promoted": false,
+  "reason": "Holdout RMSE and discrimination gates failed; previous-error context contribution unproven."
+}

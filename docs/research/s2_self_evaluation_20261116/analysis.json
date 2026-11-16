@@ -1,0 +1,224 @@
+{
+  "PatternSynapses": 24,
+  "active_extra_forecast_or_history_source_coordinates": [],
+  "all_error_targets_independently_verified": 388,
+  "analysis_scope": "post-holdout descriptive audit only; frozen gates unchanged",
+  "by_operation": {
+    "propagate": {
+      "A_S1": {
+        "actual_max": 0.0426838147786478,
+        "actual_min": 0.0015442220928178392,
+        "correlation": 0.0,
+        "mae": 0.014307281868654832,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.01656470148493122
+      },
+      "B_constant": {
+        "actual_max": 0.0426838147786478,
+        "actual_min": 0.0015442220928178392,
+        "correlation": 0.0,
+        "mae": 0.0061039781792413305,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.008358780832440101
+      },
+      "B_full_training_constant": {
+        "actual_max": 0.0426838147786478,
+        "actual_min": 0.0015442220928178392,
+        "correlation": 0.0,
+        "mae": 0.006005511178844634,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.008473661581704251
+      },
+      "C_untrained": {
+        "actual_max": 0.0426838147786478,
+        "actual_min": 0.0015442220928178392,
+        "correlation": 0.0,
+        "mae": 0.014307281868654832,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.01656470148493122
+      },
+      "D_S2": {
+        "actual_max": 0.0426838147786478,
+        "actual_min": 0.0015442220928178392,
+        "correlation": 0.253799789320759,
+        "mae": 0.006306482103331551,
+        "n": 96,
+        "negative_estimates": 1,
+        "rmse": 0.008629872088309887
+      },
+      "E_ablated": {
+        "actual_max": 0.0426838147786478,
+        "actual_min": 0.0015442220928178392,
+        "correlation": 0.0,
+        "mae": 0.014307281868654832,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.01656470148493122
+      }
+    },
+    "stop": {
+      "A_S1": {
+        "actual_max": 0.0668028849248271,
+        "actual_min": 0.002357136039388287,
+        "correlation": 0.0,
+        "mae": 0.01911504407999189,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.022822019943637882
+      },
+      "B_constant": {
+        "actual_max": 0.0668028849248271,
+        "actual_min": 0.002357136039388287,
+        "correlation": 0.0,
+        "mae": 0.009256910020353636,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.013520779824032773
+      },
+      "B_full_training_constant": {
+        "actual_max": 0.0668028849248271,
+        "actual_min": 0.002357136039388287,
+        "correlation": 0.0,
+        "mae": 0.009438967411241303,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.01395205683999451
+      },
+      "C_untrained": {
+        "actual_max": 0.0668028849248271,
+        "actual_min": 0.002357136039388287,
+        "correlation": 0.0,
+        "mae": 0.01911504407999189,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.022822019943637882
+      },
+      "D_S2": {
+        "actual_max": 0.0668028849248271,
+        "actual_min": 0.002357136039388287,
+        "correlation": 0.44974328485524134,
+        "mae": 0.00872337939919107,
+        "n": 96,
+        "negative_estimates": 1,
+        "rmse": 0.012243512060133594
+      },
+      "E_ablated": {
+        "actual_max": 0.0668028849248271,
+        "actual_min": 0.002357136039388287,
+        "correlation": 0.0,
+        "mae": 0.01911504407999189,
+        "n": 96,
+        "negative_estimates": 0,
+        "rmse": 0.022822019943637882
+      }
+    }
+  },
+  "holdout_RMSE_improvement_fraction": 0.05766706984979186,
+  "lesson_rejections": [
+    {
+      "no-check-improvement": 65
+    },
+    {
+      "no-check-improvement": 66
+    },
+    {
+      "functionally-duplicate": 1,
+      "no-check-improvement": 75,
+      "retention-regression": 36
+    },
+    {
+      "no-check-improvement": 70
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 3
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 3
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 3
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 3
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    },
+    {
+      "no-check-improvement": 80,
+      "retention-regression": 41
+    }
+  ],
+  "neurons": 264,
+  "new_error_block_before_learning": {
+    "actual_max": 0.02830567524800294,
+    "actual_min": 0.0016610865415755127,
+    "correlation": 0.14702879469350327,
+    "mae": 0.006205191754560552,
+    "n": 64,
+    "negative_estimates": 0,
+    "rmse": 0.007773062697750331
+  },
+  "new_error_block_native_commits": 0,
+  "numeric_feature_ceiling_unchanged": 32,
+  "numeric_features": 30,
+  "operation_mean_training_control": {
+    "actual_max": 0.0668028849248271,
+    "actual_min": 0.0015442220928178392,
+    "correlation": -0.2209639981998211,
+    "mae": 0.007779155612699457,
+    "n": 192,
+    "negative_estimates": 0,
+    "rmse": 0.011613000452805401
+  },
+  "operation_training_means": {
+    "0": 0.013172105594303042,
+    "1": 0.012535968999378332
+  },
+  "paired_block_bootstrap": {
+    "RMSE_gain_CI95": [
+      -0.0001259086271616234,
+      0.0013861918742394043
+    ],
+    "block_trials": 8,
+    "repetitions": 4000,
+    "seed": 1703
+  },
+  "preoperation_receipts_verified": 388,
+  "previous_error_context_removed_RMSE_delta": 0,
+  "status": "PARTIAL",
+  "synapses": 6244
+}

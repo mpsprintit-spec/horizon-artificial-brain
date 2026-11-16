@@ -1,0 +1,4 @@
+=== RUN   TestS2RestartRetention
+    s2_self_evaluation_test.go:897: restart retention S1 drift 0 A-E1 delta 0 C 6/6 E1 35/36
+--- PASS: TestS2RestartRetention (51.91s)
+PASS

@@ -1,0 +1,4 @@
+=== RUN   TestS2Verify
+    s2_self_evaluation_test.go:830: verified S2 continuation 76617 policy updates 10752
+--- PASS: TestS2Verify (6.20s)
+PASS

@@ -1,0 +1,1 @@
+{"status": "PARTIAL", "preoperation_receipts_verified": 388, "holdout_RMSE_improvement_fraction": 0.05766706984979186, "paired_block_bootstrap": {"repetitions": 4000, "seed": 1703, "block_trials": 8, "RMSE_gain_CI95": [-0.0001259086271616234, 0.0013861918742394043]}, "new_error_block_native_commits": 0}

@@ -1,0 +1,196 @@
+{
+  "full_receipts_archive_path": "s2/learning.json",
+  "full_receipts_sha256": "aaf9466ada50d3abef4b3b3c9503a297647455253fb5075ec62e0fe9a6ddb31b",
+  "lessons": [
+    {
+      "lesson": 1,
+      "committed": true,
+      "cause": "missing-relation",
+      "before_error": 0.0002565301422770848,
+      "after_error": 8.858793758713083e-05,
+      "grown_node": 261,
+      "rejection_counts": {
+        "no-check-improvement": 65
+      }
+    },
+    {
+      "lesson": 2,
+      "committed": true,
+      "cause": "missing-relation",
+      "before_error": 8.858793758713083e-05,
+      "after_error": 3.567010578971878e-05,
+      "grown_node": 262,
+      "rejection_counts": {
+        "no-check-improvement": 66
+      }
+    },
+    {
+      "lesson": 3,
+      "committed": true,
+      "cause": "missing-relation",
+      "before_error": 3.5670105789718784e-05,
+      "after_error": 3.3273764342343864e-05,
+      "grown_node": 263,
+      "rejection_counts": {
+        "retention-regression": 36,
+        "no-check-improvement": 75,
+        "functionally-duplicate": 1
+      }
+    },
+    {
+      "lesson": 4,
+      "committed": true,
+      "cause": "missing-relation",
+      "before_error": 3.3273764342343864e-05,
+      "after_error": 3.102875878926056e-05,
+      "grown_node": 264,
+      "rejection_counts": {
+        "no-check-improvement": 70
+      }
+    },
+    {
+      "lesson": 5,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "no-check-improvement": 80,
+        "retention-regression": 3
+      }
+    },
+    {
+      "lesson": 6,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "no-check-improvement": 80,
+        "retention-regression": 3
+      }
+    },
+    {
+      "lesson": 7,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "no-check-improvement": 80,
+        "retention-regression": 3
+      }
+    },
+    {
+      "lesson": 8,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "no-check-improvement": 80,
+        "retention-regression": 3
+      }
+    },
+    {
+      "lesson": 9,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 10,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 11,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 12,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 13,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 14,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 15,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    },
+    {
+      "lesson": 16,
+      "committed": false,
+      "cause": "insufficient-predictive-evidence",
+      "before_error": 3.102875878926054e-05,
+      "after_error": 3.102875878926054e-05,
+      "grown_node": 0,
+      "rejection_counts": {
+        "retention-regression": 41,
+        "no-check-improvement": 80
+      }
+    }
+  ]
+}

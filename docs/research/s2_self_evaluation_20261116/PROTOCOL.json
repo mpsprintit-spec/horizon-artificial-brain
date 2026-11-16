@@ -1,0 +1,35 @@
+{
+  "Baseline": "11c6e0a78547d68a0be8f78b3c801e912722608d",
+  "SourceCheckpointSHA256": "d9bf6662a17c262922806672bcf53fe1484e5eb552ff0ec6699c21142333d64b",
+  "SourceJournalSHA256": "3c692c4dccaa33ebac748bcafe06be8b4a21a036317d3fe0e0ec813060b0b9dd",
+  "DesignSHA256": "6c81fcdba88170cff974b001f9721bd712f283e5545b97452958c1923c4cb3c6",
+  "TrainingSeed": 223,
+  "DevelopmentSeed": 211,
+  "NewTrainingSeed": 227,
+  "HoldoutSeeds": [
+    307,
+    401
+  ],
+  "FitN": 128,
+  "DevelopmentN": 64,
+  "HoldoutN": 96,
+  "Lessons": 16,
+  "Scale": 1,
+  "Constant": 0.013885148964198507,
+  "DevelopmentSD": 0.008071502153818421,
+  "LowCut": 0.00991445678229006,
+  "HighCut": 0.014746519148654772,
+  "CalibrationLimit": 0.003,
+  "Bins": [
+    0.009164839360556589,
+    0.018329678721113178,
+    0.027494518081669767,
+    0.036659357442226356,
+    0.04582419680278294
+  ],
+  "Identifiable": true,
+  "RelativeRMSE": 0.8,
+  "Correlation": 0.5,
+  "AblationRatio": 1.2,
+  "RetentionTolerance": 1e-7
+}

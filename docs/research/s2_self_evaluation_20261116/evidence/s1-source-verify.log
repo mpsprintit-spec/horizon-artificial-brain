@@ -1,0 +1,4 @@
+=== RUN   TestS1VerifyArtifact
+    s1_internal_dynamics_test.go:851: verified restorable S1 artifact PARTIAL sequence 75866 trained sequence 75849
+--- PASS: TestS1VerifyArtifact (6.48s)
+PASS

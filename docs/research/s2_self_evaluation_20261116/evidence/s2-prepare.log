@@ -1,0 +1,4 @@
+=== RUN   TestS2Prepare
+    s2_self_evaluation_test.go:344: S1 continuation verified; frozen protocol 74995f41ae93a1bc4a327bbbf8d1d171689bb83a3c49762e1578c31d84e2b167; SD 0.008072 low 0.009914 high 0.014747 identifiable true
+--- PASS: TestS2Prepare (38.70s)
+PASS

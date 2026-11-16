@@ -1,0 +1,26 @@
+=== RUN   TestGateGArchitectureDependencyBoundary
+--- PASS: TestGateGArchitectureDependencyBoundary (0.09s)
+=== RUN   TestGateGAdmissionMatrix
+--- PASS: TestGateGAdmissionMatrix (0.00s)
+=== RUN   TestNativeNumericRegistrationCoexistence
+--- PASS: TestNativeNumericRegistrationCoexistence (3.37s)
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/nonempty-written
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/active-written
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/unsupported-numeric
+=== RUN   TestNativeNumericRegistrationRejectsInvalidCoexistence/active-numeric
+--- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence (0.22s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/nonempty-written (0.03s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/active-written (0.03s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/unsupported-numeric (0.08s)
+    --- PASS: TestNativeNumericRegistrationRejectsInvalidCoexistence/active-numeric (0.08s)
+=== RUN   TestNativeCompositionDurableLostAcknowledgmentAndInterruptedApply
+=== RUN   TestNativeCompositionDurableLostAcknowledgmentAndInterruptedApply/lost-ack
+=== RUN   TestNativeCompositionDurableLostAcknowledgmentAndInterruptedApply/panic-after-learning
+--- PASS: TestNativeCompositionDurableLostAcknowledgmentAndInterruptedApply (1.68s)
+    --- PASS: TestNativeCompositionDurableLostAcknowledgmentAndInterruptedApply/lost-ack (0.90s)
+    --- PASS: TestNativeCompositionDurableLostAcknowledgmentAndInterruptedApply/panic-after-learning (0.78s)
+=== RUN   TestMetricNativeTransitionRolloutRecovery
+--- PASS: TestMetricNativeTransitionRolloutRecovery (62.01s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	68.406s
