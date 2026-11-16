@@ -246,6 +246,12 @@ func TestGateGAdmissionRejectsBeforeMutation(t *testing.T) {
 				nativeApply(t, r, NativeControlCommand{ID: "out", Outcome: &NativeOutcome{EpisodeID: "ep", TraceDigest: k.NativeDigest(ep), Source: "fixture", OutcomeID: "out", Provenance: "observed-sensor", Reward: .8, Learn: true, ContrastID: "pair", ContrastMode: "action"}})
 			}
 			ops := map[string]func() error{
+				"numeric-registration": func() error {
+					return r.ApplyNeuralComposition(CompositionPlan{}, filepath.Join(t.TempDir(), "blocked-numeric.json"), gateGTime(r))
+				},
+				"adapter-registration": func() error {
+					return r.ApplyNeuralWrittenGrounding(WrittenGroundingPlan{}, filepath.Join(t.TempDir(), "blocked-adapter.json"), gateGTime(r))
+				},
 				"sensor": func() error {
 					s := testSensorObservation()
 					s.SampleID = "blocked"

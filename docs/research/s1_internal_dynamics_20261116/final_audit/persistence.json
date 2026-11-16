@@ -1,0 +1,52 @@
+{
+  "continuation_journal_bytes": 41106826,
+  "new_acquisition_commands": 0,
+  "original_journal_bytes": 36025006,
+  "original_journal_prefix": true,
+  "recovery": [
+    {
+      "checkpoint": "07-E1-restarted.json",
+      "checkpoint_sequence": 75331,
+      "complete_state_equal": true,
+      "native_checksum": "68a1518ebf1eea887041a339851754880d7638866a135361693205bab4bf4b82",
+      "recovered_sequence": 75866
+    },
+    {
+      "checkpoint": "02-observed-pretraining.json",
+      "checkpoint_sequence": 75813,
+      "complete_state_equal": true,
+      "native_checksum": "2d359af6d46755f428cc7d5ca607d047cb076c523fbf2abf528b4b59549e34af",
+      "recovered_sequence": 75866
+    },
+    {
+      "checkpoint": "s1-final.json",
+      "checkpoint_sequence": 75849,
+      "complete_state_equal": true,
+      "native_checksum": "7c63ef68dab03bd9fe1d7d56ef047d54e445c6d5ccfc3c8e75b8cb2d797ba6b0",
+      "recovered_sequence": 75866
+    },
+    {
+      "checkpoint": "s1-continuation.json",
+      "checkpoint_sequence": 75866,
+      "complete_state_equal": true,
+      "native_checksum": "15105e910a7d1fcc0b1cdf4b2883493c498abbabc5afae3626dd0f9bb18ba2bf",
+      "recovered_sequence": 75866
+    }
+  ],
+  "rollback": [
+    {
+      "checkpoint": "rollback-before-numeric-registration.json",
+      "complete_state_equal": true,
+      "native_checksum": "68a1518ebf1eea887041a339851754880d7638866a135361693205bab4bf4b82",
+      "schema": 20,
+      "sequence": 75331
+    },
+    {
+      "checkpoint": "rollback-before-numeric-banks.json",
+      "complete_state_equal": true,
+      "native_checksum": "f9177577ca4f79fd54f02d203d19ef9d8488a18ed622ca8040cdb4290373927c",
+      "schema": 20,
+      "sequence": 75332
+    }
+  ]
+}

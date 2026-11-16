@@ -261,16 +261,23 @@ func TestGateGPolicyOwnershipAndHistoricalNativeVersions(t *testing.T) {
 
 func TestGateGAdmissionMatrix(t *testing.T) {
 	allowed := []string{EventTypeProcess, EventTypeCognitiveProcess, EventTypeObservation, EventTypeThink, EventTypeCognitiveThink, EventTypeSensorIntent, EventTypeLearn, EventTypeSpellingExposure, EventTypeCompositionExposure, EventTypeCompositionPerception, EventTypeVectorGround, EventTypeKnowledgeImport, EventTypeInquiryOutcome, EventTypeOutcome, EventTypeConsequence, EventTypeActionBinding}
-	isolated := []string{"cognitive_model_command", EventTypeCompositionMigration, EventTypeWrittenGroundingMigration, EventTypeSurfaceRebinding, "unrecognized-command"}
+	// Numeric registrations have a narrow, independently tested native
+	// coexistence contract; controller replacement remains isolated.
+	isolated := []string{"cognitive_model_command", EventTypeSurfaceRebinding, "unrecognized-command"}
+	// Retain admission coverage for the two migrations moved out of isolated.
+	// This fixture is annotation-free; plan/version rejection is tested through
+	// the real migration APIs in TestNativeNumericRegistrationRejectsInvalidCoexistence.
+	conditional := []string{EventTypeCompositionMigration, EventTypeWrittenGroundingMigration}
+	idleSafe := append(append([]string{}, allowed...), conditional...)
 	rt, ids := nativeFixture(t)
-	for _, kind := range append(append([]string{}, allowed...), isolated...) {
+	for _, kind := range append(append([]string{}, idleSafe...), isolated...) {
 		if e := rt.admitCommandLocked(kind); e != nil {
 			t.Fatal("uninitialized behavior changed", kind, e)
 		}
 	}
 	cfg := nativeControlConfig(ids)
 	nativeApply(t, rt, NativeControlCommand{ID: "init", Initialize: &cfg})
-	for _, kind := range allowed {
+	for _, kind := range idleSafe {
 		if e := rt.admitCommandLocked(kind); e != nil {
 			t.Fatal("idle safe command blocked", kind, e)
 		}
@@ -281,7 +288,7 @@ func TestGateGAdmissionMatrix(t *testing.T) {
 		}
 	}
 	rt.markRecoveryRequiredLocked()
-	for _, kind := range append(allowed, EventTypeNativeControl) {
+	for _, kind := range append(idleSafe, EventTypeNativeControl) {
 		if e := rt.admitCommandLocked(kind); !errors.Is(e, ErrRuntimeRecoveryRequired) {
 			t.Fatal("poisoned runtime admitted", kind, e)
 		}

@@ -1,0 +1,57 @@
+{
+  "artifact-restore": {
+    "sha256": "00089c8f0f605ae8b26583a095dbd3727e3881490398331e6dd63469ce58a608",
+    "top_level_passes": 1,
+    "completed": true,
+    "has_failure": false
+  },
+  "runtime-race": {
+    "sha256": "e9a6dff9d932cef62ea1086dba2cad8a7372b4a1fb5517eb14df3db605cf8e48",
+    "top_level_passes": 9,
+    "completed": true,
+    "has_failure": false
+  },
+  "production-race": {
+    "sha256": "d0d8fc4dbe9fc14fc3203565430672f7b8c908afbec1f32bfaf7b1808bc7a949",
+    "top_level_passes": 6,
+    "completed": true,
+    "has_failure": false
+  },
+  "admission-matrix-restored": {
+    "sha256": "0426ce153e97ae347b28e8da958b181e5dea0b80ebe3d6e2870effaa545e5787",
+    "top_level_passes": 2,
+    "completed": true,
+    "has_failure": false
+  },
+  "final-retention-valid": {
+    "sha256": "ee8e584fa1b4567b10c840570da5a6bdd6a1d8a6d58383f43937e64d3108ef03",
+    "top_level_passes": 1,
+    "completed": true,
+    "has_failure": false
+  },
+  "passive-time": {
+    "sha256": "00db03381fbba5ba677181b7d3d9c365d43a277816ee46274a1769ec66a9dffc",
+    "top_level_passes": 1,
+    "completed": true,
+    "has_failure": false
+  },
+  "initial-audit-unsettled-assumption": {
+    "sha256": "e1aae5a9fb8da776608765651c0c9f1670e30ad066e61ab98b6c74cfe16cfec6",
+    "top_level_passes": 1,
+    "completed": true,
+    "has_failure": true
+  },
+  "rejected-thought-control": {
+    "sha256": "3c8b5800075fed6d05899e2a8dbb0dfd9f6f1b538725ce7a54d34f54c6573810",
+    "top_level_passes": 0,
+    "completed": true,
+    "has_failure": true
+  },
+  "historical_failures_preserved": {
+    "initial-audit-unsettled-assumption": "A blanket 1e-12 exactness expectation included C/E1 factual native returns; these do not settle the original A watermark. The measured 4.9976354166147985e-09 residual is retained. Final attribution requires exact B/C, and A/B/D margin agreement is checked separately. No historical gate was changed.",
+    "rejected-thought-control": "A real native thought is not a pure time-only control: it updates node frequency, timestamps and homeostatic thresholds. This evaluation control was rejected; no state was transplanted. Per-node changes are in rejected-thought-control.json."
+  },
+  "tested_runtime_commit": "7c9f093839baff2256d5732b613106d3ad6f0b9f",
+  "runtime_serving_sources_changed_during_final_audit": false,
+  "g8_benchmark_rerun": false
+}

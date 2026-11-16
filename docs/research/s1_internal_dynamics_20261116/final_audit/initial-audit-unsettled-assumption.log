@@ -1,0 +1,7 @@
+=== RUN   TestS1FinalRetentionAudit
+    s1_final_audit_test.go:197: functional retention regression 4.9976354166147985e-09 0
+--- FAIL: TestS1FinalRetentionAudit (57.36s)
+=== RUN   TestS1FinalPersistenceAudit
+    s1_final_audit_test.go:304: native checksums, both rollback pairs and four suffix recovery routes verified without new acquisition
+--- PASS: TestS1FinalPersistenceAudit (79.27s)
+FAIL

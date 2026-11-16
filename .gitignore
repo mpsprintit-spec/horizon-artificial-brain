@@ -24,3 +24,6 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+
+# Full S1 recovery archive is distributed via ARTIFACT.md with SHA-256.
+/docs/research/s1_internal_dynamics_20261116/evidence/Horizon_S1_Native_Dynamics_20261116.tar.xz

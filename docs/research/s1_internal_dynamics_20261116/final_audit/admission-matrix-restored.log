@@ -1,0 +1,12 @@
+=== RUN   TestGateGAdmissionMatrix
+--- PASS: TestGateGAdmissionMatrix (0.00s)
+=== RUN   TestGateGAdmissionRejectsBeforeMutation
+=== RUN   TestGateGAdmissionRejectsBeforeMutation/active
+=== RUN   TestGateGAdmissionRejectsBeforeMutation/awaiting-outcome
+=== RUN   TestGateGAdmissionRejectsBeforeMutation/pending-contrast
+--- PASS: TestGateGAdmissionRejectsBeforeMutation (0.66s)
+    --- PASS: TestGateGAdmissionRejectsBeforeMutation/active (0.22s)
+    --- PASS: TestGateGAdmissionRejectsBeforeMutation/awaiting-outcome (0.22s)
+    --- PASS: TestGateGAdmissionRejectsBeforeMutation/pending-contrast (0.22s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	1.701s

@@ -1,0 +1,4 @@
+=== RUN   TestS1FinalRetentionAudit
+    s1_final_audit_test.go:261: retention: historical PARTIAL retained; A/C max 4.9976354166147985e-09, B/C 0; C 6/6 E1 35/36
+--- PASS: TestS1FinalRetentionAudit (55.71s)
+PASS

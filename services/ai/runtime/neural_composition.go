@@ -123,6 +123,9 @@ func (r *BrainRuntime) validateCompositionPlanLocked(p CompositionPlan) error {
 	if err := p.Config.Validate(); err != nil {
 		return err
 	}
+	if r.brain.HasNativeControl() && p.Config.Version != knowledge.NeuralCompositionMetricV6 {
+		return errors.New("native coexistence requires the continuous numeric v6 contract")
+	}
 	if !r.neuralWrittenGrounding || r.composition != nil || r.brain.HasNeuralComposition() {
 		return errors.New("composition requires a migrated, not-yet-initialized Brain")
 	}
@@ -175,7 +178,11 @@ func (r *BrainRuntime) ApplyNeuralComposition(plan CompositionPlan, backupPath s
 			return err
 		}
 	}
-	if err := r.checkpointVersionLocked(backupPath, neuralWrittenBrainSnapshotSchemaVersion); err != nil {
+	backupVersion := neuralWrittenBrainSnapshotSchemaVersion
+	if r.brain.HasNativeControl() {
+		backupVersion = nativeCheckpointSchemaVersion
+	}
+	if err := r.checkpointVersionLocked(backupPath, backupVersion); err != nil {
 		return err
 	}
 	journalHash := ""

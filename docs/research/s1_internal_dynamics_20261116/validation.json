@@ -1,0 +1,81 @@
+{
+  "logs": {
+    "compatibility": {
+      "top_level_passes": 6,
+      "failed": false,
+      "completed": true,
+      "sha256": "3c22413f1f70e1a89a70c6d316a2d8c61af20dc7af56c1bdc57ee40b996c2571"
+    },
+    "neural-regression": {
+      "top_level_passes": 0,
+      "failed": false,
+      "completed": true,
+      "sha256": "5d8858f8b0670a7d2f0563ec68ca16ed7a0808a88ce7a22ebce0479bb3173528"
+    },
+    "runtime-regression": {
+      "top_level_passes": 62,
+      "failed": false,
+      "completed": true,
+      "sha256": "207458d840220b02f2d014d629c46eaf713a5c04ae35fb79a5119a8473aecd52"
+    },
+    "race": {
+      "top_level_passes": 3,
+      "failed": false,
+      "completed": true,
+      "sha256": "f648087bb49d78af0f07a5b76784815fdc98880ce909e1afdf3ad6564bc5f7f2"
+    },
+    "production-regression": {
+      "top_level_passes": 6,
+      "failed": false,
+      "completed": true,
+      "sha256": "1d8790940a339b4d514bb4448af09ad4d3dba5019ed6cb8d1d2c14efd716630c"
+    },
+    "prepare": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "9c4dd3f0b23b09891e95df3d4df79b4fd8097aef3a5e69e6c4fd129687f10234"
+    },
+    "train": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "1962bf040a4ee92626f2036a1f054109b8d2cf30bac932848f943b3fbe8988ed"
+    },
+    "evaluate": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "6373f1b9c5c1a6e565a2699f5061c46a5047fb0529e190f12dd28a0a3269dd7b"
+    },
+    "restore": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "00917b954bc26834ac0f0950849d7a022eda293e403a8848f5d2e41c65eec041"
+    },
+    "verify": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "c30d52c697f978e9f0d8e09d4a862139cb4d982e7ece189c9803ef7edc7a1757"
+    },
+    "retention-diagnosis": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "399e506fabbd0c4dfc1e95e049da0cf92b37600e0f3ad1b901c821188486d716"
+    },
+    "finalize": {
+      "top_level_passes": 1,
+      "failed": false,
+      "completed": true,
+      "sha256": "130fc03cb6ce6042fb6d0826950c1e7998dd6f32b298db0782bf5835710d78e0"
+    }
+  },
+  "max_original_dynamic_weight_delta": 4.165422007318398e-09,
+  "max_raw_retention_margin_delta": 1.2419389385787127e-06,
+  "naive_state_persistence_rmse": 0.09578981910947804,
+  "source_prefix_untouched": true,
+  "production_brain_files_changed": false
+}
