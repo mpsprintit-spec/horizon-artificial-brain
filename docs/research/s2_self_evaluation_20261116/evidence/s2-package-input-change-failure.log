@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/workspace/scratch/08c2c5fc51ab/horizon-artificial-brain/scripts/package_s2_self_evaluation.py", line 103, in <module>
+    package(a.work.resolve(), a.source.resolve(), a.output.resolve())
+  File "/workspace/scratch/08c2c5fc51ab/horizon-artificial-brain/scripts/package_s2_self_evaluation.py", line 90, in package
+    verify(output)
+  File "/workspace/scratch/08c2c5fc51ab/horizon-artificial-brain/scripts/package_s2_self_evaluation.py", line 37, in verify
+    raise ValueError('payload mismatch: '+name)
+ValueError: payload mismatch: reproduce/package_s2_self_evaluation.py

@@ -1,0 +1,58 @@
+{
+  "S1_journal_bytes": 41106826,
+  "S1_journal_prefix_exact": true,
+  "checkpoints": [
+    {
+      "bytes": 12711739,
+      "file": "s2-final.json",
+      "native_checksum": "f89ea7ef61330d6ebf6bc0cd60bf5aec49fe6a487e440843cbc646dfefdc13a3",
+      "sequence": 76602,
+      "sha256": "60ae19a96f22183596e04b5a6965a6ecef2b9efd45a75755dcf1ebd97c5c3c42"
+    },
+    {
+      "bytes": 12711739,
+      "file": "s2-restarted.json",
+      "native_checksum": "f89ea7ef61330d6ebf6bc0cd60bf5aec49fe6a487e440843cbc646dfefdc13a3",
+      "sequence": 76602,
+      "sha256": "60ae19a96f22183596e04b5a6965a6ecef2b9efd45a75755dcf1ebd97c5c3c42"
+    },
+    {
+      "bytes": 12713427,
+      "file": "s2-continuation.json",
+      "native_checksum": "b87285e38a321d45e4da920f219b388d1a2d061554042d2dd0f109883b38ab9d",
+      "sequence": 76617,
+      "sha256": "b85a818a84efb8185cdbf7003e14a8acd3d070c798f3ae7e053729ec9fc76ba0"
+    }
+  ],
+  "continuation_exact": true,
+  "continued_without_acquisition": true,
+  "native_policy_updates": 10752,
+  "new_continuation_trials": 4,
+  "protocol_sha256": "74995f41ae93a1bc4a327bbbf8d1d171689bb83a3c49762e1578c31d84e2b167",
+  "restart_exact": true,
+  "retention_tolerance": 1e-7,
+  "rollback_exact": true,
+  "routes": [
+    {
+      "checksum": "15105e910a7d1fcc0b1cdf4b2883493c498abbabc5afae3626dd0f9bb18ba2bf",
+      "exact_complete_state": true,
+      "from": "00-s1-source.json",
+      "from_sequence": 75866,
+      "recovered_sequence": 76602
+    },
+    {
+      "checksum": "8a1c0e1a35aa425b7a4a9610c1ddf7b4077b346fde6e1959560bcd81bb544742",
+      "exact_complete_state": true,
+      "from": "01-observed-untrained.json",
+      "from_sequence": 76346,
+      "recovered_sequence": 76602
+    },
+    {
+      "checksum": "f89ea7ef61330d6ebf6bc0cd60bf5aec49fe6a487e440843cbc646dfefdc13a3",
+      "exact_complete_state": true,
+      "from": "s2-final.json",
+      "from_sequence": 76602,
+      "recovered_sequence": 76602
+    }
+  ]
+}

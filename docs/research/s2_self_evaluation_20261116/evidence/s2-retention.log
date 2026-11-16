@@ -1,0 +1,4 @@
+=== RUN   TestS2Retention
+    s2_self_evaluation_test.go:653: A-E1 paired oracle delta 0 C=6/6 E1=35/36 pass=true
+--- PASS: TestS2Retention (49.61s)
+PASS

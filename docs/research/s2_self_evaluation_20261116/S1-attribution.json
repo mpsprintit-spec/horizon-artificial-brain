@@ -1,0 +1,41 @@
+{
+  "ablated_synapses": 392,
+  "candidate": {
+    "Samples": 192,
+    "Coordinates": 576,
+    "RMSE": 0.02326859012605929,
+    "MAE": 0.016711162974323342,
+    "Accuracy": 0.9600694444444444
+  },
+  "context_contrast_RMSE": 0.02990609411348765,
+  "context_contrast_correlation": 0.9703772034474148,
+  "observations": "saved S2 holdout only; no new S1 acquisition/evaluation distribution",
+  "projections": [
+    {
+      "RMSE": 0.01796249847874729,
+      "coordinates": 192,
+      "projection": 0,
+      "within_0_05": 188
+    },
+    {
+      "RMSE": 0.03027605995926203,
+      "coordinates": 192,
+      "projection": 1,
+      "within_0_05": 177
+    },
+    {
+      "RMSE": 0.019621179911203195,
+      "coordinates": 192,
+      "projection": 2,
+      "within_0_05": 188
+    }
+  ],
+  "readout_ablated": {
+    "Samples": 192,
+    "Coordinates": 576,
+    "RMSE": 0.17561637460389054,
+    "MAE": 0.13440881073532332,
+    "Accuracy": 0.3194444444444444
+  },
+  "source_candidate_predictions_exact": true
+}

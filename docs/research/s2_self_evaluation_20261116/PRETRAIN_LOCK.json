@@ -1,0 +1,6 @@
+{
+  "services/ai/runtime/s2_self_evaluation_test.go": "19ccc1f9cc438b654fdb8502c9681feedee3530c3611845c17fee3781bf04be2",
+  "docs/research/s2_self_evaluation_20261116/DESIGN.md": "6c81fcdba88170cff974b001f9721bd712f283e5545b97452958c1923c4cb3c6",
+  "protocol_sha256": "74995f41ae93a1bc4a327bbbf8d1d171689bb83a3c49762e1578c31d84e2b167",
+  "stage": "before-S2-learning-and-final-holdout"
+}

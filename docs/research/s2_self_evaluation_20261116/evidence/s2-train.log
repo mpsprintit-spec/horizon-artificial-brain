@@ -1,0 +1,19 @@
+=== RUN   TestS2Train
+    s2_self_evaluation_test.go:412: lesson 1 committed=true dev_rmse=0.00941212 features=27 cause=missing-relation
+    s2_self_evaluation_test.go:412: lesson 2 committed=true dev_rmse=0.00597245 features=28 cause=missing-relation
+    s2_self_evaluation_test.go:412: lesson 3 committed=true dev_rmse=0.00576834 features=29 cause=missing-relation
+    s2_self_evaluation_test.go:412: lesson 4 committed=true dev_rmse=0.00557035 features=30 cause=missing-relation
+    s2_self_evaluation_test.go:412: lesson 5 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 6 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 7 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 8 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 9 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 10 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 11 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 12 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 13 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 14 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 15 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+    s2_self_evaluation_test.go:412: lesson 16 committed=false dev_rmse=0.00557035 features=30 cause=insufficient-predictive-evidence
+--- PASS: TestS2Train (93.05s)
+PASS

@@ -1,0 +1,4 @@
+=== RUN   TestS2RestartRetention
+    s2_self_evaluation_test.go:884: open testdata/continual_flexibility_v1.json: no such file or directory
+--- FAIL: TestS2RestartRetention (9.20s)
+FAIL

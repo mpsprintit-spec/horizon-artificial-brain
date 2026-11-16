@@ -1,0 +1,4 @@
+=== RUN   TestS2Evaluate
+    s2_self_evaluation_test.go:577: fixed final stage: S2 RMSE 0.01059194 constant 0.01124012 untrained 0.01994034 corr 0.3502 calibration 0.00276144 S1 drift 0
+--- PASS: TestS2Evaluate (63.47s)
+PASS

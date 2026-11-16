@@ -1,0 +1,4 @@
+=== RUN   TestS2SavedS1Attribution
+    s2_self_evaluation_test.go:937: S1 saved observations RMSE 0.02326859012605929 readout ablated 0.17561637460389054 context correlation 0.9703772034474148
+--- PASS: TestS2SavedS1Attribution (2.26s)
+PASS
