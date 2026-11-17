@@ -1,0 +1,15 @@
+{
+  "checkpoint_sha256": "445991d177dc955ec58e7f9a3244a3f27da98fb90de584b09d4cc05c5c82d29d",
+  "inventory": {
+    "capacity_metadata": 0,
+    "features": 32,
+    "native_policy_updates": 10752,
+    "neurons": 274,
+    "sequence": 80735,
+    "synapses": 6408
+  },
+  "journal_sha256": "05659f8f3ea4bbe29fbcdd90a4f1c00ee8fbbe488234ee4af762730926c083d8",
+  "native_checksum": "9016b845eed4e8437e87ada99b9641718a086c570e246dd0a62e57dffd1ce9d3",
+  "sequence": 80735,
+  "source_recovered_exact": true
+}
