@@ -688,3 +688,17 @@ func TestS2R2IdenticalRetryAndDuplicateCommand(t *testing.T) {
 	}
 	s1Write(t, filepath.Join(work, "retry-engineering.json"), map[string]any{"synthetic_labels_for_engineering_only": true, "first": first, "second": second, "command_sequence_preserved": true, "duplicate_event_rejected": true, "replay_exact": true})
 }
+
+func TestS2R2JournalReproduction(t *testing.T) {
+	_, work := s2r2Paths(t)
+	w, e := OpenEventLog(filepath.Join(work, "training-combined/events.jsonl"))
+	s1Check(t, e)
+	defer w.Close()
+	r, e := RebuildRuntimeFromCheckpointAndJournal(w, filepath.Join(work, "00-source.json"))
+	s1Check(t, e)
+	expected := orderedFixtureClone(t, filepath.Join(work, "s2r2-final.json"))
+	if !bytes.Equal(continuationBytes(t, r), continuationBytes(t, expected)) {
+		t.Fatal("original source -> complete recorded R2 suffix differs")
+	}
+	s1Write(t, filepath.Join(work, "journal-reproduction.json"), map[string]any{"source_sequence": 76617, "replayed_sequence": r.LastSequence(), "complete_state_exact": true, "new_learning_acquisition": false})
+}

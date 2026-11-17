@@ -34,8 +34,17 @@ func TestMetricBoundedNonS2RecoveryAndIndependence(t *testing.T) {
 	if !mTeach(t, r, second, 1e-5).Committed {
 		t.Fatal("second non-S2 head did not learn")
 	}
-	if math.Abs(mRead(t, r, 1, nXY{.3, -.3}, 1e-5).NResolution.Value+.09) > 1e-5 || mRead(t, r, 0, nXY{.3, -.3}, 1e-5).NResolution.Value != old {
-		t.Fatal("cross-task learning/preservation failed")
+	// As in the existing metric precision curriculum, a newly recruited axis
+	// needs subsequent resolution lessons before a 1e-5 unseen-value request.
+	for pass := 2; pass <= 6; pass++ {
+		lesson := nLesson(1, pass, fit, check, func(p nXY) float64 { return .3 * p.y })
+		lesson.Resolution.Proposal = e.Resolution.Proposal
+		mTeach(t, r, lesson, 1e-5)
+	}
+	newValue := mRead(t, r, 1, nXY{.3, -.3}, 1e-5).NResolution.Value
+	oldValue := mRead(t, r, 0, nXY{.3, -.3}, 1e-5).NResolution.Value
+	if math.Abs(newValue+.09) > 1e-5 || oldValue != old {
+		t.Fatalf("cross-task learning/preservation failed: new=%g old=%g expected_old=%g", newValue, oldValue, old)
 	}
 	checkpoint := filepath.Join(dir, "bounded.json")
 	compositionCheck(t, r.Checkpoint(checkpoint))

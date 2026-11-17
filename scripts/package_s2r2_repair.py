@@ -29,10 +29,12 @@ def verify(path):
     result={'payloads_verified':len(actual),'bytes':path.stat().st_size,'sha256':digest(path.read_bytes())}
     print(json.dumps(result));return result
 
-def package(work,source,evidence,output):
+def package(work,source,evidence,output,failed=None):
     if output.exists():raise ValueError('never overwrite a published archive')
     files={}
-    for prefix,base in [('s2r2',work),('source',source),('execution',evidence),('docs',DOCS)]:
+    roots=[('s2r2',work),('source',source),('execution',evidence),('docs',DOCS)]
+    if failed:roots.append(('failed-engineering-revision',failed))
+    for prefix,base in roots:
         for path in sorted(base.rglob('*')):
             if path.is_file() and not path.name.endswith(('.lock','.test')) and not (prefix=='docs' and path.name=='ARTIFACT.md'):files[prefix+'/'+path.relative_to(base).as_posix()]=path
     for name in ['scripts/run_s2r2_repair.py','scripts/package_s2r2_repair.py','services/ai/runtime/s2r2_repair_test.go','services/ai/runtime/neural_metric_bounded_test.go','services/ai/knowledge/neural_metric_learning.go','services/ai/knowledge/neural_metric_proposal.go','services/ai/knowledge/neural_metric_proposal_test.go','services/ai/knowledge/neural_resolution.go','services/ai/knowledge/neural_metric.go','services/ai/knowledge/neural_resolution_validation.go','services/ai/knowledge/neural_composition.go','services/ai/knowledge/s2r2_probe.go']:files['implementation/'+name]=ROOT/name
@@ -46,10 +48,10 @@ def package(work,source,evidence,output):
     result=verify(output);output.with_suffix(output.suffix+'.sha256').write_text(result['sha256']+'  '+output.name+'\n')
 
 def main():
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--verify',type=Path);p.add_argument('--work',type=Path);p.add_argument('--source',type=Path);p.add_argument('--evidence',type=Path);p.add_argument('--output',type=Path);a=p.parse_args()
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('--verify',type=Path);p.add_argument('--work',type=Path);p.add_argument('--source',type=Path);p.add_argument('--evidence',type=Path);p.add_argument('--output',type=Path);p.add_argument('--failed',type=Path);a=p.parse_args()
     if a.verify:verify(a.verify)
     else:
         if not all([a.work,a.source,a.evidence,a.output]):p.error('work, source, evidence and output required')
-        package(a.work,a.source,a.evidence,a.output)
+        package(a.work,a.source,a.evidence,a.output,a.failed)
 
 if __name__=='__main__':main()
