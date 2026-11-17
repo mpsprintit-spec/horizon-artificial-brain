@@ -48,6 +48,11 @@ func (d NDiagnosis) Clone() NDiagnosis {
 				f.Parents = slices.Clone(f.Parents)
 				v.Feature = &f
 			}
+			if c.Constraint != nil {
+				v := *c.Constraint
+				v.RawReadout = slices.Clone(c.Constraint.RawReadout)
+				d.Trials[i].Candidate.Constraint = &v
+			}
 			if c.FitDiagnostic != nil {
 				f := *c.FitDiagnostic
 				v.FitDiagnostic = &f
@@ -593,7 +598,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		return errors.New("invalid diagnostic uncertainty")
 	}
 	trialLimit := 128
-	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1
+	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1 || d.ProposalProtocol == NMetricConstrainedV1 || d.ProposalProtocol == NMetricBlockV1
 	if bounded {
 		trialLimit = 1024
 	}
@@ -628,7 +633,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		}
 	}
 	for _, t := range d.Trials {
-		if t.Proposal != "" && (!bounded || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
+		if t.Proposal != "" && (!bounded || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature", "retention-constrained"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
 			return errors.New("invalid bounded trial")
 		}
 		if (t.ReadoutMode != "activation" && t.ReadoutMode != "metric") || t.FitValid == nil || len(t.RejectedBy) > 8 || !nFinite(t.CheckError) || t.CheckError < 0 || t.CheckError > 4.0000001 {
@@ -640,7 +645,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 			}
 		}
 		if c := t.Candidate; c != nil {
-			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= 64 || len(c.Readout) > 64 || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
+			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1 && d.ProposalProtocol != NMetricConstrainedV1 && d.ProposalProtocol != NMetricBlockV1) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= 64 || len(c.Readout) > 64 || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
 				return errors.New("invalid audited candidate shape")
 			}
 			for _, v := range append(slices.Clone(c.Axis), c.Readout...) {
@@ -654,6 +659,24 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 			if f := c.Feature; f != nil {
 				if f.Kind < 1 || f.Kind > 3 || (f.Kind == 1 && len(f.Parents) != 0) || (f.Kind != 1 && len(f.Parents) != 2) || c.Delta <= 0 {
 					return errors.New("invalid audited feature")
+				}
+			}
+			if f := c.Constraint; f != nil {
+				if !nFinite(f.RawBias) {
+					return errors.New("invalid constrained raw bias")
+				}
+				for _, v := range f.RawReadout {
+					if !nFinite(v) {
+						return errors.New("invalid constrained raw readout")
+					}
+				}
+				if d.ProposalProtocol != NMetricConstrainedV1 || f.Iterations < 0 || f.Iterations > 256 || f.LineSearches < 0 || f.LineSearches > 40 || f.InitialViolations < 0 || len(f.RawReadout) > 64 || f.NativeViolations < 0 || f.BoundActive < 0 || len(f.Status) > 64 {
+					return errors.New("invalid constrained telemetry")
+				}
+				for _, v := range []float64{f.Multiplier, f.FitMSE, f.HistoricalMSE, f.HistoricalLimit, f.Displacement, f.RawFitMSE, f.AnchorMSE, f.AnchorLimit} {
+					if !nFinite(v) || v < 0 {
+						return errors.New("invalid constrained telemetry value")
+					}
 				}
 			}
 			if f := c.FitDiagnostic; f != nil {
