@@ -64,7 +64,8 @@ type NResolutionLesson struct {
 	Fit   []NObservation `json:"fit"`
 	Check []NObservation `json:"check"`
 	// Explicit, journaled research opt-in. Nil preserves historical v6 replay.
-	Proposal *NMetricProposalConfig `json:"proposal,omitempty"`
+	Proposal  *NMetricProposalConfig `json:"proposal,omitempty"`
+	Retention []NObservation         `json:"retention_anchors,omitempty"`
 }
 type NFeature struct {
 	Node    NodeID   `json:"node"`
@@ -102,6 +103,7 @@ type NMetricCandidateTrace struct {
 	Readout        []float64
 	Bias           float64
 	FitDiagnostic  *nMetricFitDiagnostic `json:",omitempty"`
+	Constraint     *NConstraintTrace     `json:",omitempty"`
 }
 type NDiagnosis struct {
 	ProposalProtocol  string           `json:"proposal_protocol,omitempty"`
@@ -173,8 +175,11 @@ func validateNLesson(e CompositionExposure) error {
 	if len(b.Fit) < 4 || len(b.Check) < 4 || len(b.Fit) > 64 || len(b.Check) > 64 {
 		return errors.New("N lesson requires bounded fit and independent check sets")
 	}
+	if len(b.Retention) > 64 || (len(b.Retention) > 0 && (b.Proposal == nil || b.Proposal.Protocol != NMetricConstrainedV1)) {
+		return errors.New("retention anchors require bounded constrained protocol")
+	}
 	fit, check := map[string]bool{}, map[string]bool{}
-	for set, rows := range [][]NObservation{b.Fit, b.Check} {
+	for set, rows := range [][]NObservation{b.Fit, b.Check, b.Retention} {
 		for _, o := range rows {
 			if !nFinite(o.OutcomeError) || o.OutcomeError < 0 || o.OutcomeError > 2 {
 				return errors.New("invalid outcome uncertainty")
@@ -197,6 +202,17 @@ func validateNLesson(e CompositionExposure) error {
 	}
 	if len(fit) < 2 || len(check) < 2 {
 		return errors.New("N diagnosis needs independent episodes")
+	}
+	if len(b.Retention) > 0 {
+		for _, a := range b.Retention {
+			for _, set := range [][]NObservation{b.Fit, b.Check} {
+				for _, row := range set {
+					if a.EpisodeID == row.EpisodeID || slices.Equal(nInput(a.Input), nInput(row.Input)) {
+						return errors.New("retention anchor overlaps Fit/Check")
+					}
+				}
+			}
+		}
 	}
 	if b.Proposal != nil {
 		for _, a := range b.Fit {

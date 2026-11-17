@@ -35,10 +35,19 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	}
 	fit, check := convert(e.Resolution.Fit), convert(e.Resolution.Check)
 	proposal := e.Resolution.Proposal
+	anchors := convert(e.Resolution.Retention)
+	witnesses := state.Witnesses
+	if len(e.Resolution.Retention) > 0 {
+		witnesses = slices.Clone(witnesses)
+		for _, w := range convert(e.Resolution.Retention) {
+			w.Role = "evaluation"
+			witnesses = append(witnesses, w)
+		}
+	}
 	var evidence *NMetricEvidence
 	if proposal != nil {
 		var err error
-		fit, evidence, err = nMetricIndependentEvidence(fit, check, state.Witnesses, query)
+		fit, evidence, err = nMetricIndependentEvidence(fit, check, witnesses, query)
 		if err != nil {
 			return err
 		}
@@ -60,7 +69,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			Fit, Check, Witnesses []NWitness
 			Config                *NMetricProposalConfig
 			Precision             *float64
-		}{before, fit, check, state.Witnesses, proposal, e.Input.RequiredPrecision})
+		}{before, fit, check, witnesses, proposal, e.Input.RequiredPrecision})
 		if !state.Last.Committed && state.Last.SearchFingerprint == d.SearchFingerprint && d.SearchFingerprint != "" {
 			d = state.Last.Clone()
 			d.Cause = "duplicate-proposal"
@@ -101,21 +110,30 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	}
 	seenProposals := map[string]bool{}
 	consider := func(kind string, feature NodeID, candidate nModel) {
-		for _, mode := range []bool{false, true} {
+		modes := []bool{false, true}
+		constrained := proposal != nil && proposal.Protocol == NMetricConstrainedV1
+		if constrained {
+			modes = []bool{before.Heads[nHeadIndex(before, query)].Metric}
+		}
+		for _, mode := range modes {
 			m := nClone(candidate)
 			hi := nHeadIndex(m, query)
 			m.Heads[hi].Metric = mode
 			fullValid := false
 			var fitDiagnostic *nMetricFitDiagnostic
-			if proposal != nil && proposal.Protocol != NMetricBoundedV1 {
+			if !constrained && proposal != nil && proposal.Protocol != NMetricBoundedV1 {
 				// Same solver, with diagnostics only for explicitly versioned
 				// research commands. Historical receipts/replay stay byte exact.
 				fitDiagnostic = &nMetricFitDiagnostic{}
 				fullValid = nFitMetricDiagnosed(&m, hi, fit, fitDiagnostic)
-			} else {
+			} else if !constrained {
 				fullValid = nFit(&m, query, fit)
 			}
-			for _, step := range nMetricProposals(before, m, query, fit, proposal, fullValid) {
+			steps := nMetricProposals(before, m, query, fit, proposal, fullValid)
+			if constrained {
+				steps = nMetricConstrainedProposals(before, m, query, fit, state.Witnesses, anchors, proposal)
+			}
+			for _, step := range steps {
 				m := step.Model
 				valid := step.Valid
 				for _, row := range all {
@@ -129,7 +147,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 					valid = false
 					err = 4
 				}
-				reg := nMetricRegression(before, m, state.Witnesses)
+				reg := nMetricRegression(before, m, state.Witnesses) + nMetricRegression(before, m, anchors)
 				duplicate := len(m.Circuits) > len(before.Circuits) && nMetricRedundant(m, all, mode)
 				why := []string{}
 				if step.Rejection != "" {
@@ -151,6 +169,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 				}
 				if duplicate {
 					why = append(why, "functionally-duplicate")
+				}
+				if constrained && proposal.PreserveShared && nMetricSharedChange(before, m, query) {
+					why = append(why, "cross-query-representation-change")
 				}
 				if reg > 0 {
 					why = append(why, "retention-regression")
@@ -182,8 +203,8 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 				}
 				v := valid
 				var trace *NMetricCandidateTrace
-				if fitDiagnostic != nil {
-					trace = &NMetricCandidateTrace{FeatureOrdinal: -1, Readout: slices.Clone(m.Heads[hi].W), Bias: m.Heads[hi].B, FitDiagnostic: fitDiagnostic}
+				if fitDiagnostic != nil || step.Constraint != nil {
+					trace = &NMetricCandidateTrace{FeatureOrdinal: -1, Readout: slices.Clone(m.Heads[hi].W), Bias: m.Heads[hi].B, FitDiagnostic: fitDiagnostic, Constraint: step.Constraint}
 					index := -1
 					if len(m.Circuits) > len(before.Circuits) {
 						index = len(m.Circuits) - 1
@@ -220,6 +241,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	}
 	consider("readout", 0, nClone(before))
 	for i, c := range before.Circuits {
+		if proposal != nil && proposal.Protocol == NMetricConstrainedV1 {
+			continue
+		}
 		raw, floor := nMetricFeatureRaw(before, i, fit)
 		delta := nMetricDelta(raw, fit)
 		if goal > 0 && nMetricQuality(best, query, check) > goal {
@@ -231,9 +255,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			consider("resolution", c.Meta.Node, m)
 		}
 	}
-	growthAllowed := len(before.Circuits) < nMetricFeatureLimit(proposal)
+	growthAllowed := len(before.Circuits) < nMetricFeatureLimit(proposal) && !(proposal != nil && proposal.FixedBasis)
 	refinementAllowed := proposal != nil && proposal.RefineLeafDirections
-	if growthAllowed || refinementAllowed {
+	if (growthAllowed || refinementAllowed) && !(proposal != nil && proposal.BlockSparse) {
 		axis, mean := make([]float64, nDimensions), make([]float64, nDimensions)
 		for j := range mean {
 			base := fit[0].X[j]
@@ -403,6 +427,30 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			}
 		}
 	}
+	if proposal != nil && proposal.BlockSparse {
+		for _, axis := range nMetricBlockAxes(best, query, fit, proposal.CoordinateBlocks) {
+			if growthAllowed {
+				m := nClone(before)
+				m.Circuits = append(m.Circuits, nCircuit{Meta: NFeature{Kind: 1}, Axis: axis, Center: nCenter(axis, fit), Delta: nMetricAxisDelta(axis, fit)})
+				for i := range m.Heads {
+					m.Heads[i].W = append(m.Heads[i].W, 0)
+				}
+				consider("block-direction", 0, m)
+			}
+			if refinementAllowed {
+				for i, c := range before.Circuits {
+					if !nMetricRefinableLeaf(before, i, query) {
+						continue
+					}
+					m := nClone(before)
+					m.Circuits[i].Axis = axis
+					m.Circuits[i].Center = nCenter(axis, fit)
+					m.Circuits[i].Delta = nMetricAxisDelta(axis, fit)
+					consider("block-leaf-direction", c.Meta.Node, m)
+				}
+			}
+		}
+	}
 	if selected {
 		if proposal != nil && proposal.FeatureLimit != 0 {
 			// Never invalidate an existing larger topology when a later lesson
@@ -499,6 +547,17 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		}
 		if !found {
 			state.Heads = append(state.Heads, topo)
+		}
+		if proposal != nil && proposal.Protocol == NMetricConstrainedV1 {
+			installed := k.loadNModel(bank, queries)
+			if nMetricRegression(before, installed, state.Witnesses)+nMetricRegression(before, installed, anchors) > 0 || nMetricSharedChange(before, installed, query) || !nMetricValidHead(installed, nHeadIndex(installed, query)) {
+				return errors.New("post-install constrained native validation failed")
+			}
+			for _, row := range all {
+				if nPredict(installed, row.X, row.Query) != nPredict(best, row.X, row.Query) {
+					return errors.New("signed reconstruction changed admitted prediction")
+				}
+			}
 		}
 		if proposal != nil {
 			// Do not delete any historical witness to admit a new observation.

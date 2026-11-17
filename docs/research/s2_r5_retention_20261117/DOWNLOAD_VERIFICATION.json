@@ -1,0 +1,36 @@
+{
+  "downloaded_again": true,
+  "all_parts_exact": true,
+  "parts": [
+    {
+      "file_name": "Horizon_S2_R5_Retention_Constrained_Native_Learning_20261117.tar.xz.part1",
+      "bytes": 314572800,
+      "sha256": "c7df9929238877572c4af497a6f56e51e0de95fa044c21a98d908b4404001f00",
+      "exact": true
+    },
+    {
+      "file_name": "Horizon_S2_R5_Retention_Constrained_Native_Learning_20261117.tar.xz.part2",
+      "bytes": 314572800,
+      "sha256": "1f98d6268ed6fe222e4ad56583a4b6e4f852959792307c3daa512409f3a61329",
+      "exact": true
+    },
+    {
+      "file_name": "Horizon_S2_R5_Retention_Constrained_Native_Learning_20261117.tar.xz.part3",
+      "bytes": 314572800,
+      "sha256": "76e0cc407ffa408d7a2fb601ae74dda8cc29822bec9eaf5860cd7db83723ce93",
+      "exact": true
+    },
+    {
+      "file_name": "Horizon_S2_R5_Retention_Constrained_Native_Learning_20261117.tar.xz.part4",
+      "bytes": 183699184,
+      "sha256": "6faa9ee1cb8b13d3890ed59ae0984cbe7a0586889b79d2a4bc7c26be5d26faca",
+      "exact": true
+    }
+  ],
+  "archive_bytes": 1127417584,
+  "archive_sha256": "ee6cadaae0fa122beb40da1908c776262385f8c7e758d814e2bc4e411d9e2531",
+  "source_commit": "2fac4b8e21cf89ae211aac3f8ee7f52473fda4e6",
+  "authenticated_payloads": 3272,
+  "manifest_all_pass": true,
+  "native_model_recovery_proofs_on_identical_payloads": 108
+}

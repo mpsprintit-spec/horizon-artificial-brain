@@ -14,19 +14,24 @@ import (
 
 const NMetricBoundedV1 = "incumbent-relative-v1"
 const NMetricRefineV1 = "incumbent-relative-leaf-refinement-v1"
+const NMetricBlockV1 = "incumbent-relative-block-refinement-v1"
 const NMetricAuditV1 = "incumbent-relative-audited-v1"
 
 type NMetricProposalConfig struct {
-	Protocol       string    `json:"protocol"`
-	Strategy       string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
-	Fractions      []float64 `json:"fractions,omitempty"`
-	PreserveShared bool      `json:"preserve_shared,omitempty"`
+	CoordinateBlocks [][]int   `json:"coordinate_blocks,omitempty"`
+	Protocol         string    `json:"protocol"`
+	Strategy         string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
+	Fractions        []float64 `json:"fractions,omitempty"`
+	PreserveShared   bool      `json:"preserve_shared,omitempty"`
 	// Explicit fixed-capacity research intervention. Zero preserves the
 	// historical 32-feature law; this is not an adaptive growth policy.
 	FeatureLimit int `json:"feature_limit,omitempty"`
 	// Explicit research search within the existing feature budget. Only
 	// task-local leaf directions may change; every existing gate still runs.
-	RefineLeafDirections bool `json:"refine_leaf_directions,omitempty"`
+	RefineLeafDirections bool   `json:"refine_leaf_directions,omitempty"`
+	Update               string `json:"update,omitempty"`
+	BlockSparse          bool   `json:"block_sparse,omitempty"`
+	FixedBasis           bool   `json:"fixed_basis,omitempty"`
 }
 
 func nMetricFeatureLimit(p *NMetricProposalConfig) int {
@@ -52,11 +57,36 @@ func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if !validNFeatureLimit(p.FeatureLimit) {
 		return errors.New("experimental numerical feature limit must be 32 or 64")
 	}
-	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 {
+	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1 {
 		return errors.New("unknown numerical proposal protocol")
 	}
-	if p.RefineLeafDirections != (p.Protocol == NMetricRefineV1) || (p.RefineLeafDirections && !p.PreserveShared) {
+	if (p.RefineLeafDirections && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1) || ((p.Protocol == NMetricRefineV1 || p.Protocol == NMetricBlockV1) && !p.RefineLeafDirections) || (p.RefineLeafDirections && !p.PreserveShared) {
 		return errors.New("leaf refinement requires its explicit protocol and shared protection")
+	}
+	if p.Protocol == NMetricConstrainedV1 {
+		if !p.PreserveShared || !slices.Contains([]string{"bias", "affine", "readout"}, p.Update) || (p.FixedBasis && (p.RefineLeafDirections || p.BlockSparse)) {
+			return errors.New("invalid constrained subspace")
+		}
+	} else if p.Update != "" || p.FixedBasis || (p.BlockSparse && p.Protocol != NMetricBlockV1) {
+		return errors.New("constrained settings require versioned protocol")
+	}
+	if len(p.CoordinateBlocks) > 32 || (len(p.CoordinateBlocks) > 0 && !p.BlockSparse) {
+		return errors.New("invalid coordinate blocks")
+	}
+	for _, block := range p.CoordinateBlocks {
+		if len(block) == 0 || len(block) > 7 {
+			return errors.New("invalid block width")
+		}
+		seen := map[int]bool{}
+		for _, j := range block {
+			if j < 0 || j >= nDimensions || seen[j] {
+				return errors.New("invalid block coordinate")
+			}
+			seen[j] = true
+		}
+	}
+	if p.Protocol == NMetricBlockV1 && (!p.BlockSparse || !p.PreserveShared) {
+		return errors.New("block refinement requires explicit shared protection")
 	}
 	if !slices.Contains([]string{"full-refit", "new-feature", "bounded-joint", "combined"}, p.Strategy) {
 		return errors.New("invalid numerical proposal strategy")
@@ -122,11 +152,12 @@ func nMetricIndependentEvidence(fit, check, witnesses []NWitness, query []NodeID
 }
 
 type nMetricProposal struct {
-	Model     nModel
-	Name      string
-	Fraction  float64
-	Valid     bool
-	Rejection string
+	Model      nModel
+	Name       string
+	Fraction   float64
+	Valid      bool
+	Rejection  string
+	Constraint *NConstraintTrace
 }
 
 func nMetricValidHead(m nModel, hi int) bool {

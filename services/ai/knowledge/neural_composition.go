@@ -439,7 +439,7 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 		if e.Resolution.Proposal != nil && c.Version != NeuralCompositionMetricV6 {
 			return errors.New("bounded proposals require v6")
 		}
-		for _, set := range [][]NObservation{e.Resolution.Fit, e.Resolution.Check} {
+		for _, set := range [][]NObservation{e.Resolution.Fit, e.Resolution.Check, e.Resolution.Retention} {
 			for _, o := range set {
 				if c.Version != NeuralCompositionMetricV6 && o.OutcomeError != 0 {
 					return errors.New("outcome uncertainty requires v6")
