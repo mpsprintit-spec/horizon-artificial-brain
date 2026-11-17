@@ -1,0 +1,182 @@
+[
+  {
+    "arm": "combined",
+    "block": 0,
+    "same_search_group_full_step": {
+      "check_error": 7.821016747607725e-05,
+      "eligible": false,
+      "fit_valid": true,
+      "fraction": 1,
+      "kind": "missing-relation",
+      "parameter_sha256": "fc25815b58eb2e81380858306275d3e8d7c37082378b2819d1935a30a1029467",
+      "proposal": "full-refit",
+      "readout_mode": "metric",
+      "rejected_by": [
+        "no-check-improvement"
+      ],
+      "retention_regressions": 0
+    },
+    "selected": {
+      "check_error": 6.761743768939986e-05,
+      "eligible": true,
+      "fit_valid": true,
+      "fraction": 0.25,
+      "kind": "missing-relation",
+      "parameter_sha256": "bacbb140da8660146ede7b0a1b78f9a3d589f93edd868e46ac6bef9fa88219b3",
+      "proposal": "bounded-joint",
+      "readout_mode": "metric",
+      "retention_regressions": 0
+    },
+    "selected_trial": 81
+  },
+  {
+    "arm": "combined",
+    "block": 5,
+    "same_search_group_full_step": {
+      "check_error": 0.00016469090414983462,
+      "eligible": false,
+      "fit_valid": true,
+      "fraction": 1,
+      "kind": "readout",
+      "parameter_sha256": "89e4bb20a02c7d63537d56244a17f1d72133ad2ce727a30e89414acd7828e4cf",
+      "proposal": "full-refit",
+      "readout_mode": "metric",
+      "rejected_by": [
+        "no-check-improvement"
+      ],
+      "retention_regressions": 0
+    },
+    "selected": {
+      "check_error": 0.00014466523654896603,
+      "eligible": true,
+      "fit_valid": true,
+      "fraction": 0.5,
+      "kind": "readout",
+      "parameter_sha256": "35389cec590c4e7dd4d6b2eb8ddfc54fea769d4bf533f887fd9635823a713af4",
+      "proposal": "bounded-joint",
+      "readout_mode": "metric",
+      "retention_regressions": 0
+    },
+    "selected_trial": 5
+  },
+  {
+    "arm": "combined",
+    "block": 7,
+    "same_search_group_full_step": {
+      "check_error": 8.48609783811369e-05,
+      "eligible": false,
+      "fit_valid": true,
+      "fraction": 1,
+      "kind": "readout",
+      "parameter_sha256": "b028f02b6f5da8089766b4eefc0a3f93ab1332463fde1a320f27a620456f43fa",
+      "proposal": "full-refit",
+      "readout_mode": "metric",
+      "rejected_by": [
+        "retention-regression"
+      ],
+      "retention_regressions": 1
+    },
+    "selected": {
+      "check_error": 8.096697398563452e-05,
+      "eligible": true,
+      "fit_valid": true,
+      "fraction": 0.5,
+      "kind": "readout",
+      "parameter_sha256": "78fcf77baf62e69a2a8d6fcfd9e92863c4c060002c9516352d94b0505f352a51",
+      "proposal": "bounded-joint",
+      "readout_mode": "metric",
+      "retention_regressions": 0
+    },
+    "selected_trial": 5
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 0,
+    "same_search_group_full_step": {
+      "check_error": 7.821016747607725e-05,
+      "eligible": false,
+      "fit_valid": true,
+      "fraction": 1,
+      "kind": "missing-relation",
+      "parameter_sha256": "fc25815b58eb2e81380858306275d3e8d7c37082378b2819d1935a30a1029467",
+      "proposal": "full-refit",
+      "readout_mode": "metric",
+      "rejected_by": [
+        "no-check-improvement"
+      ],
+      "retention_regressions": 0
+    },
+    "selected": {
+      "check_error": 6.761743768939986e-05,
+      "eligible": true,
+      "fit_valid": true,
+      "fraction": 0.25,
+      "kind": "missing-relation",
+      "parameter_sha256": "bacbb140da8660146ede7b0a1b78f9a3d589f93edd868e46ac6bef9fa88219b3",
+      "proposal": "bounded-joint",
+      "readout_mode": "metric",
+      "retention_regressions": 0
+    },
+    "selected_trial": 76
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 5,
+    "same_search_group_full_step": {
+      "check_error": 0.00016469090414983462,
+      "eligible": false,
+      "fit_valid": true,
+      "fraction": 1,
+      "kind": "readout",
+      "parameter_sha256": "89e4bb20a02c7d63537d56244a17f1d72133ad2ce727a30e89414acd7828e4cf",
+      "proposal": "full-refit",
+      "readout_mode": "metric",
+      "rejected_by": [
+        "no-check-improvement"
+      ],
+      "retention_regressions": 0
+    },
+    "selected": {
+      "check_error": 0.00014466523654896603,
+      "eligible": true,
+      "fit_valid": true,
+      "fraction": 0.5,
+      "kind": "readout",
+      "parameter_sha256": "35389cec590c4e7dd4d6b2eb8ddfc54fea769d4bf533f887fd9635823a713af4",
+      "proposal": "bounded-joint",
+      "readout_mode": "metric",
+      "retention_regressions": 0
+    },
+    "selected_trial": 5
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 7,
+    "same_search_group_full_step": {
+      "check_error": 8.48609783811369e-05,
+      "eligible": false,
+      "fit_valid": true,
+      "fraction": 1,
+      "kind": "readout",
+      "parameter_sha256": "b028f02b6f5da8089766b4eefc0a3f93ab1332463fde1a320f27a620456f43fa",
+      "proposal": "full-refit",
+      "readout_mode": "metric",
+      "rejected_by": [
+        "retention-regression"
+      ],
+      "retention_regressions": 1
+    },
+    "selected": {
+      "check_error": 8.096697398563452e-05,
+      "eligible": true,
+      "fit_valid": true,
+      "fraction": 0.5,
+      "kind": "readout",
+      "parameter_sha256": "78fcf77baf62e69a2a8d6fcfd9e92863c4c060002c9516352d94b0505f352a51",
+      "proposal": "bounded-joint",
+      "readout_mode": "metric",
+      "retention_regressions": 0
+    },
+    "selected_trial": 5
+  }
+]

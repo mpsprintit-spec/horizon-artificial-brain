@@ -1,0 +1,16 @@
+{
+  "horizon-ai-android-arm64": {
+    "bytes": 18169512,
+    "sha256": "a129aa81b445eeeb0418d2716f4eb3c1c2b03b75097c3c4865457921d0cb29e6",
+    "GOOS": "android",
+    "GOARCH": "arm64",
+    "CGO_ENABLED": 0
+  },
+  "horizon-chat-android-arm64": {
+    "bytes": 7736905,
+    "sha256": "b294fb4a35ddf0ded73c4d2169a17ee1802331a8a7b3b5425aff8155d9caf638",
+    "GOOS": "android",
+    "GOARCH": "arm64",
+    "CGO_ENABLED": 0
+  }
+}

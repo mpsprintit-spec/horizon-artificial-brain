@@ -1,0 +1,6 @@
+=== RUN   TestMetricBoundedNonS2RecoveryAndIndependence
+--- PASS: TestMetricBoundedNonS2RecoveryAndIndependence (8.85s)
+=== RUN   TestMetricBoundedConcurrentReceiptOwnership
+--- PASS: TestMetricBoundedConcurrentReceiptOwnership (0.54s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	10.448s

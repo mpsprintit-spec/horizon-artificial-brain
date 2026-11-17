@@ -2,6 +2,8 @@ package runtime
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"path/filepath"
@@ -69,6 +71,66 @@ func TestMetricBoundedNonS2RecoveryAndIndependence(t *testing.T) {
 	_, _, err := r.LearnCompositionWithDiagnosis(bad, bad.After.ObservedAt)
 	if err == nil || seq != r.LastSequence() || !bytes.Equal(before, continuationBytes(t, r)) {
 		t.Fatal("encoded overlap admitted or mutated state")
+	}
+}
+
+func TestMetricBoundedLostAckAndInterruptedLearning(t *testing.T) {
+	for _, phase := range []string{"lost-ack", "interrupted-apply"} {
+		t.Run(phase, func(t *testing.T) {
+			r, wal, _, start := mNew(t, k.NeuralCompositionMetricV6)
+			e := nLesson(0, 0, nGrid([]float64{-.8, -.4, .4, .8}, []float64{-.7, .7}), nGrid([]float64{-.9, -.2, .2, .9}, []float64{-.5, .5}), func(p nXY) float64 { return .3 * p.x })
+			e.Motor = []float64{0, 0, 0, 0}
+			e.After = nScene(e.After.ObservedAt)
+			tol := 1e-5
+			e.Input.RequiredPrecision = &tol
+			e.Resolution.Proposal = &k.NMetricProposalConfig{Protocol: k.NMetricBoundedV1, Strategy: "combined", Fractions: []float64{.25, .5}, PreserveShared: true}
+			seq := r.LastSequence()
+			if phase == "lost-ack" {
+				wal.beforeAppend = func(record LoggedEvent) error {
+					raw, err := json.Marshal(record)
+					if err != nil {
+						return err
+					}
+					if _, err = wal.file.Write(append(raw, '\n')); err != nil {
+						return err
+					}
+					if err = wal.file.Sync(); err != nil {
+						return err
+					}
+					return errors.New("durable bounded command lost acknowledgment")
+				}
+				if _, _, err := r.LearnCompositionWithDiagnosis(e, e.After.ObservedAt); !errors.Is(err, ErrRuntimeRecoveryRequired) {
+					t.Fatal("uncertain bounded command remained writable", err)
+				}
+				wal.beforeAppend = nil
+			} else {
+				func() {
+					defer func() {
+						if recover() == nil {
+							t.Error("missing injected interruption")
+						}
+					}()
+					r.mu.Lock()
+					defer r.mu.Unlock()
+					_ = r.runJournalCommandLocked(LoggedEvent{Type: EventTypeCompositionExposure, Timestamp: e.After.ObservedAt, CompositionExposure: &e}, func() error {
+						compositionCheck(t, r.brain.LearnCompositionAt(r.composition.Config, e, e.After.ObservedAt))
+						panic("interrupted bounded synaptic installation")
+					})
+				}()
+			}
+			if !r.RecoveryRequired() {
+				t.Fatal("interrupted runtime remained writable")
+			}
+			rr, err := RebuildRuntimeFromCheckpointAndJournal(wal, start)
+			compositionCheck(t, err)
+			if rr.LastSequence() != seq+1 || !rr.brain.LastNDiagnosis().Committed || math.Abs(mRead(t, rr, 0, nXY{.3, -.3}, 1e-5).NResolution.Value-.09) > 1e-5 {
+				t.Fatal("bounded recovery did not restore learning")
+			}
+			before := continuationBytes(t, rr)
+			if _, _, err = rr.LearnCompositionWithDiagnosis(e, e.After.ObservedAt); err == nil || !bytes.Equal(before, continuationBytes(t, rr)) {
+				t.Fatal("bounded command replayed twice")
+			}
+		})
 	}
 }
 

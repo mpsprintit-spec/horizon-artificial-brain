@@ -12,6 +12,7 @@ PHASES={
     'prepare':'Prepare','mechanism':'Mechanism','train':'Train',
     'retry':'IdenticalRetryAndDuplicateCommand','freeze':'RetentionAndFreeze',
     'final':'FinalIndependentHoldout','persistence':'PersistenceAndContinuation',
+    'saved-audit':'SavedReadoutAndS1Attribution',
 }
 
 def main():
@@ -39,5 +40,14 @@ def main():
             subprocess.run([str(binary),'-test.run','^TestS2R2'+PHASES[phase]+'$','-test.v','-test.timeout','20m'],cwd=ROOT/'services/ai/runtime',env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
         print('completed',phase,flush=True)
     if (work/'results.json').exists():print((work/'results.json').read_text())
+    if (work/'persistence.json').exists() and (work/'saved-readout-audit.json').exists():
+        persistence=json.loads((work/'persistence.json').read_text())
+        audit=json.loads((work/'saved-readout-audit.json').read_text())
+        result=json.loads((work/'results.json').read_text())
+        keys=['restart_exact','full_suffix_replay_exact','rollback_exact','continuation_replay_exact','historical_journal_prefix_exact']
+        if all(persistence[k] for k in keys) and audit['pass'] and result['gates']['AE1_retention'] and result['gates']['S1_retention']:
+            result['repair_status']='PASS'
+            result['continuation_sequence']=persistence['checkpoints'][-1]['sequence']
+            (work/'results.json').write_text(json.dumps(result,indent=2,sort_keys=True)+'\n')
 
 if __name__=='__main__':main()

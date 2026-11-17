@@ -1,0 +1,7 @@
+{
+  "coordinates": 1536,
+  "historical_status": "PARTIAL; historical retention failure unchanged",
+  "max_delta": 0,
+  "pass": true,
+  "shared_observations": 512
+}

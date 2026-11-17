@@ -1,0 +1,8 @@
+=== RUN   TestMetricBoundedNonS2RecoveryAndIndependence
+    neural_metric_bounded_test.go:38: cross-task learning/preservation failed
+--- FAIL: TestMetricBoundedNonS2RecoveryAndIndependence (0.25s)
+=== RUN   TestMetricBoundedConcurrentReceiptOwnership
+--- PASS: TestMetricBoundedConcurrentReceiptOwnership (0.55s)
+FAIL
+FAIL	github.com/project-horizon/horizon-core/services/ai/runtime	0.838s
+FAIL

@@ -1,0 +1,74 @@
+{
+  "all-readout-clamp": {
+    "RMSE": 0.02014669731471261,
+    "RMSE_delta": 0.01057626609863763,
+    "changed_predictions": 256,
+    "maximum_prediction_delta": 0.04413426438608302
+  },
+  "new-feature-clamp": {
+    "RMSE": 0.017719194205577684,
+    "RMSE_delta": 0.008148762989502706,
+    "changed_predictions": 256,
+    "maximum_prediction_delta": 0.036897262086721554
+  },
+  "new-readout-clamp": {
+    "RMSE": 0.017719194205577684,
+    "RMSE_delta": 0.008148762989502706,
+    "changed_predictions": 256,
+    "maximum_prediction_delta": 0.036897262086721554
+  },
+  "no-forecast": {
+    "RMSE": 0.009591709412854345,
+    "RMSE_delta": 2.127819677936668e-05,
+    "changed_predictions": 256,
+    "maximum_prediction_delta": 0.00042372212042655205
+  },
+  "no-history-action": {
+    "RMSE": 0.009568711318682387,
+    "RMSE_delta": -1.7198973925915129e-06,
+    "changed_predictions": 254,
+    "maximum_prediction_delta": 3.152161123152336e-05
+  },
+  "no-history-magnitude": {
+    "RMSE": 0.00957051027865221,
+    "RMSE_delta": 7.906257723164223e-08,
+    "changed_predictions": 254,
+    "maximum_prediction_delta": 5.766831184451926e-06
+  },
+  "no-history-magnitude-and-action": {
+    "RMSE": 0.009568789856564347,
+    "RMSE_delta": -1.6413595106314766e-06,
+    "changed_predictions": 254,
+    "maximum_prediction_delta": 3.5048896324923334e-05
+  },
+  "no-history-presence": {
+    "RMSE": 0.009599107576670027,
+    "RMSE_delta": 2.867636059504866e-05,
+    "changed_predictions": 254,
+    "maximum_prediction_delta": 0.0002713210089306424
+  },
+  "permute-action-conditional": {
+    "RMSE": 0.009564694379456276,
+    "RMSE_delta": -5.736836618702376e-06,
+    "changed_predictions": 135,
+    "maximum_prediction_delta": 6.304322246304672e-05
+  },
+  "permute-extras": {
+    "RMSE": 0.009559215107100283,
+    "RMSE_delta": -1.1216108974695244e-05,
+    "changed_predictions": 250,
+    "maximum_prediction_delta": 0.0004098929233143228
+  },
+  "permute-forecast": {
+    "RMSE": 0.00956471106498699,
+    "RMSE_delta": -5.720151087988332e-06,
+    "changed_predictions": 250,
+    "maximum_prediction_delta": 0.00034718563276493926
+  },
+  "permute-history-conditional": {
+    "RMSE": 0.009570407263006788,
+    "RMSE_delta": -2.3953068190377125e-08,
+    "changed_predictions": 244,
+    "maximum_prediction_delta": 5.374910618517054e-06
+  }
+}

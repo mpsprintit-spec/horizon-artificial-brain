@@ -1,0 +1,142 @@
+[
+  {
+    "arm": "legacy",
+    "block": 0,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "legacy",
+    "block": 1,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "legacy",
+    "block": 2,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "resolution",
+    "new_cause": "resolution"
+  },
+  {
+    "arm": "legacy",
+    "block": 3,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "resolution",
+    "new_cause": "resolution"
+  },
+  {
+    "arm": "full-refit",
+    "block": 0,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "full-refit",
+    "block": 1,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "full-refit",
+    "block": 2,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "retention-regression",
+    "new_cause": "retention-regression"
+  },
+  {
+    "arm": "full-refit",
+    "block": 3,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "retention-regression",
+    "new_cause": "retention-regression"
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 0,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-direction",
+    "new_cause": "missing-direction"
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 1,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 2,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "readout",
+    "new_cause": "readout"
+  },
+  {
+    "arm": "bounded-joint",
+    "block": 3,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "readout",
+    "new_cause": "readout"
+  },
+  {
+    "arm": "new-feature",
+    "block": 0,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "new-feature",
+    "block": 1,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "new-feature",
+    "block": 2,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "invalid-numerical-candidate",
+    "new_cause": "candidate-search-exhausted"
+  },
+  {
+    "arm": "new-feature",
+    "block": 3,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "invalid-numerical-candidate",
+    "new_cause": "candidate-search-exhausted"
+  },
+  {
+    "arm": "combined",
+    "block": 0,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "combined",
+    "block": 1,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "missing-relation",
+    "new_cause": "missing-relation"
+  },
+  {
+    "arm": "combined",
+    "block": 2,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "readout",
+    "new_cause": "readout"
+  },
+  {
+    "arm": "combined",
+    "block": 3,
+    "numerical_admission_and_trials_identical": true,
+    "old_cause": "readout",
+    "new_cause": "readout"
+  }
+]

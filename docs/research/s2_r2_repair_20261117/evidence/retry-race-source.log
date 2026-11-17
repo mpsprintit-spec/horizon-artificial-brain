@@ -1,0 +1,4 @@
+=== RUN   TestS2R2IdenticalRetryAndDuplicateCommand
+--- PASS: TestS2R2IdenticalRetryAndDuplicateCommand (215.31s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	216.386s

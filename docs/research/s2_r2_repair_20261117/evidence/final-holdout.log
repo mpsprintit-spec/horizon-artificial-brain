@@ -1,0 +1,4 @@
+=== RUN   TestS2R2FinalIndependentHoldout
+    s2r2_repair_test.go:577: S2 ability PARTIAL RMSE 0.009570431216074978 constant 0.011150655952911202 correlation 0.5197323264175342 gates map[AE1_retention:true S1_retention:true beats_full-refit:true beats_legacy:true beats_original-S2:true learned_readout_ablation:true new_feature_contribution:true new_readout_contribution:true stream_0_calibration:true stream_0_correlation:false stream_0_discrimination:true stream_0_rmse:false stream_1_calibration:true stream_1_correlation:true stream_1_discrimination:true stream_1_rmse:false]
+--- PASS: TestS2R2FinalIndependentHoldout (92.10s)
+PASS

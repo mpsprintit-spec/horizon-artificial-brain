@@ -1,0 +1,24 @@
+{
+  "frozen_native_code_commit": "42e343e7b7869eb836b8c65582211b571d81bf98",
+  "run_id": 44015206135,
+  "status": "completed",
+  "conclusion": "success",
+  "event": "push",
+  "html_url": "https://github.com/mpsprintit-spec/horizon-artificial-brain/actions/runs/44015206135",
+  "main": "11c6e0a78547d68a0be8f78b3c801e912722608d",
+  "s2r1_head": "345446fd2b9f9bd660b6394e4fc8d1df54f07418",
+  "s2r1_ci": [
+    {
+      "id": 43918026310,
+      "event": "push",
+      "conclusion": "success"
+    },
+    {
+      "id": 43918079489,
+      "event": "pull_request",
+      "conclusion": "success"
+    }
+  ],
+  "native_source_unchanged_since_freeze": true,
+  "final_PR_checks": "See live PR checks; tests/documentation added after code freeze do not change the native learner."
+}

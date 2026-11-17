@@ -1,0 +1,98 @@
+[
+  {
+    "channel": "forecast-0",
+    "coordinate": 56,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.04345382811264923,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 267
+  },
+  {
+    "channel": "forecast-1",
+    "coordinate": 57,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.03212592520496557,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 268
+  },
+  {
+    "channel": "forecast-2",
+    "coordinate": 58,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.011404464254031615,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 269
+  },
+  {
+    "channel": "history-error-0",
+    "coordinate": 59,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.0029044644636209566,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 270
+  },
+  {
+    "channel": "history-error-1",
+    "coordinate": 60,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.00035468987092602053,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 271
+  },
+  {
+    "channel": "history-error-2",
+    "coordinate": 61,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.0021603461497680895,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 272
+  },
+  {
+    "channel": "history-presence",
+    "coordinate": 63,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": 0.017501429529497056,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 273
+  },
+  {
+    "channel": "history-action",
+    "coordinate": 64,
+    "signed_synaptic_paths": [
+      {
+        "axis_weight": -0.002033557486798577,
+        "feature": 266,
+        "query_readout_weight": 0.015500736128906678
+      }
+    ],
+    "source_node": 274
+  }
+]

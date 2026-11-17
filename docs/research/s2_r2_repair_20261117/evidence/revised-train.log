@@ -1,0 +1,11 @@
+=== RUN   TestS2R2Train
+    s2r2_repair_test.go:246: block 0 commit true RMSE 0.008383951541263162 -> 0.008222982286822698 features 31
+    s2r2_repair_test.go:246: block 1 commit true RMSE 0.013666752556580947 -> 0.010037431554915755 features 32
+    s2r2_repair_test.go:246: block 2 commit true RMSE 0.011224536524290334 -> 0.009874937895180886 features 32
+    s2r2_repair_test.go:246: block 3 commit true RMSE 0.013621106038928951 -> 0.012270018154490308 features 32
+    s2r2_repair_test.go:246: block 4 commit true RMSE 0.010873686267505159 -> 0.009231348957718846 features 32
+    s2r2_repair_test.go:246: block 5 commit true RMSE 0.01782311074561336 -> 0.012027686250853323 features 32
+    s2r2_repair_test.go:246: block 6 commit true RMSE 0.008588587310770142 -> 0.007817545954180622 features 32
+    s2r2_repair_test.go:246: block 7 commit true RMSE 0.00978277968602895 -> 0.008998165034363091 features 32
+--- PASS: TestS2R2Train (407.14s)
+PASS

@@ -1,0 +1,8 @@
+=== RUN   TestNMetricBoundedProposalPreservesIncumbent
+--- PASS: TestNMetricBoundedProposalPreservesIncumbent (0.00s)
+=== RUN   TestNMetricDecoupledFeatureAndIndependentEvidence
+--- PASS: TestNMetricDecoupledFeatureAndIndependentEvidence (0.00s)
+=== RUN   TestNMetricProposalConfigValidation
+--- PASS: TestNMetricProposalConfigValidation (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/knowledge	1.034s

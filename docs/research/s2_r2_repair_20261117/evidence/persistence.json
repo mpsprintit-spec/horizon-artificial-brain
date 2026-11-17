@@ -1,0 +1,33 @@
+{
+  "checkpoints": [
+    {
+      "checksum": "9c6cbd9e7d7caeeaaa0a788d0122a94fab32701ceda2c8bb6476fa3c522d47d8",
+      "file": "s2r2-final.json",
+      "sequence": 80681
+    },
+    {
+      "checksum": "9c6cbd9e7d7caeeaaa0a788d0122a94fab32701ceda2c8bb6476fa3c522d47d8",
+      "file": "s2r2-restarted.json",
+      "sequence": 80681
+    },
+    {
+      "checksum": "9016b845eed4e8437e87ada99b9641718a086c570e246dd0a62e57dffd1ce9d3",
+      "file": "s2r2-continuation.json",
+      "sequence": 80735
+    }
+  ],
+  "continuation_learning_committed": true,
+  "continuation_replay_exact": true,
+  "full_suffix_replay_exact": true,
+  "historical_checkpoint_compatible": true,
+  "historical_journal_bytes": 44021001,
+  "historical_journal_prefix_exact": true,
+  "native_policy_updates": 10752,
+  "restart_exact": true,
+  "rollback_exact": true,
+  "synaptic_changes": {
+    "added": 164,
+    "changed": 360,
+    "removed": 0
+  }
+}

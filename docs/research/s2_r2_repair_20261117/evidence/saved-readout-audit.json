@@ -1,0 +1,12 @@
+{
+  "S1_continuation_delta": 0,
+  "S1_coordinates": 768,
+  "S1_readout_ablation_max_delta": 0.5342721623645318,
+  "S1_readout_edges_ablated_on_disposable_copy": 400,
+  "S1_restart_delta": 0,
+  "new_holdout_cases": 0,
+  "new_learning_commands": 0,
+  "pass": true,
+  "restarted_intervention_conditions_exact": 13,
+  "stored_holdout_cases": 256
+}

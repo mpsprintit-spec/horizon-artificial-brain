@@ -1,0 +1,45 @@
+{
+  "arms": [
+    "legacy",
+    "full-refit",
+    "bounded-joint",
+    "new-feature",
+    "combined"
+  ],
+  "blocks": 8,
+  "checkpoint_selection": "eighth block irrespective of score",
+  "continuation_learning_seed": 71021,
+  "continuation_seed": 71001,
+  "development_pairs": [
+    [
+      41011,
+      41017
+    ],
+    [
+      41023,
+      41039
+    ],
+    [
+      41047,
+      41051
+    ],
+    [
+      41057,
+      41077
+    ]
+  ],
+  "fractions": [
+    0.015625,
+    0.0625,
+    0.25,
+    0.5
+  ],
+  "holdout_per_stream": 128,
+  "holdout_seeds": [
+    51001,
+    51031
+  ],
+  "original_final_holdout_used": false,
+  "training_check_seeds": "42007+20*b",
+  "training_fit_seeds": "42001+20*b"
+}

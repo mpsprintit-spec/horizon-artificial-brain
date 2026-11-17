@@ -1,0 +1,117 @@
+{
+  "S3_started": false,
+  "ability_status": "PARTIAL",
+  "candidate": {
+    "Bins": [
+      {
+        "actual": 0.012673429177531595,
+        "estimated": 0.008851690045223928,
+        "index": 0,
+        "n": 73
+      },
+      {
+        "actual": 0.01588167359355886,
+        "estimated": 0.016015408338744302,
+        "index": 1,
+        "n": 143
+      },
+      {
+        "actual": 0.025302013454076552,
+        "estimated": 0.027213300050487995,
+        "index": 2,
+        "n": 36
+      },
+      {
+        "actual": 0.0510296053111126,
+        "estimated": 0.039210343527030844,
+        "index": 3,
+        "n": 4
+      }
+    ],
+    "CalibrationError": 0.0016179468352621746,
+    "Correlation": 0.5197323264175342,
+    "HighMAE": 0.009795468132125652,
+    "HighN": 95,
+    "LowMAE": 0.006215604937959079,
+    "LowN": 96,
+    "MAE": 0.007377423948510732,
+    "N": 256,
+    "RMSE": 0.009570431216074978
+  },
+  "candidate_sequence": 80681,
+  "constant": {
+    "Bins": [
+      {
+        "actual": 0.016840744372773164,
+        "estimated": 0.015406036556304322,
+        "index": 1,
+        "n": 256
+      }
+    ],
+    "CalibrationError": 0.0014347078164688425,
+    "Correlation": -1.7060196968941877e-16,
+    "HighMAE": 0.01242785003427985,
+    "HighN": 95,
+    "LowMAE": 0.007843776619189032,
+    "LowN": 96,
+    "MAE": 0.008045390488935947,
+    "N": 256,
+    "RMSE": 0.011150655952911202
+  },
+  "continuation_sequence": 80735,
+  "final_holdout_evaluations": 1,
+  "gates": {
+    "AE1_retention": true,
+    "S1_retention": true,
+    "beats_full-refit": true,
+    "beats_legacy": true,
+    "beats_original-S2": true,
+    "learned_readout_ablation": true,
+    "new_feature_contribution": true,
+    "new_readout_contribution": true,
+    "stream_0_calibration": true,
+    "stream_0_correlation": false,
+    "stream_0_discrimination": true,
+    "stream_0_rmse": false,
+    "stream_1_calibration": true,
+    "stream_1_correlation": true,
+    "stream_1_discrimination": true,
+    "stream_1_rmse": false
+  },
+  "history_magnitude_independently_beneficial": false,
+  "initial_engineering_revision_retained": true,
+  "original_S2": {
+    "Bins": [
+      {
+        "actual": 0.014187649486052327,
+        "estimated": 0.008929226606167347,
+        "index": 0,
+        "n": 90
+      },
+      {
+        "actual": 0.016816239378362494,
+        "estimated": 0.015984059056684756,
+        "index": 1,
+        "n": 146
+      },
+      {
+        "actual": 0.028958557822214754,
+        "estimated": 0.02603983486683309,
+        "index": 2,
+        "n": 20
+      }
+    ],
+    "CalibrationError": 0.002551292364305592,
+    "Correlation": 0.2947872904283156,
+    "HighMAE": 0.01267237159756705,
+    "HighN": 95,
+    "LowMAE": 0.006008875328753111,
+    "LowN": 96,
+    "MAE": 0.00808158835597706,
+    "N": 256,
+    "RMSE": 0.011066862874620168
+  },
+  "production_promoted": false,
+  "repair_status": "PASS",
+  "repair_status_scope": "native proposal repair with shared-representation safeguard; scientific ability separately PARTIAL"
+}

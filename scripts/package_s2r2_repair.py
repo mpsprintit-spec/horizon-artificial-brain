@@ -4,6 +4,7 @@ import argparse
 import hashlib
 import io
 import json
+import lzma
 from pathlib import Path,PurePosixPath
 import tarfile
 
@@ -37,9 +38,12 @@ def package(work,source,evidence,output,failed=None):
     for prefix,base in roots:
         for path in sorted(base.rglob('*')):
             if path.is_file() and not path.name.endswith(('.lock','.test')) and not (prefix=='docs' and path.name=='ARTIFACT.md'):files[prefix+'/'+path.relative_to(base).as_posix()]=path
-    for name in ['scripts/run_s2r2_repair.py','scripts/package_s2r2_repair.py','services/ai/runtime/s2r2_repair_test.go','services/ai/runtime/neural_metric_bounded_test.go','services/ai/knowledge/neural_metric_learning.go','services/ai/knowledge/neural_metric_proposal.go','services/ai/knowledge/neural_metric_proposal_test.go','services/ai/knowledge/neural_resolution.go','services/ai/knowledge/neural_metric.go','services/ai/knowledge/neural_resolution_validation.go','services/ai/knowledge/neural_composition.go','services/ai/knowledge/s2r2_probe.go']:files['implementation/'+name]=ROOT/name
+    for name in ['scripts/run_s2r2_repair.py','scripts/package_s2r2_repair.py','scripts/analyze_s2r2_repair.py','services/ai/runtime/s2r2_repair_test.go','services/ai/runtime/s2r2_saved_audit_test.go','services/ai/runtime/neural_metric_bounded_test.go','services/ai/knowledge/neural_metric_learning.go','services/ai/knowledge/neural_metric_proposal.go','services/ai/knowledge/neural_metric_proposal_test.go','services/ai/knowledge/neural_resolution.go','services/ai/knowledge/neural_metric.go','services/ai/knowledge/neural_resolution_validation.go','services/ai/knowledge/neural_composition.go','services/ai/knowledge/s2r2_probe.go']:files['implementation/'+name]=ROOT/name
     manifest={name:{'bytes':path.stat().st_size,'sha256':digest(path.read_bytes())} for name,path in files.items()}
-    with tarfile.open(output,'w:xz',preset=1) as archive:
+    # Long identical checkpoint/journal prefixes are losslessly compressed in
+    # one dictionary. Keep every complete file; do not replace it with a hash.
+    filters=[{'id':lzma.FILTER_LZMA2,'preset':3,'dict_size':128<<20}]
+    with lzma.open(output,'wb',filters=filters) as compressed, tarfile.open(fileobj=compressed,mode='w|') as archive:
         for name,path in files.items():
             raw=path.read_bytes()
             if digest(raw)!=manifest[name]['sha256']:raise ValueError('input changed '+name)

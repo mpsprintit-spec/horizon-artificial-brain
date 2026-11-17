@@ -1,0 +1,4 @@
+=== RUN   TestS2R2Prepare
+    s2r2_repair_test.go:142: verified 75 source payloads and 76617; new development observations 512
+--- PASS: TestS2R2Prepare (158.20s)
+PASS

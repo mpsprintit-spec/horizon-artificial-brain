@@ -1,0 +1,19 @@
+{
+  "ACQUISITION_PROTOCOL.json": "33d2037ccc4f07caf309e49da4b652ebc92d14e97630262de99534def7cb17c3",
+  "DECISION_RULES.json": "986e343375f74857274315cde64e8cd822295b93c7a257ff3531b5abe3bdfdcf",
+  "DESIGN.md": "3293bd49021817b55af4509a4667565895ff26a18cfd6c6e24df7d9e3f2fdfd6",
+  "METRIC_PROTOCOL.json": "336e9342d515266e4b535dd5b03c17f1798e2685a68b47ba23ad8f91bd8acf80",
+  "REPAIR_AMENDMENT.md": "e69a9396926ae7718fbbf73e02a90301d94d46b4be20fdf7ae7cd8b10a145100",
+  "candidate_native_checksum": "9c6cbd9e7d7caeeaaa0a788d0122a94fab32701ceda2c8bb6476fa3c522d47d8",
+  "candidate_selection": "eighth block",
+  "candidate_sequence": 80681,
+  "code/neural_metric.go": "8b3e63aaecb6778f93196baf89afbe41bce43f4e21b33d9f50e29c2209bf305e",
+  "code/neural_metric_learning.go": "d613dbbeeaff048f01af6aacd099c71cc6c48c65c0ecdd82e3ad977c1319a5ff",
+  "code/neural_metric_proposal.go": "485609b09bbf1406755325bbf0e24cbbc5b560f44efc6a69bbdf7b3ce5e71daf",
+  "code/neural_resolution.go": "60d31c463e7ada880f3f1d8d40ea954f62272c2ae6b13e225c58ad76d580afb7",
+  "code/s2r2_probe.go": "26e9dbd46dfad1eb8cbebd2d7afe1b5c36f942d343ed66683650d7b898263e85",
+  "frozen_before_final_holdout": true,
+  "harness_sha256": "c2c3c21a38cc5a0e505e11e8210ee53de401879e1f177004d3b80620af1b4afc",
+  "holdout_evaluations": 0,
+  "s2r2-final.json": "c0cc6efa85ca5932a12379d24a33c3b41252c0cb5fa0826166702e51afbf8051"
+}

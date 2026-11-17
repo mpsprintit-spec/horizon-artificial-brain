@@ -1,0 +1,6 @@
+{
+  "historical_witnesses_exact": true,
+  "native_policy_updates": 10752,
+  "no_deleted_source_synapses": true,
+  "source_final_continuation_native_policy_exact": true
+}

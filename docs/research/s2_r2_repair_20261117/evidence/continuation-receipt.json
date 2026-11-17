@@ -1,0 +1,1121 @@
+{
+  "learned_n_units": 32,
+  "diagnosis": {
+    "proposal_protocol": "incumbent-relative-v1",
+    "search_fingerprint": "851e9220829f152207e7a0477045fa5be7acdb271425976b2d16f0b1a976076c",
+    "evidence": {
+      "Fit": 36,
+      "Check": 4,
+      "WitnessFit": 32,
+      "WitnessExcluded": 0,
+      "FitSHA256": "19e9c4d520e54c4d86ab96bd005ec1c698262e062e22fd0454a6b249333cf771",
+      "CheckSHA256": "120e3590c87c20cc37b66b6b0de92f37f113ed4e4b01fabe0e00e5be2216866a",
+      "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+    },
+    "required_precision": 0.002,
+    "estimated_abs_error": 0.012758589269838307,
+    "stage": "metric-readout",
+    "query": [
+      257,
+      258,
+      259,
+      260
+    ],
+    "cause": "readout",
+    "before_error": 0.00006727932710633977,
+    "after_error": 0.000052985997795750024,
+    "committed": true,
+    "trials": [
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "9fa4aaed678d7a8cad1f5bee37e4207dbe657101d4fcb43c8a610d6fef6cfd41",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "readout",
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "860924050cb32d3478e0c4108c4a7d94992ec4d300715f908914ed53e25f6446",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "readout",
+        "check_error": 0.0013411484998066036,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "bounded-joint",
+        "fraction": 0.015625,
+        "parameter_sha256": "206765b64932d078fabc8a219f258a1e577e1d0e9c2b6048d74b7e45457165c5",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "kind": "readout",
+        "check_error": 0.0000625321178711379,
+        "retention_regressions": 0,
+        "eligible": true
+      },
+      {
+        "proposal": "bounded-joint",
+        "fraction": 0.0625,
+        "parameter_sha256": "72b865f80a4a8b49c9c654e69511b3b05bd0da15a73421ec5b28ee0833a378cd",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "kind": "readout",
+        "check_error": 0.000052985997795750024,
+        "retention_regressions": 0,
+        "eligible": true
+      },
+      {
+        "proposal": "bounded-joint",
+        "fraction": 0.25,
+        "parameter_sha256": "a78130f49ba488bb4fca51e8f22970c63dc9004943ec7ef2cd2d579a0e220066",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "readout",
+        "check_error": 0.00008523413194746546,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "bounded-joint",
+        "fraction": 0.5,
+        "parameter_sha256": "91fa0fb266241f8f9a04a6115121ff990c74a06486e033bd915df403bf9c8e41",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "readout",
+        "check_error": 0.00030353059567788445,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "57651c02544dadc25af723341f4e8a6b80f48d16cab9a0c1ce83bba3d3722863",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 174,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "7a76dae5614efea81fdb34e8a6c11b2e8f798bf11955aa169334a5ef434736d7",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 174,
+        "check_error": 0.001341150664562146,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "7dfab47dc6e5e3f24ca50b5e9d97755f584f891f99e85a00a77462375864c27c",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 228,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "0bda677c1b60b85b35cbfac5073a85e0d4fc3a258192decccfd04b1e6d9bfd48",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 228,
+        "check_error": 0.0013411428697989482,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "a888ce48af5fa9ac83a5201eb54061302dcd5814d5df8c7ab8b4da51439b0656",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 233,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "6194e48e5a66a716c4ae59cd6a38032cde3d4fc50299001cd27a429c98df9088",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 233,
+        "check_error": 0.0013412263453253625,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "12b51e2b1f811b2deb1e8a95ce0627bf9d5cdf40e8a573877e2c7bb369ad1ec2",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 234,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "2dae8d653f16437fde9ce129d909e96de48641fc50681de6633562d60fd5ea21",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 234,
+        "check_error": 0.0013411543211116767,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "72d54a177162afcd446d78eb5694e2c2ffee1d9b2bd8a002eaf15d0f84e75b69",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 235,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "3b3bd1cacaa1ca35b2dc984ee3dca156bcdfc2af3c487155a7d1f5a32f5346aa",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 235,
+        "check_error": 0.0013411497868086905,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "476e9f7dc141adcdb0822fda63a8bfe1838e2643edd498d2ab97cbc9e14b5ad8",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 236,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "d14e5f7d83ab4bd97c682a8b8c7c65d3517825d945b08bf92f5f68be0f335f9a",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 236,
+        "check_error": 0.0013411484741506188,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "2b3817285e0fe8ef481ea039aa15ba8dcd1b13e772c2f9fae46df0cc13df01e7",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 237,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "6ead6d5c848829e350249e85ac27fdf2b313fdee357ec7fca3d905b7aef7fe20",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 237,
+        "check_error": 0.0013412078435876113,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "8bc6ff9a3d54a09c6b64c13561016b820343cd46a9767058b5f7956db02dd2b6",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 238,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "31bfab050c79cfeeda7636e49b38e1cf29405b6d4f54543df290d597dcd3453a",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 238,
+        "check_error": 0.0013410605678003632,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "321aa6299094386c32e0523c02153e8c002523148b8e9fc155deaab756ccf967",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 239,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "5d3c55ba3cb83233477711f730502f0436b619028571efe4d62288fbe3dd09bf",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 239,
+        "check_error": 0.001341126818961657,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "9c68671d1c73bb46e389838dc8138570dd5b997617bda9c68659224113a4b96c",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 240,
+        "check_error": 0.0007153891089793838,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "3afa233d703b9bb5ec375fb3533bef64656c5151b330b6c0ec48c352f4ff8dba",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 240,
+        "check_error": 0.0013410007518074273,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "f79f13d815cbe06d268fe731b51cd880e8fa8abe939412cced84eb0d0a269b31",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 241,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "05b0190733e92e2982b2ae84bdcead13d70d783f53f375061ef4e61895b3bdb8",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 241,
+        "check_error": 0.001341056437356383,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "5c142f7a60cb16a01eed12507b08fb9be8b30172f8a6156a98a46d1210f2b1bb",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 242,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "bd65149c4ca7e8d05d20b0476bafd5665ba606f4c16de083f88d2e8329e52170",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 242,
+        "check_error": 0.0013411494127219118,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "89e13c6b3225ee74d4901ce21b5d112590083c6c34fe992bdb78588f2945ee4a",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 243,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "acd54421da4dc14f197fbf71197702d2f5d2b3ee379e8dfa06f1acdc81b20e99",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 243,
+        "check_error": 0.0013411485176834266,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "a03e4448423f09391817ba49e3fc46b1cbb780f35dd3bcff0a917bc8849a3190",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 244,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "08cafe42dbdcd454fe32bc0f83c3285a794692d1c577c0750202eb7bb3b5ccba",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 244,
+        "check_error": 0.0013410846933471728,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "dbeb72dca6226997c9239b31807b2e850f091f34dc30144e08a49652fb11221e",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 245,
+        "check_error": 0.0007153891089794167,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "43a91ee32e55a5e7bc1f0f30ef22b88d81a2d46db87fab8f76ff5cb921d2b8c3",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 245,
+        "check_error": 0.0013412950859371527,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "9ca0206f3ab184b7b0cd6be68a0c50820476093a9bfc983d0941c0b214480421",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 246,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "0a38524a644fdaa37ff507b242bfe56525db64de31beb12ed811c039a97fe5cc",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 246,
+        "check_error": 0.0013412103371835218,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "d9d5059a9d49e7ed26854155cab8e5815ed2dfe4a73dadb60d0ca9d75b7f86c5",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 247,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "77bd0ef3c2eb89888d0fb8c4187c7370075f2695d7cfbb37277b7ac26007ac60",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 247,
+        "check_error": 0.0013411525717286715,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "ad93dd06d4fb881e6636bd18663896a470415eba39a2d15a2c7b299670c8aea4",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 248,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "e76e8f4c342a111f19ffefb41ca7b4c3984b864950535003371c4ae57009ed67",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 248,
+        "check_error": 0.001341164686388021,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "10cf1b8dc442c441d7ef63d818f1b79e7fd877aa86e0c98962c75eb0cedd30c5",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 249,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "3360b015dfb2bfdaeeb0a7d728909c10febf0371f470fb384a9ba5dd9f457db8",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 249,
+        "check_error": 0.0013411612334076944,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "6df9f7110a434f30d6f0f885c350726dff66397ac5d9245fb3c63b57d9ed2b21",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 250,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "1d8c9bb35123b456409a9d6b9ca58997ba5b3ed6eba5d68073f6a4f12aaf0a02",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 250,
+        "check_error": 0.0013409286575022925,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "5a2c9de65392a1404aa77b8dfa90202b7013b5f96b8157382514e8624e2281a7",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 251,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "7351d660416ad34feb9fb288fad028d3156f152acc7b46a850e56deeff033b8d",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 251,
+        "check_error": 0.0013411155822510479,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "b71fdb9dacfb017a212a56d8343a33f7ea6d9fbc1f3b3fd7a3cbd45154610ec6",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 252,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "59656ec1f38bb41ee5c801d3b73929a05b7c6fe962d98afaeea42a95816a333e",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 252,
+        "check_error": 0.0013410937540456924,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "1b449c02687d62c8b4d69e828ea3bff8be9bb0d8d6a2b629190cf81e9e7bf97e",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 253,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "b4f6d25f6715eb9609463e328af7dc897f7514e2b4aa6b7ce95e47e285abc5a5",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 253,
+        "check_error": 0.0013411251439191375,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "a12421754fb426f337f0326be85ad7032fd7e8ac4bf117d1ef4231e4657fd83e",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 254,
+        "check_error": 0.0007153891089793807,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "c809686c34a81c84c71a10e038e0702b31a1c247ca1d446da0e986fd00f60934",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 254,
+        "check_error": 0.0013406160646594085,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "31872b61a920d2b84ecbeb5a757eda4f464ff38622a2353ae0d31feebdc826d9",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 255,
+        "check_error": 0.0007153891089793775,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "c7062fb3b1d1a4d74c475fcd92c53d468c37b0863c5af477f80454ae274c0b4c",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 255,
+        "check_error": 0.0013411484998064013,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "fa2d2dd411e023ca7b6ff9ca0ea343b5396589ea9b8ad21f58764ce0c0c2b557",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 256,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "292dfc6c749c7976c00ef5a95b8bba3e49cd2c0c579053dbadd6033fc81cd564",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "cross-query-representation-change",
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 256,
+        "check_error": 0.0013411485080038579,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "f1fc53af3d25373ec584eba593a176ee26f6dd36dd16c8155892be488866bb04",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 261,
+        "check_error": 0.0007153891089793608,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "7f6a2e9ce9846d92b069dc3dc3178f1fa0af0aeb0fbf5d0d284dd6e75505ed43",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 261,
+        "check_error": 0.0013411485083562158,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "7ec2a79534eb2e31a7eb85d4e8110917ef25848799cc5a1dd186e9d6ddde32f0",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 262,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "13a1b8ebb2e319333a0043640d373e86ed8e7ba3ac38159874815b7f6ec3c66c",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 262,
+        "check_error": 0.0013411484465741933,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "a2146dea5aae75f04bd948cd878845d8d859802e936bdfa6a9c034d392f46391",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 263,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "05d8bcdf6768e78be7cf39a3a8e069fd2ffd397bf015bd55109ae7c4d15049b8",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 263,
+        "check_error": 0.0013411485010760558,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "d361a7815d6b8d3866c9541f89c79d3226a659c58742bce4ec0a533f1e5223de",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 264,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "96a6e4e28fbef6a60e20000820480c80e2285ba23240584f64a40e8821f6c8b9",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 264,
+        "check_error": 0.0013411485001341777,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "ffd659a61e59e1d87501ffd5aae0a54ab0227b4a7566e8b9e610879a11fed13f",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 265,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "eef691eac0fe5027a117422349e8ebf2fb13a1100355b0b8aec4f913529ead99",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 265,
+        "check_error": 0.0013411479684850432,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "e019c2ebcfc3ec7701a5223045486c8cc21f92d4061bc5e4ff57c5a94b7f7b9e",
+        "readout_mode": "activation",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 266,
+        "check_error": 0.0007153891089793769,
+        "retention_regressions": 0,
+        "eligible": false
+      },
+      {
+        "proposal": "full-refit",
+        "fraction": 1,
+        "parameter_sha256": "47ecb20707b98d4e8c913cdac3a1a11ef90996596d7ce4d2c874ce1e25951412",
+        "readout_mode": "metric",
+        "fit_valid": true,
+        "rejected_by": [
+          "no-check-improvement"
+        ],
+        "kind": "resolution",
+        "feature": 266,
+        "check_error": 0.0013412780318242277,
+        "retention_regressions": 0,
+        "eligible": false
+      }
+    ]
+  }
+}
