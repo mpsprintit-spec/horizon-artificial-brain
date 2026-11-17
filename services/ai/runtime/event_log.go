@@ -20,7 +20,7 @@ import (
 const EventLogSchemaVersion = 3
 
 func supportedEventLogSchema(version int) bool {
-	return version == nativeJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
+	return version == nativeJournalSchemaVersion || version == nativeEnvironmentJournalSchemaVersion || version == 1 || version == 2 || version == EventLogSchemaVersion || version == compositionJournalSchemaVersion
 }
 
 type LoggedEvent struct {

@@ -9,6 +9,7 @@ import (
 )
 
 const nativeJournalSchemaVersion = 14
+const nativeEnvironmentJournalSchemaVersion = 15
 const nativeCheckpointSchemaVersion = 20
 const EventTypeNativeControl = "native_control_command"
 
@@ -25,10 +26,14 @@ type NativeBegin struct {
 	Observation  *NativeObservation `json:"observation,omitempty"`
 }
 type NativeStep struct {
-	ExperimentAction *int    `json:"experiment_action,omitempty"`
-	ActionOverride   *int    `json:"action_override,omitempty"` // evaluation ablation only; never eligible for learning
-	EpisodeID        string  `json:"episode_id"`
-	Sample           float64 `json:"sample"`
+	// Observed experimental operation condition. Only explicit evaluation
+	// interventions may perturb a propagate operation; the policy is unchanged.
+	// WAL15 prevents older readers silently replaying the nominal gain.
+	EnvironmentGain  *float64 `json:"environment_gain,omitempty"`
+	ExperimentAction *int     `json:"experiment_action,omitempty"`
+	ActionOverride   *int     `json:"action_override,omitempty"` // evaluation ablation only; never eligible for learning
+	EpisodeID        string   `json:"episode_id"`
+	Sample           float64  `json:"sample"`
 }
 type NativeOutcome struct {
 	ContrastMode string  `json:"contrast_mode,omitempty"`
@@ -93,6 +98,9 @@ func (c NativeControlCommand) Validate() error {
 		n++
 		if c.Step.EpisodeID == "" || c.Step.Sample < 0 || c.Step.Sample >= 1 || c.Step.Sample != c.Step.Sample {
 			return errors.New("invalid native step")
+		}
+		if g := c.Step.EnvironmentGain; g != nil && (*g <= 0 || *g > 1 || *g != *g || c.Step.ActionOverride == nil || c.Step.ExperimentAction != nil) {
+			return errors.New("environment gain requires an explicit evaluation action and finite gain in (0,1]")
 		}
 	}
 	if o := c.Outcome; o != nil {
@@ -242,7 +250,14 @@ func (r *BrainRuntime) ApplyNativeControl(command NativeControlCommand, at time.
 			}
 			p.Action = *c.Step.ActionOverride
 		}
-		transition, err = r.activation.PrepareNativeOperation(s.Config.Operations[p.Action], at, s.Config.MaxActiveNodes, s.Config.MaxSynapseReads)
+		op := s.Config.Operations[p.Action]
+		if g := c.Step.EnvironmentGain; g != nil {
+			if ep.Training || op.Kind != "propagate" {
+				return out, errors.New("environment gain is restricted to observed propagate evaluation")
+			}
+			op.Gain = *g
+		}
+		transition, err = r.activation.PrepareNativeOperation(op, at, s.Config.MaxActiveNodes, s.Config.MaxSynapseReads)
 		if err != nil {
 			return out, err
 		}

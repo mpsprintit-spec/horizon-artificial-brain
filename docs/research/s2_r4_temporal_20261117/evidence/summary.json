@@ -1,0 +1,1417 @@
+{
+  "contrasts": {
+    "independent": {
+      "A32-vs-C32": {
+        "CI95": [
+          -8.013663160050255e-05,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -4.951877857850562e-05,
+        "seed_effects": [
+          -6.79897641053806e-05,
+          0.0,
+          -7.940535657979808e-05
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "A64-vs-A32": {
+        "CI95": [
+          0.003948604764140768,
+          0.1877052822581759
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.1173887949571717,
+        "seed_effects": [
+          0.15928669750048885,
+          0.1902740794306893,
+          0.0032951765764616114
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "A64-vs-C64": {
+        "CI95": [
+          -0.00621742206378102,
+          0.1080395118441353
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.0399178746100739,
+        "seed_effects": [
+          0.11203778242443152,
+          -0.005658061221264443,
+          -0.0016698592068389306
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "B32-vs-A32": {
+        "CI95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.0,
+        "seed_effects": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "B32-vs-B0-32": {
+        "CI95": [
+          -8.013663160050255e-05,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -4.951877857850562e-05,
+        "seed_effects": [
+          -6.79897641053806e-05,
+          0.0,
+          -7.940535657979808e-05
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "D32-vs-D0-32": {
+        "CI95": [
+          -8.672841790269837e-05,
+          -7.570123482835145e-05
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -8.152971947139598e-05,
+        "seed_effects": [
+          -8.179533716390353e-05,
+          -7.727550986946774e-05,
+          -8.533422730971907e-05
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      }
+    },
+    "persistent": {
+      "A32-vs-C32": {
+        "CI95": [
+          -0.00012251491077874265,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -7.814088849267264e-05,
+        "seed_effects": [
+          -0.00011115824645635541,
+          0.0,
+          -0.00012213614039802145
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "A64-vs-A32": {
+        "CI95": [
+          0.010844979318461697,
+          0.2504789008978768
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.15614485398653055,
+        "seed_effects": [
+          0.2115125271605106,
+          0.25181880102906706,
+          0.010142565909135426
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "A64-vs-C64": {
+        "CI95": [
+          0.005030618009084148,
+          0.1603692739718866
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.0747030518887769,
+        "seed_effects": [
+          0.16752956693342502,
+          0.042315874029249745,
+          0.00485326922280116
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "B32-vs-A32": {
+        "CI95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.0,
+        "seed_effects": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "B32-vs-B0-32": {
+        "CI95": [
+          -0.00012251491077874265,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -7.814088849267264e-05,
+        "seed_effects": [
+          -0.00011115824645635541,
+          0.0,
+          -0.00012213614039802145
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "D32-vs-D0-32": {
+        "CI95": [
+          -0.00012077138695630318,
+          -0.00011504306566395561
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -0.00011810518922605873,
+        "seed_effects": [
+          -0.0001171532816226506,
+          -0.00011855562348972448,
+          -0.00011862651570315741
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      }
+    },
+    "shifted": {
+      "A32-vs-C32": {
+        "CI95": [
+          -0.0001242657641625622,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -7.912176495517009e-05,
+        "seed_effects": [
+          -0.00011373230838662707,
+          0.0,
+          -0.00012252080172658886
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "A64-vs-A32": {
+        "CI95": [
+          0.01721353133898284,
+          0.27500049283021816
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.17084271855825062,
+        "seed_effects": [
+          0.23364333044701835,
+          0.2677181670394163,
+          0.016459508508717358
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "A64-vs-C64": {
+        "CI95": [
+          0.005671772309018544,
+          0.178844589348366
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.08375650295959303,
+        "seed_effects": [
+          0.1863084874921439,
+          0.050027719990316966,
+          0.005419476820543001
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "B32-vs-A32": {
+        "CI95": [
+          0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": 0.0,
+        "seed_effects": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "B32-vs-B0-32": {
+        "CI95": [
+          -0.0001242657641625622,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -7.912176495517009e-05,
+        "seed_effects": [
+          -0.00011373230838662707,
+          0.0,
+          -0.00012252080172658886
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      },
+      "D32-vs-D0-32": {
+        "CI95": [
+          -0.00012457249448571405,
+          -0.00011617118121223236
+        ],
+        "bootstrap_replicates": 2000,
+        "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+        "relative_RMSE_improvement": -0.00012075068398198496,
+        "seed_effects": [
+          -0.0001196223313828515,
+          -0.00012035979872160318,
+          -0.00012225233525531287
+        ],
+        "streams": 32,
+        "training_seeds": 3
+      }
+    }
+  },
+  "decision": {
+    "AE1_pass": 24,
+    "S1_S2_pass": 15,
+    "S2": "PARTIAL",
+    "diagnosis": "RECRUITMENT / ADMISSION FAILURE with partial representation limitation at 32; not learned low utility",
+    "final_models": 24,
+    "full_suffix_replay_exact": 24,
+    "information_full_state": {
+      "CI95": [
+        0.19282148506266172,
+        0.3053300596929593
+      ],
+      "clusters": 8,
+      "relative_RMSE_improvement": 0.2501843959729513,
+      "replicates": 2000,
+      "resampling_unit": "independent stream"
+    },
+    "main_changed": false,
+    "native_commits": 88,
+    "native_lessons": 96,
+    "primary_effect": {
+      "CI95": [
+        -0.00012251491077874265,
+        0.0
+      ],
+      "bootstrap_replicates": 2000,
+      "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+      "relative_RMSE_improvement": -7.814088849267264e-05,
+      "seed_effects": [
+        -0.00011115824645635541,
+        0.0,
+        -0.00012213614039802145
+      ],
+      "streams": 32,
+      "training_seeds": 3
+    },
+    "primary_history_gate": "NOT DEMONSTRATED",
+    "production_promoted": false,
+    "refinement": {
+      "check_better_than_start": 54,
+      "selected_commands": 0,
+      "sole_retention_rejection": 51,
+      "trials": 72,
+      "with_retention_rejection": 51
+    },
+    "source_commit": "cee0fa80dfa1667ee2738c3467463eb1fb8313ab",
+    "source_sequence": 80735,
+    "supportive_64": "measurable beneficial history utilization, below registered overall benefit threshold and not retention-safe across seeds",
+    "supportive_effect": {
+      "CI95": [
+        0.005030618009084148,
+        0.1603692739718866
+      ],
+      "bootstrap_replicates": 2000,
+      "method": "paired hierarchical training-seed and shared independent-stream bootstrap",
+      "relative_RMSE_improvement": 0.0747030518887769,
+      "seed_effects": [
+        0.16752956693342502,
+        0.042315874029249745,
+        0.00485326922280116
+      ],
+      "streams": 32,
+      "training_seeds": 3
+    }
+  },
+  "pooled": {
+    "independent": {
+      "A32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08131320381998042,
+            "bin": 0,
+            "n": 319,
+            "predicted": 0.0017064105093077795
+          },
+          {
+            "actual": 0.09207356451483077,
+            "bin": 1,
+            "n": 799,
+            "predicted": 0.020166128158458096
+          },
+          {
+            "actual": 0.11621932077700813,
+            "bin": 2,
+            "n": 982,
+            "predicted": 0.04385230813479217
+          },
+          {
+            "actual": 0.10170241557006958,
+            "bin": 3,
+            "n": 204,
+            "predicted": 0.0652643341720325
+          }
+        ],
+        "CalibrationError": 0.07002881238485328,
+        "Correlation": 0.1842711373192486,
+        "ErrorDiscriminationAUROC": 0.6496845998702434,
+        "MAE": 0.0749412154372383,
+        "N": 2304,
+        "RMSE": 0.10356004697731264
+      },
+      "A64": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07356269476942465,
+            "bin": 0,
+            "n": 157,
+            "predicted": -0.0014584226671774223
+          },
+          {
+            "actual": 0.09105649978726747,
+            "bin": 1,
+            "n": 347,
+            "predicted": 0.019999995039389346
+          },
+          {
+            "actual": 0.10075771416890182,
+            "bin": 2,
+            "n": 797,
+            "predicted": 0.0459879350358758
+          },
+          {
+            "actual": 0.10833211766262985,
+            "bin": 3,
+            "n": 820,
+            "predicted": 0.07707947171842681
+          },
+          {
+            "actual": 0.12075504188134976,
+            "bin": 4,
+            "n": 183,
+            "predicted": 0.11068039150370476
+          }
+        ],
+        "CalibrationError": 0.04668284168725586,
+        "Correlation": 0.16002548458965754,
+        "ErrorDiscriminationAUROC": 0.6007129559109757,
+        "MAE": 0.0708172072622173,
+        "N": 2304,
+        "RMSE": 0.09140325785693781
+      },
+      "B0-32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08131320381998042,
+            "bin": 0,
+            "n": 319,
+            "predicted": 0.0017095450895115172
+          },
+          {
+            "actual": 0.09198665593175626,
+            "bin": 1,
+            "n": 798,
+            "predicted": 0.020160466342684643
+          },
+          {
+            "actual": 0.1162653098848731,
+            "bin": 2,
+            "n": 983,
+            "predicted": 0.04384895476676499
+          },
+          {
+            "actual": 0.10170241557006958,
+            "bin": 3,
+            "n": 204,
+            "predicted": 0.06526980485519912
+          }
+        ],
+        "CalibrationError": 0.07002100524914609,
+        "Correlation": 0.1842668071499122,
+        "ErrorDiscriminationAUROC": 0.6496845998702434,
+        "MAE": 0.07493747130920046,
+        "N": 2304,
+        "RMSE": 0.10355491906420478
+      },
+      "B32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08131320381998042,
+            "bin": 0,
+            "n": 319,
+            "predicted": 0.0017064105093077795
+          },
+          {
+            "actual": 0.09207356451483077,
+            "bin": 1,
+            "n": 799,
+            "predicted": 0.020166128158458096
+          },
+          {
+            "actual": 0.11621932077700813,
+            "bin": 2,
+            "n": 982,
+            "predicted": 0.04385230813479217
+          },
+          {
+            "actual": 0.10170241557006958,
+            "bin": 3,
+            "n": 204,
+            "predicted": 0.0652643341720325
+          }
+        ],
+        "CalibrationError": 0.07002881238485328,
+        "Correlation": 0.1842711373192486,
+        "ErrorDiscriminationAUROC": 0.6496845998702434,
+        "MAE": 0.0749412154372383,
+        "N": 2304,
+        "RMSE": 0.10356004697731264
+      },
+      "C32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08131320381998042,
+            "bin": 0,
+            "n": 319,
+            "predicted": 0.0017095450895115172
+          },
+          {
+            "actual": 0.09198665593175626,
+            "bin": 1,
+            "n": 798,
+            "predicted": 0.020160466342684643
+          },
+          {
+            "actual": 0.1162653098848731,
+            "bin": 2,
+            "n": 983,
+            "predicted": 0.04384895476676499
+          },
+          {
+            "actual": 0.10170241557006958,
+            "bin": 3,
+            "n": 204,
+            "predicted": 0.06526980485519912
+          }
+        ],
+        "CalibrationError": 0.07002100524914609,
+        "Correlation": 0.1842668071499122,
+        "ErrorDiscriminationAUROC": 0.6496845998702434,
+        "MAE": 0.07493747130920046,
+        "N": 2304,
+        "RMSE": 0.10355491906420478
+      },
+      "C64": {
+        "CalibrationBins": [
+          {
+            "actual": 0.06527307356996538,
+            "bin": 0,
+            "n": 159,
+            "predicted": 0.0029053135641716444
+          },
+          {
+            "actual": 0.09040847078391258,
+            "bin": 1,
+            "n": 537,
+            "predicted": 0.019870015583435527
+          },
+          {
+            "actual": 0.1084586450616213,
+            "bin": 2,
+            "n": 879,
+            "predicted": 0.04478843111372895
+          },
+          {
+            "actual": 0.1081944975313192,
+            "bin": 3,
+            "n": 647,
+            "predicted": 0.07571599069211536
+          },
+          {
+            "actual": 0.12336096859421329,
+            "bin": 4,
+            "n": 82,
+            "predicted": 0.11055804668560894
+          }
+        ],
+        "CalibrationError": 0.05461162146929044,
+        "Correlation": 0.1579053080029526,
+        "ErrorDiscriminationAUROC": 0.6062875518321063,
+        "MAE": 0.07172276499086701,
+        "N": 2304,
+        "RMSE": 0.09520358252666714
+      },
+      "D0-32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07288594478338949,
+            "bin": 0,
+            "n": 324,
+            "predicted": 0.0038255771624816303
+          },
+          {
+            "actual": 0.08817086333560578,
+            "bin": 1,
+            "n": 743,
+            "predicted": 0.01896041008409702
+          },
+          {
+            "actual": 0.11466219369802348,
+            "bin": 2,
+            "n": 1145,
+            "predicted": 0.04186488763287642
+          },
+          {
+            "actual": 0.15180594013945156,
+            "bin": 3,
+            "n": 92,
+            "predicted": 0.06661796557576187
+          }
+        ],
+        "CalibrationError": 0.07160986761262933,
+        "Correlation": 0.26927794730863414,
+        "ErrorDiscriminationAUROC": 0.6793778736848044,
+        "MAE": 0.07583011326526541,
+        "N": 2304,
+        "RMSE": 0.10345608621143665
+      },
+      "D32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07284919012221083,
+            "bin": 0,
+            "n": 325,
+            "predicted": 0.0038335693150402736
+          },
+          {
+            "actual": 0.08820756169603067,
+            "bin": 1,
+            "n": 742,
+            "predicted": 0.018961142305211766
+          },
+          {
+            "actual": 0.11466219369802348,
+            "bin": 2,
+            "n": 1145,
+            "predicted": 0.04185138373424628
+          },
+          {
+            "actual": 0.15180594013945156,
+            "bin": 3,
+            "n": 92,
+            "predicted": 0.06660440635722069
+          }
+        ],
+        "CalibrationError": 0.07162232572344106,
+        "Correlation": 0.26929543948630763,
+        "ErrorDiscriminationAUROC": 0.6793813996784294,
+        "MAE": 0.0758365768655037,
+        "N": 2304,
+        "RMSE": 0.10346452095712307
+      }
+    },
+    "persistent": {
+      "A32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08677590217495539,
+            "bin": 0,
+            "n": 288,
+            "predicted": 0.002570189236886913
+          },
+          {
+            "actual": 0.10281536161440837,
+            "bin": 1,
+            "n": 790,
+            "predicted": 0.020128187565540225
+          },
+          {
+            "actual": 0.13067795309204225,
+            "bin": 2,
+            "n": 1048,
+            "predicted": 0.04363802504950115
+          },
+          {
+            "actual": 0.10561261103428693,
+            "bin": 3,
+            "n": 178,
+            "predicted": 0.06495632684221614
+          }
+        ],
+        "CalibrationError": 0.08160971180535645,
+        "Correlation": 0.1917625710765211,
+        "ErrorDiscriminationAUROC": 0.6387001210566794,
+        "MAE": 0.0859371794463692,
+        "N": 2304,
+        "RMSE": 0.1125626861867726
+      },
+      "A64": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07765242147981646,
+            "bin": 0,
+            "n": 134,
+            "predicted": -0.0010390314317371043
+          },
+          {
+            "actual": 0.08914325087061499,
+            "bin": 1,
+            "n": 303,
+            "predicted": 0.019907603721734266
+          },
+          {
+            "actual": 0.10688639271066355,
+            "bin": 2,
+            "n": 878,
+            "predicted": 0.04606349161551798
+          },
+          {
+            "actual": 0.12040098221702622,
+            "bin": 3,
+            "n": 814,
+            "predicted": 0.07717407932149326
+          },
+          {
+            "actual": 0.18683801879782508,
+            "bin": 4,
+            "n": 175,
+            "predicted": 0.1116362634059575
+          }
+        ],
+        "CalibrationError": 0.05784399700014649,
+        "Correlation": 0.3055250734761441,
+        "ErrorDiscriminationAUROC": 0.6791647614692882,
+        "MAE": 0.0752893947419865,
+        "N": 2304,
+        "RMSE": 0.09498660198780734
+      },
+      "B0-32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08677590217495539,
+            "bin": 0,
+            "n": 288,
+            "predicted": 0.0025756117107441695
+          },
+          {
+            "actual": 0.10281536161440837,
+            "bin": 1,
+            "n": 790,
+            "predicted": 0.020135743231955768
+          },
+          {
+            "actual": 0.13067795309204225,
+            "bin": 2,
+            "n": 1048,
+            "predicted": 0.04364935522913854
+          },
+          {
+            "actual": 0.10561261103428693,
+            "bin": 3,
+            "n": 178,
+            "predicted": 0.0649613601811205
+          }
+        ],
+        "CalibrationError": 0.08160090077604908,
+        "Correlation": 0.19195082677901823,
+        "ErrorDiscriminationAUROC": 0.6388297620736957,
+        "MAE": 0.08593017478375051,
+        "N": 2304,
+        "RMSE": 0.11255389112571673
+      },
+      "B32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08677590217495539,
+            "bin": 0,
+            "n": 288,
+            "predicted": 0.002570189236886913
+          },
+          {
+            "actual": 0.10281536161440837,
+            "bin": 1,
+            "n": 790,
+            "predicted": 0.020128187565540225
+          },
+          {
+            "actual": 0.13067795309204225,
+            "bin": 2,
+            "n": 1048,
+            "predicted": 0.04363802504950115
+          },
+          {
+            "actual": 0.10561261103428693,
+            "bin": 3,
+            "n": 178,
+            "predicted": 0.06495632684221614
+          }
+        ],
+        "CalibrationError": 0.08160971180535645,
+        "Correlation": 0.1917625710765211,
+        "ErrorDiscriminationAUROC": 0.6387001210566794,
+        "MAE": 0.0859371794463692,
+        "N": 2304,
+        "RMSE": 0.1125626861867726
+      },
+      "C32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.08677590217495539,
+            "bin": 0,
+            "n": 288,
+            "predicted": 0.0025756117107441695
+          },
+          {
+            "actual": 0.10281536161440837,
+            "bin": 1,
+            "n": 790,
+            "predicted": 0.020135743231955768
+          },
+          {
+            "actual": 0.13067795309204225,
+            "bin": 2,
+            "n": 1048,
+            "predicted": 0.04364935522913854
+          },
+          {
+            "actual": 0.10561261103428693,
+            "bin": 3,
+            "n": 178,
+            "predicted": 0.0649613601811205
+          }
+        ],
+        "CalibrationError": 0.08160090077604908,
+        "Correlation": 0.19195082677901823,
+        "ErrorDiscriminationAUROC": 0.6388297620736957,
+        "MAE": 0.08593017478375051,
+        "N": 2304,
+        "RMSE": 0.11255389112571673
+      },
+      "C64": {
+        "CalibrationBins": [
+          {
+            "actual": 0.06980509348573978,
+            "bin": 0,
+            "n": 135,
+            "predicted": 0.003034990623798752
+          },
+          {
+            "actual": 0.09466056695767475,
+            "bin": 1,
+            "n": 501,
+            "predicted": 0.020078866133639663
+          },
+          {
+            "actual": 0.12270612055665375,
+            "bin": 2,
+            "n": 956,
+            "predicted": 0.044293040614015344
+          },
+          {
+            "actual": 0.12131563461683723,
+            "bin": 3,
+            "n": 640,
+            "predicted": 0.07530282330841961
+          },
+          {
+            "actual": 0.14121452823647687,
+            "bin": 4,
+            "n": 72,
+            "predicted": 0.1094412122882925
+          }
+        ],
+        "CalibrationError": 0.06644018160157227,
+        "Correlation": 0.1914448934816362,
+        "ErrorDiscriminationAUROC": 0.6171192714875606,
+        "MAE": 0.08062563416325497,
+        "N": 2304,
+        "RMSE": 0.10265526346077357
+      },
+      "D0-32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07799772347335411,
+            "bin": 0,
+            "n": 295,
+            "predicted": 0.004338322674283653
+          },
+          {
+            "actual": 0.09551807984667744,
+            "bin": 1,
+            "n": 718,
+            "predicted": 0.019529764719590198
+          },
+          {
+            "actual": 0.13080069786756837,
+            "bin": 2,
+            "n": 1234,
+            "predicted": 0.04201580245590423
+          },
+          {
+            "actual": 0.1572941084771904,
+            "bin": 3,
+            "n": 57,
+            "predicted": 0.06680989961195033
+          }
+        ],
+        "CalibrationError": 0.08290247150186053,
+        "Correlation": 0.31301644530102607,
+        "ErrorDiscriminationAUROC": 0.6778438246202306,
+        "MAE": 0.08699981752152727,
+        "N": 2304,
+        "RMSE": 0.11205353398388579
+      },
+      "D32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07792816047484973,
+            "bin": 0,
+            "n": 296,
+            "predicted": 0.004344420343959977
+          },
+          {
+            "actual": 0.09583383586379292,
+            "bin": 1,
+            "n": 719,
+            "predicted": 0.019560372121870135
+          },
+          {
+            "actual": 0.13070463265950535,
+            "bin": 2,
+            "n": 1232,
+            "predicted": 0.04202094589127688
+          },
+          {
+            "actual": 0.1572941084771904,
+            "bin": 3,
+            "n": 57,
+            "predicted": 0.06679539655224022
+          }
+        ],
+        "CalibrationError": 0.0829158577202107,
+        "Correlation": 0.31273812055968797,
+        "ErrorDiscriminationAUROC": 0.6776230845101759,
+        "MAE": 0.08701094300672696,
+        "N": 2304,
+        "RMSE": 0.11206676808772043
+      }
+    },
+    "shifted": {
+      "A32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07312800512917474,
+            "bin": 0,
+            "n": 260,
+            "predicted": 0.0021136954365142866
+          },
+          {
+            "actual": 0.08380591760237606,
+            "bin": 1,
+            "n": 779,
+            "predicted": 0.020026557708512388
+          },
+          {
+            "actual": 0.10465965895933854,
+            "bin": 2,
+            "n": 1091,
+            "predicted": 0.04333715287453548
+          },
+          {
+            "actual": 0.10624799473878697,
+            "bin": 3,
+            "n": 174,
+            "predicted": 0.06553560652772124
+          }
+        ],
+        "CalibrationError": 0.06169038696382686,
+        "Correlation": 0.20627443851469118,
+        "ErrorDiscriminationAUROC": 0.691205619412516,
+        "MAE": 0.06564490809205692,
+        "N": 2304,
+        "RMSE": 0.09196549362631187
+      },
+      "A64": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07074219751389617,
+            "bin": 0,
+            "n": 129,
+            "predicted": -0.00030563095251429225
+          },
+          {
+            "actual": 0.0678146164917913,
+            "bin": 1,
+            "n": 264,
+            "predicted": 0.020619221752693987
+          },
+          {
+            "actual": 0.08745594139768773,
+            "bin": 2,
+            "n": 843,
+            "predicted": 0.046176759185002386
+          },
+          {
+            "actual": 0.0995809989064709,
+            "bin": 3,
+            "n": 832,
+            "predicted": 0.07761096651667988
+          },
+          {
+            "actual": 0.14137024675196455,
+            "bin": 4,
+            "n": 236,
+            "predicted": 0.1126335533293723
+          }
+        ],
+        "CalibrationError": 0.03536633302283866,
+        "Correlation": 0.2850336724902009,
+        "ErrorDiscriminationAUROC": 0.7022784163473819,
+        "MAE": 0.05818844076015475,
+        "N": 2304,
+        "RMSE": 0.07625385868164128
+      },
+      "B0-32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07312800512917474,
+            "bin": 0,
+            "n": 260,
+            "predicted": 0.002115760370347549
+          },
+          {
+            "actual": 0.08380591760237606,
+            "bin": 1,
+            "n": 779,
+            "predicted": 0.020032410353017675
+          },
+          {
+            "actual": 0.10465965895933854,
+            "bin": 2,
+            "n": 1091,
+            "predicted": 0.043347054432442245
+          },
+          {
+            "actual": 0.10624799473878697,
+            "bin": 3,
+            "n": 174,
+            "predicted": 0.06554117786739921
+          }
+        ],
+        "CalibrationError": 0.06168306573741779,
+        "Correlation": 0.20645099785961046,
+        "ErrorDiscriminationAUROC": 0.6912183908045977,
+        "MAE": 0.06563984225517494,
+        "N": 2304,
+        "RMSE": 0.09195821772982296
+      },
+      "B32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07312800512917474,
+            "bin": 0,
+            "n": 260,
+            "predicted": 0.0021136954365142866
+          },
+          {
+            "actual": 0.08380591760237606,
+            "bin": 1,
+            "n": 779,
+            "predicted": 0.020026557708512388
+          },
+          {
+            "actual": 0.10465965895933854,
+            "bin": 2,
+            "n": 1091,
+            "predicted": 0.04333715287453548
+          },
+          {
+            "actual": 0.10624799473878697,
+            "bin": 3,
+            "n": 174,
+            "predicted": 0.06553560652772124
+          }
+        ],
+        "CalibrationError": 0.06169038696382686,
+        "Correlation": 0.20627443851469118,
+        "ErrorDiscriminationAUROC": 0.691205619412516,
+        "MAE": 0.06564490809205692,
+        "N": 2304,
+        "RMSE": 0.09196549362631187
+      },
+      "C32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.07312800512917474,
+            "bin": 0,
+            "n": 260,
+            "predicted": 0.002115760370347549
+          },
+          {
+            "actual": 0.08380591760237606,
+            "bin": 1,
+            "n": 779,
+            "predicted": 0.020032410353017675
+          },
+          {
+            "actual": 0.10465965895933854,
+            "bin": 2,
+            "n": 1091,
+            "predicted": 0.043347054432442245
+          },
+          {
+            "actual": 0.10624799473878697,
+            "bin": 3,
+            "n": 174,
+            "predicted": 0.06554117786739921
+          }
+        ],
+        "CalibrationError": 0.06168306573741779,
+        "Correlation": 0.20645099785961046,
+        "ErrorDiscriminationAUROC": 0.6912183908045977,
+        "MAE": 0.06563984225517494,
+        "N": 2304,
+        "RMSE": 0.09195821772982296
+      },
+      "C64": {
+        "CalibrationBins": [
+          {
+            "actual": 0.06556509072107766,
+            "bin": 0,
+            "n": 136,
+            "predicted": 0.003075585488427432
+          },
+          {
+            "actual": 0.07818323788299503,
+            "bin": 1,
+            "n": 447,
+            "predicted": 0.020160199351097675
+          },
+          {
+            "actual": 0.09810845675143152,
+            "bin": 2,
+            "n": 985,
+            "predicted": 0.04449111775208629
+          },
+          {
+            "actual": 0.10125197920283406,
+            "bin": 3,
+            "n": 628,
+            "predicted": 0.07683054269229508
+          },
+          {
+            "actual": 0.11926942262702293,
+            "bin": 4,
+            "n": 108,
+            "predicted": 0.11000723360602781
+          }
+        ],
+        "CalibrationError": 0.044958736281527585,
+        "Correlation": 0.18070058942656214,
+        "ErrorDiscriminationAUROC": 0.6448480204342273,
+        "MAE": 0.061756913219800515,
+        "N": 2304,
+        "RMSE": 0.08322444735264345
+      },
+      "D0-32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.0669993563812214,
+            "bin": 0,
+            "n": 271,
+            "predicted": 0.003702570919895616
+          },
+          {
+            "actual": 0.07783206148755764,
+            "bin": 1,
+            "n": 707,
+            "predicted": 0.019524169123303944
+          },
+          {
+            "actual": 0.10612145420445875,
+            "bin": 2,
+            "n": 1236,
+            "predicted": 0.04216578987399402
+          },
+          {
+            "actual": 0.1402079967477599,
+            "bin": 3,
+            "n": 90,
+            "predicted": 0.06736771051685336
+          }
+        ],
+        "CalibrationError": 0.062492159563707746,
+        "Correlation": 0.2887544456848094,
+        "ErrorDiscriminationAUROC": 0.738176245210728,
+        "MAE": 0.06598624837956647,
+        "N": 2304,
+        "RMSE": 0.09139410242232608
+      },
+      "D32": {
+        "CalibrationBins": [
+          {
+            "actual": 0.0669993563812214,
+            "bin": 0,
+            "n": 271,
+            "predicted": 0.0036922289089650943
+          },
+          {
+            "actual": 0.07783206148755764,
+            "bin": 1,
+            "n": 707,
+            "predicted": 0.019513908821461985
+          },
+          {
+            "actual": 0.10612145420445875,
+            "bin": 2,
+            "n": 1236,
+            "predicted": 0.042153364221148244
+          },
+          {
+            "actual": 0.1402079967477599,
+            "bin": 3,
+            "n": 90,
+            "predicted": 0.0673554529545418
+          }
+        ],
+        "CalibrationError": 0.06250366911487522,
+        "Correlation": 0.28851305326583504,
+        "ErrorDiscriminationAUROC": 0.7380178799489144,
+        "MAE": 0.06599509204728932,
+        "N": 2304,
+        "RMSE": 0.09140513832270548
+      }
+    }
+  },
+  "retention": {
+    "s151-A32": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015599544528281389,
+      "replay_exact": true
+    },
+    "s151-A64": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.01544725188857946,
+      "replay_exact": true
+    },
+    "s151-B0-32": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015606448841283418,
+      "replay_exact": true
+    },
+    "s151-B32": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015599544528281389,
+      "replay_exact": true
+    },
+    "s151-C32": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015606448841283418,
+      "replay_exact": true
+    },
+    "s151-C64": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015343974054780841,
+      "replay_exact": true
+    },
+    "s151-D0-32": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015811658355649,
+      "replay_exact": true
+    },
+    "s151-D32": {
+      "AE1_delta": 4.8978598954363406e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015812373364074383,
+      "replay_exact": true
+    },
+    "s37-A32": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.01644599668870858,
+      "replay_exact": true
+    },
+    "s37-A64": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.030942781811321502,
+      "replay_exact": true
+    },
+    "s37-B0-32": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.0164521953411595,
+      "replay_exact": true
+    },
+    "s37-B32": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.01644599668870858,
+      "replay_exact": true
+    },
+    "s37-C32": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.0164521953411595,
+      "replay_exact": true
+    },
+    "s37-C64": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.01648432318565721,
+      "replay_exact": true
+    },
+    "s37-D0-32": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.015003011558386086,
+      "replay_exact": true
+    },
+    "s37-D32": {
+      "AE1_delta": 4.887867888214714e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": true,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.01500362197062943,
+      "replay_exact": true
+    },
+    "s83-A32": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.019128129194062257,
+      "replay_exact": true
+    },
+    "s83-A64": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.03489841148676483,
+      "replay_exact": true
+    },
+    "s83-B0-32": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.019128129194062257,
+      "replay_exact": true
+    },
+    "s83-B32": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.019128129194062257,
+      "replay_exact": true
+    },
+    "s83-C32": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.019128129194062257,
+      "replay_exact": true
+    },
+    "s83-C64": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.03566748182492244,
+      "replay_exact": true
+    },
+    "s83-D0-32": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.01769939686327422,
+      "replay_exact": true
+    },
+    "s83-D32": {
+      "AE1_delta": 4.8829829069063635e-12,
+      "AE1_pass": true,
+      "S1_S2_pass": false,
+      "S1_max_delta": 0,
+      "S2_RMSE": 0.017698614270757283,
+      "replay_exact": true
+    }
+  }
+}

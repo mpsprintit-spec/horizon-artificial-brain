@@ -1,0 +1,17 @@
+{
+  "full_go_tests": "PASS",
+  "go_vet_build": "PASS",
+  "tagged_vet": "PASS",
+  "android_arm64_production_chat": "PASS",
+  "knowledge_activation_full_race": "PASS",
+  "runtime_full_race": "TIMEOUT global 10m; retained; no DATA RACE report",
+  "runtime_targeted_native_metric_race": "PASS",
+  "recovery_protocol_mask_regressions": "PASS",
+  "oracle_image_full_behavior_parity": "PASS max delta 0",
+  "source_lock_files": 811,
+  "source_commit": "cee0fa80dfa1667ee2738c3467463eb1fb8313ab",
+  "full_native_suffix_proofs": 24,
+  "old_revision_suffix_proofs": 24,
+  "source_manifest_R3": 653,
+  "source_manifest_R2": 443
+}
