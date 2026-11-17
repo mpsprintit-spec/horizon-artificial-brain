@@ -1,0 +1,1106 @@
+{
+  "32": {
+    "all-readout-zero": {
+      "normal": {
+        "CI95": [
+          0.7465941983628024,
+          0.9900518231590033
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.8669431166336512,
+        "seed_effects": [
+          0.839432010359602,
+          0.9129683376462143,
+          0.8509060073521377
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          0.7746304979379155,
+          1.1043506689046916
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.9349782801404478,
+        "seed_effects": [
+          0.7722962748465214,
+          1.0888597555845299,
+          0.9853509079405236
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          0.7471408950802891,
+          1.2199687635513994
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.9741765976316055,
+        "seed_effects": [
+          0.7395806587352545,
+          1.2041843405578505,
+          1.069601899888379
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "new-feature-zero": {
+      "normal": {
+        "CI95": [
+          -0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0,
+        "seed_effects": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -0.0,
+        "seed_effects": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0,
+        "seed_effects": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "new-readout-zero": {
+      "normal": {
+        "CI95": [
+          -0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0,
+        "seed_effects": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -0.0,
+        "seed_effects": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0,
+        "seed_effects": [
+          -0.0,
+          -0.0,
+          -0.0
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-extras": {
+      "normal": {
+        "CI95": [
+          -0.005792271737103688,
+          0.0002519881658255005
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0020868108471350233,
+        "seed_effects": [
+          -0.0,
+          -0.0037539483480694136,
+          -0.0026426863091109087
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.00035596231476891783,
+          0.004221067704688334
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.001405884558627557,
+        "seed_effects": [
+          0.00013110349723555181,
+          0.0005973936711465289,
+          0.0037319164586051556
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          0.00020242490210467534,
+          0.00827831204921033
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.003469217142340053,
+        "seed_effects": [
+          0.0001932186982676054,
+          0.0036466981849405666,
+          0.007932145105483457
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-forecast": {
+      "normal": {
+        "CI95": [
+          -0.0030517686495289964,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0012579971897725972,
+        "seed_effects": [
+          -0.0,
+          -0.0021042097956502914,
+          -0.001740796049985005
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.00028022971362154646,
+          0.0018006923671896402
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.0005329107977121161,
+        "seed_effects": [
+          -0.0,
+          0.00020774913783871973,
+          0.0014946961075876786
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0,
+          0.0038830004031040043
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.0015923310864607298,
+        "seed_effects": [
+          -0.0,
+          0.001830716769182672,
+          0.0036320866055854495
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-history": {
+      "normal": {
+        "CI95": [
+          -1.1543542654066096e-05,
+          2.892470494925129e-06
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -3.317497162980132e-06,
+        "seed_effects": [
+          -0.0,
+          -7.293763439886192e-06,
+          -2.95407628925215e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -2.251630243377267e-06,
+          1.1084141331041404e-05
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 3.155670803112187e-06,
+        "seed_effects": [
+          -0.0,
+          6.283267723894426e-07,
+          9.398703653573648e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -2.788445149837226e-07,
+          1.9476226010195484e-05
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 6.990344149082617e-06,
+        "seed_effects": [
+          -0.0,
+          6.20045400490099e-06,
+          1.7580884120294016e-05
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-history-operation": {
+      "normal": {
+        "CI95": [
+          -0.0004960093706514457,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.00020017593152632518,
+        "seed_effects": [
+          -0.0,
+          -0.0001805863859167811,
+          -0.0004212409528778771
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.0002934445827580956,
+          1.70762233218713e-05
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -9.90445603090695e-05,
+        "seed_effects": [
+          -0.0,
+          -7.813695085323591e-05,
+          -0.00024223700807413096
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.00020706107455676636,
+          0.0001008964145167046
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -3.913934132193653e-05,
+        "seed_effects": [
+          -0.0,
+          -6.083324535111068e-06,
+          -0.00012368558262088047
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-presence": {
+      "normal": {
+        "CI95": [
+          -0.0027902301010381742,
+          0.0004533065102055642
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0008881908903176639,
+        "seed_effects": [
+          -0.0,
+          -0.0018060463888088796,
+          -0.0009290265936061637
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.00031716806822200405,
+          0.00227138343430243
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.000706884964013943,
+        "seed_effects": [
+          -0.0,
+          0.00015981458511937774,
+          0.002086736430242375
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0,
+          0.004147043366700393
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.001650606974897384,
+        "seed_effects": [
+          -0.0,
+          0.001540231736986808,
+          0.0040793379394226115
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-previous-operation": {
+      "normal": {
+        "CI95": [
+          0.2508858675406929,
+          0.457522632688007
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.34968220216531143,
+        "seed_effects": [
+          0.4401592008744053,
+          0.3015772194371569,
+          0.2982543145449612
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          0.21212846722706677,
+          0.430562267756531
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.3116900376063747,
+        "seed_effects": [
+          0.23520484703389521,
+          0.2728986547554364,
+          0.4337191291604032
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          0.1159389290758176,
+          0.5011467930185972
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.28865534819128236,
+        "seed_effects": [
+          0.12512896402750795,
+          0.25233363766388406,
+          0.5168022912072145
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "permute-forecast": {
+      "normal": {
+        "CI95": [
+          -0.0008780171092232891,
+          0.0
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0003499774926634114,
+        "seed_effects": [
+          -0.0,
+          -0.0005528222712603004,
+          -0.0005145331013439725
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.00040237689317714766,
+          0.00013445337578042965
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -9.170284085957547e-05,
+        "seed_effects": [
+          -0.0,
+          -9.688666232565701e-05,
+          -0.00020210740478521227
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.00023888582301421213,
+          0.00043852317699399326
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 6.1267139290333e-05,
+        "seed_effects": [
+          -0.0,
+          0.00022368050962651154,
+          4.784148912584385e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "permute-history": {
+      "normal": {
+        "CI95": [
+          -3.0389880255832225e-06,
+          4.420389557108213e-06
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 4.4729647519226035e-07,
+        "seed_effects": [
+          -0.0,
+          -2.343796789983088e-07,
+          1.5383522093959101e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -3.5097485462431965e-06,
+          1.8487494248653472e-06
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -5.967701921516522e-07,
+        "seed_effects": [
+          -0.0,
+          -6.639587072365671e-07,
+          -1.2849503970846499e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -5.710319713769784e-06,
+          1.9059561537637575e-06
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -1.2152739300441695e-06,
+        "seed_effects": [
+          -0.0,
+          -9.661120486947894e-07,
+          -3.1550608452501905e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    }
+  },
+  "64": {
+    "all-readout-zero": {
+      "normal": {
+        "CI95": [
+          0.5629287140534641,
+          0.8069058264679954
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.6771092319727527,
+        "seed_effects": [
+          0.619246161067303,
+          0.6605579775406114,
+          0.7607797999158346
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          0.7463819042828914,
+          0.9213351678586301
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.8291063567332173,
+        "seed_effects": [
+          0.802856715821161,
+          0.7914744987377056,
+          0.8985182502846956
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          0.8270401902801164,
+          1.0433155053081398
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.9284565350264649,
+        "seed_effects": [
+          0.9294977769999622,
+          0.8747121400642635,
+          0.9859678115330535
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "new-feature-zero": {
+      "normal": {
+        "CI95": [
+          0.08389509295251135,
+          4.409004260861905
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 2.177491532494606,
+        "seed_effects": [
+          0.2190729335267918,
+          0.08169617268890517,
+          4.505828489490133
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          0.03718747539815019,
+          3.802302598817909
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 1.8876857851706608,
+        "seed_effects": [
+          0.26500093192548646,
+          0.0317040211555053,
+          3.897029837379267
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0028240880190136064,
+          3.3795414883146684
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 1.6659828448178833,
+        "seed_effects": [
+          0.29848040293115496,
+          -0.0034707000588599657,
+          3.43987683774549
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "new-readout-zero": {
+      "normal": {
+        "CI95": [
+          0.08389509295251135,
+          4.409004260861905
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 2.177491532494606,
+        "seed_effects": [
+          0.2190729335267918,
+          0.08169617268890517,
+          4.505828489490133
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          0.03718747539815019,
+          3.802302598817909
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 1.8876857851706608,
+        "seed_effects": [
+          0.26500093192548646,
+          0.0317040211555053,
+          3.897029837379267
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0028240880190136064,
+          3.3795414883146684
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 1.6659828448178833,
+        "seed_effects": [
+          0.29848040293115496,
+          -0.0034707000588599657,
+          3.43987683774549
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-extras": {
+      "normal": {
+        "CI95": [
+          -0.025415507167350432,
+          0.06013533479152534
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.015660204274104528,
+        "seed_effects": [
+          0.012797187714127523,
+          -0.026032079127122354,
+          0.06381394237780058
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.010142952812623183,
+          0.02165635691099465
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.004905863003947575,
+        "seed_effects": [
+          0.005625901392790178,
+          -0.008545135503886359,
+          0.019013434631883985
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.020644419614434723,
+          0.010801094771311723
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0026964947031141717,
+        "seed_effects": [
+          0.0001973578275296095,
+          0.003090523338566742,
+          -0.012326260263234246
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-forecast": {
+      "normal": {
+        "CI95": [
+          -0.015633570124432422,
+          0.04173730471319933
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.009391547066498473,
+        "seed_effects": [
+          0.0018995456495811691,
+          -0.014818244809767567,
+          0.04450089677786684
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.004112319000458106,
+          0.014368120592899589
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.0033369577748565415,
+        "seed_effects": [
+          0.0015137410774082039,
+          -0.0019516408174550248,
+          0.011249586610104556
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.016884075571278884,
+          0.010137802804929166
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0009260645458853967,
+        "seed_effects": [
+          0.0012234185831623279,
+          0.0066435281035821525,
+          -0.011791614183787602
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-history": {
+      "normal": {
+        "CI95": [
+          -8.96057828947111e-05,
+          0.000559964239911792
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.00010196461948730473,
+        "seed_effects": [
+          9.63478249871308e-06,
+          0.00031919052078666077,
+          -3.3138477283700674e-05
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.00047693000799928773,
+          0.00040010549914650233
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -2.990574558248138e-05,
+        "seed_effects": [
+          0.00023290926341967833,
+          -0.00014689643460530366,
+          -0.00019002083152230842
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0009985987189553708,
+          0.0006885822428729533
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.00012228975910311135,
+        "seed_effects": [
+          0.00040083639940036164,
+          -0.0004617448784236533,
+          -0.00029576814984322297
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-history-operation": {
+      "normal": {
+        "CI95": [
+          -0.008703461058516385,
+          0.009286103484039498
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0007268901179259268,
+        "seed_effects": [
+          0.0050082062508576275,
+          -0.002221182959319723,
+          -0.0058621808903672745
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.004039958183869147,
+          0.008877047322034584
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.0018973578063785634,
+        "seed_effects": [
+          0.005301771869581806,
+          0.0034515578405140968,
+          -0.0036465125819199473
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.003145432067193482,
+          0.012128573629671267
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.003731526565815324,
+        "seed_effects": [
+          0.0055225524201159,
+          0.007264009907165914,
+          -0.002156001902265836
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-presence": {
+      "normal": {
+        "CI95": [
+          -0.01864254547797956,
+          0.007521792372508665
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.0046463520482358245,
+        "seed_effects": [
+          -0.001736269453755046,
+          -0.018035935055848773,
+          0.006795155205921111
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.008458353130699639,
+          0.0011921976060609955
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": -0.0033180675486726985,
+        "seed_effects": [
+          0.0004917521835612337,
+          -0.005216956925430782,
+          -0.005422655494480733
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.01290344163380074,
+          0.007129351449807722
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": -0.002388673056068824,
+        "seed_effects": [
+          0.0021645342984693006,
+          0.003346436512649875,
+          -0.013742424373028528
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "no-previous-operation": {
+      "normal": {
+        "CI95": [
+          0.06648673419130292,
+          0.48488935235448993
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.3057479702493713,
+        "seed_effects": [
+          0.05746788661627278,
+          0.4318911283566078,
+          0.41791857190822324
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          0.1961813664183644,
+          0.7370389357584228
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.4280433645652466,
+        "seed_effects": [
+          0.20432208135161178,
+          0.28924756371005667,
+          0.7652039103300616
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          0.17840050451484038,
+          0.9173358805956571
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.5078137104500213,
+        "seed_effects": [
+          0.3039388915698873,
+          0.18324079112843794,
+          0.9649382074462254
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "permute-forecast": {
+      "normal": {
+        "CI95": [
+          -0.0011477976496681197,
+          0.013813363995888594
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.004297138307838733,
+        "seed_effects": [
+          1.961871759492695e-06,
+          3.8120785359474496e-05,
+          0.014095803651608563
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -1.631671939403552e-05,
+          0.011998535768518852
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 0.004299240706426843,
+        "seed_effects": [
+          0.0006300240300665116,
+          0.0008248537423665159,
+          0.012224711619968742
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          6.986411050103892e-05,
+          0.011308736492411296
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 0.004300713409534751,
+        "seed_effects": [
+          0.0011022290187252537,
+          0.0013557460696249635,
+          0.010961705032906055
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    },
+    "permute-history": {
+      "normal": {
+        "CI95": [
+          -8.772496702053045e-05,
+          0.00031039585568447503
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 4.590206674937036e-05,
+        "seed_effects": [
+          -3.123198229482149e-06,
+          0.00020206751085027896,
+          -7.173466277865526e-05
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "pooled": {
+        "CI95": [
+          -0.000281535792897053,
+          0.00039397171395318326
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 1024,
+        "relative_RMSE_effect": 3.049864789650414e-05,
+        "seed_effects": [
+          2.9226581138575014e-05,
+          5.239102646781291e-05,
+          7.321995461939679e-06
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      },
+      "shifted": {
+        "CI95": [
+          -0.0005453972108648841,
+          0.0005147689521534659
+        ],
+        "bootstrap_replicates": 2000,
+        "n_cases": 512,
+        "relative_RMSE_effect": 1.9708591050049407e-05,
+        "seed_effects": [
+          5.3561266591062306e-05,
+          -4.869078777336444e-05,
+          6.059999895136059e-05
+        ],
+        "temporal_block_size": 4,
+        "training_seeds": 3
+      }
+    }
+  }
+}

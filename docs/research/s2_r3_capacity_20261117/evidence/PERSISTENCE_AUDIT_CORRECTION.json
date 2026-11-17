@@ -1,0 +1,11 @@
+{
+  "difference": "Last.Trials[].RejectedBy nil versus allocated empty slices, both omitted by JSON; feature topology/heads/sources/controls/capacity and full serialized states exact",
+  "final_holdout_reevaluated": false,
+  "independent_audit_sha256": "f72dd22e0b5a84777c9036b217c7d6692ecb04760df3b63ace8134f772a2a9e1",
+  "kind": "measurement correction; no neural or scientific-rule changes",
+  "models_checked": 6,
+  "new_experiences": 0,
+  "new_learning": 0,
+  "original_negative_comparison_preserved": true,
+  "original_persistence_sha256": "d25810173e3668f87a53b084976cc8beb8b9aba91fcf0013cf0416fc7813e4c4"
+}

@@ -1,0 +1,8 @@
+{
+  "bootstrap_seed": 980017,
+  "descriptive_unlabeled_projection_only": true,
+  "holdout_evaluations": 1,
+  "no_predictive_model_fit": true,
+  "numpy": "2.3.5",
+  "script_sha256": "dffb352999707f57c604cb52ded99aab6e5541bf794a3af3f3d3fe43bc7d5b1a"
+}

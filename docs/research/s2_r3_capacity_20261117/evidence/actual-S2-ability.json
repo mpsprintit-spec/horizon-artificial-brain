@@ -1,0 +1,908 @@
+{
+  "s151-c32": {
+    "gates": {
+      "all_readout_ablation": true,
+      "independent_new_representation": false,
+      "normal": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.004809294646700648,
+          "1": 0.003001757826761476
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      },
+      "retention": true,
+      "shifted": {
+        "calibration": true,
+        "context_gaps": {
+          "0": 0.0038849408212444352,
+          "1": 0.006970925169932892
+        },
+        "correlation": true,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      }
+    },
+    "metrics": {
+      "normal": {
+        "Bins": [
+          {
+            "actual": 0.011552650540827162,
+            "estimated": 0.006804816116384024,
+            "index": 0,
+            "n": 144
+          },
+          {
+            "actual": 0.013665465096816425,
+            "estimated": 0.01473865664230789,
+            "index": 1,
+            "n": 262
+          },
+          {
+            "actual": 0.01899949573434126,
+            "estimated": 0.02395018269049281,
+            "index": 2,
+            "n": 100
+          },
+          {
+            "actual": 0.00970678081333005,
+            "estimated": 0.03163416740916772,
+            "index": 3,
+            "n": 6
+          }
+        ],
+        "CalibrationError": 0.0031083932758374146,
+        "Correlation": 0.28169656701260803,
+        "HighMAE": 0.008789672424935389,
+        "HighN": 142,
+        "LowMAE": 0.00691563953604016,
+        "LowN": 173,
+        "MAE": 0.00675576182424568,
+        "N": 512,
+        "RMSE": 0.008693451655387208
+      },
+      "pooled": {
+        "Bins": [
+          {
+            "actual": 0.013156860464672638,
+            "estimated": 0.006786722006478189,
+            "index": 0,
+            "n": 264
+          },
+          {
+            "actual": 0.014273603394637523,
+            "estimated": 0.014884304768733342,
+            "index": 1,
+            "n": 512
+          },
+          {
+            "actual": 0.020886188927921896,
+            "estimated": 0.023924913045514935,
+            "index": 2,
+            "n": 208
+          },
+          {
+            "actual": 0.03197505675793327,
+            "estimated": 0.03297789146513699,
+            "index": 3,
+            "n": 32
+          },
+          {
+            "actual": 0.06112320399467594,
+            "estimated": 0.044856117123391916,
+            "index": 4,
+            "n": 8
+          }
+        ],
+        "CalibrationError": 0.0027233180454692744,
+        "Correlation": 0.45874309256828705,
+        "HighMAE": 0.010013443511490909,
+        "HighN": 356,
+        "LowMAE": 0.006924870928224492,
+        "LowN": 300,
+        "MAE": 0.007405863576036878,
+        "N": 1024,
+        "RMSE": 0.009738415768697144
+      },
+      "shifted": {
+        "Bins": [
+          {
+            "actual": 0.01508191237328723,
+            "estimated": 0.006765009074591195,
+            "index": 0,
+            "n": 120
+          },
+          {
+            "actual": 0.014910932330754034,
+            "estimated": 0.015036944005227197,
+            "index": 1,
+            "n": 250
+          },
+          {
+            "actual": 0.022633127070126217,
+            "estimated": 0.02390151522609096,
+            "index": 2,
+            "n": 108
+          },
+          {
+            "actual": 0.03711388966822632,
+            "estimated": 0.033287981631899125,
+            "index": 3,
+            "n": 26
+          },
+          {
+            "actual": 0.06112320399467594,
+            "estimated": 0.044856117123391916,
+            "index": 4,
+            "n": 8
+          }
+        ],
+        "CalibrationError": 0.002726811600040599,
+        "Correlation": 0.5333230387601534,
+        "HighMAE": 0.01082547853154177,
+        "HighN": 214,
+        "LowMAE": 0.006937445974270869,
+        "LowN": 127,
+        "MAE": 0.008055965327828074,
+        "N": 512,
+        "RMSE": 0.010681637593714936
+      }
+    },
+    "status": "PARTIAL"
+  },
+  "s151-c64": {
+    "gates": {
+      "all_readout_ablation": true,
+      "independent_new_representation": true,
+      "normal": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.00563145991245873,
+          "1": 0.004618537699081545
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      },
+      "retention": true,
+      "shifted": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.004784996686271437,
+          "1": 0.008216949298589593
+        },
+        "correlation": true,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      }
+    },
+    "metrics": {
+      "normal": {
+        "Bins": [
+          {
+            "actual": 0.011746004066470231,
+            "estimated": 0.005609797114062026,
+            "index": 0,
+            "n": 157
+          },
+          {
+            "actual": 0.013511013437601143,
+            "estimated": 0.014803314562227768,
+            "index": 1,
+            "n": 235
+          },
+          {
+            "actual": 0.018317145006923056,
+            "estimated": 0.02360914333103167,
+            "index": 2,
+            "n": 109
+          },
+          {
+            "actual": 0.016940380866582866,
+            "estimated": 0.03297275339643144,
+            "index": 3,
+            "n": 11
+          }
+        ],
+        "CalibrationError": 0.003945818693303746,
+        "Correlation": 0.2940465055026814,
+        "HighMAE": 0.009122510123754889,
+        "HighN": 142,
+        "LowMAE": 0.006990312808228719,
+        "LowN": 173,
+        "MAE": 0.00721782822058033,
+        "N": 512,
+        "RMSE": 0.009138429401763189
+      },
+      "pooled": {
+        "Bins": [
+          {
+            "actual": 0.013409742081547101,
+            "estimated": 0.00548049929971816,
+            "index": 0,
+            "n": 300
+          },
+          {
+            "actual": 0.014166935043825768,
+            "estimated": 0.014795818780274318,
+            "index": 1,
+            "n": 457
+          },
+          {
+            "actual": 0.019797867232146278,
+            "estimated": 0.024123867190901083,
+            "index": 2,
+            "n": 211
+          },
+          {
+            "actual": 0.029577381584561,
+            "estimated": 0.03369990067022695,
+            "index": 3,
+            "n": 45
+          },
+          {
+            "actual": 0.04968279703649856,
+            "estimated": 0.04454154374868343,
+            "index": 4,
+            "n": 8
+          },
+          {
+            "actual": 0.0783347909581382,
+            "estimated": 0.055571636233006955,
+            "index": 5,
+            "n": 3
+          }
+        ],
+        "CalibrationError": 0.0037830972097029456,
+        "Correlation": 0.463096286869653,
+        "HighMAE": 0.01057282933908436,
+        "HighN": 356,
+        "LowMAE": 0.0069438599862072774,
+        "LowN": 300,
+        "MAE": 0.007968244005240108,
+        "N": 1024,
+        "RMSE": 0.010183822349553874
+      },
+      "shifted": {
+        "Bins": [
+          {
+            "actual": 0.015236363538659477,
+            "estimated": 0.005338542958095861,
+            "index": 0,
+            "n": 143
+          },
+          {
+            "actual": 0.014861266473838295,
+            "estimated": 0.014787884056134393,
+            "index": 1,
+            "n": 222
+          },
+          {
+            "actual": 0.021380207649296618,
+            "estimated": 0.024673915237232138,
+            "index": 2,
+            "n": 102
+          },
+          {
+            "actual": 0.03366582299331863,
+            "estimated": 0.033935154199984295,
+            "index": 3,
+            "n": 34
+          },
+          {
+            "actual": 0.04968279703649856,
+            "estimated": 0.04454154374868343,
+            "index": 4,
+            "n": 8
+          },
+          {
+            "actual": 0.0783347909581382,
+            "estimated": 0.055571636233006955,
+            "index": 5,
+            "n": 3
+          }
+        ],
+        "CalibrationError": 0.003684012041454754,
+        "Correlation": 0.5336697303749399,
+        "HighMAE": 0.011535190687574016,
+        "HighN": 214,
+        "LowMAE": 0.00688058173258752,
+        "LowN": 127,
+        "MAE": 0.00871865978989989,
+        "N": 512,
+        "RMSE": 0.011131468158492667
+      }
+    },
+    "status": "PARTIAL"
+  },
+  "s37-c32": {
+    "gates": {
+      "all_readout_ablation": true,
+      "independent_new_representation": false,
+      "normal": {
+        "calibration": true,
+        "context_gaps": {
+          "0": 0.004509020729364445,
+          "1": 0.004100422049609356
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      },
+      "retention": true,
+      "shifted": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.001974718174931684,
+          "1": 0.003726592955371543
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      }
+    },
+    "metrics": {
+      "normal": {
+        "Bins": [
+          {
+            "actual": 0.01156473199371948,
+            "estimated": 0.007015441214988452,
+            "index": 0,
+            "n": 88
+          },
+          {
+            "actual": 0.01373423568542962,
+            "estimated": 0.013831768550295165,
+            "index": 1,
+            "n": 339
+          },
+          {
+            "actual": 0.017892343511372245,
+            "estimated": 0.02492343355635451,
+            "index": 2,
+            "n": 64
+          },
+          {
+            "actual": 0.018257690191587413,
+            "estimated": 0.03322554799057411,
+            "index": 3,
+            "n": 21
+          }
+        ],
+        "CalibrationError": 0.0023392890749518265,
+        "Correlation": 0.286592003501075,
+        "HighMAE": 0.009155237473209909,
+        "HighN": 142,
+        "LowMAE": 0.0068247963995563396,
+        "LowN": 173,
+        "MAE": 0.006756578500971327,
+        "N": 512,
+        "RMSE": 0.008747679611401283
+      },
+      "pooled": {
+        "Bins": [
+          {
+            "actual": 0.013924100979786126,
+            "estimated": 0.006900787693102754,
+            "index": 0,
+            "n": 169
+          },
+          {
+            "actual": 0.015303946798200825,
+            "estimated": 0.013687791670836202,
+            "index": 1,
+            "n": 684
+          },
+          {
+            "actual": 0.021571712183187486,
+            "estimated": 0.02512164690337447,
+            "index": 2,
+            "n": 134
+          },
+          {
+            "actual": 0.025035911833693792,
+            "estimated": 0.03295200851743586,
+            "index": 3,
+            "n": 37
+          }
+        ],
+        "CalibrationError": 0.0029892352366898485,
+        "Correlation": 0.26704308378531083,
+        "HighMAE": 0.01173178015025633,
+        "HighN": 356,
+        "LowMAE": 0.006798664460129471,
+        "LowN": 300,
+        "MAE": 0.007779781856214214,
+        "N": 1024,
+        "RMSE": 0.010909108630812592
+      },
+      "shifted": {
+        "Bins": [
+          {
+            "actual": 0.01648736605106842,
+            "estimated": 0.006776225842165198,
+            "index": 0,
+            "n": 81
+          },
+          {
+            "actual": 0.016846358587271654,
+            "estimated": 0.013546318737106908,
+            "index": 1,
+            "n": 345
+          },
+          {
+            "actual": 0.024935706397418583,
+            "estimated": 0.025302870534935597,
+            "index": 2,
+            "n": 70
+          },
+          {
+            "actual": 0.03393232773895841,
+            "estimated": 0.0325929879589419,
+            "index": 3,
+            "n": 16
+          }
+        ],
+        "CalibrationError": 0.003852044983075104,
+        "Correlation": 0.28024021984638253,
+        "HighMAE": 0.013441448655586191,
+        "HighN": 214,
+        "LowMAE": 0.006763067408784205,
+        "LowN": 127,
+        "MAE": 0.00880298521145709,
+        "N": 512,
+        "RMSE": 0.01270808418503805
+      }
+    },
+    "status": "PARTIAL"
+  },
+  "s37-c64": {
+    "gates": {
+      "all_readout_ablation": true,
+      "independent_new_representation": true,
+      "normal": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.002629201100229288,
+          "1": 0.002647073042752527
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      },
+      "retention": true,
+      "shifted": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.011298722251796062,
+          "1": 0.008969164577917382
+        },
+        "correlation": true,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      }
+    },
+    "metrics": {
+      "normal": {
+        "Bins": [
+          {
+            "actual": 0.012732357980025324,
+            "estimated": 0.006652785185671583,
+            "index": 0,
+            "n": 173
+          },
+          {
+            "actual": 0.014099279030396138,
+            "estimated": 0.013825047639779623,
+            "index": 1,
+            "n": 252
+          },
+          {
+            "actual": 0.016585570191595837,
+            "estimated": 0.02491281030738786,
+            "index": 2,
+            "n": 65
+          },
+          {
+            "actual": 0.016742976495508176,
+            "estimated": 0.03414640397458695,
+            "index": 3,
+            "n": 22
+          }
+        ],
+        "CalibrationError": 0.003994176593603074,
+        "Correlation": 0.16640619322947423,
+        "HighMAE": 0.01082640066613221,
+        "HighN": 142,
+        "LowMAE": 0.007174365035324579,
+        "LowN": 173,
+        "MAE": 0.0076646384192943584,
+        "N": 512,
+        "RMSE": 0.009937193170787314
+      },
+      "pooled": {
+        "Bins": [
+          {
+            "actual": 0.013267623985660433,
+            "estimated": 0.006818117048620381,
+            "index": 0,
+            "n": 290
+          },
+          {
+            "actual": 0.01410699656168844,
+            "estimated": 0.014124272279896575,
+            "index": 1,
+            "n": 465
+          },
+          {
+            "actual": 0.019760271536989817,
+            "estimated": 0.024793611394563805,
+            "index": 2,
+            "n": 147
+          },
+          {
+            "actual": 0.025006278271791384,
+            "estimated": 0.03518527478352712,
+            "index": 3,
+            "n": 102
+          },
+          {
+            "actual": 0.035253711747526575,
+            "estimated": 0.04437471713292212,
+            "index": 4,
+            "n": 15
+          },
+          {
+            "actual": 0.04928810260945023,
+            "estimated": 0.06095668213293013,
+            "index": 5,
+            "n": 5
+          }
+        ],
+        "CalibrationError": 0.0037614324241866713,
+        "Correlation": 0.459186946976205,
+        "HighMAE": 0.010913062275379528,
+        "HighN": 356,
+        "LowMAE": 0.007272726596661521,
+        "LowN": 300,
+        "MAE": 0.008209739042273317,
+        "N": 1024,
+        "RMSE": 0.010724187018644424
+      },
+      "shifted": {
+        "Bins": [
+          {
+            "actual": 0.014059085686300366,
+            "estimated": 0.007062582110929288,
+            "index": 0,
+            "n": 117
+          },
+          {
+            "actual": 0.014116127162090557,
+            "estimated": 0.01447828453017579,
+            "index": 1,
+            "n": 213
+          },
+          {
+            "actual": 0.02227680309126555,
+            "estimated": 0.02469912445147155,
+            "index": 2,
+            "n": 82
+          },
+          {
+            "actual": 0.027278686260269264,
+            "estimated": 0.03547096425598568,
+            "index": 3,
+            "n": 80
+          },
+          {
+            "actual": 0.035253711747526575,
+            "estimated": 0.04437471713292212,
+            "index": 4,
+            "n": 15
+          },
+          {
+            "actual": 0.04928810260945023,
+            "estimated": 0.06095668213293013,
+            "index": 5,
+            "n": 5
+          }
+        ],
+        "CalibrationError": 0.003798634779908415,
+        "Correlation": 0.5381728270701578,
+        "HighMAE": 0.010970566707683819,
+        "HighN": 214,
+        "LowMAE": 0.007406715180214996,
+        "LowN": 127,
+        "MAE": 0.008754839665252295,
+        "N": 512,
+        "RMSE": 0.011457249508855991
+      }
+    },
+    "status": "PARTIAL"
+  },
+  "s83-c32": {
+    "gates": {
+      "all_readout_ablation": true,
+      "independent_new_representation": false,
+      "normal": {
+        "calibration": true,
+        "context_gaps": {
+          "0": 0.0032066512416030948,
+          "1": 0.004008905974693808
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      },
+      "retention": true,
+      "shifted": {
+        "calibration": true,
+        "context_gaps": {
+          "0": 0.004485712839471244,
+          "1": 0.00848366802454904
+        },
+        "correlation": true,
+        "positive_context_gaps": true,
+        "relative_RMSE": true
+      }
+    },
+    "metrics": {
+      "normal": {
+        "Bins": [
+          {
+            "actual": 0.011154731281045816,
+            "estimated": 0.0066449652899811616,
+            "index": 0,
+            "n": 99
+          },
+          {
+            "actual": 0.013870900953722514,
+            "estimated": 0.014761424043108321,
+            "index": 1,
+            "n": 316
+          },
+          {
+            "actual": 0.01770411038720648,
+            "estimated": 0.023486753615785533,
+            "index": 2,
+            "n": 96
+          },
+          {
+            "actual": 0.015006096187444678,
+            "estimated": 0.03152653934168215,
+            "index": 3,
+            "n": 1
+          }
+        ],
+        "CalibrationError": 0.0025381373485530126,
+        "Correlation": 0.2786853539095033,
+        "HighMAE": 0.008313435317397328,
+        "HighN": 142,
+        "LowMAE": 0.007331002538890695,
+        "LowN": 173,
+        "MAE": 0.006668551370173473,
+        "N": 512,
+        "RMSE": 0.008411410464524581
+      },
+      "pooled": {
+        "Bins": [
+          {
+            "actual": 0.011905496575024049,
+            "estimated": 0.006635958507176536,
+            "index": 0,
+            "n": 166
+          },
+          {
+            "actual": 0.014198530990164299,
+            "estimated": 0.015064293396859302,
+            "index": 1,
+            "n": 598
+          },
+          {
+            "actual": 0.02077775382515122,
+            "estimated": 0.023612589228931138,
+            "index": 2,
+            "n": 223
+          },
+          {
+            "actual": 0.041555075118001356,
+            "estimated": 0.03464008219831418,
+            "index": 3,
+            "n": 37
+          }
+        ],
+        "CalibrationError": 0.002227043233923481,
+        "Correlation": 0.49532403561347177,
+        "HighMAE": 0.009047708522142003,
+        "HighN": 356,
+        "LowMAE": 0.0075084723088305,
+        "LowN": 300,
+        "MAE": 0.007103489857585134,
+        "N": 1024,
+        "RMSE": 0.009255850009363067
+      },
+      "shifted": {
+        "Bins": [
+          {
+            "actual": 0.013014836337767998,
+            "estimated": 0.006622649977360745,
+            "index": 0,
+            "n": 67
+          },
+          {
+            "actual": 0.014565662520361462,
+            "estimated": 0.015403678913828458,
+            "index": 1,
+            "n": 282
+          },
+          {
+            "actual": 0.023101137841235457,
+            "estimated": 0.02370770906249001,
+            "index": 2,
+            "n": 127
+          },
+          {
+            "actual": 0.04229254675496126,
+            "estimated": 0.0347265694998873,
+            "index": 3,
+            "n": 36
+          }
+        ],
+        "CalibrationError": 0.001980482100365175,
+        "Correlation": 0.5747120351959604,
+        "HighMAE": 0.009534936536505296,
+        "HighN": 214,
+        "LowMAE": 0.007750222467882364,
+        "LowN": 127,
+        "MAE": 0.00753842834499679,
+        "N": 512,
+        "RMSE": 0.010029441299939835
+      }
+    },
+    "status": "PARTIAL"
+  },
+  "s83-c64": {
+    "gates": {
+      "all_readout_ablation": true,
+      "independent_new_representation": true,
+      "normal": {
+        "calibration": false,
+        "context_gaps": {
+          "0": 0.003604059583393139,
+          "1": 0.0036620315239515745
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      },
+      "retention": true,
+      "shifted": {
+        "calibration": true,
+        "context_gaps": {
+          "0": 0.005145639087909385,
+          "1": 0.00594330087296532
+        },
+        "correlation": false,
+        "positive_context_gaps": true,
+        "relative_RMSE": false
+      }
+    },
+    "metrics": {
+      "normal": {
+        "Bins": [
+          {
+            "actual": 0.011609279632465882,
+            "estimated": 0.006094035159913626,
+            "index": 0,
+            "n": 115
+          },
+          {
+            "actual": 0.014261823220765843,
+            "estimated": 0.014727498485819676,
+            "index": 1,
+            "n": 281
+          },
+          {
+            "actual": 0.015251062643736829,
+            "estimated": 0.024179216865284188,
+            "index": 2,
+            "n": 87
+          },
+          {
+            "actual": 0.01836696064776676,
+            "estimated": 0.032417138047524274,
+            "index": 3,
+            "n": 29
+          }
+        ],
+        "CalibrationError": 0.0038072508314281727,
+        "Correlation": 0.21567632238168002,
+        "HighMAE": 0.008908157946028089,
+        "HighN": 142,
+        "LowMAE": 0.00831374897288038,
+        "LowN": 173,
+        "MAE": 0.007687810424519179,
+        "N": 512,
+        "RMSE": 0.009689972955604347
+      },
+      "pooled": {
+        "Bins": [
+          {
+            "actual": 0.012129067033959962,
+            "estimated": 0.006087083110966123,
+            "index": 0,
+            "n": 197
+          },
+          {
+            "actual": 0.01536676141234654,
+            "estimated": 0.014893682624725136,
+            "index": 1,
+            "n": 547
+          },
+          {
+            "actual": 0.019681184057424833,
+            "estimated": 0.02411929399590912,
+            "index": 2,
+            "n": 219
+          },
+          {
+            "actual": 0.025127653100447567,
+            "estimated": 0.03266089788630319,
+            "index": 3,
+            "n": 61
+          }
+        ],
+        "CalibrationError": 0.002813006775511666,
+        "Correlation": 0.3218873130242957,
+        "HighMAE": 0.010297438046927227,
+        "HighN": 356,
+        "LowMAE": 0.008112866562314257,
+        "LowN": 300,
+        "MAE": 0.008166202602847797,
+        "N": 1024,
+        "RMSE": 0.010792323642847436
+      },
+      "shifted": {
+        "Bins": [
+          {
+            "actual": 0.012858037170201671,
+            "estimated": 0.006077333286222668,
+            "index": 0,
+            "n": 82
+          },
+          {
+            "actual": 0.016534008148565264,
+            "estimated": 0.015069238049659109,
+            "index": 1,
+            "n": 266
+          },
+          {
+            "actual": 0.02260103680735558,
+            "estimated": 0.024079799377457356,
+            "index": 2,
+            "n": 132
+          },
+          {
+            "actual": 0.03125453063568958,
+            "estimated": 0.03288180524019658,
+            "index": 3,
+            "n": 32
+          }
+        ],
+        "CalibrationError": 0.0023299140847519014,
+        "Correlation": 0.37648450223832547,
+        "HighMAE": 0.011219296805467772,
+        "HighN": 214,
+        "LowMAE": 0.00783922359359032,
+        "LowN": 127,
+        "MAE": 0.008644594781176407,
+        "N": 512,
+        "RMSE": 0.011792070358659833
+      }
+    },
+    "status": "PARTIAL"
+  }
+}

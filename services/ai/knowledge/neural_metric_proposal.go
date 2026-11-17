@@ -19,7 +19,19 @@ type NMetricProposalConfig struct {
 	Strategy       string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
 	Fractions      []float64 `json:"fractions,omitempty"`
 	PreserveShared bool      `json:"preserve_shared,omitempty"`
+	// Explicit fixed-capacity research intervention. Zero preserves the
+	// historical 32-feature law; this is not an adaptive growth policy.
+	FeatureLimit int `json:"feature_limit,omitempty"`
 }
+
+func nMetricFeatureLimit(p *NMetricProposalConfig) int {
+	if p != nil && p.FeatureLimit != 0 {
+		return p.FeatureLimit
+	}
+	return maxNFeatures
+}
+
+func validNFeatureLimit(limit int) bool { return limit == 0 || limit == 32 || limit == 64 }
 
 // Evidence hashes include the actual encoded measurements, labels, uncertainty,
 // query and episode IDs. Different field names do not establish independence.
@@ -31,6 +43,9 @@ type NMetricEvidence struct {
 func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if p == nil {
 		return nil
+	}
+	if !validNFeatureLimit(p.FeatureLimit) {
+		return errors.New("experimental numerical feature limit must be 32 or 64")
 	}
 	if p.Protocol != NMetricBoundedV1 {
 		return errors.New("unknown numerical proposal protocol")

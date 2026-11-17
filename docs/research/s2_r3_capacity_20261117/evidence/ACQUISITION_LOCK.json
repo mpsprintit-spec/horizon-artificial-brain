@@ -1,0 +1,12 @@
+{
+  "GOMAXPROCS": 2,
+  "before_training": true,
+  "independent_holdout_acquired": false,
+  "metric_protocol_sha256": "243a5f64e4bea80a9b51b8280ce2fac420bc94324cf140a9ada0f23f4546da36",
+  "protocol_sha256": "fde7388009559939f7ba83313409885fe3fd342965e28d8b88f8c5d295d99276",
+  "training_seeds": [
+    37,
+    83,
+    151
+  ]
+}

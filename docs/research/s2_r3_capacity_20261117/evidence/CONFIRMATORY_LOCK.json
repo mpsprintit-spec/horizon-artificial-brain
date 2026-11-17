@@ -1,0 +1,31 @@
+{
+  "../../../scripts/analyze_s2r3_capacity.py": "dffb352999707f57c604cb52ded99aab6e5541bf794a3af3f3d3fe43bc7d5b1a",
+  "../knowledge/neural_metric.go": "8b3e63aaecb6778f93196baf89afbe41bce43f4e21b33d9f50e29c2209bf305e",
+  "../knowledge/neural_metric_learning.go": "a350b7241c510d903f6f1f2e44cfc18e3df458c04fcc27787fa781a2928046bf",
+  "../knowledge/neural_metric_proposal.go": "063fd6be8772892612f02ebf306b8d638264682a9ef6a39939b0cc79f2b67b2a",
+  "../knowledge/neural_resolution.go": "2232e82bc241f46dd79fad51f4fdc5ca991b32e2c0830788635e595d12bf2910",
+  "../knowledge/neural_resolution_validation.go": "50984550149f47eaa356403fb94028c85beeaee4470afda38984c77ebef2b064",
+  "../knowledge/s2r3_probe.go": "875cdb60063040e6dfd49b364bb51c85276a298b75c441dac2150a286878eea8",
+  "before_holdout": true,
+  "holdout_seeds": [
+    990011,
+    990031
+  ],
+  "metric_protocol": "243a5f64e4bea80a9b51b8280ce2fac420bc94324cf140a9ada0f23f4546da36",
+  "per_stream": 512,
+  "protocol": "fde7388009559939f7ba83313409885fe3fd342965e28d8b88f8c5d295d99276",
+  "s2r3_capacity_test.go": "06ec97c5fe47ddd50c2a203562ef6606158ed042ed99d5aa0e7930fd68660174",
+  "s2r3_controls_test.go": "cca8013f704618a2c6608145fff45d3d97a7c6d12a6854591c37d124ff7358b0",
+  "seed-151/arm-32/final.json": "a5aa6b7f5f874092594a84f8f46ec2339595db4988fbb265fcf4ba00f545e5a0",
+  "seed-151/arm-64/final.json": "48f7cc18e5ec12b25b4632e643930c5e06f6cfc261da65364fa86cb423b4bcb2",
+  "seed-37/arm-32/final.json": "7200ace2009228359c4593bb6d6e280c0599df80a05f4a3c5545bd664f804044",
+  "seed-37/arm-64/final.json": "b2efca90a3fd70572730701d4aa9a61e5e6c111a9632ef4e2094347651e4695d",
+  "seed-83/arm-32/final.json": "a4c7943347121926723cbf5a9b30c624d139b44455c7f27e6d0a11cf86d53e3d",
+  "seed-83/arm-64/final.json": "e645fd97ba825aae7cd61d3ebf22f6d17dac2b22a1b68cad69ec008c9ccccde4",
+  "selection": "block 7 unconditionally",
+  "training_seeds": [
+    37,
+    83,
+    151
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "actual_observations": 4352,
+  "encoded_input_overlap": 0,
+  "episode_overlap": 0,
+  "paired_evidence_hashes_exact": true,
+  "pre_input_before_target_native_event": true,
+  "pre_operation_ledger_entries": 4352,
+  "prior_R2_holdout_used_for_learning_or_selection": false
+}
