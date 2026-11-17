@@ -27,6 +27,9 @@ func (r *BrainRuntime) runJournalCommandLocked(command LoggedEvent, apply func()
 	}
 	if command.Type == EventTypeNativeControl {
 		command.SchemaVersion = nativeJournalSchemaVersion
+		if command.NativeControl != nil && command.NativeControl.Step != nil && command.NativeControl.Step.EnvironmentGain != nil {
+			command.SchemaVersion = nativeEnvironmentJournalSchemaVersion
+		}
 	}
 	command.Timestamp = command.Timestamp.UTC()
 	r.transactionFaultLocked("payload-preparation")

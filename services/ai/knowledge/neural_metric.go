@@ -39,6 +39,21 @@ func (d NDiagnosis) Clone() NDiagnosis {
 	}
 	d.Trials = slices.Clone(d.Trials)
 	for i := range d.Trials {
+		if c := d.Trials[i].Candidate; c != nil {
+			v := *c
+			v.Axis = slices.Clone(c.Axis)
+			v.Readout = slices.Clone(c.Readout)
+			if c.Feature != nil {
+				f := *c.Feature
+				f.Parents = slices.Clone(f.Parents)
+				v.Feature = &f
+			}
+			if c.FitDiagnostic != nil {
+				f := *c.FitDiagnostic
+				v.FitDiagnostic = &f
+			}
+			d.Trials[i].Candidate = &v
+		}
 		d.Trials[i].RejectedBy = slices.Clone(d.Trials[i].RejectedBy)
 		if d.Trials[i].FitValid != nil {
 			b := *d.Trials[i].FitValid
@@ -224,8 +239,29 @@ func nMetricMaximumError(m nModel, q []NodeID, rows []NWitness) float64 {
 // range; rows already beyond that boundary have zero clipped-output residual.
 // Column normalization is a disposable solver workspace, never fitted memory.
 func nFitMetric(m *nModel, hi int, rows []NWitness) bool {
-	if len(rows) == 0 {
+	return nFitMetricDiagnosed(m, hi, rows, nil)
+}
+
+// Optional read-only solver telemetry; nil preserves historical fitting and
+// receipts exactly. It never changes an admission decision or parameter.
+type nMetricFitDiagnostic struct {
+	Failure                               string
+	Column, Iterations                    int
+	Value, PeakCoefficient, SmallestPivot float64
+}
+
+func nFitMetricDiagnosed(m *nModel, hi int, rows []NWitness, diagnostic *nMetricFitDiagnostic) bool {
+	fail := func(reason string, column int, value float64) bool {
+		if diagnostic != nil {
+			if !nFinite(value) {
+				value = 0
+			}
+			diagnostic.Failure, diagnostic.Column, diagnostic.Value = reason, column, value
+		}
 		return false
+	}
+	if len(rows) == 0 {
+		return fail("no-fit-observations", -1, 0)
 	}
 	n := len(m.Circuits) + 1
 	vals := make([][]float64, len(rows))
@@ -233,7 +269,7 @@ func nFitMetric(m *nModel, hi int, rows []NWitness) bool {
 	for i, r := range rows {
 		evaluated := nMetricEvaluate(*m, r.X, nil)
 		if !evaluated.Valid {
-			return false
+			return fail("invalid-quantized-feature", i, 0)
 		}
 		v := evaluated.Metric
 		if !m.Heads[hi].Metric {
@@ -270,6 +306,9 @@ func nFitMetric(m *nModel, hi int, rows []NWitness) bool {
 	}
 	weights := make([]float64, n)
 	for iteration := 0; iteration < 16; iteration++ {
+		if diagnostic != nil {
+			diagnostic.Iterations = iteration + 1
+		}
 		a := make([][]float64, n)
 		for j := range a {
 			a[j] = make([]float64, n+1)
@@ -302,7 +341,10 @@ func nFitMetric(m *nModel, hi int, rows []NWitness) bool {
 			}
 			a[j], a[pivot] = a[pivot], a[j]
 			if !nFinite(a[j][j]) || math.Abs(a[j][j]) < 1e-15 {
-				return false
+				return fail("invalid-or-small-pivot", j, a[j][j])
+			}
+			if diagnostic != nil && (diagnostic.SmallestPivot == 0 || math.Abs(a[j][j]) < diagnostic.SmallestPivot) {
+				diagnostic.SmallestPivot = math.Abs(a[j][j])
 			}
 			d := a[j][j]
 			for k := j; k <= n; k++ {
@@ -321,8 +363,11 @@ func nFitMetric(m *nModel, hi int, rows []NWitness) bool {
 		change := 0.
 		for j := range weights {
 			v := a[j][n] / scales[j]
+			if diagnostic != nil && nFinite(v) {
+				diagnostic.PeakCoefficient = math.Max(diagnostic.PeakCoefficient, math.Abs(v))
+			}
 			if !nFinite(v) || math.Abs(v) > 7.99 {
-				return false
+				return fail("nonfinite-or-signed-coefficient-bound", j, v)
 			}
 			change = math.Max(change, math.Abs(v-weights[j]))
 			weights[j] = v
@@ -535,7 +580,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 			return errors.New("metric diagnosis requires v6")
 		}
 		for _, t := range d.Trials {
-			if t.ReadoutMode != "" || t.FitValid != nil || len(t.RejectedBy) > 0 {
+			if t.ReadoutMode != "" || t.FitValid != nil || len(t.RejectedBy) > 0 || t.Candidate != nil {
 				return errors.New("metric trial requires v6")
 			}
 		}
@@ -548,13 +593,14 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		return errors.New("invalid diagnostic uncertainty")
 	}
 	trialLimit := 128
-	if d.ProposalProtocol == NMetricBoundedV1 {
+	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1
+	if bounded {
 		trialLimit = 1024
 	}
-	if d.ProposalProtocol != "" && d.ProposalProtocol != NMetricBoundedV1 {
+	if d.ProposalProtocol != "" && !bounded {
 		return errors.New("unknown proposal diagnosis")
 	}
-	if d.ProposalProtocol == NMetricBoundedV1 && (len(d.SearchFingerprint) != 64 || d.Evidence == nil || d.Evidence.Fit < 4 || d.Evidence.Check < 4 || d.Evidence.WitnessFit < 0 || d.Evidence.WitnessExcluded < 0 || len(d.Evidence.FitSHA256) != 64 || len(d.Evidence.CheckSHA256) != 64 || len(d.Evidence.WitnessSHA256) != 64) {
+	if bounded && (len(d.SearchFingerprint) != 64 || d.Evidence == nil || d.Evidence.Fit < 4 || d.Evidence.Check < 4 || d.Evidence.WitnessFit < 0 || d.Evidence.WitnessExcluded < 0 || len(d.Evidence.FitSHA256) != 64 || len(d.Evidence.CheckSHA256) != 64 || len(d.Evidence.WitnessSHA256) != 64) {
 		return errors.New("invalid independent evidence diagnosis")
 	}
 	if d.SearchFingerprint != "" && len(d.SearchFingerprint) != 64 {
@@ -582,7 +628,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		}
 	}
 	for _, t := range d.Trials {
-		if t.Proposal != "" && (d.ProposalProtocol != NMetricBoundedV1 || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
+		if t.Proposal != "" && (!bounded || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
 			return errors.New("invalid bounded trial")
 		}
 		if (t.ReadoutMode != "activation" && t.ReadoutMode != "metric") || t.FitValid == nil || len(t.RejectedBy) > 8 || !nFinite(t.CheckError) || t.CheckError < 0 || t.CheckError > 4.0000001 {
@@ -591,6 +637,29 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		for _, reason := range t.RejectedBy {
 			if len(reason) > 64 {
 				return errors.New("invalid rejection reason")
+			}
+		}
+		if c := t.Candidate; c != nil {
+			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= 64 || len(c.Readout) > 64 || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
+				return errors.New("invalid audited candidate shape")
+			}
+			for _, v := range append(slices.Clone(c.Axis), c.Readout...) {
+				if !nFinite(v) {
+					return errors.New("nonfinite audited candidate")
+				}
+			}
+			if (c.Feature == nil) != (c.FeatureOrdinal == -1) {
+				return errors.New("audited candidate feature mismatch")
+			}
+			if f := c.Feature; f != nil {
+				if f.Kind < 1 || f.Kind > 3 || (f.Kind == 1 && len(f.Parents) != 0) || (f.Kind != 1 && len(f.Parents) != 2) || c.Delta <= 0 {
+					return errors.New("invalid audited feature")
+				}
+			}
+			if f := c.FitDiagnostic; f != nil {
+				if !slices.Contains([]string{"", "no-fit-observations", "invalid-quantized-feature", "invalid-or-small-pivot", "nonfinite-or-signed-coefficient-bound"}, f.Failure) || f.Iterations < 0 || f.Iterations > 16 || f.Column < -1 || f.Column > 64 || !nFinite(f.Value) || !nFinite(f.PeakCoefficient) || f.PeakCoefficient < 0 || !nFinite(f.SmallestPivot) || f.SmallestPivot < 0 {
+					return errors.New("invalid audited fit diagnostic")
+				}
 			}
 		}
 	}

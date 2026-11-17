@@ -81,17 +81,27 @@ type NWitness struct {
 	EpisodeID        string    `json:"episode_id"`
 }
 type NTrial struct {
-	Proposal             string   `json:"proposal,omitempty"`
-	Fraction             float64  `json:"fraction,omitempty"`
-	ParameterSHA256      string   `json:"parameter_sha256,omitempty"`
-	ReadoutMode          string   `json:"readout_mode,omitempty"`
-	FitValid             *bool    `json:"fit_valid,omitempty"`
-	RejectedBy           []string `json:"rejected_by,omitempty"`
-	Kind                 string   `json:"kind"`
-	Feature              NodeID   `json:"feature,omitempty"`
-	CheckError           float64  `json:"check_error"`
-	RetentionRegressions int      `json:"retention_regressions"`
-	Eligible             bool     `json:"eligible"`
+	Candidate            *NMetricCandidateTrace `json:"candidate,omitempty"`
+	Proposal             string                 `json:"proposal,omitempty"`
+	Fraction             float64                `json:"fraction,omitempty"`
+	ParameterSHA256      string                 `json:"parameter_sha256,omitempty"`
+	ReadoutMode          string                 `json:"readout_mode,omitempty"`
+	FitValid             *bool                  `json:"fit_valid,omitempty"`
+	RejectedBy           []string               `json:"rejected_by,omitempty"`
+	Kind                 string                 `json:"kind"`
+	Feature              NodeID                 `json:"feature,omitempty"`
+	CheckError           float64                `json:"check_error"`
+	RetentionRegressions int                    `json:"retention_regressions"`
+	Eligible             bool                   `json:"eligible"`
+}
+type NMetricCandidateTrace struct {
+	FeatureOrdinal int
+	Feature        *NFeature `json:",omitempty"`
+	Axis           []float64 `json:",omitempty"`
+	Delta, Center  float64
+	Readout        []float64
+	Bias           float64
+	FitDiagnostic  *nMetricFitDiagnostic `json:",omitempty"`
 }
 type NDiagnosis struct {
 	ProposalProtocol  string           `json:"proposal_protocol,omitempty"`

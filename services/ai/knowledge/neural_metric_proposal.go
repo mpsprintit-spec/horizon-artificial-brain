@@ -13,6 +13,8 @@ import (
 )
 
 const NMetricBoundedV1 = "incumbent-relative-v1"
+const NMetricRefineV1 = "incumbent-relative-leaf-refinement-v1"
+const NMetricAuditV1 = "incumbent-relative-audited-v1"
 
 type NMetricProposalConfig struct {
 	Protocol       string    `json:"protocol"`
@@ -22,6 +24,9 @@ type NMetricProposalConfig struct {
 	// Explicit fixed-capacity research intervention. Zero preserves the
 	// historical 32-feature law; this is not an adaptive growth policy.
 	FeatureLimit int `json:"feature_limit,omitempty"`
+	// Explicit research search within the existing feature budget. Only
+	// task-local leaf directions may change; every existing gate still runs.
+	RefineLeafDirections bool `json:"refine_leaf_directions,omitempty"`
 }
 
 func nMetricFeatureLimit(p *NMetricProposalConfig) int {
@@ -47,8 +52,11 @@ func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if !validNFeatureLimit(p.FeatureLimit) {
 		return errors.New("experimental numerical feature limit must be 32 or 64")
 	}
-	if p.Protocol != NMetricBoundedV1 {
+	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 {
 		return errors.New("unknown numerical proposal protocol")
+	}
+	if p.RefineLeafDirections != (p.Protocol == NMetricRefineV1) || (p.RefineLeafDirections && !p.PreserveShared) {
+		return errors.New("leaf refinement requires its explicit protocol and shared protection")
 	}
 	if !slices.Contains([]string{"full-refit", "new-feature", "bounded-joint", "combined"}, p.Strategy) {
 		return errors.New("invalid numerical proposal strategy")

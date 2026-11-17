@@ -105,7 +105,16 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			m := nClone(candidate)
 			hi := nHeadIndex(m, query)
 			m.Heads[hi].Metric = mode
-			fullValid := nFit(&m, query, fit)
+			fullValid := false
+			var fitDiagnostic *nMetricFitDiagnostic
+			if proposal != nil && proposal.Protocol != NMetricBoundedV1 {
+				// Same solver, with diagnostics only for explicitly versioned
+				// research commands. Historical receipts/replay stay byte exact.
+				fitDiagnostic = &nMetricFitDiagnostic{}
+				fullValid = nFitMetricDiagnosed(&m, hi, fit, fitDiagnostic)
+			} else {
+				fullValid = nFit(&m, query, fit)
+			}
 			for _, step := range nMetricProposals(before, m, query, fit, proposal, fullValid) {
 				m := step.Model
 				valid := step.Valid
@@ -172,7 +181,31 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 					modeName = "metric"
 				}
 				v := valid
-				d.Trials = append(d.Trials, NTrial{Kind: kind, Feature: feature, CheckError: err, RetentionRegressions: reg, Eligible: eligible, ReadoutMode: modeName, FitValid: &v, RejectedBy: why, Proposal: step.Name, Fraction: step.Fraction, ParameterSHA256: parameterHash})
+				var trace *NMetricCandidateTrace
+				if fitDiagnostic != nil {
+					trace = &NMetricCandidateTrace{FeatureOrdinal: -1, Readout: slices.Clone(m.Heads[hi].W), Bias: m.Heads[hi].B, FitDiagnostic: fitDiagnostic}
+					index := -1
+					if len(m.Circuits) > len(before.Circuits) {
+						index = len(m.Circuits) - 1
+					} else if feature != 0 {
+						for i, c := range m.Circuits {
+							if c.Meta.Node == feature {
+								index = i
+							}
+						}
+					}
+					if index >= 0 {
+						c := m.Circuits[index]
+						f := c.Meta
+						f.Parents = slices.Clone(f.Parents)
+						trace.FeatureOrdinal = index
+						trace.Feature = &f
+						trace.Axis = slices.Clone(c.Axis)
+						trace.Center = c.Center
+						trace.Delta = c.Delta
+					}
+				}
+				d.Trials = append(d.Trials, NTrial{Candidate: trace, Kind: kind, Feature: feature, CheckError: err, RetentionRegressions: reg, Eligible: eligible, ReadoutMode: modeName, FitValid: &v, RejectedBy: why, Proposal: step.Name, Fraction: step.Fraction, ParameterSHA256: parameterHash})
 				if eligible {
 					best = m
 					bestErr = err
@@ -198,7 +231,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			consider("resolution", c.Meta.Node, m)
 		}
 	}
-	if len(before.Circuits) < nMetricFeatureLimit(proposal) {
+	growthAllowed := len(before.Circuits) < nMetricFeatureLimit(proposal)
+	refinementAllowed := proposal != nil && proposal.RefineLeafDirections
+	if growthAllowed || refinementAllowed {
 		axis, mean := make([]float64, nDimensions), make([]float64, nDimensions)
 		for j := range mean {
 			base := fit[0].X[j]
@@ -225,118 +260,147 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			for j := range axis {
 				axis[j] /= norm
 			}
-			m := nClone(before)
-			m.Circuits = append(m.Circuits, nCircuit{Meta: NFeature{Kind: 1}, Axis: axis, Center: nCenter(axis, fit), Delta: nMetricAxisDelta(axis, fit)})
-			for i := range m.Heads {
-				m.Heads[i].W = append(m.Heads[i].W, 0)
-			}
-			kind := "missing-direction"
-			for _, old := range before.Circuits {
-				if old.Meta.Kind == 1 && math.Abs(math.Abs(nDot(old.Axis, axis))-1) < 1e-8 {
-					kind = "missing-boundary"
+			if growthAllowed {
+				m := nClone(before)
+				m.Circuits = append(m.Circuits, nCircuit{Meta: NFeature{Kind: 1}, Axis: axis, Center: nCenter(axis, fit), Delta: nMetricAxisDelta(axis, fit)})
+				for i := range m.Heads {
+					m.Heads[i].W = append(m.Heads[i].W, 0)
 				}
-			}
-			consider(kind, 0, m)
-		}
-		type product struct {
-			a, b, kind int
-			score      float64
-		}
-		candidates := []product{}
-		acts, metrics := make([][]float64, len(fit)), make([][]float64, len(fit))
-		residual := make([]float64, len(fit))
-		for i, r := range fit {
-			v := nMetricEvaluate(before, r.X, nil)
-			acts[i], metrics[i] = v.Activation, v.Metric
-			residual[i] = r.Outcome - nPredict(best, r.X, r.Query)
-		}
-		for _, kind := range []int{2, 3} {
-			values := acts
-			if kind == 3 {
-				values = metrics
-			}
-			means := make([]float64, len(before.Circuits))
-			varying := make([]bool, len(before.Circuits))
-			for i := range means {
-				lo, hi := values[0][i], values[0][i]
-				for _, v := range values {
-					means[i] += v[i] / float64(len(values))
-					lo = math.Min(lo, v[i])
-					hi = math.Max(hi, v[i])
+				kind := "missing-direction"
+				for _, old := range before.Circuits {
+					if old.Meta.Kind == 1 && math.Abs(math.Abs(nDot(old.Axis, axis))-1) < 1e-8 {
+						kind = "missing-boundary"
+					}
 				}
-				varying[i] = hi-lo > nRoundoff(math.Max(math.Abs(lo), math.Abs(hi)))
+				consider(kind, 0, m)
 			}
-			residualMean := 0.
-			for _, v := range residual {
-				residualMean += v / float64(len(residual))
-			}
-			for i := range before.Circuits {
-				for j := i; j < len(before.Circuits); j++ {
-					// Multiplying a varying feature by an observed constant adds no
-					// identifiable distinction beyond its existing scale and bias.
-					if !varying[i] || !varying[j] {
+			if refinementAllowed {
+				for i, c := range before.Circuits {
+					if !nMetricRefinableLeaf(before, i, query) {
 						continue
 					}
-					parents := []NodeID{before.Circuits[i].Meta.Node, before.Circuits[j].Meta.Node}
-					if slices.ContainsFunc(before.Circuits, func(c nCircuit) bool { return c.Meta.Kind == kind && slices.Equal(c.Meta.Parents, parents) }) {
-						continue
+					for _, fraction := range []float64{.25, .5, 1} {
+						refined := make([]float64, len(axis))
+						for j := range refined {
+							refined[j] = (1-fraction)*c.Axis[j] + fraction*axis[j]
+						}
+						scale := math.Sqrt(nDot(refined, refined))
+						if !nFinite(scale) || scale <= math.SmallestNonzeroFloat64 {
+							continue
+						}
+						for j := range refined {
+							refined[j] /= scale
+						}
+						m := nClone(before)
+						m.Circuits[i].Axis = refined
+						m.Circuits[i].Center = nCenter(refined, fit)
+						m.Circuits[i].Delta = nMetricAxisDelta(refined, fit)
+						consider("refine-leaf-direction", c.Meta.Node, m)
 					}
-					score := 0.
-					for _, centerParents := range []bool{false, true} {
-						products := make([]float64, len(values))
-						meanProduct := 0.
-						for row, v := range values {
-							value := v[i] * v[j]
-							if centerParents {
-								value = (v[i] - means[i]) * (v[j] - means[j])
+				}
+			}
+		}
+		if growthAllowed {
+			type product struct {
+				a, b, kind int
+				score      float64
+			}
+			candidates := []product{}
+			acts, metrics := make([][]float64, len(fit)), make([][]float64, len(fit))
+			residual := make([]float64, len(fit))
+			for i, r := range fit {
+				v := nMetricEvaluate(before, r.X, nil)
+				acts[i], metrics[i] = v.Activation, v.Metric
+				residual[i] = r.Outcome - nPredict(best, r.X, r.Query)
+			}
+			for _, kind := range []int{2, 3} {
+				values := acts
+				if kind == 3 {
+					values = metrics
+				}
+				means := make([]float64, len(before.Circuits))
+				varying := make([]bool, len(before.Circuits))
+				for i := range means {
+					lo, hi := values[0][i], values[0][i]
+					for _, v := range values {
+						means[i] += v[i] / float64(len(values))
+						lo = math.Min(lo, v[i])
+						hi = math.Max(hi, v[i])
+					}
+					varying[i] = hi-lo > nRoundoff(math.Max(math.Abs(lo), math.Abs(hi)))
+				}
+				residualMean := 0.
+				for _, v := range residual {
+					residualMean += v / float64(len(residual))
+				}
+				for i := range before.Circuits {
+					for j := i; j < len(before.Circuits); j++ {
+						// Multiplying a varying feature by an observed constant adds no
+						// identifiable distinction beyond its existing scale and bias.
+						if !varying[i] || !varying[j] {
+							continue
+						}
+						parents := []NodeID{before.Circuits[i].Meta.Node, before.Circuits[j].Meta.Node}
+						if slices.ContainsFunc(before.Circuits, func(c nCircuit) bool { return c.Meta.Kind == kind && slices.Equal(c.Meta.Parents, parents) }) {
+							continue
+						}
+						score := 0.
+						for _, centerParents := range []bool{false, true} {
+							products := make([]float64, len(values))
+							meanProduct := 0.
+							for row, v := range values {
+								value := v[i] * v[j]
+								if centerParents {
+									value = (v[i] - means[i]) * (v[j] - means[j])
+								}
+								products[row] = value
+								meanProduct += value / float64(len(values))
 							}
-							products[row] = value
-							meanProduct += value / float64(len(values))
+							covariance, variance := 0., 0.
+							for row, v := range products {
+								delta := v - meanProduct
+								covariance += (residual[row] - residualMean) * delta
+								variance += delta * delta
+							}
+							if variance > 0 {
+								score = math.Max(score, math.Abs(covariance)/math.Sqrt(variance))
+							}
 						}
-						covariance, variance := 0., 0.
-						for row, v := range products {
-							delta := v - meanProduct
-							covariance += (residual[row] - residualMean) * delta
-							variance += delta * delta
-						}
-						if variance > 0 {
-							score = math.Max(score, math.Abs(covariance)/math.Sqrt(variance))
-						}
+						// Centered and scale-normalized scores expose zero-context gates.
+						// Only ranking changes; candidates remain canonical raw products.
+						candidates = append(candidates, product{i, j, kind, score})
 					}
-					// Centered and scale-normalized scores expose zero-context gates.
-					// Only ranking changes; candidates remain canonical raw products.
-					candidates = append(candidates, product{i, j, kind, score})
 				}
-			}
 
-		}
-		sort.SliceStable(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
-		for _, p := range candidates[:min(8, len(candidates))] {
-			if p.score == 0 {
-				continue
 			}
-			values := acts
-			if p.kind == 3 {
-				values = metrics
+			sort.SliceStable(candidates, func(i, j int) bool { return candidates[i].score > candidates[j].score })
+			for _, p := range candidates[:min(8, len(candidates))] {
+				if p.score == 0 {
+					continue
+				}
+				values := acts
+				if p.kind == 3 {
+					values = metrics
+				}
+				raw := make([]float64, len(fit))
+				for i, v := range values {
+					raw[i] = v[p.a] * v[p.b]
+				}
+				// Product centers are descriptive quantizers, not extra answer functions.
+				center := 0.
+				for _, x := range raw {
+					center += x / float64(len(raw))
+				}
+				if math.Abs(center) > 7.99 {
+					continue
+				}
+				m := nClone(before)
+				m.Circuits = append(m.Circuits, nCircuit{Meta: NFeature{Kind: p.kind, Parents: []NodeID{before.Circuits[p.a].Meta.Node, before.Circuits[p.b].Meta.Node}}, Delta: nMetricDelta(raw, fit), Center: center})
+				for i := range m.Heads {
+					m.Heads[i].W = append(m.Heads[i].W, 0)
+				}
+				consider("missing-relation", 0, m)
 			}
-			raw := make([]float64, len(fit))
-			for i, v := range values {
-				raw[i] = v[p.a] * v[p.b]
-			}
-			// Product centers are descriptive quantizers, not extra answer functions.
-			center := 0.
-			for _, x := range raw {
-				center += x / float64(len(raw))
-			}
-			if math.Abs(center) > 7.99 {
-				continue
-			}
-			m := nClone(before)
-			m.Circuits = append(m.Circuits, nCircuit{Meta: NFeature{Kind: p.kind, Parents: []NodeID{before.Circuits[p.a].Meta.Node, before.Circuits[p.b].Meta.Node}}, Delta: nMetricDelta(raw, fit), Center: center})
-			for i := range m.Heads {
-				m.Heads[i].W = append(m.Heads[i].W, 0)
-			}
-			consider("missing-relation", 0, m)
 		}
 	}
 	if selected {
@@ -378,7 +442,20 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			state.Features = append(state.Features, c.Meta)
 		}
 		for i, c := range best.Circuits {
-			if i >= len(before.Circuits) || c.Delta != before.Circuits[i].Delta {
+			if i < len(before.Circuits) && !slices.Equal(c.Axis, before.Circuits[i].Axis) {
+				// Rewrite every previously nonzero channel too: leaving an old
+				// signed coordinate behind would corrupt the admitted unit axis.
+				for j, w := range c.Axis {
+					if w == 0 && before.Circuits[i].Axis[j] == 0 {
+						continue
+					}
+					if state.Sources[j] == 0 {
+						state.Sources[j] = k.newNNode(1, j, at)
+					}
+					k.writeNParameter([]NodeID{state.Sources[j]}, []NodeID{c.Meta.Node}, w, e.Reliability, at)
+				}
+			}
+			if i >= len(before.Circuits) || c.Delta != before.Circuits[i].Delta || c.Center != before.Circuits[i].Center {
 				if i < len(before.Circuits) {
 					d.ResolutionBefore = before.Circuits[i].Delta
 					d.ResolutionAfter = c.Delta

@@ -10,8 +10,14 @@ import (
 // Reject foreign payloads rather than replaying only the recognized fraction
 // of a mixed record. Legacy process/think retain their lower-level meaning.
 func validateJournalPayload(event LoggedEvent) error {
-	if (event.Type == EventTypeNativeControl) != (event.SchemaVersion == nativeJournalSchemaVersion) {
-		return errors.New("native command requires WAL14")
+	if (event.Type == EventTypeNativeControl) != (event.SchemaVersion == nativeJournalSchemaVersion || event.SchemaVersion == nativeEnvironmentJournalSchemaVersion) {
+		return errors.New("native command requires WAL14 or WAL15")
+	}
+	if event.Type == EventTypeNativeControl {
+		perturbed := event.NativeControl != nil && event.NativeControl.Step != nil && event.NativeControl.Step.EnvironmentGain != nil
+		if perturbed != (event.SchemaVersion == nativeEnvironmentJournalSchemaVersion) {
+			return errors.New("observed environment gain requires WAL15 exclusively")
+		}
 	}
 	if err := rejectRetiredJournal(event); err != nil {
 		return err
