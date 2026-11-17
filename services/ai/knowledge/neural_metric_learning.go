@@ -198,7 +198,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			consider("resolution", c.Meta.Node, m)
 		}
 	}
-	if len(before.Circuits) < maxNFeatures {
+	if len(before.Circuits) < nMetricFeatureLimit(proposal) {
 		axis, mean := make([]float64, nDimensions), make([]float64, nDimensions)
 		for j := range mean {
 			base := fit[0].X[j]
@@ -340,6 +340,11 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		}
 	}
 	if selected {
+		if proposal != nil && proposal.FeatureLimit != 0 {
+			// Never invalidate an existing larger topology when a later lesson
+			// requests a smaller search budget. Shrinking needs its own study.
+			state.ExperimentalFeatureLimit = max(state.ExperimentalFeatureLimit, proposal.FeatureLimit)
+		}
 		d.Committed = true
 		d.AfterError = bestErr
 		if query[0] == 0 {

@@ -68,7 +68,14 @@ func validateNResolutionState(data []byte, enabled bool, version string) error {
 	if err := validateMetricDiagnosis(s.Last, metric); err != nil {
 		return err
 	}
-	if !enabled || len(s.Sources) != nDimensions || len(s.Features) > maxNFeatures || len(s.Witnesses) > maxNWitnesses {
+	limit := maxNFeatures
+	if !validNFeatureLimit(s.ExperimentalFeatureLimit) || (!metric && s.ExperimentalFeatureLimit != 0) {
+		return errors.New("invalid experimental numerical capacity")
+	}
+	if s.ExperimentalFeatureLimit != 0 {
+		limit = s.ExperimentalFeatureLimit
+	}
+	if !enabled || len(s.Sources) != nDimensions || len(s.Features) > limit || len(s.Witnesses) > maxNWitnesses {
 		return errors.New("invalid N contract or resource limits")
 	}
 	type edge struct {

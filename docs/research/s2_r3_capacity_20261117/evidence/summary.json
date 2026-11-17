@@ -1,0 +1,76 @@
+{
+  "capacity_bottleneck_confirmed": false,
+  "capacity_effects": {
+    "normal": {
+      "CI95": [
+        -0.1719446151257061,
+        -0.05099846684526579
+      ],
+      "bootstrap_replicates": 2000,
+      "n_cases": 512,
+      "relative_RMSE_effect": -0.11319112735286807,
+      "seed_effects": [
+        -0.13598046707559686,
+        -0.1520033407562429,
+        -0.05118539379007592
+      ],
+      "temporal_block_size": 4,
+      "training_seeds": 3
+    },
+    "pooled": {
+      "CI95": [
+        -0.1590532760279639,
+        0.0247678998705297
+      ],
+      "bootstrap_replicates": 2000,
+      "n_cases": 1024,
+      "relative_RMSE_effect": -0.05788177544597106,
+      "seed_effects": [
+        0.01695112024513823,
+        -0.16600027354917168,
+        -0.04573706765410712
+      ],
+      "temporal_block_size": 4,
+      "training_seeds": 3
+    },
+    "shifted": {
+      "CI95": [
+        -0.17092447622036352,
+        0.10711758422411968
+      ],
+      "bootstrap_replicates": 2000,
+      "n_cases": 512,
+      "relative_RMSE_effect": -0.02370811152583907,
+      "seed_effects": [
+        0.09842826487211398,
+        -0.17574548830856407,
+        -0.04211250951281276
+      ],
+      "temporal_block_size": 4,
+      "training_seeds": 3
+    }
+  },
+  "extra_features_recruited_all_seeds": true,
+  "historical_S2_R2_ability": "PARTIAL",
+  "history_equivalence_under_2pct": true,
+  "negative_control_expected": true,
+  "new_actual_cases": {
+    "confirmatory": 1024,
+    "development": 256,
+    "training": 3072
+  },
+  "new_feature_causal_benefit_gate": true,
+  "no_production_promotion": true,
+  "persistence": true,
+  "positive_control_all_seeds_both_capacities": false,
+  "predictive_information_limitation_supported": false,
+  "redundant_new_features_below_1pct_novel_variance": 0,
+  "representation_bottleneck_supported": false,
+  "status": "INCONCLUSIVE",
+  "strict_retention": true,
+  "training_seeds": [
+    37,
+    83,
+    151
+  ]
+}

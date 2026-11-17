@@ -118,13 +118,16 @@ type NHeadTopology struct {
 	Features []NodeID `json:"features"`
 }
 type NResolutionState struct {
-	Contract  string          `json:"contract,omitempty"`
-	Controls  []NodeID        `json:"controls,omitempty"`
-	Heads     []NHeadTopology `json:"heads"`
-	Sources   []NodeID        `json:"sources"`
-	Features  []NFeature      `json:"features"`
-	Witnesses []NWitness      `json:"witnesses"`
-	Last      NDiagnosis      `json:"last"`
+	// Restore bound for an explicitly admitted research lesson. Omitted in
+	// historical/production state. It does not opt future lessons into growth.
+	ExperimentalFeatureLimit int             `json:"experimental_feature_limit,omitempty"`
+	Contract                 string          `json:"contract,omitempty"`
+	Controls                 []NodeID        `json:"controls,omitempty"`
+	Heads                    []NHeadTopology `json:"heads"`
+	Sources                  []NodeID        `json:"sources"`
+	Features                 []NFeature      `json:"features"`
+	Witnesses                []NWitness      `json:"witnesses"`
+	Last                     NDiagnosis      `json:"last"`
 }
 type NValue struct {
 	Metric            *float64 `json:"metric,omitempty"`

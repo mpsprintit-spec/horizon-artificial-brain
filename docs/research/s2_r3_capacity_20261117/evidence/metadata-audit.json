@@ -1,0 +1,117 @@
+{
+  "s151-c32": {
+    "capacity_exact": true,
+    "complete_state_exact": true,
+    "controls_deep_equal": true,
+    "feature_topology_deep_equal": true,
+    "head_topology_deep_equal": true,
+    "pass": true,
+    "raw_struct_deep_equal": false,
+    "replayed_NResolution_sha256": "fe606658c7729bc8ee783eff3623bc90470341ba79c605b6db8cbed45dd87292",
+    "serialized_NResolution_exact": true,
+    "serialized_NResolution_sha256": "fe606658c7729bc8ee783eff3623bc90470341ba79c605b6db8cbed45dd87292",
+    "source_metadata_deep_equal": true,
+    "struct_differences": [
+      "NResolution.Last.Trials[2].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[3].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[4].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[5].RejectedBy: nil/empty slice (lengths 0/0)"
+    ]
+  },
+  "s151-c64": {
+    "capacity_exact": true,
+    "complete_state_exact": true,
+    "controls_deep_equal": true,
+    "feature_topology_deep_equal": true,
+    "head_topology_deep_equal": true,
+    "pass": true,
+    "raw_struct_deep_equal": false,
+    "replayed_NResolution_sha256": "01b2ef1582578bd5024c195a766a5d669dfe1947d3a57a50ada00f18c4b9c8c3",
+    "serialized_NResolution_exact": true,
+    "serialized_NResolution_sha256": "01b2ef1582578bd5024c195a766a5d669dfe1947d3a57a50ada00f18c4b9c8c3",
+    "source_metadata_deep_equal": true,
+    "struct_differences": [
+      "NResolution.Last.Trials[2].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[3].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[4].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[143].RejectedBy: nil/empty slice (lengths 0/0)"
+    ]
+  },
+  "s37-c32": {
+    "capacity_exact": true,
+    "complete_state_exact": true,
+    "controls_deep_equal": true,
+    "feature_topology_deep_equal": true,
+    "head_topology_deep_equal": true,
+    "pass": true,
+    "raw_struct_deep_equal": false,
+    "replayed_NResolution_sha256": "613b632f67e3a4f9973772cc32caa18f7f5283b547711b6f3a166ddc3faf62cd",
+    "serialized_NResolution_exact": true,
+    "serialized_NResolution_sha256": "613b632f67e3a4f9973772cc32caa18f7f5283b547711b6f3a166ddc3faf62cd",
+    "source_metadata_deep_equal": true,
+    "struct_differences": [
+      "NResolution.Last.Trials[1].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[2].RejectedBy: nil/empty slice (lengths 0/0)"
+    ]
+  },
+  "s37-c64": {
+    "capacity_exact": true,
+    "complete_state_exact": true,
+    "controls_deep_equal": true,
+    "feature_topology_deep_equal": true,
+    "head_topology_deep_equal": true,
+    "pass": true,
+    "raw_struct_deep_equal": false,
+    "replayed_NResolution_sha256": "9767e54d5c1109cf26b37a18b1d105dcf29ec663a1cf1f38dea161caf071d024",
+    "serialized_NResolution_exact": true,
+    "serialized_NResolution_sha256": "9767e54d5c1109cf26b37a18b1d105dcf29ec663a1cf1f38dea161caf071d024",
+    "source_metadata_deep_equal": true,
+    "struct_differences": [
+      "NResolution.Last.Trials[2].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[3].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[4].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[5].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[100].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[111].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[122].RejectedBy: nil/empty slice (lengths 0/0)"
+    ]
+  },
+  "s83-c32": {
+    "capacity_exact": true,
+    "complete_state_exact": true,
+    "controls_deep_equal": true,
+    "feature_topology_deep_equal": true,
+    "head_topology_deep_equal": true,
+    "pass": true,
+    "raw_struct_deep_equal": false,
+    "replayed_NResolution_sha256": "da33f381a1354798b06c1bcc2ba143c51b7b0e2116b3a5f566825c112a78d906",
+    "serialized_NResolution_exact": true,
+    "serialized_NResolution_sha256": "da33f381a1354798b06c1bcc2ba143c51b7b0e2116b3a5f566825c112a78d906",
+    "source_metadata_deep_equal": true,
+    "struct_differences": [
+      "NResolution.Last.Trials[2].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[3].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[4].RejectedBy: nil/empty slice (lengths 0/0)"
+    ]
+  },
+  "s83-c64": {
+    "capacity_exact": true,
+    "complete_state_exact": true,
+    "controls_deep_equal": true,
+    "feature_topology_deep_equal": true,
+    "head_topology_deep_equal": true,
+    "pass": true,
+    "raw_struct_deep_equal": false,
+    "replayed_NResolution_sha256": "c37816d32c96c6c223d9a82b6b2225bffce5fe31a9db8c9691ed4b300261ae36",
+    "serialized_NResolution_exact": true,
+    "serialized_NResolution_sha256": "c37816d32c96c6c223d9a82b6b2225bffce5fe31a9db8c9691ed4b300261ae36",
+    "source_metadata_deep_equal": true,
+    "struct_differences": [
+      "NResolution.Last.Trials[1].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[2].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[87].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[98].RejectedBy: nil/empty slice (lengths 0/0)",
+      "NResolution.Last.Trials[109].RejectedBy: nil/empty slice (lengths 0/0)"
+    ]
+  }
+}

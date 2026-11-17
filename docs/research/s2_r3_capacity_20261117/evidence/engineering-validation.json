@@ -1,0 +1,25 @@
+{
+  "source_archive_sha256": "e51b61bf41107f4f74e7d72d6360b22cd4671d0f6ce84e867212090290e0aa46",
+  "source_payloads_verified": 443,
+  "base_commit": "7196c8a7f4a619040fe3933fe1c5363e5be661bc",
+  "main_at_start": "11c6e0a78547d68a0be8f78b3c801e912722608d",
+  "default_go_test_all_exit": 0,
+  "go_vet_exit": 0,
+  "go_build_exit": 0,
+  "initial_preflight_skip": "environment routing only; zero new acquisition before correction; preserved in preflight-no-acquisition",
+  "test_compiler": "go1.22.12 linux/amd64",
+  "scientific_training_binary_sha256": "b266716caf29193a905510eef6a54a9bcb73e22b37961544baac62a47ec3fea5",
+  "race_seven_packages_exit": 0,
+  "final_code_tests_exit": 0,
+  "android_arm64_builds": {
+    "horizon-chat-android-arm64": {
+      "bytes": 7737641,
+      "sha256": "f38696e9b24fe4b0fdbaf8847d8807252c1021cbd63fb672183db877f83f2637"
+    },
+    "horizon-ai-android-arm64": {
+      "bytes": 18169256,
+      "sha256": "fbdcea74a5633a5303505c3815a959978d57be1433df66e474ad9171c8bb5267"
+    }
+  },
+  "historical_R2_full_replay_exact": true
+}

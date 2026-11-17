@@ -1,0 +1,1764 @@
+{
+  "s151-c32": [
+    {
+      "block": 0,
+      "cause": "resolution",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "bb2815aea2d60608d54d1d47107659c3902ed44e9fa8a736d5f4931e6f0e0663",
+        "Fit": 96,
+        "FitSHA256": "8509a9530558c53e00a2c5093194ffe398ee292e284bfe0eb209ed34c5e39eca",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 67
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 5.673991413373011e-05,
+        "eligible": true,
+        "feature": 261,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "resolution",
+        "parameter_sha256": "95645a8b47859638d9ecb6502aaf9d9145efbed6c180e0762c49cab2589d7eb1",
+        "proposal": "full-refit",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 1,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "0558372e031389fd969d8100d479b242c8e7acffe978f98230abb9d49354eeff",
+        "Fit": 96,
+        "FitSHA256": "4aad38381d1f89ff96799b8ec7e7c07d74a83ee7d90a7f222c29517cdee39100",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "retention-regression": 67
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.0001409881944882972,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "readout",
+        "parameter_sha256": "aaaeec1ec39e8a466d2069e8d29a74357e074584134fb9545b37be890de224f4",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 2,
+      "cause": "insufficient-identifiable-information",
+      "committed": false,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ad5f8335a3c5fc655962ba8f50be4cde971c8399a621174b55a1eb06eeafb184",
+        "Fit": 96,
+        "FitSHA256": "ff2324d252daf07041357eff922b808dfb048027d46330e0f222759d26ac1f2f",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 70,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": null
+    },
+    {
+      "block": 3,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ebf1c77099469c1c06efdcf22640351544e8f65f1483f1fd6f93a4b428683032",
+        "Fit": 96,
+        "FitSHA256": "346662941ae929f9527087c7fd590287384e5872fb2c0b1f675922b10aa7a5a1",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 67,
+        "retention-regression": 33
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.0001360256123290587,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "readout",
+        "parameter_sha256": "ee10c98770922a8450157d4f33f599111cec5dd848e9cb8b40ba7b314be47245",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 4,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "1cba09af9b8212a7a94af76180b465a6441e1627e19aba26c7248f4e80f32ece",
+        "Fit": 96,
+        "FitSHA256": "7db09de582fae397d9f17c6d152758f85ce4cc291642e5ca22fad0ee22774b86",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 66,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 8.010488842254677e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "86917e5eef7abdc79499d44f195e9fa0dbed4e5c9832a9952923aed7018c21d4",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 5,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ce302ee9d5b7699aa0904863a3c1fc8c8a324d76e4c0b60000b5cf98d815eaaf",
+        "Fit": 96,
+        "FitSHA256": "74d6ab4082b76a286b9e6b850b1bb9d6693a437a98559ee5dff17e487ad2a37a",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "retention-regression": 67
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00017986864315024397,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "readout",
+        "parameter_sha256": "a7c67cc3648a04c694c5e6ced1ee4ee4380404f8360d209a19de5750a9766e84",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 6,
+      "cause": "resolution",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "aac7ace41eb50ac50861ef72a310a08f05e5abddcea9079f796915a75e154bd7",
+        "Fit": 96,
+        "FitSHA256": "37e9543455eda01d400293c6c3a72c0c8436e2ea9e93e7791aeac09cf091d981",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 50
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 7.934334960686767e-05,
+        "eligible": true,
+        "feature": 266,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "resolution",
+        "parameter_sha256": "bbac16a5a40f0d87e2e12f4257208150512bfdc46f2149d0789bf74182b7c45f",
+        "proposal": "full-refit",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 7,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "4efe887b27e2eaf20709a6266214220f939e75a89544b173a62e1a6596edd93b",
+        "Fit": 96,
+        "FitSHA256": "eef49657746c937fabd38e11664ae289f721b47a9c02738630f35b5bde415a6d",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 66,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00013057502317167816,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "0c39f01170761a8ff9b95dad9fb30819e1c4cf85eeaaf536b90c7f113a1dad4e",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    }
+  ],
+  "s151-c64": [
+    {
+      "block": 0,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "bb2815aea2d60608d54d1d47107659c3902ed44e9fa8a736d5f4931e6f0e0663",
+        "Fit": 96,
+        "FitSHA256": "8509a9530558c53e00a2c5093194ffe398ee292e284bfe0eb209ed34c5e39eca",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 275,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 164
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 169,
+      "winner": {
+        "check_error": 5.655741765396866e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "ec3cbf5311ca410f9a0e8113f1710e4c886b84aeccf56461669ee63cef9e0617",
+        "proposal": "full-refit",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 1,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "0558372e031389fd969d8100d479b242c8e7acffe978f98230abb9d49354eeff",
+        "Fit": 96,
+        "FitSHA256": "4aad38381d1f89ff96799b8ec7e7c07d74a83ee7d90a7f222c29517cdee39100",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 276,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 118,
+        "retention-regression": 103
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 83,
+        "readout": 6,
+        "resolution": 66
+      },
+      "trials": 166,
+      "winner": {
+        "check_error": 0.00012111123887160453,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "12a8ba8a962bf515255b5ff4ebee32819a3ccdfcc19bee3c3ad720df27267153",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 2,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ad5f8335a3c5fc655962ba8f50be4cde971c8399a621174b55a1eb06eeafb184",
+        "Fit": 96,
+        "FitSHA256": "ff2324d252daf07041357eff922b808dfb048027d46330e0f222759d26ac1f2f",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 277,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 163,
+        "retention-regression": 68
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 68
+      },
+      "trials": 173,
+      "winner": {
+        "check_error": 7.004699273031034e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "9fe36b06f210a54f9dd63935bde5b126feb3bde62ab1ed09409c3fa991b5851c",
+        "proposal": "full-refit",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 3,
+      "cause": "missing-direction",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ebf1c77099469c1c06efdcf22640351544e8f65f1483f1fd6f93a4b428683032",
+        "Fit": 96,
+        "FitSHA256": "346662941ae929f9527087c7fd590287384e5872fb2c0b1f675922b10aa7a5a1",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 278,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 158,
+        "retention-regression": 2
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 70
+      },
+      "trials": 175,
+      "winner": {
+        "check_error": 0.00014146660326429185,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-direction",
+        "parameter_sha256": "ce40c83b19a46d00c541e57851cf11f528a3a7704d63b0e5c5e067ca6321561a",
+        "proposal": "full-refit",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 4,
+      "cause": "missing-direction",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "1cba09af9b8212a7a94af76180b465a6441e1627e19aba26c7248f4e80f32ece",
+        "Fit": 96,
+        "FitSHA256": "7db09de582fae397d9f17c6d152758f85ce4cc291642e5ca22fad0ee22774b86",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 279,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 131,
+        "retention-regression": 109
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 72
+      },
+      "trials": 177,
+      "winner": {
+        "check_error": 9.179295656164258e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-direction",
+        "parameter_sha256": "a4d1f21173af2c5cb0d5b48d734f02d591822d6ee0a02e6ab0c0577614e58c56",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 5,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ce302ee9d5b7699aa0904863a3c1fc8c8a324d76e4c0b60000b5cf98d815eaaf",
+        "Fit": 96,
+        "FitSHA256": "74d6ab4082b76a286b9e6b850b1bb9d6693a437a98559ee5dff17e487ad2a37a",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 280,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 124,
+        "retention-regression": 118
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 74
+      },
+      "trials": 179,
+      "winner": {
+        "check_error": 0.00016239348097363016,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "55fa8f4b8d6f3a56412cec090d22ff667967397de25173f368a7abbf5dbd3ec9",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 6,
+      "cause": "missing-direction",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "aac7ace41eb50ac50861ef72a310a08f05e5abddcea9079f796915a75e154bd7",
+        "Fit": 96,
+        "FitSHA256": "37e9543455eda01d400293c6c3a72c0c8436e2ea9e93e7791aeac09cf091d981",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 281,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 138,
+        "retention-regression": 121
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 76
+      },
+      "trials": 181,
+      "winner": {
+        "check_error": 9.257512226198518e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-direction",
+        "parameter_sha256": "e38d2814d2dd4d88a4bf3d9e5a7f302a26cfcd36943fb5075c47057abe66fb6e",
+        "proposal": "full-refit",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 7,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "4efe887b27e2eaf20709a6266214220f939e75a89544b173a62e1a6596edd93b",
+        "Fit": 96,
+        "FitSHA256": "eef49657746c937fabd38e11664ae289f721b47a9c02738630f35b5bde415a6d",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 282,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 179,
+        "retention-regression": 100
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 78
+      },
+      "trials": 183,
+      "winner": {
+        "check_error": 0.00014609105868497628,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "missing-relation",
+        "parameter_sha256": "359745c7ce8cd4e373e13fa6387e2f788a50e3859e1c62c05bf2438a8232d364",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    }
+  ],
+  "s37-c32": [
+    {
+      "block": 0,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "c03bf973df16cb1ed1edf01d32f1860adfd1a4a6555bc6a6589c032ccc437ebb",
+        "Fit": 96,
+        "FitSHA256": "d6fd7ddddb9b60acfbe372b1f65a38af4e18e837e6e070b44d70d0807f5b4bfc",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 69,
+        "retention-regression": 33
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 7.984556166789567e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "readout",
+        "parameter_sha256": "a3332059dc7189a32e804c5b94a026aeb05807210bf989693870e75bcaf5b50e",
+        "proposal": "full-refit",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 1,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "1253e13905fadfa87a7263174e700919ec40e38ec3348f01b5eccbd63b8530f4",
+        "Fit": 96,
+        "FitSHA256": "65030bf58eae3dfa738b03543d7e6cb7e2ca8b84feee572a5fa393ad0b0898b2",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "retention-regression": 67
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.0001683353217173942,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "readout",
+        "parameter_sha256": "afffc94125caec3d770c946d08586f000d2f15536b3a6b5fb3a10a06d7d699c8",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 2,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "6290315a786dd59fad71a27ececf35890f6792c071af49f5256346650d00b4ce",
+        "Fit": 96,
+        "FitSHA256": "84f27ece3caf488c1044605639ff1224081d75ff93c5913526736a1d331425a0",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 68,
+        "retention-regression": 33
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00011723621464663933,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.0625,
+        "kind": "readout",
+        "parameter_sha256": "d52db5aa63f17bd1e12fec5986f1478510ee0f292cd5c08c5e9631b581854512",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 3,
+      "cause": "retention-regression",
+      "committed": false,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "9f68e17cd554062f854faffb08feaea8bf3360728f97965d83b3a70e36afb5d9",
+        "Fit": 96,
+        "FitSHA256": "9728c9776027986a29178b715796a2906dd5cbd30eaee5df94dad33e284bcf05",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "retention-regression": 70
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": null
+    },
+    {
+      "block": 4,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "524fe373979da472ce6da86afc978c56becf802f7cd6ff0b409af470ce38aad5",
+        "Fit": 96,
+        "FitSHA256": "c940b7ddf424f70227a8e299b9c55aac20046d6c3c2e7dc6a159d870822d82c3",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 65,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 8.980837031007432e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "b3ab57e8ce47e43a86d0cdbecf49948bb234b95c8e4a826b7c9468c3eb3a2f92",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 5,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "115e4fab7f91a7126aa0a96faf5434c6178da1b9161a7b8f32e9e904b7eb3d3c",
+        "Fit": 96,
+        "FitSHA256": "42126b06a1ec777f4376f056c95aa4c17fe724ce57baa1a486817d70b5f6b2f2",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "retention-regression": 68
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00021587407119835514,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.0625,
+        "kind": "readout",
+        "parameter_sha256": "2285426bf6a5eb8aa15341f0a4097d0d9ba08ea6069aa6a78c593335c3df88b3",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 6,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "0d8ea3894053eccac18de13d74ba85bac6e9226916b3882c7f82774c3d7af6c3",
+        "Fit": 96,
+        "FitSHA256": "f0afa1813d6139a9f5bcf0925f9a85b17ee1486ea34e9778d8cb709192a0b80a",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 65,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 6.869670993915188e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "5e1bb83a989bcdce940510535695b15e0def49e6bf52c3c11adc9a9a5c9ee7e0",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 7,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "7473b100a9d4df08325237fc5bb351df8f284aca5860d1667f9b1154d4a1ea9c",
+        "Fit": 96,
+        "FitSHA256": "16f3e9a895215f52ef5410fe9b0904b3237e20dfa654a5ff43383ba08927a308",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 65,
+        "retention-regression": 68
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00013814276258388342,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.0625,
+        "kind": "readout",
+        "parameter_sha256": "ae9ed6940430c17f93fbd283cd943053cd9f28ec250ffbbf4b6e49ead1274c3d",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    }
+  ],
+  "s37-c64": [
+    {
+      "block": 0,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "c03bf973df16cb1ed1edf01d32f1860adfd1a4a6555bc6a6589c032ccc437ebb",
+        "Fit": 96,
+        "FitSHA256": "d6fd7ddddb9b60acfbe372b1f65a38af4e18e837e6e070b44d70d0807f5b4bfc",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 275,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 167,
+        "retention-regression": 35
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 169,
+      "winner": {
+        "check_error": 7.836533260638164e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "d51a34bed0fc6d9c2fb28e992f80f0135526fb686ae4191844b602e62685de61",
+        "proposal": "full-refit",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 1,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "1253e13905fadfa87a7263174e700919ec40e38ec3348f01b5eccbd63b8530f4",
+        "Fit": 96,
+        "FitSHA256": "65030bf58eae3dfa738b03543d7e6cb7e2ca8b84feee572a5fa393ad0b0898b2",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 276,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 120,
+        "retention-regression": 123
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 66
+      },
+      "trials": 171,
+      "winner": {
+        "check_error": 0.0001422288601744541,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "eff0a1876e65660c63e0e432f448ac2b80599b1d65c1460bb59f017b1457bd25",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 2,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "6290315a786dd59fad71a27ececf35890f6792c071af49f5256346650d00b4ce",
+        "Fit": 96,
+        "FitSHA256": "84f27ece3caf488c1044605639ff1224081d75ff93c5913526736a1d331425a0",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 277,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "fit-invalid-or-parameter-bound": 1,
+        "no-check-improvement": 158,
+        "retention-regression": 28
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 68
+      },
+      "trials": 173,
+      "winner": {
+        "check_error": 9.510884845290824e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "db3bd348c81f586493f719d8f120f382557a26f6b94968195110e445b3e35cb5",
+        "proposal": "new-feature",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 3,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "9f68e17cd554062f854faffb08feaea8bf3360728f97965d83b3a70e36afb5d9",
+        "Fit": 96,
+        "FitSHA256": "9728c9776027986a29178b715796a2906dd5cbd30eaee5df94dad33e284bcf05",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 278,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 169,
+        "retention-regression": 95
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 70
+      },
+      "trials": 175,
+      "winner": {
+        "check_error": 9.474551490851963e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "missing-relation",
+        "parameter_sha256": "3cf03eb2c078322816d2c2b6117c05615e983b4411782b64b8a8846846c53a15",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 4,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "524fe373979da472ce6da86afc978c56becf802f7cd6ff0b409af470ce38aad5",
+        "Fit": 96,
+        "FitSHA256": "c940b7ddf424f70227a8e299b9c55aac20046d6c3c2e7dc6a159d870822d82c3",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 279,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 160,
+        "retention-regression": 8
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 72
+      },
+      "trials": 177,
+      "winner": {
+        "check_error": 8.569256224692602e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "6a978b2325f86b2d4dfc4c7c10160e1f409711ce8778ccd8cea314b28edfb3fb",
+        "proposal": "full-refit",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 5,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "115e4fab7f91a7126aa0a96faf5434c6178da1b9161a7b8f32e9e904b7eb3d3c",
+        "Fit": 96,
+        "FitSHA256": "42126b06a1ec777f4376f056c95aa4c17fe724ce57baa1a486817d70b5f6b2f2",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 280,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 158
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 74
+      },
+      "trials": 179,
+      "winner": {
+        "check_error": 0.0001524165587214703,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "237779d497077090f5a3fc4a15c4f9f2532b59ab4413776fb4b167535b8ac0a3",
+        "proposal": "full-refit",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 6,
+      "cause": "missing-direction",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "0d8ea3894053eccac18de13d74ba85bac6e9226916b3882c7f82774c3d7af6c3",
+        "Fit": 96,
+        "FitSHA256": "f0afa1813d6139a9f5bcf0925f9a85b17ee1486ea34e9778d8cb709192a0b80a",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 281,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 176,
+        "retention-regression": 48
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 76
+      },
+      "trials": 181,
+      "winner": {
+        "check_error": 6.23037648061729e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-direction",
+        "parameter_sha256": "e1d2e06772d086d5679f897ae23efda0c87063a4a25906e55dc0097220cebef6",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 7,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "7473b100a9d4df08325237fc5bb351df8f284aca5860d1667f9b1154d4a1ea9c",
+        "Fit": 96,
+        "FitSHA256": "16f3e9a895215f52ef5410fe9b0904b3237e20dfa654a5ff43383ba08927a308",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 282,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "functionally-duplicate": 1,
+        "no-check-improvement": 175,
+        "retention-regression": 56
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 78
+      },
+      "trials": 183,
+      "winner": {
+        "check_error": 0.0001417344224104361,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "66143438862f2463f03a4d9e658fca86db2081f241b91cefd3263cc9b098a9cf",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    }
+  ],
+  "s83-c32": [
+    {
+      "block": 0,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "80542fb5e4f54804eb6a50bcd7460872016516ab32549279aaf848a0ed2a3c67",
+        "Fit": 96,
+        "FitSHA256": "73864f29edf8c25bbdd08ddef7a613d180abf201a14cc10a0d1fc947c0f62229",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 65,
+        "retention-regression": 33
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00010307886435568452,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "1e759ba2c6bba86c9cc4e65ade91ddf2525afc4e2b9e3dc4cc36120078f0a629",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 1,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "12ecb7cc573928321c3547210e5cafb1605a682fd411107295f0d154775067a5",
+        "Fit": 96,
+        "FitSHA256": "e7f6cbb81c5d5067380e1535c1abd69e2a018afffa6d5a9869491d967f06627f",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 65,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 8.702255157765566e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "5d0ae2f59489df02ac076f36ef29f8a1de77a7039bd99a216b9b6e6ec59cdf8d",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 2,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ea0ca5d291bb2cf8ec45142ba0a96a373802359202247cbcd28a8ffec97a2ec5",
+        "Fit": 96,
+        "FitSHA256": "34392f3dfc84070e14975670501af16541bb7f82f5792034948820f1a58ad7b1",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 66,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 7.560780535316921e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "a60b8c49ffbc05a87ddf9d6acc651c9162ef79448a54bb2a791e6bee7ccc8ccf",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 3,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "cfd23be793b02e6761336ff3be7a57f9cb4f8074d4c171c6121b4178e9108551",
+        "Fit": 96,
+        "FitSHA256": "a5896622866f0c148e3c3e016b03affa48ea26b93481dda905105f1f6b604610",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 32,
+        "retention-regression": 66
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.0001558626065349881,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "180914c212090d3d8cb0d49abe4586c8b6e0393c40123e69243dea8c73f6aa8b",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 4,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "8e6769dd3d32c003fdbf75a7449e0f6821386e2ce2e36031bc1990f08edc8cd4",
+        "Fit": 96,
+        "FitSHA256": "ca0c4f85c88d34af46498fb49f94ffe2e6746e5bf6cd46ebdfac7d8d77afd9fa",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 68
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 7.475908047673694e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.0625,
+        "kind": "readout",
+        "parameter_sha256": "5ca587ed66dc809161e72319104e0cbf7c58596022ab6201e02d263204fa7f79",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 5,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "4a3418a66763e92cc656d452b4ca720e445f29357fd70b1aae17d502d5bbbab9",
+        "Fit": 96,
+        "FitSHA256": "0b227e7376ba7ac729f1cb42463346be763dcb6de50c5e3fcd4ff6060a5ea324",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 66,
+        "retention-regression": 33
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 7.901596668880111e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "a9df580ec47ae5415a405cdfebaa63fb64832157a07203b53c57a68dc85d9cbe",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 6,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "2adf002767f74596a922d950b68a45cdae792f85ae66b5f1ca95d3ca13828337",
+        "Fit": 96,
+        "FitSHA256": "3ed25bad8849704534b18adbfd6195160cd418a70f92d1c5264028f1729f3dc9",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 68
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 6.351171990139301e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "readout",
+        "parameter_sha256": "95f7dc10697deb760d7e51fcb0e352edefd3ba6fe9e01afbfe625e461d2e7e9e",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 7,
+      "cause": "readout",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "a6d65aad6cff4f4ac3a88f850aa6e851822fe72c63aa576f521cd67d23287df6",
+        "Fit": 96,
+        "FitSHA256": "dfd0246b023f608c12b893162d45f0f68bf86832c72b1b0817bd440e31c2714b",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 0,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 65,
+        "retention-regression": 67
+      },
+      "trial_kinds": {
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 70,
+      "winner": {
+        "check_error": 0.00013102230496166097,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "readout",
+        "parameter_sha256": "e808a432c4032f475da951caa7199d1125302bee28b87dc9bb0b4729ae71133c",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    }
+  ],
+  "s83-c64": [
+    {
+      "block": 0,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "80542fb5e4f54804eb6a50bcd7460872016516ab32549279aaf848a0ed2a3c67",
+        "Fit": 96,
+        "FitSHA256": "73864f29edf8c25bbdd08ddef7a613d180abf201a14cc10a0d1fc947c0f62229",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 275,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "functionally-duplicate": 1,
+        "no-check-improvement": 162,
+        "retention-regression": 41
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 64
+      },
+      "trials": 169,
+      "winner": {
+        "check_error": 9.960132169482804e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "2c3632787c63641fa38842ca6ff42a2d3866fed67185f8acebae66b253b89934",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 1,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "12ecb7cc573928321c3547210e5cafb1605a682fd411107295f0d154775067a5",
+        "Fit": 96,
+        "FitSHA256": "e7f6cbb81c5d5067380e1535c1abd69e2a018afffa6d5a9869491d967f06627f",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 276,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 156,
+        "retention-regression": 90
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 66
+      },
+      "trials": 171,
+      "winner": {
+        "check_error": 7.803463392860458e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "ef1bcd0577109b8e04bc11d95d6b83a8232dfd9309a013aa146465c36cbaa865",
+        "proposal": "bounded-joint",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 2,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "ea0ca5d291bb2cf8ec45142ba0a96a373802359202247cbcd28a8ffec97a2ec5",
+        "Fit": 96,
+        "FitSHA256": "34392f3dfc84070e14975670501af16541bb7f82f5792034948820f1a58ad7b1",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 277,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "fit-invalid-or-parameter-bound": 38,
+        "no-check-improvement": 137,
+        "retention-regression": 50
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 76,
+        "readout": 2,
+        "resolution": 68
+      },
+      "trials": 157,
+      "winner": {
+        "check_error": 6.975974873762693e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-relation",
+        "parameter_sha256": "8c64153e906aee01a57e65787fe451355c4680bfe7dea62966e11d6957421d70",
+        "proposal": "new-feature",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 3,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "cfd23be793b02e6761336ff3be7a57f9cb4f8074d4c171c6121b4178e9108551",
+        "Fit": 96,
+        "FitSHA256": "a5896622866f0c148e3c3e016b03affa48ea26b93481dda905105f1f6b604610",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 278,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 170,
+        "retention-regression": 93
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 70
+      },
+      "trials": 175,
+      "winner": {
+        "check_error": 0.0001225664548292296,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "a60f961fbdaf54b5b67babc2a1cb08ca460dfa3dc489ebcc2080ddb587799655",
+        "proposal": "new-feature",
+        "readout_mode": "metric",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 4,
+      "cause": "missing-direction",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "8e6769dd3d32c003fdbf75a7449e0f6821386e2ce2e36031bc1990f08edc8cd4",
+        "Fit": 96,
+        "FitSHA256": "ca0c4f85c88d34af46498fb49f94ffe2e6746e5bf6cd46ebdfac7d8d77afd9fa",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 279,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 175
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 72
+      },
+      "trials": 177,
+      "winner": {
+        "check_error": 8.452529863915042e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 1,
+        "kind": "missing-direction",
+        "parameter_sha256": "7e6a216c318a4d7ea2fe89c18852316f90568da78bc41c25d42821518385f9e2",
+        "proposal": "full-refit",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 5,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "4a3418a66763e92cc656d452b4ca720e445f29357fd70b1aae17d502d5bbbab9",
+        "Fit": 96,
+        "FitSHA256": "0b227e7376ba7ac729f1cb42463346be763dcb6de50c5e3fcd4ff6060a5ea324",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 280,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 171,
+        "retention-regression": 100
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 74
+      },
+      "trials": 179,
+      "winner": {
+        "check_error": 9.743380426530503e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "fe4f1573f2d395804728333c87cad2f8811f2fa4c40f01bb2b59febe186888ec",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 6,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "2adf002767f74596a922d950b68a45cdae792f85ae66b5f1ca95d3ca13828337",
+        "Fit": 96,
+        "FitSHA256": "3ed25bad8849704534b18adbfd6195160cd418a70f92d1c5264028f1729f3dc9",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 281,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 174,
+        "retention-regression": 119
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 76
+      },
+      "trials": 181,
+      "winner": {
+        "check_error": 6.53857152316698e-05,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.5,
+        "kind": "missing-relation",
+        "parameter_sha256": "2c9d056ac3f7f4796f28c71f428a4ec8a8b45a8dd4c4b98f852cc89079dc7ac5",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    },
+    {
+      "block": 7,
+      "cause": "missing-relation",
+      "committed": true,
+      "evidence": {
+        "Check": 64,
+        "CheckSHA256": "a6d65aad6cff4f4ac3a88f850aa6e851822fe72c63aa576f521cd67d23287df6",
+        "Fit": 96,
+        "FitSHA256": "dfd0246b023f608c12b893162d45f0f68bf86832c72b1b0817bd440e31c2714b",
+        "WitnessExcluded": 0,
+        "WitnessFit": 32,
+        "WitnessSHA256": "a92d7e91fc186312735dcd3064623694d83a512b1ff06c8078f21816468769dc"
+      },
+      "grown": 282,
+      "rejections": {
+        "cross-query-representation-change": 52,
+        "no-check-improvement": 121,
+        "retention-regression": 126
+      },
+      "trial_kinds": {
+        "missing-direction": 11,
+        "missing-relation": 88,
+        "readout": 6,
+        "resolution": 78
+      },
+      "trials": 183,
+      "winner": {
+        "check_error": 0.0001846921920796381,
+        "eligible": true,
+        "fit_valid": true,
+        "fraction": 0.25,
+        "kind": "missing-relation",
+        "parameter_sha256": "56057733b9397d5ae0bf73d89c474728adf8b6a10e33cececb6d1e6cba3b6be8",
+        "proposal": "bounded-joint",
+        "readout_mode": "activation",
+        "retention_regressions": 0
+      }
+    }
+  ]
+}
