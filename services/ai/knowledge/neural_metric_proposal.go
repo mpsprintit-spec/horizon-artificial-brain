@@ -1,0 +1,181 @@
+package knowledge
+
+// Proposal workspaces are disposable. Only an admitted model is written to
+// the existing signed synapses by learnNMetric. This is not a second learner.
+import (
+	"crypto/sha256"
+	"encoding/hex"
+	"encoding/json"
+	"errors"
+	"math"
+	"reflect"
+	"slices"
+)
+
+const NMetricBoundedV1 = "incumbent-relative-v1"
+
+type NMetricProposalConfig struct {
+	Protocol  string    `json:"protocol"`
+	Strategy  string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
+	Fractions []float64 `json:"fractions,omitempty"`
+}
+
+// Evidence hashes include the actual encoded measurements, labels, uncertainty,
+// query and episode IDs. Different field names do not establish independence.
+type NMetricEvidence struct {
+	Fit, Check, WitnessFit, WitnessExcluded int
+	FitSHA256, CheckSHA256, WitnessSHA256   string
+}
+
+func validateNMetricProposal(p *NMetricProposalConfig) error {
+	if p == nil {
+		return nil
+	}
+	if p.Protocol != NMetricBoundedV1 {
+		return errors.New("unknown numerical proposal protocol")
+	}
+	if !slices.Contains([]string{"full-refit", "new-feature", "bounded-joint", "combined"}, p.Strategy) {
+		return errors.New("invalid numerical proposal strategy")
+	}
+	if len(p.Fractions) > 4 || (p.Strategy != "full-refit" && len(p.Fractions) == 0) {
+		return errors.New("bounded proposal requires one to four frozen fractions")
+	}
+	previous := 0.
+	for _, a := range p.Fractions {
+		if !nFinite(a) || a <= previous || a >= 1 {
+			return errors.New("proposal fractions must increase strictly in (0,1)")
+		}
+		previous = a
+	}
+	return nil
+}
+
+func nMetricHash(v any) string {
+	b, err := json.Marshal(v)
+	if err != nil {
+		return ""
+	}
+	h := sha256.Sum256(b)
+	return hex.EncodeToString(h[:])
+}
+
+func nMetricSameExperience(a, b NWitness) bool {
+	// An episode cannot be both fit and check, even under another query.
+	// Identical encoded input under the same query is also not independent.
+	return a.EpisodeID == b.EpisodeID || (slices.Equal(a.Query, b.Query) && slices.Equal(a.X, b.X))
+}
+
+func nMetricIndependentEvidence(fit, check, witnesses []NWitness, query []NodeID) ([]NWitness, *NMetricEvidence, error) {
+	for _, a := range fit {
+		for _, b := range check {
+			if nMetricSameExperience(a, b) {
+				return nil, nil, errors.New("numerical check overlaps fit evidence")
+			}
+		}
+	}
+	out := slices.Clone(fit)
+	e := &NMetricEvidence{Check: len(check), WitnessSHA256: nMetricHash(witnesses)}
+	for _, w := range witnesses {
+		if !slices.Equal(w.Query, query) {
+			continue
+		}
+		overlap := slices.ContainsFunc(check, func(c NWitness) bool { return nMetricSameExperience(w, c) })
+		// New check witnesses remain retention-only, including on later lessons.
+		// Legacy witnesses retain their original role except for current overlap.
+		if w.Role == "evaluation" || overlap {
+			e.WitnessExcluded++
+			continue
+		}
+		if !slices.ContainsFunc(out, func(f NWitness) bool { return nMetricSameExperience(w, f) }) {
+			out = append(out, w)
+			e.WitnessFit++
+		}
+	}
+	e.Fit = len(out)
+	e.FitSHA256 = nMetricHash(out)
+	e.CheckSHA256 = nMetricHash(check)
+	return out, e, nil
+}
+
+type nMetricProposal struct {
+	Model    nModel
+	Name     string
+	Fraction float64
+	Valid    bool
+}
+
+func nMetricValidHead(m nModel, hi int) bool {
+	h := m.Heads[hi]
+	if !nFinite(h.B) || math.Abs(h.B) > 7.99 {
+		return false
+	}
+	for _, w := range h.W {
+		if !nFinite(w) || math.Abs(w) > 7.99 {
+			return false
+		}
+	}
+	return true
+}
+
+func nMetricProposals(before, full nModel, query []NodeID, fit []NWitness, p *NMetricProposalConfig, fullValid bool) []nMetricProposal {
+	if p == nil {
+		return []nMetricProposal{{full, "", 0, fullValid}}
+	}
+	hi, bi := nHeadIndex(full, query), nHeadIndex(before, query)
+	out := []nMetricProposal{}
+	if p.Strategy == "full-refit" || p.Strategy == "combined" || p.Strategy == "bounded-joint" {
+		out = append(out, nMetricProposal{full, "full-refit", 1, fullValid})
+	}
+	// Interpolating coefficients from different readout bases has no meaning.
+	// Resolution changes may still be tested by the unchanged full-refit arm.
+	compatible := bi >= 0 && before.Heads[bi].Known && before.Heads[bi].Metric == full.Heads[hi].Metric && len(full.Circuits) >= len(before.Circuits)
+	if compatible {
+		for i, c := range before.Circuits {
+			compatible = compatible && reflect.DeepEqual(c, full.Circuits[i])
+		}
+	}
+	if !compatible {
+		return out
+	}
+	inc := before.Heads[bi]
+	if fullValid && (p.Strategy == "bounded-joint" || p.Strategy == "combined") {
+		for _, a := range p.Fractions {
+			m := nClone(full)
+			h := &m.Heads[hi]
+			h.B = inc.B + a*(h.B-inc.B)
+			for i, w := range h.W {
+				old := 0.
+				if i < len(inc.W) {
+					old = inc.W[i]
+				}
+				h.W[i] = old + a*(w-old)
+			}
+			out = append(out, nMetricProposal{m, "bounded-joint", a, nMetricValidHead(m, hi)})
+		}
+	}
+	if len(full.Circuits) != len(before.Circuits)+1 || (p.Strategy != "new-feature" && p.Strategy != "combined") {
+		return out
+	}
+	// Fit just the new coefficient to the incumbent residual. Old bias and
+	// weights stay exactly fixed for this proposal, not permanently frozen.
+	numerator, denominator := 0., 0.
+	for _, r := range fit {
+		v := nMetricValues(full, r.X, inc.Metric)
+		x := v[len(v)-1]
+		numerator += x * (r.Outcome - nPredict(before, r.X, query))
+		denominator += x * x
+	}
+	if denominator <= 0 || !nFinite(numerator/denominator) {
+		return out
+	}
+	w := numerator / denominator
+	for _, a := range append(slices.Clone(p.Fractions), 1) {
+		m := nClone(full)
+		h := &m.Heads[hi]
+		h.B = inc.B
+		h.W = append(slices.Clone(inc.W), a*w)
+		h.Known = true
+		out = append(out, nMetricProposal{m, "new-feature", a, nMetricValidHead(m, hi)})
+	}
+	return out
+}

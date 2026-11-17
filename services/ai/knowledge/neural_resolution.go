@@ -63,6 +63,8 @@ type NObservation struct {
 type NResolutionLesson struct {
 	Fit   []NObservation `json:"fit"`
 	Check []NObservation `json:"check"`
+	// Explicit, journaled research opt-in. Nil preserves historical v6 replay.
+	Proposal *NMetricProposalConfig `json:"proposal,omitempty"`
 }
 type NFeature struct {
 	Node    NodeID   `json:"node"`
@@ -70,6 +72,7 @@ type NFeature struct {
 	Parents []NodeID `json:"parents,omitempty"`
 }
 type NWitness struct {
+	Role             string    `json:"role,omitempty"`
 	OutcomeError     float64   `json:"outcome_error,omitempty"`
 	MeasurementError []float64 `json:"measurement_error,omitempty"`
 	X                []float64 `json:"x"`
@@ -78,6 +81,9 @@ type NWitness struct {
 	EpisodeID        string    `json:"episode_id"`
 }
 type NTrial struct {
+	Proposal             string   `json:"proposal,omitempty"`
+	Fraction             float64  `json:"fraction,omitempty"`
+	ParameterSHA256      string   `json:"parameter_sha256,omitempty"`
 	ReadoutMode          string   `json:"readout_mode,omitempty"`
 	FitValid             *bool    `json:"fit_valid,omitempty"`
 	RejectedBy           []string `json:"rejected_by,omitempty"`
@@ -88,21 +94,24 @@ type NTrial struct {
 	Eligible             bool     `json:"eligible"`
 }
 type NDiagnosis struct {
-	RequiredPrecision *float64        `json:"required_precision,omitempty"`
-	EstimatedAbsError *float64        `json:"estimated_abs_error,omitempty"`
-	Stage             string          `json:"stage,omitempty"`
-	Hypotheses        []string        `json:"hypotheses,omitempty"`
-	Probes            []NProbeRequest `json:"probes,omitempty"`
-	AliasPairs        int             `json:"alias_pairs,omitempty"`
-	Query             []NodeID        `json:"query"`
-	Cause             string          `json:"cause"`
-	BeforeError       float64         `json:"before_error"`
-	AfterError        float64         `json:"after_error"`
-	Committed         bool            `json:"committed"`
-	Grown             NodeID          `json:"grown,omitempty"`
-	ResolutionBefore  float64         `json:"resolution_before,omitempty"`
-	ResolutionAfter   float64         `json:"resolution_after,omitempty"`
-	Trials            []NTrial        `json:"trials"`
+	ProposalProtocol  string           `json:"proposal_protocol,omitempty"`
+	SearchFingerprint string           `json:"search_fingerprint,omitempty"`
+	Evidence          *NMetricEvidence `json:"evidence,omitempty"`
+	RequiredPrecision *float64         `json:"required_precision,omitempty"`
+	EstimatedAbsError *float64         `json:"estimated_abs_error,omitempty"`
+	Stage             string           `json:"stage,omitempty"`
+	Hypotheses        []string         `json:"hypotheses,omitempty"`
+	Probes            []NProbeRequest  `json:"probes,omitempty"`
+	AliasPairs        int              `json:"alias_pairs,omitempty"`
+	Query             []NodeID         `json:"query"`
+	Cause             string           `json:"cause"`
+	BeforeError       float64          `json:"before_error"`
+	AfterError        float64          `json:"after_error"`
+	Committed         bool             `json:"committed"`
+	Grown             NodeID           `json:"grown,omitempty"`
+	ResolutionBefore  float64          `json:"resolution_before,omitempty"`
+	ResolutionAfter   float64          `json:"resolution_after,omitempty"`
+	Trials            []NTrial         `json:"trials"`
 }
 type NHeadTopology struct {
 	Query    []NodeID `json:"query"`
@@ -145,6 +154,9 @@ func validateNLesson(e CompositionExposure) error {
 		return errors.New("N lesson needs a query and numerical sequence")
 	}
 	b := e.Resolution
+	if err := validateNMetricProposal(b.Proposal); err != nil {
+		return err
+	}
 	if len(b.Fit) < 4 || len(b.Check) < 4 || len(b.Fit) > 64 || len(b.Check) > 64 {
 		return errors.New("N lesson requires bounded fit and independent check sets")
 	}
@@ -172,6 +184,15 @@ func validateNLesson(e CompositionExposure) error {
 	}
 	if len(fit) < 2 || len(check) < 2 {
 		return errors.New("N diagnosis needs independent episodes")
+	}
+	if b.Proposal != nil {
+		for _, a := range b.Fit {
+			for _, c := range b.Check {
+				if slices.Equal(nInput(a.Input), nInput(c.Input)) {
+					return errors.New("numerical check repeats encoded fit input")
+				}
+			}
+		}
 	}
 	return nil
 }

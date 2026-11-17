@@ -1,0 +1,5 @@
+=== RUN   TestS2R1Source
+    s2r1_diagnostic_test.go:112: verified immutable S2 continuation and 64 development reads; no holdout evaluation
+--- PASS: TestS2R1Source (3.71s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	3.728s
