@@ -1,0 +1,95 @@
+{
+  "status": "PARTIAL",
+  "diagnosis": "RETENTION LIMITED",
+  "source_commit": "2fac4b8e21cf89ae211aac3f8ee7f52473fda4e6",
+  "Brain_source_checksum": "9016b845eed4e8437e87ada99b9641718a086c570e246dd0a62e57dffd1ce9d3",
+  "models": 108,
+  "training_seeds": [
+    37,
+    83,
+    151,
+    211,
+    307,
+    419
+  ],
+  "commits": 426,
+  "opportunities": 432,
+  "native_installed_retention_violations": 0,
+  "AE1_pass": 108,
+  "AE1_total": 108,
+  "S1_strict_pass": 108,
+  "replay_exact": 108,
+  "D_persistent_history": {
+    "CI90": [
+      0.15820260154220192,
+      0.27322741947189033
+    ],
+    "CI95": [
+      0.14907458708290133,
+      0.2814891894000863
+    ],
+    "relative_RMSE_improvement": 0.21454942034042213,
+    "replicates": 5000,
+    "resampling": "paired training-seeds and independent whole streams",
+    "seed_effects": [
+      0.2823881371140565,
+      0.295397563361385,
+      0.26341523451045057,
+      0.1887681139178311,
+      0.19841317597741215,
+      0.09823963051382267
+    ],
+    "streams": 32,
+    "training_seeds": 6
+  },
+  "E_persistent_history": {
+    "CI90": [
+      0.15668933421567333,
+      0.2181592655551814
+    ],
+    "CI95": [
+      0.15225870032015656,
+      0.2269760573132971
+    ],
+    "relative_RMSE_improvement": 0.18381077633574483,
+    "replicates": 5000,
+    "resampling": "paired training-seeds and independent whole streams",
+    "seed_effects": [
+      0.27141745593503663,
+      0.1713212935055689,
+      0.1578301393033874,
+      0.2160200491202744,
+      0.16559313783021568,
+      0.1528899840896476
+    ],
+    "streams": 32,
+    "training_seeds": 6
+  },
+  "D_new_retention_pass": 4,
+  "E_new_retention_pass": 5,
+  "capacity_E_vs_D": {
+    "CI90": [
+      -0.0643142695702288,
+      0.08225561010104394
+    ],
+    "CI95": [
+      -0.07709574959413867,
+      0.09253241239646195
+    ],
+    "relative_RMSE_improvement": 0.014982925272722603,
+    "replicates": 5000,
+    "resampling": "paired training-seeds and independent whole streams",
+    "seed_effects": [
+      0.019068324673505277,
+      -0.12496138574648641,
+      -0.0907456725032787,
+      0.08772536058578762,
+      0.00361493675847413,
+      0.13632944045877438
+    ],
+    "streams": 32,
+    "training_seeds": 6
+  },
+  "main_changed": false,
+  "promoted": false
+}
