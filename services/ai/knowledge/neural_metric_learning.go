@@ -34,14 +34,41 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		return out
 	}
 	fit, check := convert(e.Resolution.Fit), convert(e.Resolution.Check)
-	for _, w := range state.Witnesses {
-		if slices.Equal(w.Query, query) {
-			fit = append(fit, w)
+	proposal := e.Resolution.Proposal
+	var evidence *NMetricEvidence
+	if proposal != nil {
+		var err error
+		fit, evidence, err = nMetricIndependentEvidence(fit, check, state.Witnesses, query)
+		if err != nil {
+			return err
+		}
+	} else {
+		for _, w := range state.Witnesses {
+			if slices.Equal(w.Query, query) {
+				fit = append(fit, w)
+			}
 		}
 	}
 	all := append(slices.Clone(fit), check...)
 	d := NDiagnosis{Query: slices.Clone(query), Cause: "insufficient-predictive-evidence", Stage: "validation", BeforeError: nError(before, check)}
 	d.AfterError = d.BeforeError
+	if proposal != nil {
+		d.ProposalProtocol = proposal.Protocol
+		d.Evidence = evidence
+		d.SearchFingerprint = nMetricHash(struct {
+			Model                 nModel
+			Fit, Check, Witnesses []NWitness
+			Config                *NMetricProposalConfig
+			Precision             *float64
+		}{before, fit, check, state.Witnesses, proposal, e.Input.RequiredPrecision})
+		if !state.Last.Committed && state.Last.SearchFingerprint == d.SearchFingerprint && d.SearchFingerprint != "" {
+			d = state.Last.Clone()
+			d.Cause = "duplicate-proposal"
+			d.Stage = "identical-retry"
+			k.finishNMetricDiagnosis(d, e.Input.RequiredPrecision, nMetricQuality(before, query, check), at)
+			return nil
+		}
+	}
 	d.AliasPairs = nMetricAliasPairs(before, query, check)
 	if nMetricConflict(all) {
 		d.Cause = "conflicting-observations"
@@ -72,73 +99,89 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	if e.Input.RequiredPrecision != nil {
 		goal = *e.Input.RequiredPrecision
 	}
+	seenProposals := map[string]bool{}
 	consider := func(kind string, feature NodeID, candidate nModel) {
 		for _, mode := range []bool{false, true} {
 			m := nClone(candidate)
 			hi := nHeadIndex(m, query)
 			m.Heads[hi].Metric = mode
-			valid := nFit(&m, query, fit)
-			for _, row := range all {
-				if !nMetricEvaluate(m, row.X, row.MeasurementError).Valid {
-					valid = false
-					break
+			fullValid := nFit(&m, query, fit)
+			for _, step := range nMetricProposals(before, m, query, fit, proposal, fullValid) {
+				m := step.Model
+				valid := step.Valid
+				for _, row := range all {
+					if !nMetricEvaluate(m, row.X, row.MeasurementError).Valid {
+						valid = false
+						break
+					}
 				}
-			}
-			err := nError(m, check)
-			if !nFinite(err) {
-				valid = false
-				err = 4
-			}
-			reg := nMetricRegression(before, m, state.Witnesses)
-			duplicate := len(m.Circuits) > len(before.Circuits) && nMetricRedundant(m, all, mode)
-			why := []string{}
-			if binary && goal == 0 && mode {
-				why = append(why, "metric-goal-unspecified")
-			}
-			if !valid {
-				why = append(why, "fit-invalid-or-parameter-bound")
-			}
-			if duplicate {
-				why = append(why, "functionally-duplicate")
-			}
-			if reg > 0 {
-				why = append(why, "retention-regression")
-			}
-			knownGain := !bestKnown && valid && err == 0
-			bound := nMetricQuality(m, query, check)
-			precisionGain := goal > 0 && bestBound > goal && nImproves(bound, bestBound) && err <= math.Max(bestErr, goal*goal)+nRoundoff(math.Max(bestErr, goal*goal))
-			errorGain := nImproves(err, bestErr)
-			if goal > 0 && bestErr <= goal*goal/4 {
-				errorGain = false
-			}
-			if goal == 0 && binary && bestKnown && bestErr <= nTolerance*nTolerance {
-				errorGain = false
-			}
-			gain := errorGain || knownGain || precisionGain
-			if binary && goal == 0 && mode && bestKnown && bestErr-err <= nTolerance {
-				gain = false
-			}
-			if !gain {
-				why = append(why, "no-check-improvement")
-			}
-			if len(m.Circuits) > len(before.Circuits) && bestKnown && ((goal > 0 && nMetricPointError(best, query, check) <= goal) || (goal == 0 && binary && nBinarySolved(best, query, check))) {
-				why = append(why, "existing-knowledge-meets-precision")
-			}
-			eligible := len(why) == 0
-			modeName := "activation"
-			if mode {
-				modeName = "metric"
-			}
-			v := valid
-			d.Trials = append(d.Trials, NTrial{Kind: kind, Feature: feature, CheckError: err, RetentionRegressions: reg, Eligible: eligible, ReadoutMode: modeName, FitValid: &v, RejectedBy: why})
-			if eligible {
-				best = m
-				bestErr = err
-				bestBound = bound
-				bestKnown = true
-				selected = true
-				d.Cause = kind
-				d.Stage = modeName + "-readout"
+				err := nError(m, check)
+				if !nFinite(err) {
+					valid = false
+					err = 4
+				}
+				reg := nMetricRegression(before, m, state.Witnesses)
+				duplicate := len(m.Circuits) > len(before.Circuits) && nMetricRedundant(m, all, mode)
+				why := []string{}
+				if step.Rejection != "" {
+					why = append(why, step.Rejection)
+				}
+				parameterHash := ""
+				if proposal != nil {
+					parameterHash = nMetricHash(m)
+					if seenProposals[parameterHash] {
+						why = append(why, "duplicate-proposal")
+					}
+					seenProposals[parameterHash] = true
+				}
+				if binary && goal == 0 && mode {
+					why = append(why, "metric-goal-unspecified")
+				}
+				if !valid {
+					why = append(why, "fit-invalid-or-parameter-bound")
+				}
+				if duplicate {
+					why = append(why, "functionally-duplicate")
+				}
+				if reg > 0 {
+					why = append(why, "retention-regression")
+				}
+				knownGain := !bestKnown && valid && err == 0
+				bound := nMetricQuality(m, query, check)
+				precisionGain := goal > 0 && bestBound > goal && nImproves(bound, bestBound) && err <= math.Max(bestErr, goal*goal)+nRoundoff(math.Max(bestErr, goal*goal))
+				errorGain := nImproves(err, bestErr)
+				if goal > 0 && bestErr <= goal*goal/4 {
+					errorGain = false
+				}
+				if goal == 0 && binary && bestKnown && bestErr <= nTolerance*nTolerance {
+					errorGain = false
+				}
+				gain := errorGain || knownGain || precisionGain
+				if binary && goal == 0 && mode && bestKnown && bestErr-err <= nTolerance {
+					gain = false
+				}
+				if !gain {
+					why = append(why, "no-check-improvement")
+				}
+				if len(m.Circuits) > len(before.Circuits) && bestKnown && ((goal > 0 && nMetricPointError(best, query, check) <= goal) || (goal == 0 && binary && nBinarySolved(best, query, check))) {
+					why = append(why, "existing-knowledge-meets-precision")
+				}
+				eligible := len(why) == 0
+				modeName := "activation"
+				if mode {
+					modeName = "metric"
+				}
+				v := valid
+				d.Trials = append(d.Trials, NTrial{Kind: kind, Feature: feature, CheckError: err, RetentionRegressions: reg, Eligible: eligible, ReadoutMode: modeName, FitValid: &v, RejectedBy: why, Proposal: step.Name, Fraction: step.Fraction, ParameterSHA256: parameterHash})
+				if eligible {
+					best = m
+					bestErr = err
+					bestBound = bound
+					bestKnown = true
+					selected = true
+					d.Cause = kind
+					d.Stage = modeName + "-readout"
+				}
 			}
 		}
 	}
@@ -375,14 +418,46 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		if !found {
 			state.Heads = append(state.Heads, topo)
 		}
-		state.Witnesses = append(state.Witnesses, check...)
-		if len(state.Witnesses) > maxNWitnesses {
+		if proposal != nil {
+			// Do not delete any historical witness to admit a new observation.
+			// Excess observations remain in the complete WAL with provenance.
+			for _, w := range check {
+				w.Role = "evaluation"
+				if len(state.Witnesses) < maxNWitnesses && !slices.ContainsFunc(state.Witnesses, func(old NWitness) bool { return nMetricSameExperience(old, w) }) {
+					state.Witnesses = append(state.Witnesses, w)
+				}
+			}
+		} else {
+			state.Witnesses = append(state.Witnesses, check...)
+		}
+		if proposal == nil && len(state.Witnesses) > maxNWitnesses {
 			state.Witnesses = nMetricWitnesses(state.Witnesses, state.Heads, maxNWitnesses, best)
 		}
 	} else if goal > 0 && nMetricMaximumError(before, query, check) <= goal && before.Heads[nHeadIndex(before, query)].Known {
 		d.Cause = "already-within-precision"
 		d.Stage = "validated"
 	} else {
+		if proposal != nil {
+			d.Cause = "candidate-search-exhausted"
+			valid, improvement, retention := false, false, false
+			for _, trial := range d.Trials {
+				valid = valid || (trial.FitValid != nil && *trial.FitValid)
+				improvement = improvement || !slices.Contains(trial.RejectedBy, "no-check-improvement")
+				retention = retention || slices.Contains(trial.RejectedBy, "retention-regression")
+			}
+			if len(d.Trials) == 0 {
+				d.Cause = "candidate-search-exhausted"
+			} else if !valid {
+				d.Cause = "invalid-numerical-candidate"
+			} else if !improvement {
+				d.Cause = "no-check-improvement"
+			} else if retention {
+				d.Cause = "retention-regression"
+			}
+			if d.AliasPairs > 0 && !improvement {
+				d.Cause = "insufficient-identifiable-information"
+			}
+		}
 		d.Hypotheses = []string{"missing-measurement", "insufficient-composition", "changed-dynamics"}
 		d.Probes = []NProbeRequest{{Kind: "context-contrast", Evidence: "compare observed outcomes while varying an independently measured context"}, {Kind: "transition-observation", Evidence: "supply the measured after-state and known action, not a repeated prediction"}}
 	}

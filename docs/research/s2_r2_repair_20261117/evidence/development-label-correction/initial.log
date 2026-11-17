@@ -1,0 +1,23 @@
+=== RUN   TestS2R2Mechanism
+    s2r2_repair_test.go:173: legacy 0 true 0.009230604344982487 missing-relation
+    s2r2_repair_test.go:173: legacy 1 true 0.007598626664977421 missing-relation
+    s2r2_repair_test.go:173: legacy 2 true 0.010767700378895644 resolution
+    s2r2_repair_test.go:173: legacy 3 true 0.008230123082149663 resolution
+    s2r2_repair_test.go:173: full-refit 0 true 0.009230604344982487 missing-relation
+    s2r2_repair_test.go:173: full-refit 1 true 0.008722642358856761 missing-relation
+    s2r2_repair_test.go:173: full-refit 2 false 0.012824534531422543 retention-regression
+    s2r2_repair_test.go:173: full-refit 3 false 0.009500173347857754 retention-regression
+    s2r2_repair_test.go:173: bounded-joint 0 true 0.009501286553073106 missing-direction
+    s2r2_repair_test.go:173: bounded-joint 1 true 0.007556438595869883 missing-relation
+    s2r2_repair_test.go:173: bounded-joint 2 true 0.010526573326641983 readout
+    s2r2_repair_test.go:173: bounded-joint 3 true 0.008694898945664893 readout
+    s2r2_repair_test.go:173: new-feature 0 true 0.009563597701972404 missing-relation
+    s2r2_repair_test.go:173: new-feature 1 true 0.00762364307024739 missing-relation
+    s2r2_repair_test.go:173: new-feature 2 false 0.011230354799596274 invalid-numerical-candidate
+    s2r2_repair_test.go:173: new-feature 3 false 0.009652475259784117 invalid-numerical-candidate
+    s2r2_repair_test.go:173: combined 0 true 0.009495943031224486 missing-relation
+    s2r2_repair_test.go:173: combined 1 true 0.007772196218704312 missing-relation
+    s2r2_repair_test.go:173: combined 2 true 0.009818382046423145 readout
+    s2r2_repair_test.go:173: combined 3 true 0.008175205006040843 readout
+--- PASS: TestS2R2Mechanism (80.39s)
+PASS

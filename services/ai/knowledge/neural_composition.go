@@ -436,6 +436,9 @@ func (k *KnowledgeBase) ValidateCompositionExposure(c CompositionConfig, e Compo
 		return errors.New("metric precision requires v6")
 	}
 	if e.Resolution != nil {
+		if e.Resolution.Proposal != nil && c.Version != NeuralCompositionMetricV6 {
+			return errors.New("bounded proposals require v6")
+		}
 		for _, set := range [][]NObservation{e.Resolution.Fit, e.Resolution.Check} {
 			for _, o := range set {
 				if c.Version != NeuralCompositionMetricV6 && o.OutcomeError != 0 {

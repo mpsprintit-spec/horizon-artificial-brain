@@ -19,6 +19,10 @@ type NProbeRequest struct {
 }
 
 func (d NDiagnosis) Clone() NDiagnosis {
+	if d.Evidence != nil {
+		v := *d.Evidence
+		d.Evidence = &v
+	}
 	if d.RequiredPrecision != nil {
 		v := *d.RequiredPrecision
 		d.RequiredPrecision = &v
@@ -524,6 +528,9 @@ func (k *KnowledgeBase) validateNContract(c CompositionConfig) error {
 }
 func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 	if !metric {
+		if d.ProposalProtocol != "" || d.SearchFingerprint != "" || d.Evidence != nil {
+			return errors.New("bounded diagnosis requires v6")
+		}
 		if d.RequiredPrecision != nil || d.EstimatedAbsError != nil || d.Stage != "" || len(d.Hypotheses) > 0 || len(d.Probes) > 0 || d.AliasPairs != 0 {
 			return errors.New("metric diagnosis requires v6")
 		}
@@ -540,7 +547,20 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 	if d.EstimatedAbsError != nil && (!nFinite(*d.EstimatedAbsError) || *d.EstimatedAbsError < 0 || *d.EstimatedAbsError > 2) {
 		return errors.New("invalid diagnostic uncertainty")
 	}
-	if len(d.Stage) > 64 || len(d.Hypotheses) > 8 || len(d.Probes) > 8 || len(d.Trials) > 128 || d.AliasPairs < 0 {
+	trialLimit := 128
+	if d.ProposalProtocol == NMetricBoundedV1 {
+		trialLimit = 1024
+	}
+	if d.ProposalProtocol != "" && d.ProposalProtocol != NMetricBoundedV1 {
+		return errors.New("unknown proposal diagnosis")
+	}
+	if d.ProposalProtocol == NMetricBoundedV1 && (len(d.SearchFingerprint) != 64 || d.Evidence == nil || d.Evidence.Fit < 4 || d.Evidence.Check < 4 || d.Evidence.WitnessFit < 0 || d.Evidence.WitnessExcluded < 0 || len(d.Evidence.FitSHA256) != 64 || len(d.Evidence.CheckSHA256) != 64 || len(d.Evidence.WitnessSHA256) != 64) {
+		return errors.New("invalid independent evidence diagnosis")
+	}
+	if d.SearchFingerprint != "" && len(d.SearchFingerprint) != 64 {
+		return errors.New("invalid search fingerprint")
+	}
+	if len(d.Stage) > 64 || len(d.Hypotheses) > 8 || len(d.Probes) > 8 || len(d.Trials) > trialLimit || d.AliasPairs < 0 {
 		return errors.New("metric diagnosis exceeds resource limits")
 	}
 	if !nFinite(d.BeforeError) || !nFinite(d.AfterError) || d.BeforeError < 0 || d.AfterError < 0 || d.BeforeError > 4.0000001 || d.AfterError > 4.0000001 {
@@ -562,6 +582,9 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		}
 	}
 	for _, t := range d.Trials {
+		if t.Proposal != "" && (d.ProposalProtocol != NMetricBoundedV1 || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
+			return errors.New("invalid bounded trial")
+		}
 		if (t.ReadoutMode != "activation" && t.ReadoutMode != "metric") || t.FitValid == nil || len(t.RejectedBy) > 8 || !nFinite(t.CheckError) || t.CheckError < 0 || t.CheckError > 4.0000001 {
 			return errors.New("invalid metric trial")
 		}

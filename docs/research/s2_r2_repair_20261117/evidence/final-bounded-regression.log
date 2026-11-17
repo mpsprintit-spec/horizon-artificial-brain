@@ -1,0 +1,12 @@
+=== RUN   TestMetricBoundedNonS2RecoveryAndIndependence
+--- PASS: TestMetricBoundedNonS2RecoveryAndIndependence (0.71s)
+=== RUN   TestMetricBoundedLostAckAndInterruptedLearning
+=== RUN   TestMetricBoundedLostAckAndInterruptedLearning/lost-ack
+=== RUN   TestMetricBoundedLostAckAndInterruptedLearning/interrupted-apply
+--- PASS: TestMetricBoundedLostAckAndInterruptedLearning (0.59s)
+    --- PASS: TestMetricBoundedLostAckAndInterruptedLearning/lost-ack (0.39s)
+    --- PASS: TestMetricBoundedLostAckAndInterruptedLearning/interrupted-apply (0.20s)
+=== RUN   TestMetricBoundedConcurrentReceiptOwnership
+--- PASS: TestMetricBoundedConcurrentReceiptOwnership (0.04s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	1.348s

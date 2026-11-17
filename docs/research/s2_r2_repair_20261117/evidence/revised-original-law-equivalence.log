@@ -1,0 +1,6 @@
+=== RUN   TestS2R2HistoricalLawEquivalence
+    s2r2_legacy_equivalence_test.go:32: original S2-R1 default law exact mechanism 4 commands
+    s2r2_legacy_equivalence_test.go:32: original S2-R1 default law exact training 8 commands
+--- PASS: TestS2R2HistoricalLawEquivalence (35.17s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	35.188s

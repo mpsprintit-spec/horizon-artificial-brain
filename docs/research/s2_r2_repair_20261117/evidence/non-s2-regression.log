@@ -1,0 +1,4 @@
+=== RUN   TestMetricBoundedNonS2RecoveryAndIndependence
+--- PASS: TestMetricBoundedNonS2RecoveryAndIndependence (4.80s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	5.838s

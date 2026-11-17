@@ -1,0 +1,10 @@
+{
+  "timing": "Before confirmatory freeze and before any final holdout observation",
+  "repair": "PASS only with a real admitted bounded/decoupled gain, unchanged gates, valid evidence separation, exact recovery/reproduction and acceptable regression checks",
+  "ability_PASS": "All preregistered stream, discrimination, ablation and retention gates, and pooled RMSE better than original-S2, continued legacy and independent full-refit controls",
+  "ability_PARTIAL": "Pooled RMSE improves all three matched controls but at least one preregistered ability gate fails",
+  "ability_FAIL": "Pooled RMSE does not improve at least one of original-S2, continued legacy or independent full-refit; or unacceptable retention regression",
+  "ability_BLOCKED": "Valid source, engineering prerequisite or independent final evaluation unavailable",
+  "history": "Report independent history magnitude benefit as negative if masking and conditional permutation do not both worsen pooled holdout error; do not substitute previous-action contribution",
+  "no_changes": "No sample size, threshold, seed, mechanism or checkpoint selection changes after final holdout"
+}

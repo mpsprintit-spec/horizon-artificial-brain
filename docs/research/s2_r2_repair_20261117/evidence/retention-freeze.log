@@ -1,0 +1,4 @@
+=== RUN   TestS2R2RetentionAndFreeze
+    s2r2_repair_test.go:321: retention gate blocked final ability evaluation
+--- FAIL: TestS2R2RetentionAndFreeze (59.32s)
+FAIL

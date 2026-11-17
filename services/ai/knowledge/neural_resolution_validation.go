@@ -211,6 +211,9 @@ func validateNResolutionState(data []byte, enabled bool, version string) error {
 		}
 	}
 	for _, w := range s.Witnesses {
+		if w.Role != "" && w.Role != "evaluation" {
+			return errors.New("invalid witness evidence role")
+		}
 		if !nFinite(w.OutcomeError) || w.OutcomeError < 0 || w.OutcomeError > 2 || (!metric && w.OutcomeError != 0) {
 			return errors.New("invalid witness outcome uncertainty")
 		}

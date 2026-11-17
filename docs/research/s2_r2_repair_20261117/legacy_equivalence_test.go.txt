@@ -1,0 +1,34 @@
+package runtime
+
+import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"os"
+	"path/filepath"
+	"testing"
+)
+
+// Run on the untouched S2-R1 worktree, not the repaired implementation.
+func TestS2R2HistoricalLawEquivalence(t *testing.T) {
+	root,work:=os.Getenv("HORIZON_S2R2_SOURCE"),os.Getenv("HORIZON_S2R2_WORK")
+	if root=="" || work==""{t.Skip("explicit immutable source and R2 results required")}
+	pop:=s1Pop(t,filepath.Join(root,"source/source"))
+	for _,phase:=range []string{"mechanism","training"} {
+		dir:=filepath.Join(work,"original-code-"+phase);s1Check(t,os.Mkdir(dir,0700))
+		for from,to:=range map[string]string{"00-source.json":"state.json","source-events.jsonl":"events.jsonl"}{raw,e:=os.ReadFile(filepath.Join(work,from));s1Check(t,e);s1Check(t,os.WriteFile(filepath.Join(dir,to),raw,0600))}
+		r,w:=s1Open(t,filepath.Join(dir,"state.json"),filepath.Join(dir,"events.jsonl"));n:=4;prefix:="dev";if phase=="training"{n=8;prefix="train"}
+		receipts:=[]*CompositionLearningReceipt{}
+		for i:=0;i<n;i++ {
+			var fit,check []s2Trial;s1Read(t,filepath.Join(work,fmt.Sprintf("%s-%d-fit.json",prefix,i)),&fit);s1Read(t,filepath.Join(work,fmt.Sprintf("%s-%d-check.json",prefix,i)),&check)
+			e:=s2Lesson(1,fit,check,pop,s1Time(r));id:=fmt.Sprintf("s2r2-mechanism-legacy-%d",i);if phase=="training"{id=fmt.Sprintf("s2r2-learning-legacy-%d",i)};e.ID=id;e.EpisodeID=id;e.IndependenceGroup=id;e.Source="s2r2-native-observed-error"
+			_,rec,err:=r.LearnCompositionWithDiagnosis(e,s1Time(r));s1Check(t,err);receipts=append(receipts,rec)
+		}
+		cp:=filepath.Join(dir,"final.json");s1Check(t,r.Checkpoint(cp));expected:=orderedFixtureClone(t,filepath.Join(work,phase+"-legacy/final.json"))
+		if !bytes.Equal(continuationBytes(t,r),continuationBytes(t,expected)){t.Fatal("original/repaired default law differs",phase)}
+		s1Write(t,filepath.Join(dir,"receipts.json"),receipts)
+		var want any;if phase=="mechanism"{s1Read(t,filepath.Join(work,"mechanism-legacy/receipts.json"),&want)}else{var all map[string]any;s1Read(t,filepath.Join(work,"learning.json"),&all);want=all["legacy"]}
+		a,err:=json.Marshal(receipts);s1Check(t,err);var got any;s1Check(t,json.Unmarshal(a,&got));if !s1Near(got,want,0){t.Fatal("default receipt differs",phase)}
+		s1Check(t,w.Close());t.Log("original S2-R1 default law exact",phase,n,"commands")
+	}
+}

@@ -1,0 +1,5 @@
+=== RUN   TestS2R2IdenticalRetryAndDuplicateCommand
+    s2r2_repair_test.go:608: requires immutable original S2 and isolated S2-R2 work
+--- SKIP: TestS2R2IdenticalRetryAndDuplicateCommand (0.00s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	1.028s

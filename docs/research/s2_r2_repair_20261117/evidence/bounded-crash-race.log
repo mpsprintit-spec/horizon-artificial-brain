@@ -1,0 +1,8 @@
+=== RUN   TestMetricBoundedLostAckAndInterruptedLearning
+=== RUN   TestMetricBoundedLostAckAndInterruptedLearning/lost-ack
+=== RUN   TestMetricBoundedLostAckAndInterruptedLearning/interrupted-apply
+--- PASS: TestMetricBoundedLostAckAndInterruptedLearning (4.26s)
+    --- PASS: TestMetricBoundedLostAckAndInterruptedLearning/lost-ack (2.05s)
+    --- PASS: TestMetricBoundedLostAckAndInterruptedLearning/interrupted-apply (2.20s)
+PASS
+ok  	github.com/project-horizon/horizon-core/services/ai/runtime	5.300s

@@ -1,0 +1,29 @@
+{
+  "continuation": {
+    "PatternSynapses": 24,
+    "features": 32,
+    "native_checksum": "9016b845eed4e8437e87ada99b9641718a086c570e246dd0a62e57dffd1ce9d3",
+    "native_policy_updates": 10752,
+    "neurons": 274,
+    "sequence": 80735,
+    "synapses": 6408
+  },
+  "final": {
+    "PatternSynapses": 24,
+    "features": 32,
+    "native_checksum": "9c6cbd9e7d7caeeaaa0a788d0122a94fab32701ceda2c8bb6476fa3c522d47d8",
+    "native_policy_updates": 10752,
+    "neurons": 274,
+    "sequence": 80681,
+    "synapses": 6408
+  },
+  "source": {
+    "PatternSynapses": 24,
+    "features": 30,
+    "native_checksum": "b87285e38a321d45e4da920f219b388d1a2d061554042d2dd0f109883b38ab9d",
+    "native_policy_updates": 10752,
+    "neurons": 264,
+    "sequence": 76617,
+    "synapses": 6244
+  }
+}

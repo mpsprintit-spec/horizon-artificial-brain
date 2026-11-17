@@ -1,0 +1,128 @@
+{
+  "repair_status": "PASS",
+  "ability_status": "PARTIAL",
+  "gates": {
+    "AE1_retention": true,
+    "S1_retention": true,
+    "beats_full-refit": true,
+    "beats_legacy": true,
+    "beats_original-S2": true,
+    "learned_readout_ablation": true,
+    "new_feature_contribution": true,
+    "new_readout_contribution": true,
+    "stream_0_calibration": true,
+    "stream_0_correlation": false,
+    "stream_0_discrimination": true,
+    "stream_0_rmse": false,
+    "stream_1_calibration": true,
+    "stream_1_correlation": true,
+    "stream_1_discrimination": true,
+    "stream_1_rmse": false
+  },
+  "source": {
+    "sequence": 76617,
+    "native_checksum": "b87285e38a321d45e4da920f219b388d1a2d061554042d2dd0f109883b38ab9d",
+    "neurons": 264,
+    "synapses": 6244,
+    "PatternSynapses": 24,
+    "features": 30,
+    "native_policy_updates": 10752
+  },
+  "final": {
+    "sequence": 80681,
+    "native_checksum": "9c6cbd9e7d7caeeaaa0a788d0122a94fab32701ceda2c8bb6476fa3c522d47d8",
+    "neurons": 274,
+    "synapses": 6408,
+    "PatternSynapses": 24,
+    "features": 32,
+    "native_policy_updates": 10752
+  },
+  "continuation": {
+    "sequence": 80735,
+    "native_checksum": "9016b845eed4e8437e87ada99b9641718a086c570e246dd0a62e57dffd1ce9d3",
+    "neurons": 274,
+    "synapses": 6408,
+    "PatternSynapses": 24,
+    "features": 32,
+    "native_policy_updates": 10752
+  },
+  "commits": {
+    "bounded-joint": 8,
+    "combined": 8,
+    "full-refit": 3,
+    "legacy": 5,
+    "new-feature": 2
+  },
+  "historical_witnesses_preserved_exact": true,
+  "historical_WAL_prefix_exact": true,
+  "candidate_RMSE": 0.009570431216074978,
+  "constant_RMSE": 0.011150655952911202,
+  "constant_improvement_percent": 14.171585452097645,
+  "original_S2_RMSE": 0.011066862874620168,
+  "correlation": 0.5197323264175342,
+  "calibration": 0.0016179468352621746,
+  "history_independent_benefit": false,
+  "initial_failed_revision": {
+    "repair_status": "FAIL_INITIAL_ENGINEERING_REVISION",
+    "ability_status": "BLOCKED",
+    "reason": "S1 exact-retention gate failed before final holdout",
+    "S1_max_prediction_delta": 0.00046141326817925044,
+    "final_holdout_evaluations": 0,
+    "candidate_sequence": 80681,
+    "candidate_checkpoint": "s2r2-final.json",
+    "source_checkpoint_sequence": 76617,
+    "historical_source_unchanged": true,
+    "superseded_before_confirmatory_by": "REPAIR_AMENDMENT.md; preserve_shared explicitly enabled",
+    "no_threshold_changed": true
+  },
+  "final_holdout_evaluations": 1,
+  "protocol": {
+    "Baseline": "11c6e0a78547d68a0be8f78b3c801e912722608d",
+    "SourceCheckpointSHA256": "b85a818a84efb8185cdbf7003e14a8acd3d070c798f3ae7e053729ec9fc76ba0",
+    "SourceJournalSHA256": "e7157d7c1e3b03c38abd3825e3a6bd8aef0bcbdf748b291e48d99de356d7d527",
+    "DesignSHA256": "3293bd49021817b55af4509a4667565895ff26a18cfd6c6e24df7d9e3f2fdfd6",
+    "TrainingSeed": 42001,
+    "DevelopmentSeed": 41011,
+    "NewTrainingSeed": 42021,
+    "HoldoutSeeds": [
+      51001,
+      51031
+    ],
+    "FitN": 512,
+    "DevelopmentN": 256,
+    "HoldoutN": 128,
+    "Lessons": 8,
+    "Scale": 1,
+    "Constant": 0.015406036556304356,
+    "DevelopmentSD": 0.009586453921761013,
+    "LowCut": 0.01103726184827788,
+    "HighCut": 0.018044194730252858,
+    "CalibrationLimit": 0.003,
+    "Bins": [
+      0.011520690319594842,
+      0.023041380639189684,
+      0.03456207095878453,
+      0.04608276127837937,
+      0.05760345159797421
+    ],
+    "Identifiable": true,
+    "RelativeRMSE": 0.8,
+    "Correlation": 0.5,
+    "AblationRatio": 1.2,
+    "RetentionTolerance": 1e-07
+  },
+  "AE1_retention": {
+    "C_correct": 6,
+    "E1_correct": 35,
+    "E1_delta": 0,
+    "delta": 0,
+    "pass": true
+  },
+  "S1_retention": {
+    "coordinates": 1536,
+    "historical_status": "PARTIAL; historical retention failure unchanged",
+    "max_delta": 0,
+    "pass": true,
+    "shared_observations": 512
+  }
+}
