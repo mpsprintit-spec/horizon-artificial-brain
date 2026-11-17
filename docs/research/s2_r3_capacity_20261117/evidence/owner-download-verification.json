@@ -1,0 +1,74 @@
+{
+  "bytes": 93164080,
+  "file_name": "Horizon_S2_R3_Neural_Capacity_Diagnosis_20261117.tar.xz",
+  "final_checkpoints": {
+    "s151-c32": {
+      "bytes": 13739782,
+      "features": 32,
+      "native_checksum": "4eb5824238625d14ee59bc8efd8e632be9a86920c97a21fcc9ff03179212ad1b",
+      "sequence": 84799
+    },
+    "s151-c64": {
+      "bytes": 14009623,
+      "features": 40,
+      "native_checksum": "a68d64a5bac11136eaa4362097c831da72fb5a4335bec400c5c7ed53b734d5e8",
+      "sequence": 84799
+    },
+    "s37-c32": {
+      "bytes": 13738908,
+      "features": 32,
+      "native_checksum": "37ba33ebb8cdf61ca6e28218d9d026f4b38132b4f32e68e705e953fead274a67",
+      "sequence": 84799
+    },
+    "s37-c64": {
+      "bytes": 13918675,
+      "features": 40,
+      "native_checksum": "196d2c5abf4781d4e686c335b1e75c388a13a93de1d9cfcee24c7f75c7706cd8",
+      "sequence": 84799
+    },
+    "s83-c32": {
+      "bytes": 13739367,
+      "features": 32,
+      "native_checksum": "a410a951498d163349ae159f826b660da63f0a642bc737ff4f9b748b4fbfe86a",
+      "sequence": 84799
+    },
+    "s83-c64": {
+      "bytes": 13918877,
+      "features": 40,
+      "native_checksum": "313b7bd40857b6e0367cf7b9ac98e42cf3c16b47522b0d6c3cefd5ef99686573",
+      "sequence": 84799
+    }
+  },
+  "fresh_owner_download_verified": true,
+  "full_journals": {
+    "s2r3/seed-151/arm-32/events.jsonl": {
+      "bytes": 52283643,
+      "sha256": "f2b870dc642abe630001ca23c4c84eb074aad96e0d6cd1b75caf34a8127b6586"
+    },
+    "s2r3/seed-151/arm-64/events.jsonl": {
+      "bytes": 52283643,
+      "sha256": "630422245680a8d93557fa37c0d8d1a27d88b59b3e2159b76fb1843b4b79043a"
+    },
+    "s2r3/seed-37/arm-32/events.jsonl": {
+      "bytes": 52283808,
+      "sha256": "f79fae2a6ca7a5480534e2db50bbfb32571865dbf934369f2a9222cb120dd977"
+    },
+    "s2r3/seed-37/arm-64/events.jsonl": {
+      "bytes": 52283808,
+      "sha256": "63118724c7d757c66f8bf0265d8c114c16b54c4b62876beb09fafe5f0a4ba4b9"
+    },
+    "s2r3/seed-83/arm-32/events.jsonl": {
+      "bytes": 52282535,
+      "sha256": "680829f231a6b5d767962ba6bfc9084cf7145a61bc4dfe4a8814d2000ab42452"
+    },
+    "s2r3/seed-83/arm-64/events.jsonl": {
+      "bytes": 52282535,
+      "sha256": "6688b4a10357767f98af83717b8e34025cda2f16f2c0e0451f1b3f58f56d76fe"
+    }
+  },
+  "library_file_id": "libfile_2cd2f0c3c4f881918341a31c89d99bd9",
+  "original_R2_archive_present_and_exact": true,
+  "payloads_authenticated": 653,
+  "published_source_commit": "3e917d35eb117a30387484d62db6d6e18208ba92",
+  "sha256": "0137ba463fd78e85b130cba5213d37747582cf32ddf4acf6757c9d5d99a9d6f5"
+}
