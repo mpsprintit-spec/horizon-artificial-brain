@@ -86,3 +86,21 @@ Saved original locks contain original absolute provenance paths; regenerate
 locks for a fresh reproduction rather than editing them to bypass validation.
 No additional acquisition or retraining is needed merely to recover/audit
 the saved research result.
+
+## Published source and exact local history
+
+The original frozen scientific commit is `cee0fa80dfa1667ee2738c3467463eb1fb8313ab`.
+Published commit `262ab99b10a5aa7bdb22b2821c71b0803272e60a` has its identical tree.
+Use either source for reproduction. To recover the original commit IDs, start
+from a repository containing exact R3 base `6d8ad454bb2c5289a747ab7d7e0cdca58dd7db2c`,
+then fetch the small bundle delivered alongside this document:
+
+```sh
+git bundle verify docs/research/s2_r4_temporal_20261117/S2R4_Source_History_20261117.bundle
+git fetch docs/research/s2_r4_temporal_20261117/S2R4_Source_History_20261117.bundle refs/heads/research/s2-r4-temporal-error-history-20261117:refs/remotes/recovery/s2r4
+git checkout cee0fa80dfa1667ee2738c3467463eb1fb8313ab
+```
+
+`PUBLICATION_MAPPING.json` authenticates the bundle and records both identical
+tree mappings. Later delivery commits change documentation only. The complete
+research archive and its manifest remain unchanged by this publication step.

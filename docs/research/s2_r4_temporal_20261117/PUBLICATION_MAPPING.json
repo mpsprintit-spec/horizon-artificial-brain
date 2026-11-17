@@ -1,0 +1,24 @@
+{
+  "repository": "mpsprintit-spec/horizon-artificial-brain",
+  "base_commit": "6d8ad454bb2c5289a747ab7d7e0cdca58dd7db2c",
+  "mappings": [
+    {
+      "purpose": "frozen-primary-source-before-holdout",
+      "local_commit": "cee0fa80dfa1667ee2738c3467463eb1fb8313ab",
+      "published_commit": "262ab99b10a5aa7bdb22b2821c71b0803272e60a",
+      "identical_tree": "2d7b820ff0cb30fe7a8428bb4d031cf684f8b1fb"
+    },
+    {
+      "purpose": "final-research-report-and-evidence",
+      "local_commit": "f342b03ad7d5511a025812aa7a0c55a69c823ea9",
+      "published_commit": "4d383faab3a35da6fde2d7ebfe42826d10cd1905",
+      "identical_tree": "b5ddcb2c442d94572cd31e079f761535a81a1c34"
+    }
+  ],
+  "exact_local_history_bundle": {
+    "path": "S2R4_Source_History_20261117.bundle",
+    "bytes": 107792,
+    "sha256": "01da0fe1530ed3edb6bb1214b2453cde3d603849fdd7a78b8ec091a7e17af870"
+  },
+  "reason": "Publication API assigns commit metadata; file contents and Git trees are identical. Exact local history is retained in the Git bundle."
+}

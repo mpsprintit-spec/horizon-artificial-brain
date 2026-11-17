@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "file_name": "S2-R4_TEMPORAL_ERROR_HISTORY_LEARNING.md",
+      "library_file_id": "libfile_b8c0e4d0ecbc8191a2a91928f7f609b6",
+      "file_id": "file_00000000f7c481fd8f899a9e87a16d64",
+      "saved": true,
+      "identity_applied": true
+    },
+    {
+      "file_name": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz.part1",
+      "library_file_id": "libfile_f46346e1b1e08191a14ea298e8d3ec17",
+      "file_id": "file_00000000940081fd9e12f5940bbc2b40",
+      "saved": true,
+      "identity_applied": true
+    },
+    {
+      "file_name": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz.part2",
+      "library_file_id": "libfile_4c7ef8691fcc819180569bce39bc25c1",
+      "file_id": "file_00000000c28881fd94a66b1e49210a53",
+      "saved": true,
+      "identity_applied": true
+    },
+    {
+      "file_name": "S2-R4_PEMULIHAN_ARTEFAK.md",
+      "library_file_id": "libfile_4c95b775f3848191bd3fbe241e0ccfce",
+      "file_id": "file_00000000efe881fdbd1b31afa95b1d6f",
+      "saved": true,
+      "identity_applied": true
+    }
+  ],
+  "archive": {
+    "archive": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz",
+    "size": 626908084,
+    "sha256": "4d29df0bae3e92e808fd540d6a54d817d8f641c89047e14e19f41103cb83ab0a",
+    "payloads": 2250,
+    "parts": [
+      {
+        "name": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz.part1",
+        "size": 314572800,
+        "sha256": "086c785d4f35b00eff2cafaae381d0f3368f5c6df6ebaa03315e814ddadcee53"
+      },
+      {
+        "name": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz.part2",
+        "size": 312335284,
+        "sha256": "0e7bc420b1033ff9431769f8cd0649a66e1e2c7a05181c8809a2ce4821771c8f"
+      }
+    ]
+  },
+  "fresh_download_verification": {
+    "files": [
+      {
+        "name": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz.part1",
+        "bytes": 314572800,
+        "sha256": "086c785d4f35b00eff2cafaae381d0f3368f5c6df6ebaa03315e814ddadcee53",
+        "match": true
+      },
+      {
+        "name": "Horizon_S2_R4_Temporal_Error_History_Learning_20261117.tar.xz.part2",
+        "bytes": 312335284,
+        "sha256": "0e7bc420b1033ff9431769f8cd0649a66e1e2c7a05181c8809a2ce4821771c8f",
+        "match": true
+      }
+    ],
+    "combined_sha256": "4d29df0bae3e92e808fd540d6a54d817d8f641c89047e14e19f41103cb83ab0a",
+    "combined_match": true,
+    "payload_count_preupload": 2250
+  }
+}
