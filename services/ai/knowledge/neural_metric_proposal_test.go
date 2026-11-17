@@ -82,3 +82,25 @@ func TestNMetricProposalConfigValidation(t *testing.T) {
 		}
 	}
 }
+
+func TestNMetricSharedRepresentationGuard(t *testing.T) {
+	q := []NodeID{10, 11, 12, 13}
+	other := []NodeID{20, 21, 22, 23}
+	m := nModel{MetricEnabled: true, Circuits: []nCircuit{{Meta: NFeature{Node: 1, Kind: 1}, Axis: []float64{1}, Delta: .1}, {Meta: NFeature{Node: 2, Kind: 3, Parents: []NodeID{1, 1}}, Delta: .1}}, Heads: []nHead{{Query: q, W: []float64{1, 0}, Known: true, Metric: true}, {Query: other, W: []float64{0, 1}, Known: true, Metric: true}}}
+	changed := nClone(m)
+	changed.Circuits[0].Delta = .01
+	p := &NMetricProposalConfig{Protocol: NMetricBoundedV1, Strategy: "combined", Fractions: []float64{.25}, PreserveShared: true}
+	steps := nMetricProposals(m, changed, q, nil, p, true)
+	if len(steps) != 1 || steps[0].Rejection != "cross-query-representation-change" {
+		t.Fatal("transitive dependency was not protected", steps)
+	}
+	p.PreserveShared = false
+	if nMetricProposals(m, changed, q, nil, p, true)[0].Rejection != "" {
+		t.Fatal("historical law changed")
+	}
+	changed = nClone(m)
+	changed.Heads[0].W[0] = .5
+	if nMetricSharedChange(m, changed, q) {
+		t.Fatal("query plasticity was frozen")
+	}
+}

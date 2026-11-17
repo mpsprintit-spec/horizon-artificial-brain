@@ -17,7 +17,7 @@ func TestMetricBoundedNonS2RecoveryAndIndependence(t *testing.T) {
 	check := nGrid([]float64{-.9, -.2, .2, .9}, []float64{-.5, .5})
 	fn := func(p nXY) float64 { return .3 * p.x }
 	e := nLesson(0, 0, fit, check, fn)
-	e.Resolution.Proposal = &k.NMetricProposalConfig{Protocol: k.NMetricBoundedV1, Strategy: "combined", Fractions: []float64{1. / 64, 1. / 16, .25, .5}}
+	e.Resolution.Proposal = &k.NMetricProposalConfig{Protocol: k.NMetricBoundedV1, Strategy: "combined", Fractions: []float64{1. / 64, 1. / 16, .25, .5}, PreserveShared: true}
 	d := mTeach(t, r, e, 1e-5)
 	if !d.Committed || d.ProposalProtocol != k.NMetricBoundedV1 || d.Evidence == nil {
 		t.Fatal(d)
@@ -26,6 +26,16 @@ func TestMetricBoundedNonS2RecoveryAndIndependence(t *testing.T) {
 		if math.Abs(mRead(t, r, 0, p, 1e-5).NResolution.Value-fn(p)) > 1e-5 {
 			t.Fatal("non-S2 precision")
 		}
+	}
+	// Learn an independent variable on another head without moving the first.
+	old := mRead(t, r, 0, nXY{.3, -.3}, 1e-5).NResolution.Value
+	second := nLesson(1, 1, fit, check, func(p nXY) float64 { return .3 * p.y })
+	second.Resolution.Proposal = e.Resolution.Proposal
+	if !mTeach(t, r, second, 1e-5).Committed {
+		t.Fatal("second non-S2 head did not learn")
+	}
+	if math.Abs(mRead(t, r, 1, nXY{.3, -.3}, 1e-5).NResolution.Value+.09) > 1e-5 || mRead(t, r, 0, nXY{.3, -.3}, 1e-5).NResolution.Value != old {
+		t.Fatal("cross-task learning/preservation failed")
 	}
 	checkpoint := filepath.Join(dir, "bounded.json")
 	compositionCheck(t, r.Checkpoint(checkpoint))

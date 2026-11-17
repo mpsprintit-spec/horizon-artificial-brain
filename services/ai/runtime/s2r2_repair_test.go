@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 
 	k "github.com/project-horizon/horizon-core/services/ai/knowledge"
@@ -77,7 +78,7 @@ func s2r2Lesson(t *testing.T, r *BrainRuntime, id, arm string, fit, check []s2Tr
 	e.IndependenceGroup = id
 	e.Source = "s2r2-native-observed-error"
 	if arm != "legacy" {
-		e.Resolution.Proposal = &k.NMetricProposalConfig{Protocol: k.NMetricBoundedV1, Strategy: arm, Fractions: append([]float64(nil), s2r2Fractions...)}
+		e.Resolution.Proposal = &k.NMetricProposalConfig{Protocol: k.NMetricBoundedV1, Strategy: arm, Fractions: append([]float64(nil), s2r2Fractions...), PreserveShared: true}
 	}
 	_, receipt, err := r.LearnCompositionWithDiagnosis(e, s1Time(r))
 	s1Check(t, err)
@@ -103,15 +104,36 @@ func TestS2R2Prepare(t *testing.T) {
 	s2r2Copy(t, filepath.Join(root, "s2/lineage/events.jsonl"), filepath.Join(work, "source-events.jsonl"))
 	s2r2Copy(t, "../../../docs/research/s2_r2_repair_20261117/DESIGN.md", filepath.Join(work, "DESIGN.md"))
 	s2r2Copy(t, "../../../docs/research/s2_r2_repair_20261117/DECISION_RULES.json", filepath.Join(work, "DECISION_RULES.json"))
-	observer, ow := s2r2Fork(t, filepath.Join(work, "00-source.json"), filepath.Join(work, "source-events.jsonl"), filepath.Join(work, "development-observer"))
+	s2r2Copy(t, "../../../docs/research/s2_r2_repair_20261117/REPAIR_AMENDMENT.md", filepath.Join(work, "REPAIR_AMENDMENT.md"))
+	reuse := os.Getenv("HORIZON_S2R2_DEVELOPMENT_REUSE")
+	observerCP, observerWAL := filepath.Join(work, "00-source.json"), filepath.Join(work, "source-events.jsonl")
+	if reuse != "" {
+		observerCP = filepath.Join(reuse, "development-observer/final.json")
+		observerWAL = filepath.Join(reuse, "development-observer/events.jsonl")
+		raw, e := os.ReadFile(filepath.Join(reuse, "preoperation.jsonl"))
+		s1Check(t, e)
+		lines := strings.Split(string(raw), "\n")
+		if len(lines) < 512 {
+			t.Fatal("incomplete development ledger")
+		}
+		s1Check(t, os.WriteFile(filepath.Join(work, "preoperation.jsonl"), []byte(strings.Join(lines[:512], "\n")+"\n"), 0600))
+		s1Write(t, filepath.Join(work, "DEVELOPMENT_REUSE.json"), map[string]any{"from_failed_engineering_revision": true, "actual_observations": 512, "new_development_samples": 0, "parameter_copy": false})
+	}
+	observer, ow := s2r2Fork(t, observerCP, observerWAL, filepath.Join(work, "development-observer"))
 	pop := s1Pop(t, filepath.Join(root, "source/source"))
 	pairs := [][2]int64{{41011, 41017}, {41023, 41039}, {41047, 41051}, {41057, 41077}}
 	all := []s2Trial{}
 	constant := 0.
 	count := 0
 	for i, seeds := range pairs {
-		fit := s2Collect(t, observer, pop, seeds[0], 64, i >= 2, nil, -1)
-		check := s2Collect(t, observer, pop, seeds[1], 64, i >= 2, nil, -1)
+		var fit, check []s2Trial
+		if reuse != "" {
+			s1Read(t, filepath.Join(reuse, fmt.Sprintf("dev-%d-fit.json", i)), &fit)
+			s1Read(t, filepath.Join(reuse, fmt.Sprintf("dev-%d-check.json", i)), &check)
+		} else {
+			fit = s2Collect(t, observer, pop, seeds[0], 64, i >= 2, nil, -1)
+			check = s2Collect(t, observer, pop, seeds[1], 64, i >= 2, nil, -1)
+		}
 		s1Write(t, filepath.Join(work, fmt.Sprintf("dev-%d-fit.json", i)), fit)
 		s1Write(t, filepath.Join(work, fmt.Sprintf("dev-%d-check.json", i)), check)
 		for _, s := range fit {
@@ -303,7 +325,7 @@ func TestS2R2RetentionAndFreeze(t *testing.T) {
 	s1delta := s1AuditMax(s1AuditValue(t, a), s1AuditValue(t, b))
 	s1Write(t, filepath.Join(work, "s1-retention.json"), map[string]any{"shared_observations": len(rows), "coordinates": 3 * len(rows), "max_delta": s1delta, "pass": s1delta <= 1e-12, "historical_status": "PARTIAL; historical retention failure unchanged"})
 	frozen := map[string]any{"candidate_sequence": s1Snapshot(t, cp).Sequence, "candidate_native_checksum": s1Snapshot(t, cp).Checksum, "frozen_before_final_holdout": true, "holdout_evaluations": 0, "candidate_selection": "eighth block"}
-	for _, name := range []string{"s2r2-final.json", "METRIC_PROTOCOL.json", "ACQUISITION_PROTOCOL.json", "DESIGN.md", "DECISION_RULES.json"} {
+	for _, name := range []string{"s2r2-final.json", "METRIC_PROTOCOL.json", "ACQUISITION_PROTOCOL.json", "DESIGN.md", "DECISION_RULES.json", "REPAIR_AMENDMENT.md"} {
 		raw, e := os.ReadFile(filepath.Join(work, name))
 		s1Check(t, e)
 		frozen[name] = s1Digest(raw)
@@ -448,7 +470,7 @@ func TestS2R2FinalIndependentHoldout(t *testing.T) {
 	root, work := s2r2Paths(t)
 	var lock map[string]any
 	s1Read(t, filepath.Join(work, "CONFIRMATORY_LOCK.json"), &lock)
-	for _, name := range []string{"s2r2-final.json", "METRIC_PROTOCOL.json", "ACQUISITION_PROTOCOL.json", "DESIGN.md", "DECISION_RULES.json"} {
+	for _, name := range []string{"s2r2-final.json", "METRIC_PROTOCOL.json", "ACQUISITION_PROTOCOL.json", "DESIGN.md", "DECISION_RULES.json", "REPAIR_AMENDMENT.md"} {
 		raw, e := os.ReadFile(filepath.Join(work, name))
 		s1Check(t, e)
 		if lock[name] != s1Digest(raw) {

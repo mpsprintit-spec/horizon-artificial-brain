@@ -123,6 +123,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 				reg := nMetricRegression(before, m, state.Witnesses)
 				duplicate := len(m.Circuits) > len(before.Circuits) && nMetricRedundant(m, all, mode)
 				why := []string{}
+				if step.Rejection != "" {
+					why = append(why, step.Rejection)
+				}
 				parameterHash := ""
 				if proposal != nil {
 					parameterHash = nMetricHash(m)

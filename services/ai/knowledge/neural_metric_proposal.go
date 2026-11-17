@@ -15,9 +15,10 @@ import (
 const NMetricBoundedV1 = "incumbent-relative-v1"
 
 type NMetricProposalConfig struct {
-	Protocol  string    `json:"protocol"`
-	Strategy  string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
-	Fractions []float64 `json:"fractions,omitempty"`
+	Protocol       string    `json:"protocol"`
+	Strategy       string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
+	Fractions      []float64 `json:"fractions,omitempty"`
+	PreserveShared bool      `json:"preserve_shared,omitempty"`
 }
 
 // Evidence hashes include the actual encoded measurements, labels, uncertainty,
@@ -98,10 +99,11 @@ func nMetricIndependentEvidence(fit, check, witnesses []NWitness, query []NodeID
 }
 
 type nMetricProposal struct {
-	Model    nModel
-	Name     string
-	Fraction float64
-	Valid    bool
+	Model     nModel
+	Name      string
+	Fraction  float64
+	Valid     bool
+	Rejection string
 }
 
 func nMetricValidHead(m nModel, hi int) bool {
@@ -119,12 +121,17 @@ func nMetricValidHead(m nModel, hi int) bool {
 
 func nMetricProposals(before, full nModel, query []NodeID, fit []NWitness, p *NMetricProposalConfig, fullValid bool) []nMetricProposal {
 	if p == nil {
-		return []nMetricProposal{{full, "", 0, fullValid}}
+		return []nMetricProposal{{Model: full, Valid: fullValid}}
 	}
 	hi, bi := nHeadIndex(full, query), nHeadIndex(before, query)
 	out := []nMetricProposal{}
+	if p.PreserveShared && nMetricSharedChange(before, full, query) {
+		// Keep the proposal in the audit. This task-local refit has no evidence
+		// to revise another head's representation; query weights stay plastic.
+		return []nMetricProposal{{Model: full, Name: "full-refit", Fraction: 1, Valid: fullValid, Rejection: "cross-query-representation-change"}}
+	}
 	if p.Strategy == "full-refit" || p.Strategy == "combined" || p.Strategy == "bounded-joint" {
-		out = append(out, nMetricProposal{full, "full-refit", 1, fullValid})
+		out = append(out, nMetricProposal{Model: full, Name: "full-refit", Fraction: 1, Valid: fullValid})
 	}
 	// Interpolating coefficients from different readout bases has no meaning.
 	// Resolution changes may still be tested by the unchanged full-refit arm.
@@ -150,7 +157,7 @@ func nMetricProposals(before, full nModel, query []NodeID, fit []NWitness, p *NM
 				}
 				h.W[i] = old + a*(w-old)
 			}
-			out = append(out, nMetricProposal{m, "bounded-joint", a, nMetricValidHead(m, hi)})
+			out = append(out, nMetricProposal{Model: m, Name: "bounded-joint", Fraction: a, Valid: nMetricValidHead(m, hi)})
 		}
 	}
 	if len(full.Circuits) != len(before.Circuits)+1 || (p.Strategy != "new-feature" && p.Strategy != "combined") {
@@ -175,7 +182,41 @@ func nMetricProposals(before, full nModel, query []NodeID, fit []NWitness, p *NM
 		h.B = inc.B
 		h.W = append(slices.Clone(inc.W), a*w)
 		h.Known = true
-		out = append(out, nMetricProposal{m, "new-feature", a, nMetricValidHead(m, hi)})
+		out = append(out, nMetricProposal{Model: m, Name: "new-feature", Fraction: a, Valid: nMetricValidHead(m, hi)})
 	}
 	return out
+}
+
+func nMetricSharedChange(before, after nModel, query []NodeID) bool {
+	used := map[NodeID]bool{}
+	var include func(NodeID)
+	include = func(id NodeID) {
+		if used[id] {
+			return
+		}
+		used[id] = true
+		for _, c := range before.Circuits {
+			if c.Meta.Node == id {
+				for _, parent := range c.Meta.Parents {
+					include(parent)
+				}
+			}
+		}
+	}
+	for _, h := range before.Heads {
+		if slices.Equal(h.Query, query) || !h.Known {
+			continue
+		}
+		for i, w := range h.W {
+			if w != 0 {
+				include(before.Circuits[i].Meta.Node)
+			}
+		}
+	}
+	for i, c := range before.Circuits {
+		if used[c.Meta.Node] && (i >= len(after.Circuits) || !reflect.DeepEqual(c, after.Circuits[i])) {
+			return true
+		}
+	}
+	return false
 }
