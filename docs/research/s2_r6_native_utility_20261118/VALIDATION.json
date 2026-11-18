@@ -1,0 +1,44 @@
+[
+  {
+    "check": "default-tests.log",
+    "sha256": "6eaa5c5487d6c741742d3fdb9e6ee98281f779eeb87d10650210f65838467728",
+    "passed": true
+  },
+  {
+    "check": "build.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passed": true
+  },
+  {
+    "check": "vet.log",
+    "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "passed": true
+  },
+  {
+    "check": "tagged-regressions.log",
+    "sha256": "7e63c2fd3899be204686c69c6cd71f8f66e2858466736b145b1983997df221fe",
+    "passed": true
+  },
+  {
+    "check": "targeted-race.log",
+    "sha256": "a8f9b343dab1d4a4722d613ad3067c872aea42797a7aeaf23906b4aa826f2a2c",
+    "passed": true
+  },
+  {
+    "check": "reuse-unit-v3.log",
+    "sha256": "bbf3e2673e9f33d38e9fe814c042f1dab791af02d23159d892c96f150b2213b8",
+    "passed": true
+  },
+  {
+    "check": "horizon-ai-android-arm64",
+    "bytes": 18263341,
+    "sha256": "dc3fef636470565929abd24f5ff8dd1b8c1287af62d581954d5bfe644d31e769",
+    "crossbuild_only": true
+  },
+  {
+    "check": "horizon-chat-android-arm64",
+    "bytes": 7830750,
+    "sha256": "3c4ee1dd816a2f0e2d43f58ad656f09f66eef1e9b76d7db3e653ddb5e63861df",
+    "crossbuild_only": true
+  }
+]

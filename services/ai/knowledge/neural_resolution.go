@@ -66,6 +66,9 @@ type NResolutionLesson struct {
 	// Explicit, journaled research opt-in. Nil preserves historical v6 replay.
 	Proposal  *NMetricProposalConfig `json:"proposal,omitempty"`
 	Retention []NObservation         `json:"retention_anchors,omitempty"`
+	// Additional bounded banks keep distinct historical contexts separate.
+	// They are admission evidence, never a learned utility decision.
+	RetentionBanks [][]NObservation `json:"retention_banks,omitempty"`
 }
 type NFeature struct {
 	Node    NodeID   `json:"node"`
@@ -82,18 +85,19 @@ type NWitness struct {
 	EpisodeID        string    `json:"episode_id"`
 }
 type NTrial struct {
-	Candidate            *NMetricCandidateTrace `json:"candidate,omitempty"`
-	Proposal             string                 `json:"proposal,omitempty"`
-	Fraction             float64                `json:"fraction,omitempty"`
-	ParameterSHA256      string                 `json:"parameter_sha256,omitempty"`
-	ReadoutMode          string                 `json:"readout_mode,omitempty"`
-	FitValid             *bool                  `json:"fit_valid,omitempty"`
-	RejectedBy           []string               `json:"rejected_by,omitempty"`
-	Kind                 string                 `json:"kind"`
-	Feature              NodeID                 `json:"feature,omitempty"`
-	CheckError           float64                `json:"check_error"`
-	RetentionRegressions int                    `json:"retention_regressions"`
-	Eligible             bool                   `json:"eligible"`
+	RetentionBankRegressions []int                  `json:"retention_bank_regressions,omitempty"`
+	Candidate                *NMetricCandidateTrace `json:"candidate,omitempty"`
+	Proposal                 string                 `json:"proposal,omitempty"`
+	Fraction                 float64                `json:"fraction,omitempty"`
+	ParameterSHA256          string                 `json:"parameter_sha256,omitempty"`
+	ReadoutMode              string                 `json:"readout_mode,omitempty"`
+	FitValid                 *bool                  `json:"fit_valid,omitempty"`
+	RejectedBy               []string               `json:"rejected_by,omitempty"`
+	Kind                     string                 `json:"kind"`
+	Feature                  NodeID                 `json:"feature,omitempty"`
+	CheckError               float64                `json:"check_error"`
+	RetentionRegressions     int                    `json:"retention_regressions"`
+	Eligible                 bool                   `json:"eligible"`
 }
 type NMetricCandidateTrace struct {
 	FeatureOrdinal int
@@ -178,8 +182,16 @@ func validateNLesson(e CompositionExposure) error {
 	if len(b.Retention) > 64 || (len(b.Retention) > 0 && (b.Proposal == nil || b.Proposal.Protocol != NMetricConstrainedV1)) {
 		return errors.New("retention anchors require bounded constrained protocol")
 	}
+	if len(b.RetentionBanks) > 4 || (len(b.RetentionBanks) > 0 && (b.Proposal == nil || b.Proposal.Protocol != NMetricConstrainedV1)) {
+		return errors.New("additional retention banks require constrained protocol")
+	}
+	for _, bank := range b.RetentionBanks {
+		if len(bank) < 1 || len(bank) > 64 {
+			return errors.New("invalid additional retention bank size")
+		}
+	}
 	fit, check := map[string]bool{}, map[string]bool{}
-	for set, rows := range [][]NObservation{b.Fit, b.Check, b.Retention} {
+	for set, rows := range append([][]NObservation{b.Fit, b.Check, b.Retention}, b.RetentionBanks...) {
 		for _, o := range rows {
 			if !nFinite(o.OutcomeError) || o.OutcomeError < 0 || o.OutcomeError > 2 {
 				return errors.New("invalid outcome uncertainty")
@@ -203,8 +215,8 @@ func validateNLesson(e CompositionExposure) error {
 	if len(fit) < 2 || len(check) < 2 {
 		return errors.New("N diagnosis needs independent episodes")
 	}
-	if len(b.Retention) > 0 {
-		for _, a := range b.Retention {
+	for _, bank := range append([][]NObservation{b.Retention}, b.RetentionBanks...) {
+		for _, a := range bank {
 			for _, set := range [][]NObservation{b.Fit, b.Check} {
 				for _, row := range set {
 					if a.EpisodeID == row.EpisodeID || slices.Equal(nInput(a.Input), nInput(row.Input)) {

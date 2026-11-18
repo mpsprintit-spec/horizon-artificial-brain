@@ -1,0 +1,54 @@
+{
+  "archive_bytes": 1590405149,
+  "archive_sha256": "059fa4665ef3f1b5822801c212f27b9494d9b806d0ccb0892c62465cff89cf0c",
+  "authenticated_payloads": 1914,
+  "all_payloads_pass": true,
+  "uncompressed_payload_bytes": 14295582771,
+  "encoding": "tar+zstd; lossless, no evidence reduction",
+  "all_parts_verified": true,
+  "download_roundtrip_exact": true,
+  "parts": [
+    {
+      "part": 1,
+      "bytes": 314572800,
+      "sha256": "615dfc7ea36763445b119d854fa14e67438e9f1c60196ff08e9741cc33f030eb",
+      "library_file_id": "libfile_469545a608b881919ff1b84738e87144",
+      "independent_retrieval_verified": true
+    },
+    {
+      "part": 2,
+      "bytes": 314572800,
+      "sha256": "903d2fab798e6a93c83bf0c50415039a12a8c320131c8a8f8ad6df2dbb80e3f6",
+      "library_file_id": "libfile_bae1660b9eb08191a6157f2e19ce643d",
+      "independent_retrieval_verified": true
+    },
+    {
+      "part": 3,
+      "bytes": 314572800,
+      "sha256": "d63a9dbf9533e0f1ff610999ecc1f2b476b62a9288f34c2f7459a4baba557dc1",
+      "library_file_id": "libfile_05be0cf8cdfc81919d75d7c520f82495",
+      "independent_retrieval_verified": true
+    },
+    {
+      "part": 4,
+      "bytes": 314572800,
+      "sha256": "2ef749ce2d747527b39e764ca822635676739ffe3e98d952cd931677bf92f42c",
+      "library_file_id": "libfile_f4f58e7a3ccc81918c98504edc23769d",
+      "independent_retrieval_verified": true
+    },
+    {
+      "part": 5,
+      "bytes": 314572800,
+      "sha256": "9638e0caa15646b6be54b87dcebc3d181a19c4b37401aec1f6c6262f41a5b00e",
+      "library_file_id": "libfile_a6894b589a1c8191ae1622874bb0e487",
+      "independent_retrieval_verified": true
+    },
+    {
+      "part": 6,
+      "bytes": 17541149,
+      "sha256": "748425fe386baa265395b80f9d548e219d5eb57ce21dcebceffbc71a66716af3",
+      "library_file_id": "libfile_e8359057768c8191897f96c959bfd1be",
+      "independent_retrieval_verified": true
+    }
+  ]
+}
