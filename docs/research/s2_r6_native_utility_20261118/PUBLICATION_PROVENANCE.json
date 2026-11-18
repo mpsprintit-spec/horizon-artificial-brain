@@ -1,0 +1,12 @@
+{
+  "local_frozen_commit": "c068d827b1b8c2cd6edb701b8e9b16dc747ea120",
+  "scientific_tree": "6f09340835532cda247495d0550a7a6af55d48ac",
+  "published_scientific_commit": "b82b07f530bff9c72fc48b0b4be7b74f6d6a84a8",
+  "published_tree_exact": true,
+  "commit_metadata_differs": true,
+  "original_local_commits": "Horizon_S2_R6_Scientific_Commits_20261118.bundle",
+  "full_results_json_sha256": "fa5cba3a3f629857e132f79568b4823bda9c359b4c0b98fd46c01329bb578fcc",
+  "results_gzip_sha256": "e347ec64fecb8a3363b1f1d3525b6be71da4ea168445db657e40f875c1e5af0b",
+  "no_result_omission": true,
+  "main_changed": false
+}
