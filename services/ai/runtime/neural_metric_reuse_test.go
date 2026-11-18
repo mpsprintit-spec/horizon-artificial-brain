@@ -12,7 +12,7 @@ import (
 // A new readout must reuse a shared circuit, leave its original function
 // exact, and survive a replay beginning before the new query existed.
 func TestMetricFixedBasisNewQueryRecovery(t *testing.T) {
-	for _, protocol := range []string{k.NMetricReuseV1, k.NMetricReuseV2} {
+	for _, protocol := range []string{k.NMetricReuseV1, k.NMetricReuseV2, k.NMetricReuseV3} {
 		t.Run(protocol, func(t *testing.T) { testMetricFixedBasisNewQueryRecovery(t, protocol) })
 	}
 }
@@ -30,6 +30,9 @@ func testMetricFixedBasisNewQueryRecovery(t *testing.T, protocol string) {
 	before := mRead(t, r, 0, nXY{.371, -.29}, 1e-5).NResolution.Value
 	e := nLesson(1, 10, fit, check, func(p nXY) float64 { return -.3 * p.x })
 	e.Resolution.Proposal = &k.NMetricProposalConfig{Protocol: protocol, Strategy: "full-refit", FixedBasis: true, PreserveShared: true, FeatureLimit: 32}
+	if protocol == k.NMetricReuseV3 {
+		e.Resolution.Proposal.Ridge = .01
+	}
 	d := mTeach(t, r, e, 1e-5)
 	if !d.Committed {
 		t.Fatalf("new shared-basis query not learned: %+v", d)

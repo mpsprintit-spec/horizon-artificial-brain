@@ -1,0 +1,36 @@
+{
+  "raw_alias_pairs": 64,
+  "D0_exact_aliases": 64,
+  "D1_exact_aliases": 0,
+  "different_actual_utility": 64,
+  "controlled_access": {
+    "D0": {
+      "input_exact_alias": 64,
+      "activation_exact_alias": 64,
+      "metric_exact_alias": 64
+    },
+    "D1": {
+      "input_exact_alias": 0,
+      "activation_exact_alias": 63,
+      "metric_exact_alias": 0
+    },
+    "D2": {
+      "input_exact_alias": 0,
+      "activation_exact_alias": 63,
+      "metric_exact_alias": 0
+    },
+    "D3": {
+      "input_exact_alias": 0,
+      "activation_exact_alias": 63,
+      "metric_exact_alias": 0
+    }
+  },
+  "hidden_twins": 32,
+  "full_prestate_exact": 32,
+  "preinput_exact": 32,
+  "mean_conditional_variance": 1.110057095475318e-07,
+  "conditional_RMSE_floor_in_this_equal_gain_mixture": 0.00033317519347564247,
+  "total_variance_in_twin_corpus": 1.344684371174284e-06,
+  "irreducible_fraction_in_this_twin_mixture": 0.08255149827508808,
+  "not_global_R7_variance_decomposition": true
+}

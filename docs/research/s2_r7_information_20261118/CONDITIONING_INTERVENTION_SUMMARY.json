@@ -1,0 +1,738 @@
+[
+  {
+    "seed": 37,
+    "block": 0,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 4.209061987010755e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.049055222176692274,
+      "Fit_MSE": 1.0843469362847506e-06,
+      "Check_MSE": 4.2652903137833365e-06
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0020384267848711514,
+      "Fit_MSE": 1.0843206050032717e-06,
+      "Check_MSE": 3.866341680792408e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002033391938208041,
+      "Fit_MSE": 1.0845048403540807e-06,
+      "Check_MSE": 3.821968346998131e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 1,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 6.417503160853459e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.07002965834540566,
+      "Fit_MSE": 1.7050039750748111e-06,
+      "Check_MSE": 0.019233813092545064
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0021226807727666333,
+      "Fit_MSE": 1.704934509273503e-06,
+      "Check_MSE": 5.565752604617672e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002112537596356711,
+      "Fit_MSE": 1.705041869633922e-06,
+      "Check_MSE": 5.613078476592167e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 2,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": true,
+    "prior_Check_MSE": 3.943745638269378e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06253482079943178,
+      "Fit_MSE": 1.125714861000368e-06,
+      "Check_MSE": 3.1853913835629235e-06
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0020965055822340034,
+      "Fit_MSE": 1.1257145557060613e-06,
+      "Check_MSE": 3.185334295702518e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0020815135020649206,
+      "Fit_MSE": 1.1259377641435853e-06,
+      "Check_MSE": 3.1344674817719243e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 3,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 2.938391270750108e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06254854082986679,
+      "Fit_MSE": 8.979555419570831e-07,
+      "Check_MSE": 0.0023177165248935835
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002007960710163369,
+      "Fit_MSE": 8.845733569970688e-07,
+      "Check_MSE": 2.8656908187554033e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002005084693757825,
+      "Fit_MSE": 8.846816465539127e-07,
+      "Check_MSE": 2.848695617088299e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 4,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 4.039782785216411e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.0625460138274066,
+      "Fit_MSE": 8.177771262860902e-07,
+      "Check_MSE": 0.015631667191457508
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002075955643487298,
+      "Fit_MSE": 3.9211931577338835e-07,
+      "Check_MSE": 4.74298159798946e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.00206953057002904,
+      "Fit_MSE": 3.922363567933483e-07,
+      "Check_MSE": 4.704422501718687e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 5,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 2.5693720059373736e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06277245937442016,
+      "Fit_MSE": 2.5564934471772887e-06,
+      "Check_MSE": 0.0012084843834085572
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002120252533328651,
+      "Fit_MSE": 8.590234881383652e-07,
+      "Check_MSE": 2.376419190133515e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0021092135168628637,
+      "Fit_MSE": 8.597635360994109e-07,
+      "Check_MSE": 2.232359129389876e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 6,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 8.067176289054309e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.02820921250083349,
+      "Fit_MSE": 1.644513606824921e-06,
+      "Check_MSE": 7.080429713436984e-05
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0021021634976949857,
+      "Fit_MSE": 1.6431328700951447e-06,
+      "Check_MSE": 7.770599820288614e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0020966441737062555,
+      "Fit_MSE": 1.6436192312937906e-06,
+      "Check_MSE": 7.706065259271752e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 7,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 2.9556597365735493e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.07636395207843429,
+      "Fit_MSE": 8.250947496535311e-07,
+      "Check_MSE": 0.023107615213023215
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0019551625340418,
+      "Fit_MSE": 8.250947496535533e-07,
+      "Check_MSE": 1.3055862641461466e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.001954294539229387,
+      "Fit_MSE": 8.251289722079092e-07,
+      "Check_MSE": 1.3107559296126392e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 8,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 4.679966341455041e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.0506720406911254,
+      "Fit_MSE": 4.748636259949161e-06,
+      "Check_MSE": 0.0016860418500612311
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0025801272079176876,
+      "Fit_MSE": 4.748590182366238e-06,
+      "Check_MSE": 3.596857388692623e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0025687811639056152,
+      "Fit_MSE": 4.749211175214316e-06,
+      "Check_MSE": 3.5494211713437206e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 9,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 2.616198965162688e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06669953209334616,
+      "Fit_MSE": 2.076088468217903e-06,
+      "Check_MSE": 0.000719363768262228
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0024639161825747635,
+      "Fit_MSE": 2.0760541866377416e-06,
+      "Check_MSE": 1.2642028305307188e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002305292011521244,
+      "Fit_MSE": 2.0801504113826694e-06,
+      "Check_MSE": 1.1407996892273255e-05
+    }
+  },
+  {
+    "seed": 37,
+    "block": 10,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 5.414985955677233e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06855597968197931,
+      "Fit_MSE": 3.0682765850281e-06,
+      "Check_MSE": 1.2639709424547355e-05
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0020155887860295756,
+      "Fit_MSE": 1.6083980823133897e-06,
+      "Check_MSE": 4.760217660771079e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0020030894309823345,
+      "Fit_MSE": 1.6098026571009829e-06,
+      "Check_MSE": 4.685806842405351e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 11,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.758874567176583e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.027236333614832745,
+      "Fit_MSE": 2.548115838221065e-06,
+      "Check_MSE": 0.0001029275270138482
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002013358793893408,
+      "Fit_MSE": 2.5480604329220066e-06,
+      "Check_MSE": 1.7238157610853954e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0020125197093513385,
+      "Fit_MSE": 2.5481675870749275e-06,
+      "Check_MSE": 1.7254826252793003e-05
+    }
+  },
+  {
+    "seed": 37,
+    "block": 12,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 4.282031823583562e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06285006954999939,
+      "Fit_MSE": 6.5126263482201375e-06,
+      "Check_MSE": 3.9034278131967835e-05
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002061699383613781,
+      "Fit_MSE": 6.36952565825688e-06,
+      "Check_MSE": 1.959992552655433e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0020610682371610934,
+      "Fit_MSE": 6.369756101050228e-06,
+      "Check_MSE": 1.9370533380910548e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 13,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 2.1986790894403116e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.1977351897372975,
+      "Fit_MSE": 8.996333711361651e-06,
+      "Check_MSE": 0.015646698276074344
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002195673282038796,
+      "Fit_MSE": 6.664863854541248e-06,
+      "Check_MSE": 1.915095847044811e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0021675067361063517,
+      "Fit_MSE": 6.665263459724756e-06,
+      "Check_MSE": 1.920103517154892e-05
+    }
+  },
+  {
+    "seed": 37,
+    "block": 14,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": true,
+    "prior_Check_MSE": 7.142882553529272e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06253877955822035,
+      "Fit_MSE": 1.0636541905161011e-06,
+      "Check_MSE": 7.0946313330793025e-06
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0021572550359861297,
+      "Fit_MSE": 1.0527187876889306e-06,
+      "Check_MSE": 7.0708569013878595e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002153425757139681,
+      "Fit_MSE": 1.0536389060110197e-06,
+      "Check_MSE": 7.056961051678624e-06
+    }
+  },
+  {
+    "seed": 37,
+    "block": 15,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 4.204336681718425e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.04804024211824269,
+      "Fit_MSE": 9.601292569497621e-07,
+      "Check_MSE": 0.0003372007915940626
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002106520899857285,
+      "Fit_MSE": 9.601292569495715e-07,
+      "Check_MSE": 4.308427460761077e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002092540003702131,
+      "Fit_MSE": 9.605784462227393e-07,
+      "Check_MSE": 4.179193854668321e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 0,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.7485067456085767e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.12461206579370235,
+      "Fit_MSE": 2.7585824648297485e-06,
+      "Check_MSE": 0.04110173249916495
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0023444790549700797,
+      "Fit_MSE": 2.758581957167288e-06,
+      "Check_MSE": 5.23327518750317e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0023157179348771355,
+      "Fit_MSE": 2.7590204787537853e-06,
+      "Check_MSE": 5.060072688684733e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 1,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.4681962299306922e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.08932653493968966,
+      "Fit_MSE": 6.5667040737513885e-06,
+      "Check_MSE": 0.00016770902087190876
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0037637460513461805,
+      "Fit_MSE": 6.551296811373309e-06,
+      "Check_MSE": 1.8470124441556294e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.003757498026313967,
+      "Fit_MSE": 6.553050710608783e-06,
+      "Check_MSE": 1.8323370410668975e-05
+    }
+  },
+  {
+    "seed": 211,
+    "block": 2,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 2.2772933822376323e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.036576660124294544,
+      "Fit_MSE": 9.298502832421705e-07,
+      "Check_MSE": 3.7449546871215e-06
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0021220561083808913,
+      "Fit_MSE": 7.518445511577474e-07,
+      "Check_MSE": 2.255097056408412e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0021197513868478,
+      "Fit_MSE": 7.518907520067544e-07,
+      "Check_MSE": 2.256920130326145e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 3,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": true,
+    "prior_Check_MSE": 2.6019054075693826e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.07576741863316816,
+      "Fit_MSE": 2.8684767539498754e-06,
+      "Check_MSE": 2.4947297996743435e-06
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0022232778283739576,
+      "Fit_MSE": 2.843029633739914e-06,
+      "Check_MSE": 2.497313587561461e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002219134188754638,
+      "Fit_MSE": 2.8433460919771643e-06,
+      "Check_MSE": 2.4912705731694346e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 4,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.536561180925905e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.0956282648281585,
+      "Fit_MSE": 5.738975212049573e-07,
+      "Check_MSE": 0.007832988051031714
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002235815969504979,
+      "Fit_MSE": 5.738975210221521e-07,
+      "Check_MSE": 1.4429009294284478e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002236296874941782,
+      "Fit_MSE": 5.740088472602861e-07,
+      "Check_MSE": 1.3120748798439749e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 5,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 4.4467741439943754e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.04965708007193679,
+      "Fit_MSE": 1.2493818710839006e-06,
+      "Check_MSE": 0.003168328253902625
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0022154707440415894,
+      "Fit_MSE": 1.2493818710838546e-06,
+      "Check_MSE": 2.7458283416916607e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0022050756346923077,
+      "Fit_MSE": 1.2496748804288579e-06,
+      "Check_MSE": 2.743962570572159e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 6,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.8338823096635944e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.08857964796709944,
+      "Fit_MSE": 2.3007090527190523e-06,
+      "Check_MSE": 0.00017301882798300962
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0022153993534052697,
+      "Fit_MSE": 2.2059229959646418e-06,
+      "Check_MSE": 1.634560652042116e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0022120391611288354,
+      "Fit_MSE": 2.206090846587727e-06,
+      "Check_MSE": 1.6249582355349395e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 7,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.273556979946855e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.08872749448875004,
+      "Fit_MSE": 7.410990293237732e-06,
+      "Check_MSE": 0.04691926749733969
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0022906264490701253,
+      "Fit_MSE": 6.262219368392919e-06,
+      "Check_MSE": 3.5643271253174696e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002363922898269029,
+      "Fit_MSE": 6.262855818828005e-06,
+      "Check_MSE": 3.511882283488297e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 8,
+    "metric_prior_Check_improves_zero": true,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 8.938235781897597e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.04105510255888952,
+      "Fit_MSE": 2.3568732489527395e-06,
+      "Check_MSE": 0.0012694268012158883
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0035529533018482965,
+      "Fit_MSE": 2.35686681314043e-06,
+      "Check_MSE": 7.556916906177456e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0034322921005300977,
+      "Fit_MSE": 2.360116514653703e-06,
+      "Check_MSE": 7.58864346513449e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 9,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.1807960040007906e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.06995557940027924,
+      "Fit_MSE": 7.698008087258201e-07,
+      "Check_MSE": 0.006772753820374168
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0022465383086894067,
+      "Fit_MSE": 7.698008087180522e-07,
+      "Check_MSE": 1.2710824996993718e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002240431064900571,
+      "Fit_MSE": 7.700383191602546e-07,
+      "Check_MSE": 1.24606738952805e-05
+    }
+  },
+  {
+    "seed": 211,
+    "block": 10,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.2227060585565477e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.20911064411701616,
+      "Fit_MSE": 1.3710191090968733e-06,
+      "Check_MSE": 0.0935506121966275
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0026618408925763596,
+      "Fit_MSE": 1.3710168898661874e-06,
+      "Check_MSE": 4.900227215878982e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0027692287650043306,
+      "Fit_MSE": 1.3729134943496514e-06,
+      "Check_MSE": 5.9397144479765075e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 11,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": true,
+    "prior_Check_MSE": 7.831542534963144e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.08838212503632878,
+      "Fit_MSE": 1.4407543133422466e-06,
+      "Check_MSE": 7.375436853166903e-06
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002314941202484974,
+      "Fit_MSE": 1.4407543133418972e-06,
+      "Check_MSE": 7.37543648633631e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0023109865890287877,
+      "Fit_MSE": 1.4412475846784352e-06,
+      "Check_MSE": 7.331519877262443e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 12,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.1533559700678026e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.08895596326022145,
+      "Fit_MSE": 6.1782338243980245e-06,
+      "Check_MSE": 7.949666244746715e-05
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002369570463139416,
+      "Fit_MSE": 7.98905659633438e-07,
+      "Check_MSE": 9.994803283741058e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002367459977697267,
+      "Fit_MSE": 7.991630229777094e-07,
+      "Check_MSE": 9.978353223842126e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 13,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 5.058637109727548e-06,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.03462909182858386,
+      "Fit_MSE": 5.173259535218165e-07,
+      "Check_MSE": 0.0021577287488099353
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0021379034468216596,
+      "Fit_MSE": 5.113209384106123e-07,
+      "Check_MSE": 5.026440224008827e-06
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.002137559001498384,
+      "Fit_MSE": 5.113825278363449e-07,
+      "Check_MSE": 5.02855929288359e-06
+    }
+  },
+  {
+    "seed": 211,
+    "block": 14,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": false,
+    "prior_Check_MSE": 1.1955366746646844e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.04357125556140821,
+      "Fit_MSE": 1.3583594419877445e-06,
+      "Check_MSE": 0.007073158402691774
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.002690572952423386,
+      "Fit_MSE": 1.3583369944356438e-06,
+      "Check_MSE": 1.679644296540006e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0025634203414198853,
+      "Fit_MSE": 1.3692616424130994e-06,
+      "Check_MSE": 1.66983513731601e-05
+    }
+  },
+  {
+    "seed": 211,
+    "block": 15,
+    "metric_prior_Check_improves_zero": false,
+    "mode_switch_Check_improves_prior": true,
+    "prior_Check_MSE": 2.3487070811501513e-05,
+    "prior_peak": 7.989999999997963,
+    "metric-coefficients-warm-activation": {
+      "RMSE": 0.09420091591240444,
+      "Fit_MSE": 6.160643282471446e-06,
+      "Check_MSE": 2.031637618064622e-05
+    },
+    "zero-initialized-activation": {
+      "RMSE": 0.0027691952299193343,
+      "Fit_MSE": 6.1606432701917526e-06,
+      "Check_MSE": 1.0918270213596002e-05
+    },
+    "standardized-ridge-activation": {
+      "RMSE": 0.0027257581014958464,
+      "Fit_MSE": 6.161044958676295e-06,
+      "Check_MSE": 1.066785745599325e-05
+    }
+  }
+]

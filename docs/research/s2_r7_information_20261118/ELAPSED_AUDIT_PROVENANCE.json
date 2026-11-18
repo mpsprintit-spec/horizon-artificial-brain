@@ -1,0 +1,8 @@
+{
+  "source": "5e83ebfe85208ff1d2b82e37a137cdbad10369cc",
+  "binary_sha256": "b731dff7ad808b3e6f40e594926e8ae5a5c240b20874c068d9a3364fb8d8947c",
+  "test_sha256": "b86502cd020c061127c31c178954be30ec07fd3e8f50b7a9da7f4799f7df1d8e",
+  "existing_mechanism": "s2r4_retention_time_audit_test.go / settleMemoryTimeLocked",
+  "scope": "Supplementary source natural-time counterfactual. Raw source-age-mismatched failures retained. No fitting, threshold change, source mutation or model selection.",
+  "R6_authenticated_raw_AE1_pass_count": 48
+}

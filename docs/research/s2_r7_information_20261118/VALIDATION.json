@@ -1,0 +1,61 @@
+{
+  "checks": {
+    "go-test-all": {
+      "status": "PASS",
+      "log": "execution/go-test-all.log",
+      "bytes": 4311,
+      "sha256": "1743def7dc59649eb3120e0d8c622c7ccb5db80041d4b7b6e63cd550171d985c"
+    },
+    "go-build-all": {
+      "status": "PASS",
+      "log": "execution/go-build-all.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "go-vet-all": {
+      "status": "PASS",
+      "log": "execution/go-vet-all.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "tagged-native-regressions": {
+      "status": "PASS",
+      "log": "execution/tagged-native-regressions.log",
+      "bytes": 146,
+      "sha256": "3c66577da4a13f378533b4828dde3aef80d59be51ca701bf22781aa5bb3720eb"
+    },
+    "race-regularized-recovery": {
+      "status": "PASS",
+      "log": "execution/race-regularized-recovery.log",
+      "bytes": 73,
+      "sha256": "b0dea1ed935abaec345a0f3b956159299428b61bc4183ccf4f4e33aab9ac2fcc"
+    },
+    "regularization-unit-v3": {
+      "status": "PASS",
+      "log": "execution/regularization-unit-v3.log",
+      "bytes": 72,
+      "sha256": "7d8a2ee2bb1e8494c5bade39c76e8eda28ee3a68954eaf67efc6cc96e169f841"
+    },
+    "frozen-payload-final-verification": {
+      "status": "PASS",
+      "log": "execution/frozen-payload-final-verification.log",
+      "bytes": 36,
+      "sha256": "7d4ce333a95a54cb5f2375a83c214eea3c7aa432028f364ce90b18f261b7fcd0"
+    },
+    "horizon-ai-android-arm64": {
+      "status": "PASS cross-build; not physical-device latency/replay",
+      "bytes": 18265212,
+      "sha256": "ebe3821522816ce47925de324bd765ed48da5fc545c8641daf817b75c1435a50"
+    },
+    "horizon-chat-android-arm64": {
+      "status": "PASS cross-build; not physical-device latency/replay",
+      "bytes": 7833749,
+      "sha256": "82f3ff6da475cdf6059f3c8853006329cb04fb6ed348b7476f4690e02596975e"
+    }
+  },
+  "scientific_verdict": "PARTIAL \u2014 H1 FAILED",
+  "exact_models": 60,
+  "AE1_revision_time_matched": 60,
+  "raw_source_unmatched": 0,
+  "no_main_or_production_change": true
+}

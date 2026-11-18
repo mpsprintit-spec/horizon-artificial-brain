@@ -47,6 +47,10 @@ func (k *KnowledgeBase) s2r6Model(in CompositionInput) (nModel, []NodeID, error)
 func (k *KnowledgeBase) S2R6Describe(in CompositionInput, change S2R6Intervention) (S2R6Context, error) {
 	k.RLock()
 	defer k.RUnlock()
+	return k.s2r6DescribeLocked(in, change)
+}
+
+func (k *KnowledgeBase) s2r6DescribeLocked(in CompositionInput, change S2R6Intervention) (S2R6Context, error) {
 	out := S2R6Context{}
 	m, q, err := k.s2r6Model(in)
 	if err != nil {
