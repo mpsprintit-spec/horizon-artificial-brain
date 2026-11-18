@@ -134,6 +134,7 @@ type NHeadTopology struct {
 	Features []NodeID `json:"features"`
 }
 type NResolutionState struct {
+	AdaptiveGrowthVersion string `json:"adaptive_growth_version,omitempty"`
 	// Restore bound for an explicitly admitted research lesson. Omitted in
 	// historical/production state. It does not opt future lessons into growth.
 	ExperimentalFeatureLimit int             `json:"experimental_feature_limit,omitempty"`
@@ -179,10 +180,11 @@ func validateNLesson(e CompositionExposure) error {
 	if len(b.Fit) < 4 || len(b.Check) < 4 || len(b.Fit) > 64 || len(b.Check) > 64 {
 		return errors.New("N lesson requires bounded fit and independent check sets")
 	}
-	if len(b.Retention) > 64 || (len(b.Retention) > 0 && (b.Proposal == nil || b.Proposal.Protocol != NMetricConstrainedV1)) {
+	retentionProtocol := b.Proposal != nil && (b.Proposal.Protocol == NMetricConstrainedV1 || b.Proposal.Protocol == NMetricAdaptiveV1)
+	if len(b.Retention) > 64 || (len(b.Retention) > 0 && !retentionProtocol) {
 		return errors.New("retention anchors require bounded constrained protocol")
 	}
-	if len(b.RetentionBanks) > 4 || (len(b.RetentionBanks) > 0 && (b.Proposal == nil || b.Proposal.Protocol != NMetricConstrainedV1)) {
+	if len(b.RetentionBanks) > 4 || (len(b.RetentionBanks) > 0 && !retentionProtocol) {
 		return errors.New("additional retention banks require constrained protocol")
 	}
 	for _, bank := range b.RetentionBanks {
@@ -269,6 +271,10 @@ type nModel struct {
 	MetricEnabled bool
 	Circuits      []nCircuit
 	Heads         []nHead
+	// Disposable immutable-input memoization for one adaptive search basis.
+	// nClone deliberately drops it before any circuit mutation; it is never
+	// serialized, shared by runtimes, or retained as learned memory.
+	evaluationCache map[nMetricEvaluationKey]nMetricEvaluation
 }
 
 func nDot(a, b []float64) float64 {

@@ -23,6 +23,11 @@ const NMetricReuseV1 = "native-shared-basis-reuse-v1"
 const NMetricReuseV2 = "native-shared-basis-reuse-v2"
 const NMetricReuseV3 = "native-shared-basis-regularized-v3"
 
+// A versioned continuation law: the feature budget is a physical resource
+// bound, while Fit/Check evidence decides whether any structure is recruited.
+const NMetricAdaptiveV1 = "native-adaptive-representation-v1"
+const maxNAdaptiveFeatures = 256
+
 func nMetricReuse(p string) bool {
 	return p == NMetricReuseV1 || p == NMetricReuseV2 || p == NMetricReuseV3
 }
@@ -33,8 +38,8 @@ type NMetricProposalConfig struct {
 	Strategy         string    `json:"strategy"` // full-refit, new-feature, bounded-joint, combined
 	Fractions        []float64 `json:"fractions,omitempty"`
 	PreserveShared   bool      `json:"preserve_shared,omitempty"`
-	// Explicit fixed-capacity research intervention. Zero preserves the
-	// historical 32-feature law; this is not an adaptive growth policy.
+	// Physical search ceiling. Zero preserves 32 for historical protocols;
+	// the versioned adaptive protocol uses its independent resource bound.
 	FeatureLimit int `json:"feature_limit,omitempty"`
 	// Explicit research search within the existing feature budget. Only
 	// task-local leaf directions may change; every existing gate still runs.
@@ -43,11 +48,18 @@ type NMetricProposalConfig struct {
 	BlockSparse          bool    `json:"block_sparse,omitempty"`
 	FixedBasis           bool    `json:"fixed_basis,omitempty"`
 	Ridge                float64 `json:"ridge,omitempty"`
+	// Explicit causal research interventions; zero values enable normal reuse.
+	ExcludedFeatures []NodeID `json:"excluded_features,omitempty"`
+	PermuteGrowth    bool     `json:"permute_growth,omitempty"`
+	GrowthSeed       int64    `json:"growth_seed,omitempty"`
 }
 
 func nMetricFeatureLimit(p *NMetricProposalConfig) int {
 	if p != nil && p.FeatureLimit != 0 {
 		return p.FeatureLimit
+	}
+	if p != nil && p.Protocol == NMetricAdaptiveV1 {
+		return maxNAdaptiveFeatures
 	}
 	return maxNFeatures
 }
@@ -65,19 +77,33 @@ func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if p == nil {
 		return nil
 	}
-	if !nFinite(p.Ridge) || (p.Protocol == NMetricReuseV3 && (p.Ridge <= 0 || p.Ridge > 1)) || (p.Protocol != NMetricReuseV3 && p.Ridge != 0) {
-		return errors.New("regularization requires explicit versioned fixed-basis protocol")
+	adaptive := p.Protocol == NMetricAdaptiveV1
+	if !nFinite(p.Ridge) || ((p.Protocol == NMetricReuseV3 || adaptive) && (p.Ridge <= 0 || p.Ridge > 1)) || (p.Protocol != NMetricReuseV3 && !adaptive && p.Ridge != 0) {
+		return errors.New("regularization requires an explicit versioned protocol")
 	}
-	if !validNFeatureLimit(p.FeatureLimit) {
-		return errors.New("experimental numerical feature limit must be 32 or 64")
+	if (!adaptive && !validNFeatureLimit(p.FeatureLimit)) || (adaptive && (p.FeatureLimit < 0 || p.FeatureLimit > maxNAdaptiveFeatures)) {
+		return errors.New("invalid numerical feature resource bound for protocol")
 	}
-	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1 && !nMetricReuse(p.Protocol) {
+	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1 && !nMetricReuse(p.Protocol) && !adaptive {
 		return errors.New("unknown numerical proposal protocol")
 	}
-	if (p.RefineLeafDirections && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1) || ((p.Protocol == NMetricRefineV1 || p.Protocol == NMetricBlockV1) && !p.RefineLeafDirections) || (p.RefineLeafDirections && !p.PreserveShared) {
+	if (p.RefineLeafDirections && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1 && !adaptive) || ((p.Protocol == NMetricRefineV1 || p.Protocol == NMetricBlockV1) && !p.RefineLeafDirections) || (p.RefineLeafDirections && !p.PreserveShared) {
 		return errors.New("leaf refinement requires its explicit protocol and shared protection")
 	}
-	if p.Protocol == NMetricConstrainedV1 {
+	if adaptive {
+		if !p.PreserveShared || p.Update != "" || p.BlockSparse || (p.FixedBasis && p.RefineLeafDirections) || len(p.ExcludedFeatures) > maxNAdaptiveFeatures {
+			return errors.New("adaptive representation requires shared protection and bounded generic interventions")
+		}
+		seen := map[NodeID]bool{}
+		for _, id := range p.ExcludedFeatures {
+			if id == 0 || seen[id] {
+				return errors.New("invalid excluded feature")
+			}
+			seen[id] = true
+		}
+	} else if len(p.ExcludedFeatures) != 0 || p.PermuteGrowth || p.GrowthSeed != 0 {
+		return errors.New("representation interventions require adaptive protocol")
+	} else if p.Protocol == NMetricConstrainedV1 {
 		if !p.PreserveShared || !slices.Contains([]string{"bias", "affine", "readout"}, p.Update) || (p.FixedBasis && (p.RefineLeafDirections || p.BlockSparse)) {
 			return errors.New("invalid constrained subspace")
 		}

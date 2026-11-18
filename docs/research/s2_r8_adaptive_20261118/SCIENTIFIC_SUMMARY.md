@@ -1,0 +1,17 @@
+# S2-R8 — PARTIAL
+
+Native adaptive representation continues the authentic R2 sequence 80735 on one N per isolated arm. Across seeds 37, 83, 151, 211, 307, 419 and 1,728 independent final cases, pooled S2 RMSE improves from fixed-32 0.06225278 to adaptive 0.04643250: +25.413%, paired hierarchical CI95 [+15.380%, +34.164%]. Adaptive is also better than permuted-growth control D by 17.675%, CI97.5 [+8.492%, +25.564%].
+
+**The complete learning gate fails.** Normal-condition RMSE worsens from 0.00910839 to 0.01079246 (+18.49%), exceeding the prelocked 5% limit. Shifted RMSE is 0.01253823 versus 0.01312081; persistent hidden-dynamics RMSE improves from 0.10670546 to 0.07860851. No checkpoint was selected by score; all arms use the fourth block.
+
+B ends with 35–36 numerical features, 277–278 neural units and 6,492–6,598 synapses. A and C remain at 32/274/6,408. D reaches 36/278/6,516–6,626. A/B/D each admit 24/24 lessons; C admits 0/24 because the inherited-ancestry exclusion violates retention. C is therefore an attempted, ineffective learning ablation; its nominal score cannot prove the benefit of prior-knowledge reuse.
+
+Historical retention passes 96/96 blocks. S1 prediction shift is exactly zero; maximum A–E1 oracle difference is 6.66e-16 under the declared revision/time matched evaluation control. Every checkpoint, full authenticated-prefix replay, restart, fresh-runtime rollback and additional-learning comparison passes in the separate recovery audit: 24/24 models. Seventeen models admit the extra post-restart lesson; the other seven preserve the native rejection decision exactly.
+
+The frozen training harness did not return success: 18 runs hit its unsupported hot-restore probe and six later runs exhausted workspace storage during output/continuation checks. Six interrupted cohorts were deterministically reconstructed and every block 1–4 state matched its saved scientific checkpoint exactly. Original errors, partial outputs and timing files are preserved. The corrected companion tests, rather than the original exit status, support the recovery claim. Six cost trajectories are explicitly remeasured replay costs. Three final evaluation cleanup races were rerun sequentially with identical previously computed scores; no learner, thresholds, cohort or selected checkpoint changed.
+
+The numeric codec and selected metric head preserve 384/384 observed contrast pairs across the six B models. Activation can still saturate. Sixteen identical prospective-input twins with different unobserved future gains remain indistinguishable, correctly locating a missing-information limit rather than a capacity remedy. The fixed 25 CPU-second comparison admits all four blocks in every arm and yields the same final scores; it does not establish equal consumed work or superior error per CPU second.
+
+Default tests, native builds, vet, targeted race checks, tagged adaptive regressions, and AI/chat/CLI Android arm64 cross-builds pass. Physical Android latency and long continual curricula beyond this experiment are not tested. Main remains `11c6e0a78547d68a0be8f78b3c801e912722608d`; no PR, merge or production Brain promotion is performed.
+
+The architecture repair is functional. The next scientific task is to protect new normal-distribution generalization during contextual updates and establish an effective, retention-compatible partial reuse ablation. Capacity growth alone is not a success criterion.

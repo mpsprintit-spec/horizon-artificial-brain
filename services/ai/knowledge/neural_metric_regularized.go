@@ -5,9 +5,14 @@ package knowledge
 // through the existing shared protection, Check, retention and signed writer.
 import (
 	"math"
+	"slices"
 )
 
 func nMetricRegularizedProposal(basis nModel, query []NodeID, rows []NWitness, ridge float64) nMetricProposal {
+	return nMetricRegularizedMaskedProposal(basis, query, rows, ridge, nil)
+}
+
+func nMetricRegularizedMaskedProposal(basis nModel, query []NodeID, rows []NWitness, ridge float64, excluded map[NodeID]bool) nMetricProposal {
 	m := nClone(basis)
 	hi := nHeadIndex(m, query)
 	h := &m.Heads[hi]
@@ -17,6 +22,14 @@ func nMetricRegularizedProposal(basis nModel, query []NodeID, rows []NWitness, r
 	targetMean := 0.
 	for i, r := range rows {
 		x[i] = nMetricValues(m, r.X, h.Metric)
+		if len(excluded) > 0 {
+			x[i] = slices.Clone(x[i])
+		}
+		for j, c := range m.Circuits {
+			if excluded[c.Meta.Node] {
+				x[i][j] = 0
+			}
+		}
 		targetMean += r.Outcome / float64(len(rows))
 		for j, v := range x[i] {
 			mean[j] += v / float64(len(rows))

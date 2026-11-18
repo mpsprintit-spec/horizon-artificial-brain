@@ -35,6 +35,10 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	}
 	fit, check := convert(e.Resolution.Fit), convert(e.Resolution.Check)
 	proposal := e.Resolution.Proposal
+	adaptive := proposal != nil && proposal.Protocol == NMetricAdaptiveV1
+	if adaptive {
+		before.evaluationCache = make(map[nMetricEvaluationKey]nMetricEvaluation)
+	}
 	anchors := convert(e.Resolution.Retention)
 	extraBanks := make([][]NWitness, len(e.Resolution.RetentionBanks))
 	for i, bank := range e.Resolution.RetentionBanks {
@@ -137,7 +141,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			m.Heads[hi].Metric = mode
 			fullValid := false
 			var fitDiagnostic *nMetricFitDiagnostic
-			regularized := proposal != nil && proposal.Protocol == NMetricReuseV3
+			regularized := proposal != nil && (proposal.Protocol == NMetricReuseV3 || adaptive)
 			if !constrained && !regularized && proposal != nil && proposal.Protocol != NMetricBoundedV1 {
 				// Same solver, with diagnostics only for explicitly versioned
 				// research commands. Historical receipts/replay stay byte exact.
@@ -170,8 +174,14 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			if proposal != nil && proposal.Protocol == NMetricReuseV3 {
 				steps = []nMetricProposal{nMetricRegularizedProposal(m, query, fit, proposal.Ridge)}
 			}
+			if adaptive {
+				steps = nMetricAdaptiveSteps(before, m, query, fit, proposal)
+			}
 			for _, step := range steps {
 				m := step.Model
+				if adaptive {
+					m.evaluationCache = make(map[nMetricEvaluationKey]nMetricEvaluation)
+				}
 				valid := step.Valid
 				for _, row := range all {
 					if !nMetricEvaluate(m, row.X, row.MeasurementError).Valid {
@@ -284,7 +294,11 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		}
 	}
 	consider("readout", 0, nClone(before))
+	growthFit := nMetricGrowthEvidence(best, fit, proposal)
 	for i, c := range before.Circuits {
+		if adaptive && (i < len(before.Circuits)-4 || !nMetricRefinableLeaf(before, i, query)) {
+			continue
+		}
 		if proposal != nil && (proposal.Protocol == NMetricConstrainedV1 || proposal.FixedBasis) {
 			continue
 		}
@@ -304,19 +318,19 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	if (growthAllowed || refinementAllowed) && !(proposal != nil && proposal.BlockSparse) {
 		axis, mean := make([]float64, nDimensions), make([]float64, nDimensions)
 		for j := range mean {
-			base := fit[0].X[j]
+			base := growthFit[0].X[j]
 			deltas := 0.
-			for _, r := range fit {
-				deltas += (r.X[j] - base) / float64(len(fit))
+			for _, r := range growthFit {
+				deltas += (r.X[j] - base) / float64(len(growthFit))
 			}
 			mean[j] = base + deltas
 		}
 		maxResidual := 0.
-		for _, r := range fit {
+		for _, r := range growthFit {
 			maxResidual = math.Max(maxResidual, math.Abs(r.Outcome-nPredict(best, r.X, r.Query)))
 		}
 		if maxResidual > 0 {
-			for _, r := range fit {
+			for _, r := range growthFit {
 				residual := (r.Outcome - nPredict(best, r.X, r.Query)) / maxResidual
 				for j, x := range r.X {
 					axis[j] += residual * (x - mean[j])
@@ -344,6 +358,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			}
 			if refinementAllowed {
 				for i, c := range before.Circuits {
+					if adaptive && i < len(before.Circuits)-4 {
+						continue
+					}
 					if !nMetricRefinableLeaf(before, i, query) {
 						continue
 					}
@@ -376,7 +393,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			candidates := []product{}
 			acts, metrics := make([][]float64, len(fit)), make([][]float64, len(fit))
 			residual := make([]float64, len(fit))
-			for i, r := range fit {
+			for i, r := range growthFit {
 				v := nMetricEvaluate(before, r.X, nil)
 				acts[i], metrics[i] = v.Activation, v.Metric
 				residual[i] = r.Outcome - nPredict(best, r.X, r.Query)
@@ -403,6 +420,12 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 				}
 				for i := range before.Circuits {
 					for j := i; j < len(before.Circuits); j++ {
+						if adaptive {
+							excluded := nMetricExcluded(before, proposal)
+							if excluded[before.Circuits[i].Meta.Node] || excluded[before.Circuits[j].Meta.Node] {
+								continue
+							}
+						}
 						// Multiplying a varying feature by an observed constant adds no
 						// identifiable distinction beyond its existing scale and bias.
 						if !varying[i] || !varying[j] {
@@ -495,7 +518,23 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			}
 		}
 	}
+	if adaptive && growthAllowed {
+		for _, axis := range nMetricAdaptiveAxes(best, query, growthFit) {
+			for _, delta := range []float64{nMetricAxisDelta(axis, fit), nMetricAdaptiveDelta(axis, fit)} {
+				m := nClone(before)
+				m.Circuits = append(m.Circuits, nCircuit{Meta: NFeature{Kind: 1}, Axis: axis, Center: nCenter(axis, fit), Delta: delta})
+				for i := range m.Heads {
+					m.Heads[i].W = append(m.Heads[i].W, 0)
+				}
+				consider("adaptive-measured-direction", 0, m)
+			}
+		}
+	}
 	if selected {
+		if adaptive {
+			state.AdaptiveGrowthVersion = NMetricAdaptiveV1
+			state.ExperimentalFeatureLimit = max(state.ExperimentalFeatureLimit, nMetricFeatureLimit(proposal), len(best.Circuits))
+		}
 		if proposal != nil && proposal.FeatureLimit != 0 {
 			// Never invalidate an existing larger topology when a later lesson
 			// requests a smaller search budget. Shrinking needs its own study.
@@ -592,8 +631,10 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		if !found {
 			state.Heads = append(state.Heads, topo)
 		}
-		if proposal != nil && proposal.Protocol == NMetricConstrainedV1 {
-			installed := k.loadNModel(bank, queries)
+		if proposal != nil && (proposal.Protocol == NMetricConstrainedV1 || adaptive) {
+			installedQueries := slices.Clone(queries)
+			installedQueries[0] = slices.Clone(query)
+			installed := k.loadNModel(bank, installedQueries)
 			if regressions(before, installed) > 0 || nMetricSharedChange(before, installed, query) || !nMetricValidHead(installed, nHeadIndex(installed, query)) {
 				return errors.New("post-install constrained native validation failed")
 			}

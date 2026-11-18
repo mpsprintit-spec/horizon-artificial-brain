@@ -118,7 +118,32 @@ func nRoundoff(x float64) float64 {
 func nImproves(a, b float64) bool {
 	return nFinite(a) && a+nRoundoff(math.Max(math.Abs(a), math.Abs(b))) < b
 }
+
+type nMetricEvaluationKey struct {
+	X, Error *float64
+	NX, NE   int
+}
+
 func nMetricEvaluate(m nModel, x, inputError []float64) nMetricEvaluation {
+	if m.evaluationCache == nil {
+		return nMetricEvaluateUncached(m, x, inputError)
+	}
+	key := nMetricEvaluationKey{NX: len(x), NE: len(inputError)}
+	if len(x) > 0 {
+		key.X = &x[0]
+	}
+	if len(inputError) > 0 {
+		key.Error = &inputError[0]
+	}
+	if value, ok := m.evaluationCache[key]; ok {
+		return value
+	}
+	value := nMetricEvaluateUncached(m, x, inputError)
+	m.evaluationCache[key] = value
+	return value
+}
+
+func nMetricEvaluateUncached(m nModel, x, inputError []float64) nMetricEvaluation {
 	count := len(m.Circuits)
 	e := nMetricEvaluation{make([]float64, count), make([]float64, count), make([]float64, count), make([]float64, count), make([]float64, count), true}
 	ids := map[NodeID]int{}
@@ -599,7 +624,8 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		return errors.New("invalid diagnostic uncertainty")
 	}
 	trialLimit := 128
-	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1 || d.ProposalProtocol == NMetricConstrainedV1 || d.ProposalProtocol == NMetricBlockV1 || nMetricReuse(d.ProposalProtocol)
+	adaptive := d.ProposalProtocol == NMetricAdaptiveV1
+	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1 || d.ProposalProtocol == NMetricConstrainedV1 || d.ProposalProtocol == NMetricBlockV1 || nMetricReuse(d.ProposalProtocol) || adaptive
 	if bounded {
 		trialLimit = 1024
 	}
@@ -654,7 +680,11 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 			}
 		}
 		if c := t.Candidate; c != nil {
-			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1 && d.ProposalProtocol != NMetricConstrainedV1 && d.ProposalProtocol != NMetricBlockV1 && !nMetricReuse(d.ProposalProtocol)) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= 64 || len(c.Readout) > 64 || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
+			capacity := 64
+			if adaptive {
+				capacity = maxNAdaptiveFeatures
+			}
+			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1 && d.ProposalProtocol != NMetricConstrainedV1 && d.ProposalProtocol != NMetricBlockV1 && !nMetricReuse(d.ProposalProtocol) && !adaptive) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= capacity || len(c.Readout) > capacity || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
 				return errors.New("invalid audited candidate shape")
 			}
 			for _, v := range append(slices.Clone(c.Axis), c.Readout...) {

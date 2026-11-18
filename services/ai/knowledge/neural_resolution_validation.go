@@ -69,7 +69,15 @@ func validateNResolutionState(data []byte, enabled bool, version string) error {
 		return err
 	}
 	limit := maxNFeatures
-	if !validNFeatureLimit(s.ExperimentalFeatureLimit) || (!metric && s.ExperimentalFeatureLimit != 0) {
+	adaptive := s.AdaptiveGrowthVersion == NMetricAdaptiveV1
+	if s.AdaptiveGrowthVersion != "" && !adaptive {
+		return errors.New("unknown adaptive representation contract")
+	}
+	validLimit := validNFeatureLimit(s.ExperimentalFeatureLimit)
+	if adaptive {
+		validLimit = metric && s.ExperimentalFeatureLimit > 0 && s.ExperimentalFeatureLimit <= maxNAdaptiveFeatures
+	}
+	if !validLimit || (!metric && s.ExperimentalFeatureLimit != 0) {
 		return errors.New("invalid experimental numerical capacity")
 	}
 	if s.ExperimentalFeatureLimit != 0 {
