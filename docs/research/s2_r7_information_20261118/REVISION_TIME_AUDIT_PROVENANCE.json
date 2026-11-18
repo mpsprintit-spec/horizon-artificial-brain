@@ -1,0 +1,12 @@
+{
+  "source": "5e83ebfe85208ff1d2b82e37a137cdbad10369cc",
+  "binary_sha256": "cbea2f1d54c4b2f0618a7fd169632fe105dc58b818e33aefb33bc684fc789e7f",
+  "test_sha256": "627e1170f1125d7bfd03f5acc35893e24f42dc8256a6e22f68446efb3f64585e",
+  "existing_mechanism": "R6 revision-matched nonlearning observer control; flexAt derives probe time from LastSequence",
+  "scope": "Read-only postconfirmatory measurement control; no learning, threshold change or candidate mutation",
+  "models": 60,
+  "pass": 60,
+  "raw_unmatched_pass": 0,
+  "physical_time_only_pass": 0,
+  "physical_time_only_models": 30
+}

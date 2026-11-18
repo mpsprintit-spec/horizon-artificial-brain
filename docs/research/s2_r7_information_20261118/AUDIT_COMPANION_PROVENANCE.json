@@ -1,0 +1,10 @@
+{
+  "frozen_native_source": "5e83ebfe85208ff1d2b82e37a137cdbad10369cc",
+  "original_binary_sha256": "be1c71448ccaedbf061f60538f1614afc9799398a4e842f4879f32b40f167935",
+  "audit_binary_sha256": "1569d3dd9bf3e890007d9ba5aa370f23fe29cf1c74e576c5d6d8f2eb89ede126",
+  "companion_test_sha256": "29aa9a8c94b4337b68aea7dd2d0a70902350847f04a97a5c648ba6e5e23269cd",
+  "change": "Record original A-E1 pass/fail and full raw oracles without aborting subsequent models. Preserve every exact replay/restart/signed/source test. Original scientific criteria and all learned states unchanged.",
+  "frozen_persistence_test_initial_results": "FAIL A-E1; retained in original logs",
+  "functional_failure_can_coexist_with_exact_persistence": true,
+  "nonfinite_comparison_deltas": "encoded as strings plus flag; original false verdict retained"
+}

@@ -1,0 +1,69 @@
+{
+  "archive_bytes": 3577492032,
+  "archive_sha256": "67cc764a946d1e664ccb53593b2d3dbacc35375da83f1a6613539f4847e13cc1",
+  "authenticated_payloads": 2424,
+  "uncompressed_payload_bytes": 10254275266,
+  "all_payloads_pass": true,
+  "parts": [
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part01",
+      "bytes": 314572800,
+      "sha256": "825517522f368762e1618797bb17630c0e6ab6d4210aad667bc7352a0d0f007c"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part02",
+      "bytes": 314572800,
+      "sha256": "141e004a1f8afd65788887f60899a5d278d860468107fc4d0a0f905a3fab08ac"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part03",
+      "bytes": 314572800,
+      "sha256": "57b477cdbeeed99af11bf20d565a68c954080f95b686205c70fb74bb6adc4a81"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part04",
+      "bytes": 314572800,
+      "sha256": "e32b386a9178e6bac6b020b1a7637fe90c99a3a17e1e91ef446e7b4f8791a6d3"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part05",
+      "bytes": 314572800,
+      "sha256": "6c1462354c06a44938d4059e019ee48023a3f39320c9acea135327131fb1829c"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part06",
+      "bytes": 314572800,
+      "sha256": "8b643f9ee6d71bfae7232554797ed47f63a9418d6f5f94c08c73b42bf75134d0"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part07",
+      "bytes": 314572800,
+      "sha256": "150332bdf03a52c53f3827e2db1594174f90b630025d340d2aff8666923c7c19"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part08",
+      "bytes": 314572800,
+      "sha256": "ca993c572ea78d435b73ae77572dda3ad699e1dc21db2b70b6b1e037f06a2b00"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part09",
+      "bytes": 314572800,
+      "sha256": "968bd9f905bb55761f091bc00d2f6a7188fb8fcee37edb8be88958bcc68570c3"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part10",
+      "bytes": 314572800,
+      "sha256": "30d23150df506d986014d40041b8a73e04f9053609d7eac0c276395478ba3e66"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part11",
+      "bytes": 314572800,
+      "sha256": "b0019135fc68fc61b9f691ea626d786439cb97125400c2c7bd2b46fc248770ea"
+    },
+    {
+      "name": "Horizon_S2_R7_Native_Utility_Information_Learning_Repair_20261118.tar.zst.part12",
+      "bytes": 117191232,
+      "sha256": "d83bda2724ac446570135350186ff0cdf549e95ea2e0defa03fafdf006bc927c"
+    }
+  ]
+}
