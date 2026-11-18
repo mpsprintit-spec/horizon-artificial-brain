@@ -642,7 +642,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 				return errors.New("negative retention diagnostic")
 			}
 		}
-		if t.Proposal != "" && (!bounded || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature", "retention-constrained"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
+		if t.Proposal != "" && (!bounded || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature", "retention-constrained", "standardized-bounded-ridge"}, t.Proposal) || (t.Proposal == "standardized-bounded-ridge" && d.ProposalProtocol != NMetricReuseV3) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
 			return errors.New("invalid bounded trial")
 		}
 		if (t.ReadoutMode != "activation" && t.ReadoutMode != "metric") || t.FitValid == nil || len(t.RejectedBy) > 8 || !nFinite(t.CheckError) || t.CheckError < 0 || t.CheckError > 4.0000001 {

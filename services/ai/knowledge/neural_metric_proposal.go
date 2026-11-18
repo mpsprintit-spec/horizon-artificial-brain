@@ -21,8 +21,11 @@ const NMetricAuditV1 = "incumbent-relative-audited-v1"
 // written by the ordinary signed head writer; no separate estimator is kept.
 const NMetricReuseV1 = "native-shared-basis-reuse-v1"
 const NMetricReuseV2 = "native-shared-basis-reuse-v2"
+const NMetricReuseV3 = "native-shared-basis-regularized-v3"
 
-func nMetricReuse(p string) bool { return p == NMetricReuseV1 || p == NMetricReuseV2 }
+func nMetricReuse(p string) bool {
+	return p == NMetricReuseV1 || p == NMetricReuseV2 || p == NMetricReuseV3
+}
 
 type NMetricProposalConfig struct {
 	CoordinateBlocks [][]int   `json:"coordinate_blocks,omitempty"`
@@ -35,10 +38,11 @@ type NMetricProposalConfig struct {
 	FeatureLimit int `json:"feature_limit,omitempty"`
 	// Explicit research search within the existing feature budget. Only
 	// task-local leaf directions may change; every existing gate still runs.
-	RefineLeafDirections bool   `json:"refine_leaf_directions,omitempty"`
-	Update               string `json:"update,omitempty"`
-	BlockSparse          bool   `json:"block_sparse,omitempty"`
-	FixedBasis           bool   `json:"fixed_basis,omitempty"`
+	RefineLeafDirections bool    `json:"refine_leaf_directions,omitempty"`
+	Update               string  `json:"update,omitempty"`
+	BlockSparse          bool    `json:"block_sparse,omitempty"`
+	FixedBasis           bool    `json:"fixed_basis,omitempty"`
+	Ridge                float64 `json:"ridge,omitempty"`
 }
 
 func nMetricFeatureLimit(p *NMetricProposalConfig) int {
@@ -60,6 +64,9 @@ type NMetricEvidence struct {
 func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if p == nil {
 		return nil
+	}
+	if !nFinite(p.Ridge) || (p.Protocol == NMetricReuseV3 && (p.Ridge <= 0 || p.Ridge > 1)) || (p.Protocol != NMetricReuseV3 && p.Ridge != 0) {
+		return errors.New("regularization requires explicit versioned fixed-basis protocol")
 	}
 	if !validNFeatureLimit(p.FeatureLimit) {
 		return errors.New("experimental numerical feature limit must be 32 or 64")

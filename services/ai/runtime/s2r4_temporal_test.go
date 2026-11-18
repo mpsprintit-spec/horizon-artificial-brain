@@ -280,6 +280,13 @@ func s2r4Paths(t *testing.T) (string, string, [][]k.NodeID) {
 }
 
 func s2r4Collect(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, dir, condition string, seed int64, streams, steps int, shift bool) []s2r4Row {
+	return s2r4CollectHooks(t, r, pop, dir, condition, seed, streams, steps, shift, nil, nil)
+}
+
+// Optional research observers receive a target-free pre-operation snapshot.
+// The post hook runs only after the factual neural operation has completed.
+// Nil hooks preserve the historical acquisition and WAL semantics.
+func s2r4CollectHooks(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, dir, condition string, seed int64, streams, steps int, shift bool, preHook func(s2Pre, string, string, int, uint64), postHook func(s2r4Row)) []s2r4Row {
 	t.Helper()
 	s1Check(t, os.MkdirAll(dir, 0700))
 	ledger, e := os.OpenFile(filepath.Join(dir, "preoperation.jsonl"), os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0600)
@@ -353,6 +360,9 @@ func s2r4Collect(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, dir, condition
 			// This ledger deliberately contains no gain, regime, target, or poststate.
 			s1Check(t, json.NewEncoder(ledger).Encode(map[string]any{"id": id, "stream": streamID, "step": stepIndex, "previous_id": previousID, "before_sequence": beforeSequence, "input": s2Input(p, pop), "input_sha256": s1Digest(encoded), "forecast": p.Forecast, "estimate": estimate}))
 			s1Check(t, ledger.Sync())
+			if preHook != nil {
+				preHook(p, id, streamID, stepIndex, beforeSequence)
+			}
 			command := NativeControlCommand{ID: id + "-target", Step: &NativeStep{EpisodeID: id, ActionOverride: &action}}
 			if action == 0 {
 				command.Step.EnvironmentGain = &gain
@@ -376,7 +386,11 @@ func s2r4Collect(t *testing.T, r *BrainRuntime, pop [][]k.NodeID, dir, condition
 			}
 			s2r4Command(t, r, NativeControlCommand{ID: id + "-outcome", Outcome: &NativeOutcome{EpisodeID: id, TraceDigest: result.TraceDigest, Source: "s2r4-actual-neural-error", OutcomeID: id, Provenance: "observed-environment", Learn: false}})
 			trial := s2Trial{ID: id, Pre: p, Actual: actual, Residual: residual, Error: magnitude, Estimate: estimate, AfterAt: p.At, InputSHA256: s1Digest(encoded)}
-			out = append(out, s2r4Row{Trial: trial, Stream: streamID, Step: stepIndex, Condition: condition, BeforeSequence: beforeSequence, OperationSequence: operationSequence, PreviousID: previousID})
+			measured := s2r4Row{Trial: trial, Stream: streamID, Step: stepIndex, Condition: condition, BeforeSequence: beforeSequence, OperationSequence: operationSequence, PreviousID: previousID}
+			out = append(out, measured)
+			if postHook != nil {
+				postHook(measured)
+			}
 			previous = s1Previous(p.Before, pop)
 			previousAction = action
 			historyAction = action

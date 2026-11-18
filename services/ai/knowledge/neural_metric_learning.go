@@ -137,12 +137,13 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			m.Heads[hi].Metric = mode
 			fullValid := false
 			var fitDiagnostic *nMetricFitDiagnostic
-			if !constrained && proposal != nil && proposal.Protocol != NMetricBoundedV1 {
+			regularized := proposal != nil && proposal.Protocol == NMetricReuseV3
+			if !constrained && !regularized && proposal != nil && proposal.Protocol != NMetricBoundedV1 {
 				// Same solver, with diagnostics only for explicitly versioned
 				// research commands. Historical receipts/replay stay byte exact.
 				fitDiagnostic = &nMetricFitDiagnostic{}
 				fullValid = nFitMetricDiagnosed(&m, hi, fit, fitDiagnostic)
-			} else if !constrained {
+			} else if !constrained && !regularized {
 				fullValid = nFit(&m, query, fit)
 			}
 			if proposal != nil && nMetricReuse(proposal.Protocol) && fullValid {
@@ -165,6 +166,9 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 				config := *proposal
 				config.Update = "readout"
 				steps = nMetricConstrainedProposals(origin, m, query, fit, state.Witnesses, nil, &config)
+			}
+			if proposal != nil && proposal.Protocol == NMetricReuseV3 {
+				steps = []nMetricProposal{nMetricRegularizedProposal(m, query, fit, proposal.Ridge)}
 			}
 			for _, step := range steps {
 				m := step.Model
@@ -236,7 +240,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 				}
 				v := valid
 				var trace *NMetricCandidateTrace
-				if fitDiagnostic != nil || step.Constraint != nil {
+				if fitDiagnostic != nil || step.Constraint != nil || regularized {
 					trace = &NMetricCandidateTrace{FeatureOrdinal: -1, Readout: slices.Clone(m.Heads[hi].W), Bias: m.Heads[hi].B, FitDiagnostic: fitDiagnostic, Constraint: step.Constraint}
 					index := -1
 					if len(m.Circuits) > len(before.Circuits) {
