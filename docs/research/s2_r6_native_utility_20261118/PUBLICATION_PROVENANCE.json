@@ -8,5 +8,10 @@
   "full_results_json_sha256": "fa5cba3a3f629857e132f79568b4823bda9c359b4c0b98fd46c01329bb578fcc",
   "results_gzip_sha256": "e347ec64fecb8a3363b1f1d3525b6be71da4ea168445db657e40f875c1e5af0b",
   "no_result_omission": true,
-  "main_changed": false
+  "main_changed": false,
+  "complete_archive_sha256": "059fa4665ef3f1b5822801c212f27b9494d9b806d0ccb0892c62465cff89cf0c",
+  "complete_archive_bytes": 1590405149,
+  "authenticated_payloads": 1914,
+  "independent_download_roundtrip_exact": true,
+  "owner_recovery_note_library_file_id": "libfile_6c19e739396081919264371a24f802f1"
 }
