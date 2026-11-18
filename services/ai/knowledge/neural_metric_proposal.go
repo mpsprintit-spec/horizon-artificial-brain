@@ -17,6 +17,13 @@ const NMetricRefineV1 = "incumbent-relative-leaf-refinement-v1"
 const NMetricBlockV1 = "incumbent-relative-block-refinement-v1"
 const NMetricAuditV1 = "incumbent-relative-audited-v1"
 
+// Reuse is a generic opt-in lesson on the existing basis. New knowledge is
+// written by the ordinary signed head writer; no separate estimator is kept.
+const NMetricReuseV1 = "native-shared-basis-reuse-v1"
+const NMetricReuseV2 = "native-shared-basis-reuse-v2"
+
+func nMetricReuse(p string) bool { return p == NMetricReuseV1 || p == NMetricReuseV2 }
+
 type NMetricProposalConfig struct {
 	CoordinateBlocks [][]int   `json:"coordinate_blocks,omitempty"`
 	Protocol         string    `json:"protocol"`
@@ -57,7 +64,7 @@ func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if !validNFeatureLimit(p.FeatureLimit) {
 		return errors.New("experimental numerical feature limit must be 32 or 64")
 	}
-	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1 {
+	if p.Protocol != NMetricBoundedV1 && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricAuditV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1 && !nMetricReuse(p.Protocol) {
 		return errors.New("unknown numerical proposal protocol")
 	}
 	if (p.RefineLeafDirections && p.Protocol != NMetricRefineV1 && p.Protocol != NMetricConstrainedV1 && p.Protocol != NMetricBlockV1) || ((p.Protocol == NMetricRefineV1 || p.Protocol == NMetricBlockV1) && !p.RefineLeafDirections) || (p.RefineLeafDirections && !p.PreserveShared) {
@@ -66,6 +73,10 @@ func validateNMetricProposal(p *NMetricProposalConfig) error {
 	if p.Protocol == NMetricConstrainedV1 {
 		if !p.PreserveShared || !slices.Contains([]string{"bias", "affine", "readout"}, p.Update) || (p.FixedBasis && (p.RefineLeafDirections || p.BlockSparse)) {
 			return errors.New("invalid constrained subspace")
+		}
+	} else if nMetricReuse(p.Protocol) {
+		if !p.FixedBasis || !p.PreserveShared || p.Update != "" || p.BlockSparse || p.RefineLeafDirections || p.Strategy != "full-refit" || nMetricFeatureLimit(p) != 32 {
+			return errors.New("shared basis reuse requires fixed 32-feature readout-only search")
 		}
 	} else if p.Update != "" || p.FixedBasis || (p.BlockSparse && p.Protocol != NMetricBlockV1) {
 		return errors.New("constrained settings require versioned protocol")

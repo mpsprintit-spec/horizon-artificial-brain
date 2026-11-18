@@ -60,6 +60,7 @@ func (d NDiagnosis) Clone() NDiagnosis {
 			d.Trials[i].Candidate = &v
 		}
 		d.Trials[i].RejectedBy = slices.Clone(d.Trials[i].RejectedBy)
+		d.Trials[i].RetentionBankRegressions = slices.Clone(d.Trials[i].RetentionBankRegressions)
 		if d.Trials[i].FitValid != nil {
 			b := *d.Trials[i].FitValid
 			d.Trials[i].FitValid = &b
@@ -598,7 +599,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		return errors.New("invalid diagnostic uncertainty")
 	}
 	trialLimit := 128
-	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1 || d.ProposalProtocol == NMetricConstrainedV1 || d.ProposalProtocol == NMetricBlockV1
+	bounded := d.ProposalProtocol == NMetricBoundedV1 || d.ProposalProtocol == NMetricAuditV1 || d.ProposalProtocol == NMetricRefineV1 || d.ProposalProtocol == NMetricConstrainedV1 || d.ProposalProtocol == NMetricBlockV1 || nMetricReuse(d.ProposalProtocol)
 	if bounded {
 		trialLimit = 1024
 	}
@@ -633,6 +634,14 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 		}
 	}
 	for _, t := range d.Trials {
+		if len(t.RetentionBankRegressions) > 6 {
+			return errors.New("too many retention bank diagnostics")
+		}
+		for _, n := range t.RetentionBankRegressions {
+			if n < 0 {
+				return errors.New("negative retention diagnostic")
+			}
+		}
 		if t.Proposal != "" && (!bounded || !slices.Contains([]string{"full-refit", "bounded-joint", "new-feature", "retention-constrained"}, t.Proposal) || !nFinite(t.Fraction) || t.Fraction <= 0 || t.Fraction > 1 || len(t.ParameterSHA256) != 64) {
 			return errors.New("invalid bounded trial")
 		}
@@ -645,7 +654,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 			}
 		}
 		if c := t.Candidate; c != nil {
-			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1 && d.ProposalProtocol != NMetricConstrainedV1 && d.ProposalProtocol != NMetricBlockV1) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= 64 || len(c.Readout) > 64 || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
+			if (d.ProposalProtocol != NMetricAuditV1 && d.ProposalProtocol != NMetricRefineV1 && d.ProposalProtocol != NMetricConstrainedV1 && d.ProposalProtocol != NMetricBlockV1 && !nMetricReuse(d.ProposalProtocol)) || c.FeatureOrdinal < -1 || c.FeatureOrdinal >= 64 || len(c.Readout) > 64 || !nFinite(c.Bias) || !nFinite(c.Center) || !nFinite(c.Delta) || c.Delta < 0 || c.Delta > 7.99 || (len(c.Axis) != 0 && len(c.Axis) != nDimensions) {
 				return errors.New("invalid audited candidate shape")
 			}
 			for _, v := range append(slices.Clone(c.Axis), c.Readout...) {
@@ -670,7 +679,7 @@ func validateMetricDiagnosis(d NDiagnosis, metric bool) error {
 						return errors.New("invalid constrained raw readout")
 					}
 				}
-				if d.ProposalProtocol != NMetricConstrainedV1 || f.Iterations < 0 || f.Iterations > 256 || f.LineSearches < 0 || f.LineSearches > 40 || f.InitialViolations < 0 || len(f.RawReadout) > 64 || f.NativeViolations < 0 || f.BoundActive < 0 || len(f.Status) > 64 {
+				if (d.ProposalProtocol != NMetricConstrainedV1 && d.ProposalProtocol != NMetricReuseV2) || f.Iterations < 0 || f.Iterations > 256 || f.LineSearches < 0 || f.LineSearches > 40 || f.InitialViolations < 0 || len(f.RawReadout) > 64 || f.NativeViolations < 0 || f.BoundActive < 0 || len(f.Status) > 64 {
 					return errors.New("invalid constrained telemetry")
 				}
 				for _, v := range []float64{f.Multiplier, f.FitMSE, f.HistoricalMSE, f.HistoricalLimit, f.Displacement, f.RawFitMSE, f.AnchorMSE, f.AnchorLimit} {

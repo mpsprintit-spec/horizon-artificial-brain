@@ -36,10 +36,25 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	fit, check := convert(e.Resolution.Fit), convert(e.Resolution.Check)
 	proposal := e.Resolution.Proposal
 	anchors := convert(e.Resolution.Retention)
+	extraBanks := make([][]NWitness, len(e.Resolution.RetentionBanks))
+	for i, bank := range e.Resolution.RetentionBanks {
+		extraBanks[i] = convert(bank)
+	}
+	regressions := func(before, after nModel) int {
+		n := nMetricRegression(before, after, state.Witnesses) + nMetricRegression(before, after, anchors)
+		for _, bank := range extraBanks {
+			n += nMetricRegression(before, after, bank)
+		}
+		return n
+	}
 	witnesses := state.Witnesses
-	if len(e.Resolution.Retention) > 0 {
+	if len(e.Resolution.Retention) > 0 || len(extraBanks) > 0 {
 		witnesses = slices.Clone(witnesses)
-		for _, w := range convert(e.Resolution.Retention) {
+		allAnchors := slices.Clone(anchors)
+		for _, bank := range extraBanks {
+			allAnchors = append(allAnchors, bank...)
+		}
+		for _, w := range allAnchors {
 			w.Role = "evaluation"
 			witnesses = append(witnesses, w)
 		}
@@ -69,7 +84,8 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			Fit, Check, Witnesses []NWitness
 			Config                *NMetricProposalConfig
 			Precision             *float64
-		}{before, fit, check, witnesses, proposal, e.Input.RequiredPrecision})
+			AdditionalBanks       [][]NWitness `json:"additional_banks,omitempty"`
+		}{before, fit, check, witnesses, proposal, e.Input.RequiredPrecision, extraBanks})
 		if !state.Last.Committed && state.Last.SearchFingerprint == d.SearchFingerprint && d.SearchFingerprint != "" {
 			d = state.Last.Clone()
 			d.Cause = "duplicate-proposal"
@@ -129,9 +145,26 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 			} else if !constrained {
 				fullValid = nFit(&m, query, fit)
 			}
+			if proposal != nil && nMetricReuse(proposal.Protocol) && fullValid {
+				m.Heads[hi].B = nConstraintCoefficient(m.Heads[hi].B)
+				for i, w := range m.Heads[hi].W {
+					m.Heads[hi].W[i] = nConstraintCoefficient(w)
+				}
+			}
 			steps := nMetricProposals(before, m, query, fit, proposal, fullValid)
 			if constrained {
 				steps = nMetricConstrainedProposals(before, m, query, fit, state.Witnesses, anchors, proposal)
+			}
+			if proposal != nil && proposal.Protocol == NMetricReuseV2 {
+				// Reuse the existing bounded solver for a new/read-only basis.
+				// An unconfigured query is a zero initialization, not a model
+				// carrying any utility label or policy prior.
+				origin := nClone(before)
+				origin.Heads[hi].Known = true
+				origin.Heads[hi].Metric = mode
+				config := *proposal
+				config.Update = "readout"
+				steps = nMetricConstrainedProposals(origin, m, query, fit, state.Witnesses, nil, &config)
 			}
 			for _, step := range steps {
 				m := step.Model
@@ -147,7 +180,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 					valid = false
 					err = 4
 				}
-				reg := nMetricRegression(before, m, state.Witnesses) + nMetricRegression(before, m, anchors)
+				reg := regressions(before, m)
 				duplicate := len(m.Circuits) > len(before.Circuits) && nMetricRedundant(m, all, mode)
 				why := []string{}
 				if step.Rejection != "" {
@@ -227,6 +260,13 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 					}
 				}
 				d.Trials = append(d.Trials, NTrial{Candidate: trace, Kind: kind, Feature: feature, CheckError: err, RetentionRegressions: reg, Eligible: eligible, ReadoutMode: modeName, FitValid: &v, RejectedBy: why, Proposal: step.Name, Fraction: step.Fraction, ParameterSHA256: parameterHash})
+				if len(extraBanks) > 0 {
+					banks := []int{nMetricRegression(before, m, state.Witnesses), nMetricRegression(before, m, anchors)}
+					for _, bank := range extraBanks {
+						banks = append(banks, nMetricRegression(before, m, bank))
+					}
+					d.Trials[len(d.Trials)-1].RetentionBankRegressions = banks
+				}
 				if eligible {
 					best = m
 					bestErr = err
@@ -241,7 +281,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 	}
 	consider("readout", 0, nClone(before))
 	for i, c := range before.Circuits {
-		if proposal != nil && proposal.Protocol == NMetricConstrainedV1 {
+		if proposal != nil && (proposal.Protocol == NMetricConstrainedV1 || proposal.FixedBasis) {
 			continue
 		}
 		raw, floor := nMetricFeatureRaw(before, i, fit)
@@ -550,7 +590,7 @@ func (k *KnowledgeBase) learnNMetric(bank [compositionBanks][]NodeID, query []No
 		}
 		if proposal != nil && proposal.Protocol == NMetricConstrainedV1 {
 			installed := k.loadNModel(bank, queries)
-			if nMetricRegression(before, installed, state.Witnesses)+nMetricRegression(before, installed, anchors) > 0 || nMetricSharedChange(before, installed, query) || !nMetricValidHead(installed, nHeadIndex(installed, query)) {
+			if regressions(before, installed) > 0 || nMetricSharedChange(before, installed, query) || !nMetricValidHead(installed, nHeadIndex(installed, query)) {
 				return errors.New("post-install constrained native validation failed")
 			}
 			for _, row := range all {
